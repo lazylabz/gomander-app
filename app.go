@@ -27,11 +27,9 @@ func (a *App) startup(ctx context.Context) {
 }
 
 func (a *App) ExecCommand(arg string) error {
-	chunks := strings.Split(arg, " ")
-	command := chunks[0]
-	args := chunks[1:]
+	chunks := strings.Fields(arg)
 
-	cmd := exec.Command(command, args...)
+	cmd := exec.Command(chunks[0], chunks[1:]...)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -72,7 +70,8 @@ func (a *App) streamOutput(pipeReader io.ReadCloser, streamType string) {
 	scanner := bufio.NewScanner(pipeReader)
 	for scanner.Scan() {
 		line := scanner.Text()
-		runtime.EventsEmit(a.ctx, "processLog", map[string]string{
+		runtime.LogDebug(a.ctx, line)
+		runtime.EventsEmit(a.ctx, "newLog", map[string]string{
 			"type": streamType,
 			"line": line,
 		})

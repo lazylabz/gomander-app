@@ -1,19 +1,29 @@
-import {Children, useState} from "react";
-import {EventsOn} from "../wailsjs/runtime";
+import {Children, useEffect, useState} from "react";
+import {EventsOff, EventsOn} from "../wailsjs/runtime";
 import {ExecCommand} from "../wailsjs/go/main/App";
 
 function App() {
-    const [logs, setLogs] = useState<{type: string, line: string}[]>([])
+    const [logs, setLogs] = useState<{ type: string, line: string }[]>([])
     const [inputText, setInputText] = useState("")
 
-    EventsOn("processLog", (event: {type: string, line: string}) => {
-        setLogs((prev) => [...prev, event])
+    useEffect(() => {
+
+        EventsOn("newLog", (event: { type: string, line: string }) => {
+            setLogs((prev) => [...prev, event])
+        })
+
+        return () => {
+            EventsOff("newLog")
+        }
     })
+
 
     return (
         <div className="app-container">
-            <input value={inputText} onChange={e => setInputText(e.target.value)} />
+            <p>{logs.length}</p>
+            <input value={inputText} onChange={e => setInputText(e.target.value)}/>
             <button onClick={() => ExecCommand(inputText || "echo POTATO")}>Click me</button>
+            <button onClick={() => setLogs([])}>Clean</button>
             <div>
                 {Children.toArray(logs.map((line) => <p>[{line.type}]: {line.line}</p>))}
             </div>
