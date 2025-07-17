@@ -1,8 +1,4 @@
 import { useEffect, useState } from "react";
-import { EventsOn } from "../wailsjs/runtime";
-import { GetCommands } from "../wailsjs/go/main/LogServer";
-import type { Command } from "./types/contracts.ts";
-import { Event } from "./types/contracts.ts";
 
 import { Button } from "@/components/ui/button.tsx";
 import {
@@ -14,6 +10,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog.tsx";
+
+import { GetCommands } from "../wailsjs/go/main/LogServer";
+import { EventsOn } from "../wailsjs/runtime";
+import type { Command } from "./types/contracts.ts";
+import { Event } from "./types/contracts.ts";
 
 function App() {
   const [, setCommands] = useState<Record<string, Command>>({});
