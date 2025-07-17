@@ -20,4 +20,11 @@ export default tseslint.config([
             globals: globals.browser,
         },
     },
+    // Shadcn UI components
+    {
+        files: ["**/components/ui/**/*.{ts,tsx}"],
+        rules: {
+            "react-refresh/only-export-components": "off",
+        }
+    }
 ])
