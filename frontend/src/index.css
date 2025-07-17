@@ -1,5 +1,7 @@
-.app-container {
-    width: 100vw;
-    height: 100vh;
-    background-color: white;
+@import "tailwindcss";
+
+html, body, #root {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
 }

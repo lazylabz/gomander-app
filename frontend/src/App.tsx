@@ -19,7 +19,7 @@ function App() {
 
 
     return (
-        <div className="app-container">
+        <div className="w-full h-full bg-white">
             <p>{logs.length}</p>
             <input value={inputText} onChange={e => setInputText(e.target.value)}/>
             <button onClick={() => ExecCommand(inputText || "echo POTATO")}>Click me</button>
