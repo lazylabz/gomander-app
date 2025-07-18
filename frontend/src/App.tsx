@@ -3,7 +3,7 @@ import { SidebarProvider } from "@/components/ui/sidebar.tsx";
 import { Toaster } from "@/components/ui/sonner.tsx";
 import { DataContextProvider } from "@/contexts/DataContext.tsx";
 
-import { MainScreen } from "./screens/MainScreen";
+import { LogsScreen } from "./screens/LogsScreen.tsx";
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
           <AppSidebar />
         </nav>
         <main className="w-full h-screen bg-white">
-          <MainScreen />
+          <LogsScreen />
         </main>
         <Toaster />
       </SidebarProvider>

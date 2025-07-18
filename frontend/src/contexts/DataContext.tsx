@@ -19,6 +19,7 @@ type DataContextValue = {
   activeCommandId: string | null;
   setActiveCommandId: (commandId: string | null) => void;
   currentLogs: string[];
+  clearCurrentLogs: () => void;
   // Handlers
   createCommand: (command: Command) => Promise<void>;
   editCommand: (command: Command) => Promise<void>;
@@ -109,6 +110,16 @@ export const DataContextProvider = ({
     return logs[activeCommandId ?? ""] || [];
   }, [logs, activeCommandId]);
 
+  const clearCurrentLogs = () => {
+    if (!activeCommandId) {
+      return;
+    }
+    setLogs((prev) => ({
+      ...prev,
+      [activeCommandId]: [],
+    }));
+  };
+
   const value: DataContextValue = {
     commands,
     activeCommandId,
@@ -118,6 +129,7 @@ export const DataContextProvider = ({
     currentLogs,
     deleteCommand,
     editCommand,
+    clearCurrentLogs,
   };
 
   return <dataContext.Provider value={value}>{children}</dataContext.Provider>;
