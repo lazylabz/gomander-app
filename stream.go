@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"io"
 	"os"
 	"os/exec"
@@ -79,7 +78,7 @@ func (a *App) streamOutput(commandId string, pipeReader io.ReadCloser) {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		runtime.LogInfo(a.ctx, line)
+		a.logDebug(line)
 
 		a.sendStreamLine(commandId, line)
 	}

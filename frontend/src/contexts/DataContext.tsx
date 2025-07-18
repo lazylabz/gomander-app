@@ -5,6 +5,7 @@ import { Event, type EventData } from "@/types/contracts.ts";
 
 import {
   AddCommand,
+  EditCommand,
   ExecCommand,
   GetCommands,
   RemoveCommand,
@@ -20,6 +21,7 @@ type DataContextValue = {
   currentLogs: string[];
   // Handlers
   createCommand: (command: Command) => Promise<void>;
+  editCommand: (command: Command) => Promise<void>;
   execCommand: (commandId: string) => Promise<void>;
   deleteCommand: (commandId: string) => Promise<void>;
 };
@@ -59,6 +61,10 @@ export const DataContextProvider = ({
 
   const deleteCommand = async (commandId: string) => {
     await RemoveCommand(commandId);
+  };
+
+  const editCommand = async (command: Command) => {
+    await EditCommand(command);
   };
 
   // Register events listeners
@@ -111,6 +117,7 @@ export const DataContextProvider = ({
     execCommand,
     currentLogs,
     deleteCommand,
+    editCommand,
   };
 
   return <dataContext.Provider value={value}>{children}</dataContext.Provider>;

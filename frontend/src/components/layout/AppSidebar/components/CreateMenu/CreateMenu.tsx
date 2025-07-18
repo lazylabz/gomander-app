@@ -1,5 +1,7 @@
 import { CirclePlus, Terminal } from "lucide-react";
+import { useState } from "react";
 
+import { CreateCommandModal } from "@/components/modals/CreateCommandModal.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,32 +10,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
-import { Modals, useModalsContext } from "@/contexts/ModalsContext.tsx";
 
 export const CreateMenu = () => {
-  const { setOpenModal } = useModalsContext();
+  const [modalOpen, setModalOpen] = useState(false);
 
-  const openCreateCommandModal = () => setOpenModal(Modals.CREATE)(true);
+  const openCreateCommandModal = () => setModalOpen(true);
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="outline-0">
-        <CirclePlus
-          className="text-muted-foreground cursor-pointer hover:text-primary"
-          size={18}
-        />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuLabel>Create</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={openCreateCommandModal}
-          className="flex flex-row items-center justify-start"
-        >
-          <Terminal />
-          Command
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <CreateCommandModal open={modalOpen} setOpen={setModalOpen} />
+      <DropdownMenu>
+        <DropdownMenuTrigger className="outline-0">
+          <CirclePlus
+            className="text-muted-foreground cursor-pointer hover:text-primary"
+            size={18}
+          />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuLabel>Create</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={openCreateCommandModal}
+            className="flex flex-row items-center justify-start"
+          >
+            <Terminal />
+            Command
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 };

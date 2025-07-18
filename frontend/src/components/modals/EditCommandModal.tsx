@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/form.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { useDataContext } from "@/contexts/DataContext.tsx";
+import type { Command } from "@/types/contracts.ts";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -32,32 +33,37 @@ const formSchema = z.object({
   }),
 });
 
-export const CreateCommandModal = ({
+export const EditCommandModal = ({
+  command,
   open,
   setOpen,
 }: {
+  command: Command | null;
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
-  const { createCommand } = useDataContext();
+  const { editCommand } = useDataContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      command: "",
+    values: {
+      name: command?.name || "",
+      command: command?.command || "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    await createCommand({
-      id: crypto.randomUUID(),
+    if (!command) {
+      return;
+    }
+
+    await editCommand({
+      id: command.id,
       name: values.name,
       command: values.command,
     });
 
     setOpen(false);
-    form.reset();
   };
 
   const onOpenChange = (open: boolean) => {
@@ -74,7 +80,7 @@ export const CreateCommandModal = ({
           <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
             <DialogHeader className="flex flex-row items-center gap-6">
               <Terminal />
-              <DialogTitle>Create new command</DialogTitle>
+              <DialogTitle>Edit command</DialogTitle>
             </DialogHeader>
             <div className="space-y-6 my-4">
               <FormField
@@ -110,7 +116,7 @@ export const CreateCommandModal = ({
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit">Create</Button>
+              <Button type="submit">Save</Button>
             </DialogFooter>
           </form>
         </Form>
