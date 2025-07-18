@@ -3,8 +3,11 @@ package main
 import (
 	"bufio"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/transform"
 	"io"
 	"os/exec"
+	stdRuntime "runtime"
 	"strings"
 )
 
@@ -50,7 +53,9 @@ func (a *App) ExecCommand(id string) {
 }
 
 func (a *App) streamOutput(commandId string, pipeReader io.ReadCloser) {
-	scanner := bufio.NewScanner(pipeReader)
+	reader := a.decodeIfNeeded(pipeReader)
+	scanner := bufio.NewScanner(reader)
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		runtime.LogDebug(a.ctx, line)
@@ -69,4 +74,13 @@ func (a *App) sendStreamLine(commandId string, line string) {
 func (a *App) sendErrAsStreamLine(command Command, err error) {
 	a.logDebug(err.Error())
 	a.sendStreamLine(command.Id, err.Error())
+}
+
+func (a *App) decodeIfNeeded(r io.Reader) io.Reader {
+	if stdRuntime.GOOS == "windows" {
+		// On Windows, many commands output Windows-1252 (CP1252)
+		return transform.NewReader(r, charmap.Windows1252.NewDecoder())
+	}
+	// On Linux/macOS: assume UTF-8 (safe default)
+	return r
 }
