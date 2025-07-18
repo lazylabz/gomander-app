@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	stdRuntime "runtime"
 	"strings"
+	"syscall"
 )
 
 // ExecCommand executes a command by its ID and streams its output.
@@ -39,6 +40,10 @@ func (a *App) ExecCommand(id string) {
 	}
 
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		HideWindow:    true,
+		CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP,
+	}
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
