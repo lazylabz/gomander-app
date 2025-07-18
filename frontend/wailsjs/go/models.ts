@@ -4,6 +4,7 @@ export namespace main {
 	    GET_COMMANDS = "get_commands",
 	    PROCESS_FINISHED = "process_finished",
 	    NEW_LOG_ENTRY = "new_log_entry",
+	    ERROR_NOTIFICATION = "error_notification",
 	}
 	export class Command {
 	    id: string;

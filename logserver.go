@@ -29,6 +29,7 @@ func NewLogServer(app *App) *LogServer {
 func (l *LogServer) AddCommand(newCommand Command) {
 	if _, exists := l.commands[newCommand.Id]; exists {
 		l.app.logError("Command already exists: " + newCommand.Id)
+		l.app.notifyError("Command already exists: " + newCommand.Id)
 		return
 	}
 
@@ -42,6 +43,7 @@ func (l *LogServer) AddCommand(newCommand Command) {
 func (l *LogServer) RemoveCommand(id string) {
 	if _, exists := l.commands[id]; !exists {
 		l.app.logError("Command not found: " + id)
+		l.app.notifyError("Command not found: " + id)
 		return
 	}
 
@@ -54,6 +56,7 @@ func (l *LogServer) RemoveCommand(id string) {
 func (l *LogServer) EditCommand(newCommand Command) {
 	if _, exists := l.commands[newCommand.Id]; !exists {
 		l.app.logError("Command not found: " + newCommand.Id)
+		l.app.notifyError("Command not found: " + newCommand.Id)
 		return
 	}
 
@@ -67,11 +70,10 @@ func (l *LogServer) GetCommands() map[string]Command {
 	return l.commands
 }
 
-func (l *LogServer) ExecCommand(id string) error {
+func (l *LogServer) ExecCommand(id string) {
 	command, exists := l.commands[id]
 	if !exists {
-		l.app.logError("Command not found: " + id)
-		return nil
+		l.app.notifyError("Command not found: " + id)
 	}
 
 	chunks := strings.Fields(command.Command)
@@ -80,19 +82,16 @@ func (l *LogServer) ExecCommand(id string) error {
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		l.app.logError(err.Error())
-		return err
+		l.handleExecCommandErr(command, err)
 	}
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		l.app.logError(err.Error())
-		return err
+		l.handleExecCommandErr(command, err)
 	}
 
 	if err := cmd.Start(); err != nil {
-		l.app.logDebug(err.Error())
-		return err
+		l.handleExecCommandErr(command, err)
 	}
 
 	// Stream stdout
@@ -109,8 +108,6 @@ func (l *LogServer) ExecCommand(id string) error {
 		}
 		l.app.emitEvent(ProcessFinished, command.Id)
 	}()
-
-	return nil
 }
 
 func (l *LogServer) streamOutput(commandId string, pipeReader io.ReadCloser) {
@@ -119,9 +116,18 @@ func (l *LogServer) streamOutput(commandId string, pipeReader io.ReadCloser) {
 		line := scanner.Text()
 		runtime.LogDebug(l.app.ctx, line)
 
-		l.app.emitEvent(NewLogEntry, map[string]string{
-			"id":   commandId,
-			"line": line,
-		})
+		l.sendLog(commandId, line)
 	}
+}
+
+func (l *LogServer) sendLog(commandId string, line string) {
+	l.app.emitEvent(NewLogEntry, map[string]string{
+		"id":   commandId,
+		"line": line,
+	})
+}
+
+func (l *LogServer) handleExecCommandErr(command Command, err error) {
+	l.app.logDebug(err.Error())
+	l.sendLog(command.Id, err.Error())
 }

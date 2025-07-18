@@ -36,3 +36,7 @@ func (a *App) logError(message string) {
 func (a *App) emitEvent(event Event, payload interface{}) {
 	runtime.EventsEmit(a.ctx, string(event), payload)
 }
+
+func (a *App) notifyError(message string) {
+	a.emitEvent(ErrorNotification, message)
+}

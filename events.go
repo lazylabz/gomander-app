@@ -5,9 +5,10 @@ import "strings"
 type Event string
 
 const (
-	GetCommands     Event = "get_commands"
-	ProcessFinished Event = "process_finished"
-	NewLogEntry     Event = "new_log_entry"
+	GetCommands       Event = "get_commands"
+	ProcessFinished   Event = "process_finished"
+	NewLogEntry       Event = "new_log_entry"
+	ErrorNotification Event = "error_notification"
 )
 
 var Events = []struct {
@@ -17,4 +18,5 @@ var Events = []struct {
 	{Value: GetCommands, TSName: strings.ToUpper(string(GetCommands))},
 	{Value: ProcessFinished, TSName: strings.ToUpper(string(ProcessFinished))},
 	{Value: NewLogEntry, TSName: strings.ToUpper(string(NewLogEntry))},
+	{Value: ErrorNotification, TSName: strings.ToUpper(string(ErrorNotification))},
 }
