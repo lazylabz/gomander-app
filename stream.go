@@ -79,6 +79,7 @@ func (a *App) ExecCommand(id string) {
 	}()
 }
 
+// TODO: Los Ctrl-C salen como error en lugar de como salida del comando
 func (a *App) streamOutput(commandId string, pipeReader io.ReadCloser) {
 	scanner := bufio.NewScanner(pipeReader)
 
