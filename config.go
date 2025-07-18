@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"os"
+	"strings"
 )
 
 type Config struct {
@@ -10,24 +11,8 @@ type Config struct {
 }
 
 func loadConfig() (*Config, error) {
-	settingsFile, err := getConfigFilePath()
+	file, err := findOrCreateConfigFile()
 	if err != nil {
-		return nil, err
-	}
-
-	file, err := os.Open(*settingsFile)
-	if err != nil {
-		if os.IsNotExist(err) {
-			// Create a new config file if it does not exist
-			defaultConfig := &Config{
-				Commands: make(map[string]Command),
-			}
-			err = saveConfig(defaultConfig)
-			if err != nil {
-				return nil, err
-			}
-			file, err = os.Open(*settingsFile)
-		}
 		return nil, err
 	}
 
@@ -35,6 +20,7 @@ func loadConfig() (*Config, error) {
 		err = file.Close()
 	}(file)
 
+	// Read the config from the file
 	var config Config
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&config)
@@ -46,17 +32,7 @@ func loadConfig() (*Config, error) {
 }
 
 func saveConfig(config *Config) error {
-	err := findOrCreateConfigDir()
-	if err != nil {
-		return err
-	}
-
-	settingsFile, err := getConfigFilePath()
-	if err != nil {
-		return err
-	}
-
-	file, err := os.Create(*settingsFile)
+	file, err := findOrCreateConfigFile()
 	if err != nil {
 		return err
 	}
@@ -65,6 +41,7 @@ func saveConfig(config *Config) error {
 		err = file.Close()
 	}(file)
 
+	// Save the config to the file
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
 	err = encoder.Encode(config)
@@ -72,30 +49,37 @@ func saveConfig(config *Config) error {
 	return err
 }
 
-func findOrCreateConfigDir() error {
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return err
-	}
-
-	dirName := configDir + string(os.PathSeparator) + "gomander"
-	if _, err := os.Stat(dirName); os.IsNotExist(err) {
-		err = os.MkdirAll(dirName, 0755)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func getConfigFilePath() (*string, error) {
+func findOrCreateConfigFile() (*os.File, error) {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return nil, err
 	}
 
-	dirName := configDir + string(os.PathSeparator) + "gomander" + string(os.PathSeparator) + "settings.json"
+	path := strings.Builder{}
 
-	return &dirName, nil
+	path.WriteString(configDir)
+	path.WriteString(string(os.PathSeparator))
+	path.WriteString("gomander")
+
+	folderPath := path.String()
+
+	path.WriteString(string(os.PathSeparator))
+	path.WriteString("settings.json")
+
+	filePath := path.String()
+
+	// Ensure the directory exists
+	err = os.MkdirAll(folderPath, 0755)
+	if err != nil {
+		return nil, err
+	}
+
+	// Open the file, creating it if it doesn't exist
+	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0644)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
 }

@@ -14,7 +14,6 @@ var assets embed.FS
 func main() {
 	// Create an instance of the app structure
 	app := NewApp()
-	logServer := NewLogServer(app)
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -28,7 +27,6 @@ func main() {
 		OnStartup:        app.startup,
 		Bind: []interface{}{
 			app,
-			logServer,
 		},
 		EnumBind: []interface{}{
 			Events,

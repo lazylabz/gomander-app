@@ -8,7 +8,7 @@ import {
   ExecCommand,
   GetCommands,
   RemoveCommand,
-} from "../../wailsjs/go/main/LogServer";
+} from "../../wailsjs/go/main/App";
 import { EventsOff, EventsOn } from "../../wailsjs/runtime";
 import type { Command } from "../types/contracts";
 
@@ -50,6 +50,10 @@ export const DataContextProvider = ({
   };
 
   const execCommand = async (commandId: string) => {
+    setLogs((prev) => ({
+      ...prev,
+      [commandId]: [], // Reset logs for the command being executed
+    }));
     await ExecCommand(commandId);
   };
 
@@ -85,14 +89,9 @@ export const DataContextProvider = ({
       },
     );
 
-    // Clean listeners on unmount
+    // Clean listeners on all events
     return () =>
-      EventsOff(
-        Event.GET_COMMANDS,
-        Event.NEW_LOG_ENTRY,
-        Event.ERROR_NOTIFICATION,
-        Event.PROCESS_FINISHED,
-      );
+      EventsOff(Object.keys(Event)[0], ...Object.values(Event).slice(1));
   });
 
   // Initial fetch of commands

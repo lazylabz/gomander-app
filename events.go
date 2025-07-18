@@ -1,6 +1,9 @@
 package main
 
-import "strings"
+import (
+	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"strings"
+)
 
 type Event string
 
@@ -19,4 +22,8 @@ var Events = []struct {
 	{Value: ProcessFinished, TSName: strings.ToUpper(string(ProcessFinished))},
 	{Value: NewLogEntry, TSName: strings.ToUpper(string(NewLogEntry))},
 	{Value: ErrorNotification, TSName: strings.ToUpper(string(ErrorNotification))},
+}
+
+func (a *App) emitEvent(event Event, payload interface{}) {
+	runtime.EventsEmit(a.ctx, string(event), payload)
 }
