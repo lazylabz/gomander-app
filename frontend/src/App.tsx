@@ -14,7 +14,7 @@ function App() {
           <nav>
             <AppSidebar />
           </nav>
-          <main className="w-full h-full bg-white">
+          <main className="w-full h-screen bg-white">
             <MainScreen />
           </main>
           <Toaster />
