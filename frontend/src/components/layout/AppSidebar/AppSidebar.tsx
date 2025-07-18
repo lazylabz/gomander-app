@@ -7,6 +7,12 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible.tsx";
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+} from "@/components/ui/context-menu";
+import { ContextMenuTrigger } from "@/components/ui/context-menu.tsx";
+import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -19,12 +25,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
 import { useDataContext } from "@/contexts/DataContext.tsx";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-} from "@/components/ui/context-menu";
-import { ContextMenuTrigger } from "@/components/ui/context-menu.tsx";
 
 export const AppSidebar = () => {
   const {

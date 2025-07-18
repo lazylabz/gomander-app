@@ -15,63 +15,85 @@ type Command struct {
 }
 
 type LogServer struct {
-	app      *App
-	commands map[string]Command
+	app *App
 }
 
 func NewLogServer(app *App) *LogServer {
 	return &LogServer{
-		app:      app,
-		commands: make(map[string]Command),
+		app: app,
 	}
 }
 
 func (l *LogServer) AddCommand(newCommand Command) {
-	if _, exists := l.commands[newCommand.Id]; exists {
+	if _, exists := l.app.commands[newCommand.Id]; exists {
 		l.app.logError("Command already exists: " + newCommand.Id)
 		l.app.notifyError("Command already exists: " + newCommand.Id)
 		return
 	}
 
-	l.commands[newCommand.Id] = newCommand
+	l.app.commands[newCommand.Id] = newCommand
 
 	l.app.logInfo("Command added: " + newCommand.Id)
 
 	l.app.emitEvent(GetCommands, nil)
+
+	err := saveConfig(&Config{
+		Commands: l.app.commands,
+	})
+
+	if err != nil {
+		l.app.notifyError(err.Error())
+	}
 }
 
 func (l *LogServer) RemoveCommand(id string) {
-	if _, exists := l.commands[id]; !exists {
+	if _, exists := l.app.commands[id]; !exists {
 		l.app.logError("Command not found: " + id)
 		l.app.notifyError("Command not found: " + id)
 		return
 	}
 
-	delete(l.commands, id)
+	delete(l.app.commands, id)
 	l.app.logInfo("Command removed: " + id)
 
 	l.app.emitEvent(GetCommands, nil)
+
+	err := saveConfig(&Config{
+		Commands: l.app.commands,
+	})
+
+	if err != nil {
+		l.app.notifyError(err.Error())
+	}
 }
 
 func (l *LogServer) EditCommand(newCommand Command) {
-	if _, exists := l.commands[newCommand.Id]; !exists {
+	if _, exists := l.app.commands[newCommand.Id]; !exists {
 		l.app.logError("Command not found: " + newCommand.Id)
 		l.app.notifyError("Command not found: " + newCommand.Id)
 		return
 	}
 
-	l.commands[newCommand.Id] = newCommand
+	l.app.commands[newCommand.Id] = newCommand
 	l.app.logInfo("Command edited: " + newCommand.Id)
 
 	l.app.emitEvent(GetCommands, nil)
+
+	err := saveConfig(&Config{
+		Commands: l.app.commands,
+	})
+
+	if err != nil {
+		l.app.notifyError(err.Error())
+	}
 }
 
 func (l *LogServer) GetCommands() map[string]Command {
-	return l.commands
+	return l.app.commands
 }
 
 func (l *LogServer) ExecCommand(id string) {
-	command, exists := l.commands[id]
+	command, exists := l.app.commands[id]
 	if !exists {
 		l.app.notifyError("Command not found: " + id)
 	}

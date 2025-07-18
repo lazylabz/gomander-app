@@ -7,18 +7,30 @@ import (
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx      context.Context
+	commands map[string]Command
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-	return &App{}
+	return &App{
+		commands: make(map[string]Command),
+	}
 }
 
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+
+	a.logInfo("Loading configuration...")
+	config, err := loadConfig()
+	if err != nil {
+		panic("Failed to load config: " + err.Error())
+	}
+	a.logInfo("Configuration loaded successfully")
+
+	a.commands = config.Commands
 }
 
 func (a *App) logInfo(message string) {
