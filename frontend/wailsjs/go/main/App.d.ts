@@ -11,3 +11,5 @@ export function ExecCommand(arg1:string):Promise<void>;
 export function GetCommands():Promise<Record<string, main.Command>>;
 
 export function RemoveCommand(arg1:string):Promise<void>;
+
+export function StopRunningCommand(arg1:string):Promise<void>;

@@ -56,6 +56,7 @@ func (a *App) ExecCommand(id string) {
 		a.sendErrAsStreamLine(command, err)
 		return
 	}
+	a.commandsProcesses[command.Id] = cmd
 
 	// Stream stdout
 	go a.streamOutput(command.Id, stdout)

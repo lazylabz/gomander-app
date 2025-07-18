@@ -45,6 +45,7 @@ const CommandMenuItem = ({ command }: { command: Command }) => {
     deleteCommand,
     setCommandStatus,
     commandsStatus,
+    stopRunningCommand,
   } = useDataContext();
 
   const { editCommand } = useContext(editContext);
@@ -68,8 +69,8 @@ const CommandMenuItem = ({ command }: { command: Command }) => {
     setActiveCommandId(command.id);
   };
 
-  const handleStopCommand = () => {
-    alert("Stopping command is not implemented yet.");
+  const handleStopCommand = async () => {
+    await stopRunningCommand(command.id);
   };
 
   return (

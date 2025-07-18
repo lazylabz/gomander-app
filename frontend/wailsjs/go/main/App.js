@@ -21,3 +21,7 @@ export function GetCommands() {
 export function RemoveCommand(arg1) {
   return window['go']['main']['App']['RemoveCommand'](arg1);
 }
+
+export function StopRunningCommand(arg1) {
+  return window['go']['main']['App']['StopRunningCommand'](arg1);
+}

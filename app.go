@@ -3,18 +3,21 @@ package main
 import (
 	"context"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"os/exec"
 )
 
 // App struct
 type App struct {
-	ctx      context.Context
-	commands map[string]Command
+	ctx               context.Context
+	commands          map[string]Command
+	commandsProcesses map[string]*exec.Cmd
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
 	return &App{
-		commands: make(map[string]Command),
+		commands:          make(map[string]Command),
+		commandsProcesses: make(map[string]*exec.Cmd),
 	}
 }
 

@@ -73,3 +73,32 @@ func (a *App) EditCommand(newCommand Command) {
 func (a *App) GetCommands() map[string]Command {
 	return a.commands
 }
+
+func (a *App) StopRunningCommand(id string) error {
+	cmd, exists := a.commands[id]
+
+	if !exists {
+		a.notifyError("Command not found: " + id)
+		return nil
+	}
+
+	process, exists := a.commandsProcesses[cmd.Id]
+
+	if !exists {
+		a.notifyError("No running process for command: " + id)
+		return nil
+	}
+
+	err := process.Process.Kill()
+
+	if err != nil {
+		a.notifyError("Failed to stop command: " + id + " - " + err.Error())
+		return err
+	}
+
+	a.logInfo("Command stopped: " + id)
+
+	a.emitEvent(ProcessFinished, cmd.Id)
+	
+	return nil
+}
