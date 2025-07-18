@@ -18,4 +18,5 @@ export type EventData = {
     line: string;
   };
   [Event.ERROR_NOTIFICATION]: string;
+  [Event.PROCESS_FINISHED]: string;
 };

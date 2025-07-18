@@ -1,6 +1,8 @@
-import { ChevronRight, Folder, Play } from "lucide-react";
+import { ChevronRight, Folder, Play, Square } from "lucide-react";
+import { createContext, useContext, useState } from "react";
 
 import { CreateMenu } from "@/components/layout/AppSidebar/components/CreateMenu/CreateMenu.tsx";
+import { EditCommandModal } from "@/components/modals/EditCommandModal.tsx";
 import {
   Collapsible,
   CollapsibleContent,
@@ -24,10 +26,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
-import { useDataContext } from "@/contexts/DataContext.tsx";
+import { CommandStatus, useDataContext } from "@/contexts/DataContext.tsx";
 import type { Command } from "@/types/contracts.ts";
-import { EditCommandModal } from "@/components/modals/EditCommandModal.tsx";
-import { createContext, useContext, useState } from "react";
 
 const editContext = createContext<{
   editCommand: (command: Command) => void;
@@ -38,13 +38,20 @@ const editContext = createContext<{
 );
 
 const CommandMenuItem = ({ command }: { command: Command }) => {
-  const { execCommand, setActiveCommandId, activeCommandId, deleteCommand } =
-    useDataContext();
+  const {
+    execCommand,
+    setActiveCommandId,
+    activeCommandId,
+    deleteCommand,
+    setCommandStatus,
+    commandsStatus,
+  } = useDataContext();
 
   const { editCommand } = useContext(editContext);
 
-  const handleCommandClick = async () => {
+  const handleRunCommand = async () => {
     setActiveCommandId(command.id);
+    setCommandStatus(command.id, CommandStatus.RUNNING);
     await execCommand(command.id);
   };
 
@@ -61,6 +68,10 @@ const CommandMenuItem = ({ command }: { command: Command }) => {
     setActiveCommandId(command.id);
   };
 
+  const handleStopCommand = () => {
+    alert("Stopping command is not implemented yet.");
+  };
+
   return (
     <ContextMenu>
       <ContextMenuTrigger>
@@ -70,10 +81,18 @@ const CommandMenuItem = ({ command }: { command: Command }) => {
             className="flex flex-row justify-between items-center w-full"
           >
             {command.name}
-            <Play
-              className="text-muted-foreground cursor-pointer hover:text-primary"
-              onClick={handleCommandClick}
-            />
+            {commandsStatus[command.id] === CommandStatus.IDLE && (
+              <Play
+                className="text-muted-foreground cursor-pointer hover:text-primary"
+                onClick={handleRunCommand}
+              />
+            )}
+            {commandsStatus[command.id] === CommandStatus.RUNNING && (
+              <Square
+                className="text-muted-foreground cursor-pointer hover:text-primary"
+                onClick={handleStopCommand}
+              />
+            )}
           </div>
         </SidebarMenuButton>
       </ContextMenuTrigger>
@@ -89,7 +108,7 @@ export const MyCommandsSection = () => {
   const { commands } = useDataContext();
 
   return (
-    <Collapsible className="group/collapsible">
+    <Collapsible defaultOpen className="group/collapsible">
       <SidebarGroup>
         <SidebarGroupLabel
           asChild

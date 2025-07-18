@@ -13,11 +13,20 @@ import {
 import { EventsOff, EventsOn } from "../../wailsjs/runtime";
 import type { Command } from "../types/contracts";
 
+export enum CommandStatus {
+  IDLE,
+  RUNNING,
+}
+
 type DataContextValue = {
   // State
   commands: Record<string, Command>;
+  commandsStatus: Record<string, CommandStatus>;
   activeCommandId: string | null;
   setActiveCommandId: (commandId: string | null) => void;
+  // Command status updates
+  setCommandStatus: (commandId: string, status: CommandStatus) => void;
+  // Logs
   currentLogs: string[];
   clearCurrentLogs: () => void;
   // Handlers
@@ -37,6 +46,10 @@ export const DataContextProvider = ({
   children: React.ReactNode;
 }) => {
   const [commands, setCommands] = useState<Record<string, Command>>({});
+  const [commandsStatus, setCommandsStatus] = useState<
+    Record<string, CommandStatus>
+  >({});
+
   const [logs, setLogs] = useState<Record<string, string[]>>({});
   const [activeCommandId, setActiveCommandId] = useState<string | null>(null);
 
@@ -44,9 +57,14 @@ export const DataContextProvider = ({
     const commandsData = await GetCommands();
 
     setCommands(commandsData);
+    setCommandsStatus(
+      Object.fromEntries(
+        Object.keys(commandsData).map((id) => [id, CommandStatus.IDLE]),
+      ),
+    );
   };
 
-  // Handlers
+  // Command CRUD operations
 
   const createCommand = async (command: Command) => {
     await AddCommand(command);
@@ -66,6 +84,29 @@ export const DataContextProvider = ({
 
   const editCommand = async (command: Command) => {
     await EditCommand(command);
+  };
+
+  // Log handlers
+  const currentLogs = useMemo(() => {
+    return logs[activeCommandId ?? ""] || [];
+  }, [logs, activeCommandId]);
+
+  const clearCurrentLogs = () => {
+    if (!activeCommandId) {
+      return;
+    }
+    setLogs((prev) => ({
+      ...prev,
+      [activeCommandId]: [],
+    }));
+  };
+
+  // Command status updates
+  const setCommandStatus = (commandId: string, status: CommandStatus) => {
+    setCommandsStatus((prevStatus) => ({
+      ...prevStatus,
+      [commandId]: status,
+    }));
   };
 
   // Register events listeners
@@ -96,6 +137,16 @@ export const DataContextProvider = ({
       },
     );
 
+    EventsOn(
+      Event.PROCESS_FINISHED,
+      (data: EventData[Event.PROCESS_FINISHED]) => {
+        setCommandsStatus((prevStatus) => ({
+          ...prevStatus,
+          [data]: CommandStatus.IDLE, // Reset status to IDLE when process finishes
+        }));
+      },
+    );
+
     // Clean listeners on all events
     return () =>
       EventsOff(Object.keys(Event)[0], ...Object.values(Event).slice(1));
@@ -106,22 +157,9 @@ export const DataContextProvider = ({
     refreshCommands();
   }, []);
 
-  const currentLogs = useMemo(() => {
-    return logs[activeCommandId ?? ""] || [];
-  }, [logs, activeCommandId]);
-
-  const clearCurrentLogs = () => {
-    if (!activeCommandId) {
-      return;
-    }
-    setLogs((prev) => ({
-      ...prev,
-      [activeCommandId]: [],
-    }));
-  };
-
   const value: DataContextValue = {
     commands,
+    commandsStatus,
     activeCommandId,
     setActiveCommandId,
     createCommand,
@@ -130,6 +168,7 @@ export const DataContextProvider = ({
     deleteCommand,
     editCommand,
     clearCurrentLogs,
+    setCommandStatus,
   };
 
   return <dataContext.Provider value={value}>{children}</dataContext.Provider>;
