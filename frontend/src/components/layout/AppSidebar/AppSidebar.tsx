@@ -19,14 +19,30 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
 import { useDataContext } from "@/contexts/DataContext.tsx";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+} from "@/components/ui/context-menu";
+import { ContextMenuTrigger } from "@/components/ui/context-menu.tsx";
 
 export const AppSidebar = () => {
-  const { commands, execCommand, setActiveCommandId, activeCommandId } =
-    useDataContext();
+  const {
+    commands,
+    execCommand,
+    setActiveCommandId,
+    activeCommandId,
+    deleteCommand,
+  } = useDataContext();
 
   const handleCommandClick = (commandId: string) => async () => {
     setActiveCommandId(commandId);
     await execCommand(commandId);
+  };
+
+  const handleDeleteCommand = (commandId: string) => async () => {
+    await deleteCommand(commandId);
+    setActiveCommandId(null); // Reset active command after deletion
   };
 
   const onCommandSectionClick = (commandId: string) => () => {
@@ -57,21 +73,33 @@ export const AppSidebar = () => {
                 <SidebarMenu>
                   {Object.values(commands).map((command) => (
                     <SidebarMenuItem key={command.id}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={activeCommandId === command.id}
-                      >
-                        <div
-                          onClick={onCommandSectionClick(command.id)}
-                          className="flex flex-row justify-between items-center w-full"
-                        >
-                          {command.name}
-                          <Play
-                            className="text-muted-foreground cursor-pointer hover:text-primary"
-                            onClick={handleCommandClick(command.id)}
-                          />
-                        </div>
-                      </SidebarMenuButton>
+                      <ContextMenu>
+                        <ContextMenuTrigger>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={activeCommandId === command.id}
+                          >
+                            <div
+                              onClick={onCommandSectionClick(command.id)}
+                              className="flex flex-row justify-between items-center w-full"
+                            >
+                              {command.name}
+                              <Play
+                                className="text-muted-foreground cursor-pointer hover:text-primary"
+                                onClick={handleCommandClick(command.id)}
+                              />
+                            </div>
+                          </SidebarMenuButton>
+                        </ContextMenuTrigger>
+                        <ContextMenuContent>
+                          <ContextMenuItem>Edit</ContextMenuItem>
+                          <ContextMenuItem
+                            onClick={handleDeleteCommand(command.id)}
+                          >
+                            Delete
+                          </ContextMenuItem>
+                        </ContextMenuContent>
+                      </ContextMenu>
                     </SidebarMenuItem>
                   ))}
                 </SidebarMenu>

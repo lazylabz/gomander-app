@@ -7,17 +7,21 @@ import {
   AddCommand,
   ExecCommand,
   GetCommands,
+  RemoveCommand,
 } from "../../wailsjs/go/main/LogServer";
 import { EventsOff, EventsOn } from "../../wailsjs/runtime";
 import type { Command } from "../types/contracts";
 
 type DataContextValue = {
+  // State
   commands: Record<string, Command>;
   activeCommandId: string | null;
   setActiveCommandId: (commandId: string | null) => void;
+  currentLogs: string[];
+  // Handlers
   createCommand: (command: Command) => Promise<void>;
   execCommand: (commandId: string) => Promise<void>;
-  currentLogs: string[];
+  deleteCommand: (commandId: string) => Promise<void>;
 };
 
 export const dataContext = createContext<DataContextValue>(
@@ -47,6 +51,10 @@ export const DataContextProvider = ({
 
   const execCommand = async (commandId: string) => {
     await ExecCommand(commandId);
+  };
+
+  const deleteCommand = async (commandId: string) => {
+    await RemoveCommand(commandId);
   };
 
   // Register events listeners
@@ -103,6 +111,7 @@ export const DataContextProvider = ({
     createCommand,
     execCommand,
     currentLogs,
+    deleteCommand,
   };
 
   return <dataContext.Provider value={value}>{children}</dataContext.Provider>;
