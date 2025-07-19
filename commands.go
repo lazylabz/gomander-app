@@ -1,7 +1,10 @@
 package main
 
 import (
+	"os"
+	"os/exec"
 	ntvRuntime "runtime"
+	"strings"
 	"syscall"
 )
 
@@ -79,6 +82,79 @@ func (a *App) GetCommands() map[string]Command {
 	return a.commands
 }
 
+// ExecCommand executes a command by its ID and streams its output.
+func (a *App) ExecCommand(id string) {
+	command, exists := a.commands[id]
+	if !exists {
+		a.notifyError("Command not found: " + id)
+		return
+	}
+
+	cmdStr := command.Command
+	var cmd *exec.Cmd
+
+	if ntvRuntime.GOOS == "windows" {
+		if strings.HasPrefix(cmdStr, "powershell ") {
+			cmd = exec.Command("powershell", "-Command", strings.TrimPrefix(cmdStr, "powershell "))
+		} else if strings.HasPrefix(cmdStr, "cmd ") {
+			cmd = exec.Command("cmd", "/C", strings.TrimPrefix(cmdStr, "cmd "))
+		} else {
+			cmd = exec.Command("cmd", "/C", cmdStr)
+		}
+	} else {
+		if strings.HasPrefix(cmdStr, "bash ") {
+			cmd = exec.Command("bash", "-c", strings.TrimPrefix(cmdStr, "bash "))
+		} else if strings.HasPrefix(cmdStr, "sh ") {
+			cmd = exec.Command("sh", "-c", strings.TrimPrefix(cmdStr, "sh "))
+		} else {
+			cmd = exec.Command("sh", "-c", cmdStr)
+		}
+	}
+
+	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		HideWindow:    true,
+		CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP,
+	}
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		a.sendErrAsStreamLine(command, err)
+		return
+	}
+
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		a.sendErrAsStreamLine(command, err)
+		return
+	}
+
+	if err := cmd.Start(); err != nil {
+		a.sendErrAsStreamLine(command, err)
+		return
+	}
+	a.commandsProcesses[command.Id] = cmd
+
+	// Stream stdout
+	go a.streamOutput(command.Id, stdout)
+	// Stream stderr
+	go a.streamOutput(command.Id, stderr)
+
+	// Optional: Wait in background
+	go func() {
+		err := cmd.Wait()
+		if err != nil {
+			// Windows Ctrl-C sends a specific error code (0xc000013a)
+			if strings.Contains(err.Error(), "0xc000013a") {
+				return
+			}
+			a.logError("[ERROR - Waiting for command]: " + err.Error())
+			return
+		}
+		a.emitEvent(ProcessFinished, command.Id)
+	}()
+}
+
 func (a *App) StopRunningCommand(id string) error {
 	cmd, exists := a.commands[id]
 
@@ -111,27 +187,15 @@ func (a *App) StopRunningCommand(id string) error {
 		err = process.Process.Signal(syscall.SIGTERM)
 	}
 
+	if err != nil {
+		a.notifyError("Failed to stop command: " + id + " - " + err.Error())
+		return err
+	}
+
 	a.logInfo("Command stopped: " + id)
 
 	a.emitEvent(ProcessFinished, cmd.Id)
 
-	return nil
-}
-
-// TODO: Review why this only works sometimes
-func sendCtrlBreak2(pid int) error {
-	d, e := syscall.LoadDLL("kernel32.dll")
-	if e != nil {
-		return e
-	}
-	p, e := d.FindProc("GenerateConsoleCtrlEvent")
-	if e != nil {
-		return e
-	}
-	r, _, e := p.Call(uintptr(syscall.CTRL_BREAK_EVENT), uintptr(pid))
-	if r == 0 {
-		return e // syscall.GetLastError()
-	}
 	return nil
 }
 
