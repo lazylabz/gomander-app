@@ -23,7 +23,8 @@ func (a *App) sendStreamLine(commandId string, line string) {
 	})
 }
 
-func (a *App) sendErrAsStreamLine(command Command, err error) {
+func (a *App) sendStreamError(command Command, err error) {
 	a.logDebug(err.Error())
+	a.emitEvent(ProcessFinished, command.Id)
 	a.sendStreamLine(command.Id, err.Error())
 }

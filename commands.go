@@ -119,18 +119,18 @@ func (a *App) ExecCommand(id string) {
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		a.sendErrAsStreamLine(command, err)
+		a.sendStreamError(command, err)
 		return
 	}
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		a.sendErrAsStreamLine(command, err)
+		a.sendStreamError(command, err)
 		return
 	}
 
 	if err := cmd.Start(); err != nil {
-		a.sendErrAsStreamLine(command, err)
+		a.sendStreamError(command, err)
 		return
 	}
 	a.commandsProcesses[command.Id] = cmd
@@ -144,10 +144,7 @@ func (a *App) ExecCommand(id string) {
 	go func() {
 		err := cmd.Wait()
 		if err != nil {
-			// Windows Ctrl-C sends a specific error code (0xc000013a)
-			if strings.Contains(err.Error(), "0xc000013a") {
-				return
-			}
+			a.sendStreamError(command, err)
 			a.logError("[ERROR - Waiting for command]: " + err.Error())
 			return
 		}
@@ -174,22 +171,18 @@ func (a *App) StopRunningCommand(id string) error {
 
 	if ntvRuntime.GOOS == "windows" {
 		err = sendCtrlBreak(process.Process.Pid)
-		if err != nil {
-			a.logInfo(err.Error())
-			// If sending CTRL_BREAK fails, try to kill the process directly
-			err = process.Process.Kill()
-			if err != nil {
-				a.notifyError("Failed to stop command: " + id + " - " + err.Error())
-				return err
-			}
-		}
 	} else {
 		err = process.Process.Signal(syscall.SIGTERM)
 	}
 
+	// If "graceful" stop fails, we try to kill the process
 	if err != nil {
-		a.notifyError("Failed to stop command: " + id + " - " + err.Error())
-		return err
+		a.logInfo(err.Error())
+		err = process.Process.Kill()
+		if err != nil {
+			a.notifyError("Failed to stop command: " + id + " - " + err.Error())
+			return err
+		}
 	}
 
 	a.logInfo("Command stopped: " + id)
