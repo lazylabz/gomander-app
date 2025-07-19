@@ -5,7 +5,6 @@ import (
 	"os/exec"
 	ntvRuntime "runtime"
 	"strings"
-	"syscall"
 )
 
 type Command struct {
@@ -157,46 +156,24 @@ func (a *App) StopRunningCommand(id string) error {
 		return nil
 	}
 
-	process, exists := a.commandsProcesses[cmd.Id]
+	runningCommand, exists := a.commandsProcesses[cmd.Id]
 
 	if !exists {
-		a.notifyError("No running process for command: " + id)
+		a.notifyError("No running runningCommand for command: " + id)
 		return nil
 	}
 
-	var err error
+	err := stopProcessGracefully(runningCommand)
 
-	if ntvRuntime.GOOS == "windows" {
-		err = sendCtrlBreak(process.Process.Pid)
-	} else {
-		err = process.Process.Signal(syscall.SIGTERM)
-	}
-
-	// If "graceful" stop fails, we try to kill the process
+	// If "graceful" stop fails, we try to kill the runningCommand
 	if err != nil {
-		a.logInfo(err.Error())
-		err = process.Process.Kill()
-		if err != nil {
-			a.notifyError("Failed to stop command: " + id + " - " + err.Error())
-			return err
-		}
+		a.logError(err.Error())
+		a.notifyError("Failed to stop command gracefully: " + id + " - " + err.Error())
 	}
 
 	a.logInfo("Command stopped: " + id)
 
 	a.emitEvent(ProcessFinished, cmd.Id)
 
-	return nil
-}
-
-func sendCtrlBreak(pid int) error {
-	kernel32 := syscall.MustLoadDLL("kernel32.dll")
-	generateConsoleCtrlEvent := kernel32.MustFindProc("GenerateConsoleCtrlEvent")
-
-	// Enviar CTRL_BREAK al grupo de proceso (el PID debe ser el del proceso raíz creado con CREATE_NEW_PROCESS_GROUP)
-	r, _, err := generateConsoleCtrlEvent.Call(uintptr(syscall.CTRL_BREAK_EVENT), uintptr(pid))
-	if r == 0 {
-		return err
-	}
 	return nil
 }
