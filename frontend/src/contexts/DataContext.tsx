@@ -61,7 +61,10 @@ export const DataContextProvider = ({
     setCommands(commandsData);
     setCommandsStatus(
       Object.fromEntries(
-        Object.keys(commandsData).map((id) => [id, CommandStatus.IDLE]),
+        Object.keys(commandsData).map((id) => [
+          id,
+          commandsStatus[id] || CommandStatus.IDLE,
+        ]),
       ),
     );
   };
