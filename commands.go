@@ -112,10 +112,7 @@ func (a *App) ExecCommand(id string) {
 	}
 
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		HideWindow:    true,
-		CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP,
-	}
+	setProcAttributes(cmd)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
