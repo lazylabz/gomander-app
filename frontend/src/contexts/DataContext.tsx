@@ -55,7 +55,13 @@ export const DataContextProvider = ({
   const [logs, setLogs] = useState<Record<string, string[]>>({});
   const [activeCommandId, setActiveCommandId] = useState<string | null>(null);
 
-  const refreshCommands = async () => {
+  // Computed values
+  const currentLogs = useMemo(() => {
+    return logs[activeCommandId ?? ""] || [];
+  }, [logs, activeCommandId]);
+
+  // Command CRUD operations
+  const fetchCommands = async () => {
     const commandsData = await GetCommands();
 
     setCommands(commandsData);
@@ -68,8 +74,6 @@ export const DataContextProvider = ({
       );
     });
   };
-
-  // Command CRUD operations
 
   const createCommand = async (command: Command) => {
     await AddCommand(command);
@@ -95,11 +99,7 @@ export const DataContextProvider = ({
     await StopCommand(commandId);
   };
 
-  // Log handlers
-  const currentLogs = useMemo(() => {
-    return logs[activeCommandId ?? ""] || [];
-  }, [logs, activeCommandId]);
-
+  // Handlers
   const clearCurrentLogs = () => {
     if (!activeCommandId) {
       return;
@@ -110,7 +110,6 @@ export const DataContextProvider = ({
     }));
   };
 
-  // Command status updates
   const setCommandStatus = (commandId: string, status: CommandStatus) => {
     setCommandsStatus((prevStatus) => ({
       ...prevStatus,
@@ -121,7 +120,7 @@ export const DataContextProvider = ({
   // Register events listeners
   useEffect(() => {
     EventsOn(Event.GET_COMMANDS, () => {
-      refreshCommands();
+      fetchCommands();
     });
 
     EventsOn(Event.NEW_LOG_ENTRY, (data: EventData[Event.NEW_LOG_ENTRY]) => {
@@ -170,7 +169,7 @@ export const DataContextProvider = ({
 
   // Initial fetch of commands
   useEffect(() => {
-    refreshCommands();
+    fetchCommands();
   }, []);
 
   const value: DataContextValue = {
