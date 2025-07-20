@@ -20,7 +20,12 @@ func stopProcessGracefully(cmd *exec.Cmd) error {
 	pid := strconv.Itoa(cmd.Process.Pid)
 
 	// Try graceful termination
-	err := exec.Command("taskkill", "/PID", pid).Run()
+	killCmd := exec.Command("taskkill", "/PID", pid)
+	killCmd.SysProcAttr = &syscall.SysProcAttr{
+		HideWindow: true,
+	}
+
+	err := killCmd.Run()
 	if err != nil {
 		// Fallback to force kill
 		return exec.Command("taskkill", "/F", "/T", "/PID", pid).Run()
