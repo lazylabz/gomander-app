@@ -113,7 +113,7 @@ func (a *App) ExecCommand(id string) {
 		a.sendStreamError(command, err)
 		return
 	}
-	a.commandsProcesses[command.Id] = cmd
+	a.runningCommands[command.Id] = cmd
 
 	// Stream stdout
 	go a.streamOutput(command.Id, stdout)
@@ -140,7 +140,7 @@ func (a *App) StopRunningCommand(id string) error {
 		return nil
 	}
 
-	runningCommand, exists := a.commandsProcesses[cmd.Id]
+	runningCommand, exists := a.runningCommands[cmd.Id]
 
 	if !exists {
 		a.notifyError("No running runningCommand for command: " + id)

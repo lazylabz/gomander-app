@@ -8,16 +8,16 @@ import (
 
 // App struct
 type App struct {
-	ctx               context.Context
-	commands          map[string]Command
-	commandsProcesses map[string]*exec.Cmd
+	ctx             context.Context
+	commands        map[string]Command
+	runningCommands map[string]*exec.Cmd
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
 	return &App{
-		commands:          make(map[string]Command),
-		commandsProcesses: make(map[string]*exec.Cmd),
+		commands:        make(map[string]Command),
+		runningCommands: make(map[string]*exec.Cmd),
 	}
 }
 
