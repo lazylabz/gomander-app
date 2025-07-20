@@ -15,7 +15,7 @@ function App() {
         <main className="w-full h-screen bg-white">
           <LogsScreen />
         </main>
-        <Toaster />
+        <Toaster richColors />
       </SidebarProvider>
     </DataContextProvider>
   );

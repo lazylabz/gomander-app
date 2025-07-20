@@ -59,14 +59,14 @@ export const DataContextProvider = ({
     const commandsData = await GetCommands();
 
     setCommands(commandsData);
-    setCommandsStatus(
-      Object.fromEntries(
+    setCommandsStatus((prevStatus) => {
+      return Object.fromEntries(
         Object.keys(commandsData).map((id) => [
           id,
-          commandsStatus[id] || CommandStatus.IDLE,
+          prevStatus[id] || CommandStatus.IDLE,
         ]),
-      ),
-    );
+      );
+    });
   };
 
   // Command CRUD operations
@@ -140,9 +140,16 @@ export const DataContextProvider = ({
     EventsOn(
       Event.ERROR_NOTIFICATION,
       (data: EventData[Event.ERROR_NOTIFICATION]) => {
-        toast("Error", {
+        toast.error("Error", {
           description: data,
         });
+      },
+    );
+
+    EventsOn(
+      Event.SUCCESS_NOTIFICATION,
+      (data: EventData[Event.SUCCESS_NOTIFICATION]) => {
+        toast.success(data);
       },
     );
 
