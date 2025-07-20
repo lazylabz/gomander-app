@@ -36,3 +36,17 @@ func stopProcessGracefully(cmd *exec.Cmd) error {
 		return nil
 	}
 }
+
+func getCommand(cmdStr string) *exec.Cmd {
+	var cmd *exec.Cmd
+
+	if strings.HasPrefix(cmdStr, "bash ") {
+		cmd = exec.Command("bash", "-c", strings.TrimPrefix(cmdStr, "bash "))
+	} else if strings.HasPrefix(cmdStr, "sh ") {
+		cmd = exec.Command("sh", "-c", strings.TrimPrefix(cmdStr, "sh "))
+	} else {
+		cmd = exec.Command("sh", "-c", cmdStr)
+	}
+
+	return cmd
+}

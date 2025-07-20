@@ -2,9 +2,6 @@ package main
 
 import (
 	"os"
-	"os/exec"
-	ntvRuntime "runtime"
-	"strings"
 )
 
 type Command struct {
@@ -90,27 +87,14 @@ func (a *App) ExecCommand(id string) {
 	}
 
 	cmdStr := command.Command
-	var cmd *exec.Cmd
 
-	if ntvRuntime.GOOS == "windows" {
-		if strings.HasPrefix(cmdStr, "powershell ") {
-			cmd = exec.Command("powershell", "-Command", strings.TrimPrefix(cmdStr, "powershell "))
-		} else if strings.HasPrefix(cmdStr, "cmd ") {
-			cmd = exec.Command("cmd", "/C", strings.TrimPrefix(cmdStr, "cmd "))
-		} else {
-			cmd = exec.Command("cmd", "/C", cmdStr)
-		}
-	} else {
-		if strings.HasPrefix(cmdStr, "bash ") {
-			cmd = exec.Command("bash", "-c", strings.TrimPrefix(cmdStr, "bash "))
-		} else if strings.HasPrefix(cmdStr, "sh ") {
-			cmd = exec.Command("sh", "-c", strings.TrimPrefix(cmdStr, "sh "))
-		} else {
-			cmd = exec.Command("sh", "-c", cmdStr)
-		}
-	}
+	// Get the command object based on the command string and OS
+	cmd := getCommand(cmdStr)
 
+	// Enable color output and set terminal type
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
+
+	// Set commabd attributes based on OS
 	setProcAttributes(cmd)
 
 	stdout, err := cmd.StdoutPipe()

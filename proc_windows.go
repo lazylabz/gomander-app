@@ -5,6 +5,7 @@ package main
 import (
 	"os/exec"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -44,4 +45,18 @@ func stopProcessGracefully(cmd *exec.Cmd) error {
 	case <-done:
 		return nil
 	}
+}
+
+func getCommand(cmdStr string) *exec.Cmd {
+	var cmd *exec.Cmd
+
+	if strings.HasPrefix(cmdStr, "powershell ") {
+		cmd = exec.Command("powershell", "-Command", strings.TrimPrefix(cmdStr, "powershell "))
+	} else if strings.HasPrefix(cmdStr, "cmd ") {
+		cmd = exec.Command("cmd", "/C", strings.TrimPrefix(cmdStr, "cmd "))
+	} else {
+		cmd = exec.Command("cmd", "/C", cmdStr)
+	}
+
+	return cmd
 }
