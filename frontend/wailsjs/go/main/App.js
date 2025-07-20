@@ -10,10 +10,6 @@ export function EditCommand(arg1) {
   return window['go']['main']['App']['EditCommand'](arg1);
 }
 
-export function ExecCommand(arg1) {
-  return window['go']['main']['App']['ExecCommand'](arg1);
-}
-
 export function GetCommands() {
   return window['go']['main']['App']['GetCommands']();
 }
@@ -22,6 +18,10 @@ export function RemoveCommand(arg1) {
   return window['go']['main']['App']['RemoveCommand'](arg1);
 }
 
-export function StopRunningCommand(arg1) {
-  return window['go']['main']['App']['StopRunningCommand'](arg1);
+export function RunCommand(arg1) {
+  return window['go']['main']['App']['RunCommand'](arg1);
+}
+
+export function StopCommand(arg1) {
+  return window['go']['main']['App']['StopCommand'](arg1);
 }

@@ -6,10 +6,10 @@ import { Event, type EventData } from "@/types/contracts.ts";
 import {
   AddCommand,
   EditCommand,
-  ExecCommand,
   GetCommands,
   RemoveCommand,
-  StopRunningCommand,
+  RunCommand,
+  StopCommand,
 } from "../../wailsjs/go/main/App";
 import { EventsOff, EventsOn } from "../../wailsjs/runtime";
 import type { Command } from "../types/contracts";
@@ -80,7 +80,7 @@ export const DataContextProvider = ({
       ...prev,
       [commandId]: [], // Reset logs for the command being executed
     }));
-    await ExecCommand(commandId);
+    await RunCommand(commandId);
   };
 
   const deleteCommand = async (commandId: string) => {
@@ -92,7 +92,7 @@ export const DataContextProvider = ({
   };
 
   const stopRunningCommand = async (commandId: string) => {
-    await StopRunningCommand(commandId);
+    await StopCommand(commandId);
   };
 
   // Log handlers

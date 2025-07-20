@@ -6,10 +6,10 @@ export function AddCommand(arg1:main.Command):Promise<void>;
 
 export function EditCommand(arg1:main.Command):Promise<void>;
 
-export function ExecCommand(arg1:string):Promise<void>;
-
 export function GetCommands():Promise<Record<string, main.Command>>;
 
 export function RemoveCommand(arg1:string):Promise<void>;
 
-export function StopRunningCommand(arg1:string):Promise<void>;
+export function RunCommand(arg1:string):Promise<Record<string, main.Command>>;
+
+export function StopCommand(arg1:string):Promise<void>;

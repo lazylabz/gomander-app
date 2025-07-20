@@ -10,10 +10,10 @@ type Config struct {
 	Commands map[string]Command `json:"commands"`
 }
 
-func loadConfig() (*Config, error) {
+func loadConfigOrPanic() *Config {
 	file, err := findOrCreateConfigFile()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	defer func(file *os.File) {
@@ -25,16 +25,16 @@ func loadConfig() (*Config, error) {
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&config)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	return &config, err
+	return &config
 }
 
-func saveConfig(config *Config) error {
+func saveConfigOrPanic(config *Config) {
 	file, err := findOrCreateConfigFile()
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	defer func(file *os.File) {
@@ -45,8 +45,9 @@ func saveConfig(config *Config) error {
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
 	err = encoder.Encode(config)
-
-	return err
+	if err != nil {
+		panic(err)
+	}
 }
 
 func findOrCreateConfigFile() (*os.File, error) {
