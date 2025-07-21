@@ -3,6 +3,7 @@
 package main
 
 import (
+	"os"
 	"os/exec"
 	"strings"
 	"syscall"
@@ -13,6 +14,35 @@ func setProcAttributes(cmd *exec.Cmd) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Setpgid: true,
 	}
+}
+
+func setProcEnv(cmd *exec.Cmd, extraPaths []string) {
+	if len(extraPaths) == 0 {
+		return
+	}
+
+	currentPath := os.Getenv("PATH")
+
+	separator := ":"
+
+	// Prepend extra paths to existing PATH
+	newPath := strings.Join(extraPaths, separator) + separator + currentPath
+
+	// Set the environment
+	if cmd.Env == nil {
+		cmd.Env = os.Environ()
+	}
+
+	// Update or add PATH
+	for i, env := range cmd.Env {
+		if strings.HasPrefix(strings.ToUpper(env), "PATH=") {
+			cmd.Env[i] = "PATH=" + newPath
+			return
+		}
+	}
+
+	// If PATH wasn't found, add it
+	cmd.Env = append(cmd.Env, "PATH="+newPath)
 }
 
 func stopProcessGracefully(cmd *exec.Cmd) error {
@@ -39,15 +69,7 @@ func stopProcessGracefully(cmd *exec.Cmd) error {
 }
 
 func getCommand(cmdStr string) *exec.Cmd {
-	var cmd *exec.Cmd
+	shell := os.Getenv("SHELL")
 
-	if strings.HasPrefix(cmdStr, "bash ") {
-		cmd = exec.Command("bash", "-c", strings.TrimPrefix(cmdStr, "bash "))
-	} else if strings.HasPrefix(cmdStr, "sh ") {
-		cmd = exec.Command("sh", "-c", strings.TrimPrefix(cmdStr, "sh "))
-	} else {
-		cmd = exec.Command("sh", "-c", cmdStr)
-	}
-
-	return cmd
+	return exec.Command(shell, "-c", cmdStr)
 }

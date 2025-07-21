@@ -8,8 +8,12 @@ export function EditCommand(arg1:main.Command):Promise<void>;
 
 export function GetCommands():Promise<Record<string, main.Command>>;
 
+export function GetUserConfig():Promise<main.UserConfig>;
+
 export function RemoveCommand(arg1:string):Promise<void>;
 
 export function RunCommand(arg1:string):Promise<Record<string, main.Command>>;
+
+export function SaveUserConfig(arg1:main.UserConfig):Promise<void>;
 
 export function StopCommand(arg1:string):Promise<void>;

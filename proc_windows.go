@@ -17,6 +17,36 @@ func setProcAttributes(cmd *exec.Cmd) {
 	}
 }
 
+// TODO: Check if this works
+func setProcEnv(cmd *exec.Cmd, extraPaths []string) {
+	if len(extraPaths) == 0 {
+		return
+	}
+
+	currentPath := os.Getenv("PATH")
+
+	separator := ";"
+
+	// Prepend extra paths to existing PATH
+	newPath := strings.Join(extraPaths, separator) + separator + currentPath
+
+	// Set the environment
+	if cmd.Env == nil {
+		cmd.Env = os.Environ()
+	}
+
+	// Update or add PATH
+	for i, env := range cmd.Env {
+		if strings.HasPrefix(strings.ToUpper(env), "PATH=") {
+			cmd.Env[i] = "PATH=" + newPath
+			return
+		}
+	}
+
+	// If PATH wasn't found, add it
+	cmd.Env = append(cmd.Env, "PATH="+newPath)
+}
+
 func stopProcessGracefully(cmd *exec.Cmd) error {
 	pid := strconv.Itoa(cmd.Process.Pid)
 
@@ -47,6 +77,7 @@ func stopProcessGracefully(cmd *exec.Cmd) error {
 	}
 }
 
+// TODO: Check if this can be abstracted to "shell" env as in unix
 func getCommand(cmdStr string) *exec.Cmd {
 	var cmd *exec.Cmd
 

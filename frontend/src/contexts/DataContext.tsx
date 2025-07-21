@@ -1,14 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { Event, type EventData } from "@/types/contracts.ts";
+import { Event, type EventData, type UserConfig } from "@/types/contracts.ts";
 
 import {
   AddCommand,
   EditCommand,
   GetCommands,
+  GetUserConfig,
   RemoveCommand,
   RunCommand,
+  SaveUserConfig,
   StopCommand,
 } from "../../wailsjs/go/main/App";
 import { EventsOff, EventsOn } from "../../wailsjs/runtime";
@@ -36,6 +38,9 @@ type DataContextValue = {
   execCommand: (commandId: string) => Promise<void>;
   deleteCommand: (commandId: string) => Promise<void>;
   stopRunningCommand: (commandId: string) => Promise<void>;
+  // User config
+  userConfig: UserConfig;
+  saveUserConfig: (config: UserConfig) => Promise<void>;
 };
 
 export const dataContext = createContext<DataContextValue>(
@@ -54,6 +59,10 @@ export const DataContextProvider = ({
 
   const [logs, setLogs] = useState<Record<string, string[]>>({});
   const [activeCommandId, setActiveCommandId] = useState<string | null>(null);
+
+  const [userConfig, setUserConfig] = useState<UserConfig>({
+    extraPaths: [],
+  });
 
   // Computed values
   const currentLogs = useMemo(() => {
@@ -99,6 +108,19 @@ export const DataContextProvider = ({
     await StopCommand(commandId);
   };
 
+  // User config operations
+  const fetchUserConfig = async (): Promise<void> => {
+    const config = await GetUserConfig();
+    
+    setUserConfig(config);
+  };
+
+  const saveUserConfig = async (config: UserConfig): Promise<void> => {
+    // Assuming there's a function to set user config
+    // This function should be implemented in the backend
+    await SaveUserConfig(config);
+  };
+
   // Handlers
   const clearCurrentLogs = () => {
     if (!activeCommandId) {
@@ -121,6 +143,10 @@ export const DataContextProvider = ({
   useEffect(() => {
     EventsOn(Event.GET_COMMANDS, () => {
       fetchCommands();
+    });
+
+    EventsOn(Event.GET_USER_CONFIG, () => {
+      fetchUserConfig();
     });
 
     EventsOn(Event.NEW_LOG_ENTRY, (data: EventData[Event.NEW_LOG_ENTRY]) => {
@@ -167,9 +193,10 @@ export const DataContextProvider = ({
       EventsOff(Object.keys(Event)[0], ...Object.values(Event).slice(1));
   });
 
-  // Initial fetch of commands
+  // Initial fetch of data
   useEffect(() => {
     fetchCommands();
+    fetchUserConfig();
   }, []);
 
   const value: DataContextValue = {
@@ -189,6 +216,9 @@ export const DataContextProvider = ({
     execCommand,
     deleteCommand,
     stopRunningCommand,
+    // User config
+    userConfig,
+    saveUserConfig,
   };
 
   return <dataContext.Provider value={value}>{children}</dataContext.Provider>;

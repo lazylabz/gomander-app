@@ -24,6 +24,7 @@ const (
 	NewLogEntry         Event = "new_log_entry"
 	ErrorNotification   Event = "error_notification"
 	SuccessNotification Event = "success_notification"
+	GetUserConfig       Event = "get_user_config"
 )
 
 var Events = []struct {
@@ -35,6 +36,7 @@ var Events = []struct {
 	{Value: NewLogEntry, TSName: strings.ToUpper(string(NewLogEntry))},
 	{Value: ErrorNotification, TSName: strings.ToUpper(string(ErrorNotification))},
 	{Value: SuccessNotification, TSName: strings.ToUpper(string(SuccessNotification))},
+	{Value: GetUserConfig, TSName: strings.ToUpper(string(GetUserConfig))},
 }
 
 func (e *EventEmitter) emitEvent(event Event, payload interface{}) {

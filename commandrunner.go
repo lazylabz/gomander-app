@@ -23,15 +23,16 @@ func NewCommandRunner(logger *Logger, emitter *EventEmitter) *CommandRunner {
 }
 
 // ExecCommand executes a command by its ID and streams its output.
-func (c *CommandRunner) RunCommand(command Command) error {
+func (c *CommandRunner) RunCommand(command Command, extraPaths []string) error {
 	// Get the command object based on the command string and OS
 	cmd := getCommand(command.Command)
 
 	// Enable color output and set terminal type
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
 
-	// Set commabd attributes based on OS
+	// Set command attributes based on OS
 	setProcAttributes(cmd)
+	setProcEnv(cmd, extraPaths)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {

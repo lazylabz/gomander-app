@@ -14,12 +14,20 @@ export function GetCommands() {
   return window['go']['main']['App']['GetCommands']();
 }
 
+export function GetUserConfig() {
+  return window['go']['main']['App']['GetUserConfig']();
+}
+
 export function RemoveCommand(arg1) {
   return window['go']['main']['App']['RemoveCommand'](arg1);
 }
 
 export function RunCommand(arg1) {
   return window['go']['main']['App']['RunCommand'](arg1);
+}
+
+export function SaveUserConfig(arg1) {
+  return window['go']['main']['App']['SaveUserConfig'](arg1);
 }
 
 export function StopCommand(arg1) {

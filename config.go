@@ -7,7 +7,12 @@ import (
 )
 
 type Config struct {
-	Commands map[string]Command `json:"commands"`
+	Commands   map[string]Command `json:"commands"`
+	ExtraPaths []string           `json:"extra_paths"`
+}
+
+type UserConfig struct {
+	ExtraPaths []string `json:"extraPaths"`
 }
 
 func loadConfigOrPanic() *Config {

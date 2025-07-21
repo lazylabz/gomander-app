@@ -11,6 +11,7 @@ type App struct {
 	eventEmitter       *EventEmitter
 	commandRunner      *CommandRunner
 	commandsRepository *CommandRepository
+	config             *Config
 }
 
 // NewApp creates a new App application struct
@@ -32,11 +33,11 @@ func (a *App) startup(ctx context.Context) {
 
 	a.logger.info("Loading configuration...")
 
-	config := loadConfigOrPanic()
+	a.config = loadConfigOrPanic()
 
 	a.logger.info("Configuration loaded successfully")
 
-	a.commandsRepository = NewCommandRepository(config.Commands)
+	a.commandsRepository = NewCommandRepository(a.config.Commands)
 }
 
 func (a *App) GetCommands() map[string]Command {
@@ -103,7 +104,7 @@ func (a *App) RunCommand(id string) map[string]Command {
 		return nil
 	}
 
-	err = a.commandRunner.RunCommand(*command)
+	err = a.commandRunner.RunCommand(*command, a.config.ExtraPaths)
 
 	if err != nil {
 		a.logger.error(err.Error())
@@ -136,6 +137,22 @@ func (a *App) StopCommand(id string) {
 	a.logger.info("Command stopped: " + id)
 
 	a.eventEmitter.emitEvent(ProcessFinished, id)
+}
+
+func (a *App) SaveUserConfig(userConfig UserConfig) {
+	a.config.ExtraPaths = userConfig.ExtraPaths
+
+	saveConfigOrPanic(a.config)
+
+	a.logger.info("Extra paths saved successfully")
+	a.eventEmitter.emitEvent(SuccessNotification, "Extra paths saved successfully")
+	a.eventEmitter.emitEvent(GetUserConfig, nil)
+}
+
+func (a *App) GetUserConfig() UserConfig {
+	return UserConfig{
+		ExtraPaths: a.config.ExtraPaths,
+	}
 }
 
 func (a *App) saveConfig() {
