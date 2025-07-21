@@ -20,6 +20,17 @@ func loadConfigOrPanic() *Config {
 		err = file.Close()
 	}(file)
 
+	stat, err := os.Stat(file.Name())
+	if err != nil {
+		panic(err)
+	}
+
+	if stat.Size() == 0 {
+		return &Config{
+			Commands: make(map[string]Command),
+		}
+	}
+
 	// Read the config from the file
 	var config Config
 	decoder := json.NewDecoder(file)
