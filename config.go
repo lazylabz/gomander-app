@@ -32,7 +32,8 @@ func loadConfigOrPanic() *Config {
 
 	if stat.Size() == 0 {
 		return &Config{
-			Commands: make(map[string]Command),
+			Commands:   make(map[string]Command),
+			ExtraPaths: make([]string, 0),
 		}
 	}
 

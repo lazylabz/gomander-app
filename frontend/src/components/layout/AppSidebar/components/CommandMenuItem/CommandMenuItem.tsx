@@ -17,6 +17,7 @@ export const CommandMenuItem = ({ command }: { command: Command }) => {
     setActiveCommandId,
     activeCommandId,
     deleteCommand,
+    duplicateCommand,
     setCommandStatus,
     commandsStatus,
     stopRunningCommand,
@@ -37,6 +38,11 @@ export const CommandMenuItem = ({ command }: { command: Command }) => {
 
   const handleEditCommand = () => {
     editCommand(command);
+  };
+
+  const handleDuplicateCommand = async () => {
+    await duplicateCommand(command);
+    setActiveCommandId(null); // Reset active command after duplication
   };
 
   const onCommandSectionClick = () => {
@@ -65,16 +71,9 @@ export const CommandMenuItem = ({ command }: { command: Command }) => {
             )}
             {commandsStatus[command.id] === CommandStatus.RUNNING && (
               <div className="group/command p-0 m-0">
-                <Play
-                  size={18}
-                  fill="currentColor"
-                  className="text-green-600 group-hover/command:hidden"
-                  onClick={handleRunCommand}
-                />
                 <Square
                   size={18}
-                  fill="currentColor"
-                  className="text-red-400 hidden group-hover/command:block cursor-pointer"
+                  className="text-muted-foreground cursor-pointer hover:text-primary"
                   onClick={handleStopCommand}
                 />
               </div>
@@ -85,6 +84,9 @@ export const CommandMenuItem = ({ command }: { command: Command }) => {
       <ContextMenuContent>
         <ContextMenuItem onClick={handleEditCommand}>Edit</ContextMenuItem>
         <ContextMenuItem onClick={handleDeleteCommand}>Delete</ContextMenuItem>
+        <ContextMenuItem onClick={handleDuplicateCommand}>
+          Duplicate
+        </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );

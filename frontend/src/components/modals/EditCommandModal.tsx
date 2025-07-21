@@ -75,7 +75,7 @@ export const EditCommandModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[628px]">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
             <DialogHeader className="flex flex-row items-center gap-6">

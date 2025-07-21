@@ -38,6 +38,7 @@ type DataContextValue = {
   execCommand: (commandId: string) => Promise<void>;
   deleteCommand: (commandId: string) => Promise<void>;
   stopRunningCommand: (commandId: string) => Promise<void>;
+  duplicateCommand: (command: Command) => Promise<void>;
   // User config
   userConfig: UserConfig;
   saveUserConfig: (config: UserConfig) => Promise<void>;
@@ -108,10 +109,19 @@ export const DataContextProvider = ({
     await StopCommand(commandId);
   };
 
+  const duplicateCommand = async (command: Command) => {
+    const newCommand = {
+      ...command,
+      name: `${command.name} (copy)`,
+      id: crypto.randomUUID(),
+    };
+    await AddCommand(newCommand);
+  };
+
   // User config operations
   const fetchUserConfig = async (): Promise<void> => {
     const config = await GetUserConfig();
-    
+
     setUserConfig(config);
   };
 
@@ -216,6 +226,7 @@ export const DataContextProvider = ({
     execCommand,
     deleteCommand,
     stopRunningCommand,
+    duplicateCommand,
     // User config
     userConfig,
     saveUserConfig,
