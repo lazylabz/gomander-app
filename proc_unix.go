@@ -4,13 +4,14 @@ package main
 
 import (
 	"os/exec"
+	"strings"
 	"syscall"
+	"time"
 )
 
 func setProcAttributes(cmd *exec.Cmd) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		HideWindow: true,
-		Setpgid:    true,
+		Setpgid: true,
 	}
 }
 
