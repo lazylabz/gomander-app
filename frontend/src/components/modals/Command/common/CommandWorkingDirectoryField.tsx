@@ -58,7 +58,7 @@ export const CommandWorkingDirectoryField = () => {
       name="workingDirectory"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Command</FormLabel>
+          <FormLabel>Working Directory</FormLabel>
           <FormControl>
             <div className="w-full flex items-center gap-2">
               <Input
