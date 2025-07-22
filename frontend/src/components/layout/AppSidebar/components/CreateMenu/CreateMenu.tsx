@@ -1,7 +1,7 @@
 import { CirclePlus, Terminal } from "lucide-react";
 import { useState } from "react";
 
-import { CreateCommandModal } from "@/components/modals/CreateCommandModal.tsx";
+import { CreateCommandModal } from "@/components/modals/Command/CreateCommandModal.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,

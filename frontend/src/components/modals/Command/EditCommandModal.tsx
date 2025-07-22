@@ -1,8 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Terminal } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
+import { CommandCommandField } from "@/components/modals/Command/common/CommandCommandField.tsx";
+import { CommandNameField } from "@/components/modals/Command/common/CommandNameField.tsx";
+import { CommandWorkingDirectoryField } from "@/components/modals/Command/common/CommandWorkingDirectoryField.tsx";
+import {
+  formSchema,
+  type FormSchemaType,
+} from "@/components/modals/Command/common/formSchema.ts";
 import { Button } from "@/components/ui/button.tsx";
 import {
   Dialog,
@@ -12,27 +18,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog.tsx";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form.tsx";
-import { Input } from "@/components/ui/input.tsx";
+import { Form } from "@/components/ui/form.tsx";
 import { useDataContext } from "@/contexts/DataContext.tsx";
 import type { Command } from "@/types/contracts.ts";
-
-const formSchema = z.object({
-  name: z.string().min(1, {
-    message: "Command name is required",
-  }),
-  command: z.string().min(1, {
-    message: "Command is required",
-  }),
-  workingDirectory: z.string().min(0),
-});
 
 export const EditCommandModal = ({
   command,
@@ -45,7 +33,7 @@ export const EditCommandModal = ({
 }) => {
   const { editCommand } = useDataContext();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     values: {
       name: command?.name || "",
@@ -54,7 +42,7 @@ export const EditCommandModal = ({
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: FormSchemaType) => {
     if (!command) {
       return;
     }
@@ -86,45 +74,9 @@ export const EditCommandModal = ({
               <DialogTitle>Edit command</DialogTitle>
             </DialogHeader>
             <div className="space-y-6 my-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="My awesome command" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="command"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Command</FormLabel>
-                    <FormControl>
-                      <Input placeholder={'cowsay "Hello World!"'} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="workingDirectory"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Command</FormLabel>
-                    <FormControl>
-                      <Input placeholder={"/Users/hackerman/Code"} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <CommandNameField />
+              <CommandCommandField />
+              <CommandWorkingDirectoryField />
             </div>
             <DialogFooter>
               <DialogClose asChild>

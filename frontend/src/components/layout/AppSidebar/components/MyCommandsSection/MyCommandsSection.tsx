@@ -1,11 +1,19 @@
 import { ChevronRight, Folder } from "lucide-react";
+import { useState } from "react";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
+import { CreateCommandModal } from "@/components/modals/Command/CreateCommandModal.tsx";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible.tsx";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -14,14 +22,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
 import { useDataContext } from "@/contexts/DataContext.tsx";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { useState } from "react";
-import { CreateCommandModal } from "@/components/modals/CreateCommandModal.tsx";
 
 export const MyCommandsSection = () => {
   const { commands } = useDataContext();

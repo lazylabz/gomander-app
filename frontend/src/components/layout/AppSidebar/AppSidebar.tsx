@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CreateMenu } from "@/components/layout/AppSidebar/components/CreateMenu/CreateMenu.tsx";
 import { MyCommandsSection } from "@/components/layout/AppSidebar/components/MyCommandsSection/MyCommandsSection.tsx";
 import { sidebarContext } from "@/components/layout/AppSidebar/contexts/sidebarContext.tsx";
-import { EditCommandModal } from "@/components/modals/EditCommandModal.tsx";
+import { EditCommandModal } from "@/components/modals/Command/EditCommandModal.tsx";
 import { SettingsModal } from "@/components/modals/SettingsModal.tsx";
 import {
   Sidebar,
@@ -24,7 +24,7 @@ export const AppSidebar = () => {
 
   const openSettingsModal = () => {
     setSettingsModalOpen(true);
-  }
+  };
 
   const value = {
     editCommand: (command: Command) => setEdittingCommand(command),
@@ -47,7 +47,11 @@ export const AppSidebar = () => {
           <MyCommandsSection />
         </SidebarContent>
         <SidebarFooter>
-          <Settings onClick={openSettingsModal} size={20} className="text-muted-foreground cursor-pointer hover:text-primary" />
+          <Settings
+            onClick={openSettingsModal}
+            size={20}
+            className="text-muted-foreground cursor-pointer hover:text-primary"
+          />
         </SidebarFooter>
       </Sidebar>
     </sidebarContext.Provider>
