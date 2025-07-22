@@ -15,7 +15,7 @@ export const LogsScreen = () => {
   const { currentLogs, clearCurrentLogs } = useDataContext();
 
   return (
-    <div className="p-4 overflow-y-auto h-full w-full">
+    <div className="p-4 overflow-y-auto h-full w-full flex flex-col font-mono justify-end">
       <BrushCleaning
         onClick={clearCurrentLogs}
         className="fixed top-3 right-6 z-1 text-foreground opacity-25 hover:opacity-100 transition-opacity cursor-pointer"
