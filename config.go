@@ -58,6 +58,12 @@ func saveConfigOrPanic(config *Config) {
 		err = file.Close()
 	}(file)
 
+	// Truncate the file to ensure clean write
+	err = file.Truncate(0)
+	if err != nil {
+		panic(err)
+	}
+
 	// Save the config to the file
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")

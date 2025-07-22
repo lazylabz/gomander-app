@@ -157,6 +157,7 @@ func (a *App) GetUserConfig() UserConfig {
 
 func (a *App) saveConfig() {
 	saveConfigOrPanic(&Config{
-		Commands: a.commandsRepository.commands,
+		Commands:   a.commandsRepository.commands,
+		ExtraPaths: a.config.ExtraPaths,
 	})
 }
