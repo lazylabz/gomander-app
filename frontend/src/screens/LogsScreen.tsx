@@ -3,7 +3,13 @@ import { BrushCleaning } from "lucide-react";
 
 import { useDataContext } from "@/contexts/DataContext.tsx";
 
-const ansiConverter = new AnsiToHtml();
+const ansiConverter = new AnsiToHtml({
+  fg: "#000000",
+  bg: "#ffffff",
+  escapeXML: true,
+  newline: true,
+  stream: false,
+});
 
 export const LogsScreen = () => {
   const { currentLogs, clearCurrentLogs } = useDataContext();
