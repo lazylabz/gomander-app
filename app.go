@@ -142,7 +142,7 @@ func (a *App) StopCommand(id string) {
 func (a *App) SaveUserConfig(userConfig UserConfig) {
 	a.savedConfig.ExtraPaths = userConfig.ExtraPaths
 
-	saveConfigOrPanic(a.savedConfig)
+	a.saveConfig()
 
 	a.logger.info("Extra paths saved successfully")
 	a.eventEmitter.emitEvent(SuccessNotification, "Extra paths saved successfully")
