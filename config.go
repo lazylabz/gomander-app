@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type Config struct {
+type SavedConfig struct {
 	Commands   map[string]Command `json:"commands"`
 	ExtraPaths []string           `json:"extra_paths"`
 }
@@ -15,7 +15,7 @@ type UserConfig struct {
 	ExtraPaths []string `json:"extraPaths"`
 }
 
-func loadConfigOrPanic() *Config {
+func loadConfigOrPanic() *SavedConfig {
 	file, err := findOrCreateConfigFile()
 	if err != nil {
 		panic(err)
@@ -31,14 +31,14 @@ func loadConfigOrPanic() *Config {
 	}
 
 	if stat.Size() == 0 {
-		return &Config{
+		return &SavedConfig{
 			Commands:   make(map[string]Command),
 			ExtraPaths: make([]string, 0),
 		}
 	}
 
 	// Read the config from the file
-	var config Config
+	var config SavedConfig
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&config)
 	if err != nil {
@@ -48,7 +48,7 @@ func loadConfigOrPanic() *Config {
 	return &config
 }
 
-func saveConfigOrPanic(config *Config) {
+func saveConfigOrPanic(config *SavedConfig) {
 	file, err := findOrCreateConfigFile()
 	if err != nil {
 		panic(err)
