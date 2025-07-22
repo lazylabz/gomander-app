@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/context-menu.tsx";
 import { SidebarMenuButton } from "@/components/ui/sidebar.tsx";
 import { CommandStatus, useDataContext } from "@/contexts/DataContext.tsx";
+import { cn } from "@/lib/utils.ts";
 import type { Command } from "@/types/contracts.ts";
 
 export const CommandMenuItem = ({ command }: { command: Command }) => {
@@ -53,23 +54,37 @@ export const CommandMenuItem = ({ command }: { command: Command }) => {
     await stopRunningCommand(command.id);
   };
 
+  const isIdle = commandsStatus[command.id] === CommandStatus.IDLE;
+  const isRunning = commandsStatus[command.id] === CommandStatus.RUNNING;
+  const isActiveCommand = activeCommandId === command.id;
+
   return (
     <ContextMenu>
       <ContextMenuTrigger>
-        <SidebarMenuButton asChild isActive={activeCommandId === command.id}>
+        <SidebarMenuButton
+          asChild
+          className={cn(
+            isActiveCommand && "bg-sidebar-accent",
+            isRunning &&
+              "bg-green-100 hover:bg-green-100 focus:bg-green-100 active:bg-green-100",
+            isActiveCommand &&
+              isRunning &&
+              "bg-green-200 hover:bg-green-200 focus:bg-green-200 active:bg-green-200",
+          )}
+        >
           <div
             onClick={onCommandSectionClick}
             className="flex flex-row justify-between items-center w-full"
           >
             {command.name}
-            {commandsStatus[command.id] === CommandStatus.IDLE && (
+            {isIdle && (
               <Play
                 size={18}
                 className="text-muted-foreground cursor-pointer hover:text-primary"
                 onClick={handleRunCommand}
               />
             )}
-            {commandsStatus[command.id] === CommandStatus.RUNNING && (
+            {isRunning && (
               <div className="group/command p-0 m-0">
                 <Square
                   size={18}

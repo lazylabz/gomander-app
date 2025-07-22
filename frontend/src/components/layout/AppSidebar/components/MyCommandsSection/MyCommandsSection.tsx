@@ -34,7 +34,7 @@ export const MyCommandsSection = () => {
   return (
     <>
       <CreateCommandModal open={modalOpen} setOpen={setModalOpen} />
-      <Collapsible defaultOpen className="group/collapsible">
+      <Collapsible className="group/collapsible">
         <SidebarGroup>
           <ContextMenu>
             <ContextMenuTrigger>
@@ -42,7 +42,7 @@ export const MyCommandsSection = () => {
                 asChild
                 className="group/label text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm"
               >
-                <CollapsibleTrigger className="group flex items-center gap-2 p-2">
+                <CollapsibleTrigger className="group flex items-center gap-2 p-2 w-full">
                   <ChevronRight className="transition-transform group-data-[state=open]:rotate-90" />
                   <Folder />
                   <p>Your commands</p>
