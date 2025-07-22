@@ -1,7 +1,8 @@
-import { CirclePlus, Terminal } from "lucide-react";
+import { CirclePlus, Group, Terminal } from "lucide-react";
 import { useState } from "react";
 
 import { CreateCommandModal } from "@/components/modals/Command/CreateCommandModal.tsx";
+import { CreateCommandGroupModal } from "@/components/modals/CommandGroup/CreateCommandGroupModal.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,13 +13,24 @@ import {
 } from "@/components/ui/dropdown-menu.tsx";
 
 export const CreateMenu = () => {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [createCommandModalOpen, setCreateCommandModalOpen] = useState(false);
+  const [createCommandGroupModalOpen, setCreateCommandGroupModalOpen] =
+    useState(false);
 
-  const openCreateCommandModal = () => setModalOpen(true);
+  const openCreateCommandModal = () => setCreateCommandModalOpen(true);
+  const openCreateCommandGroupModal = () =>
+    setCreateCommandGroupModalOpen(true);
 
   return (
     <>
-      <CreateCommandModal open={modalOpen} setOpen={setModalOpen} />
+      <CreateCommandModal
+        open={createCommandModalOpen}
+        setOpen={setCreateCommandModalOpen}
+      />
+      <CreateCommandGroupModal
+        open={createCommandGroupModalOpen}
+        setOpen={setCreateCommandGroupModalOpen}
+      />
       <DropdownMenu>
         <DropdownMenuTrigger className="outline-0">
           <CirclePlus
@@ -35,6 +47,13 @@ export const CreateMenu = () => {
           >
             <Terminal />
             Command
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={openCreateCommandGroupModal}
+            className="flex flex-row items-center justify-start"
+          >
+            <Group />
+            Command Group
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

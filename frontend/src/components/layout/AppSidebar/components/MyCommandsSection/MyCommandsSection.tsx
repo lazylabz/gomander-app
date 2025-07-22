@@ -35,7 +35,7 @@ export const MyCommandsSection = () => {
     <>
       <CreateCommandModal open={modalOpen} setOpen={setModalOpen} />
       <Collapsible className="group/collapsible">
-        <SidebarGroup>
+        <SidebarGroup className="py-0">
           <ContextMenu>
             <ContextMenuTrigger>
               <SidebarGroupLabel

@@ -1,6 +1,7 @@
 import { Settings } from "lucide-react";
 import { useState } from "react";
 
+import { CommandGroupSection } from "@/components/layout/AppSidebar/components/CommandGroupSection/CommandGroupSection.tsx";
 import { CreateMenu } from "@/components/layout/AppSidebar/components/CreateMenu/CreateMenu.tsx";
 import { MyCommandsSection } from "@/components/layout/AppSidebar/components/MyCommandsSection/MyCommandsSection.tsx";
 import { sidebarContext } from "@/components/layout/AppSidebar/contexts/sidebarContext.tsx";
@@ -12,9 +13,12 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar.tsx";
+import { useDataContext } from "@/contexts/DataContext.tsx";
 import type { Command } from "@/types/contracts.ts";
 
 export const AppSidebar = () => {
+  const { commandGroups } = useDataContext();
+
   const [editingCommand, setEdittingCommand] = useState<Command | null>(null);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
@@ -43,8 +47,11 @@ export const AppSidebar = () => {
           <h1 className="text-xl font-semibold pl-2">Gomander</h1>
           <CreateMenu />
         </SidebarHeader>
-        <SidebarContent>
+        <SidebarContent className="gap-0">
           <MyCommandsSection />
+          {commandGroups.map((cg) => (
+            <CommandGroupSection commandGroup={cg} key={cg.id} />
+          ))}
         </SidebarContent>
         <SidebarFooter>
           <Settings
