@@ -58,7 +58,7 @@ func (a *App) AddCommand(newCommand Command) {
 	// Update the commands map in the frontend
 	a.eventEmitter.emitEvent(GetCommands, nil)
 
-	a.saveConfig()
+	a.persistSavedConfig()
 }
 
 func (a *App) RemoveCommand(id string) {
@@ -75,7 +75,7 @@ func (a *App) RemoveCommand(id string) {
 	// Update the commands map in the frontend
 	a.eventEmitter.emitEvent(GetCommands, nil)
 
-	a.saveConfig()
+	a.persistSavedConfig()
 }
 
 func (a *App) EditCommand(newCommand Command) {
@@ -92,7 +92,7 @@ func (a *App) EditCommand(newCommand Command) {
 	// Update the commands map in the frontend
 	a.eventEmitter.emitEvent(GetCommands, nil)
 
-	a.saveConfig()
+	a.persistSavedConfig()
 }
 
 func (a *App) RunCommand(id string) map[string]Command {
@@ -142,7 +142,7 @@ func (a *App) StopCommand(id string) {
 func (a *App) SaveUserConfig(userConfig UserConfig) {
 	a.savedConfig.ExtraPaths = userConfig.ExtraPaths
 
-	a.saveConfig()
+	a.persistSavedConfig()
 
 	a.logger.info("Extra paths saved successfully")
 	a.eventEmitter.emitEvent(SuccessNotification, "Extra paths saved successfully")
@@ -155,9 +155,10 @@ func (a *App) GetUserConfig() UserConfig {
 	}
 }
 
-func (a *App) saveConfig() {
+func (a *App) persistSavedConfig() {
 	saveConfigOrPanic(&SavedConfig{
-		Commands:   a.commandsRepository.commands,
-		ExtraPaths: a.savedConfig.ExtraPaths,
+		Commands:      a.commandsRepository.commands,
+		ExtraPaths:    a.savedConfig.ExtraPaths,
+		CommandGroups: a.savedConfig.CommandGroups,
 	})
 }

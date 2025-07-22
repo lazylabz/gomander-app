@@ -7,8 +7,9 @@ import (
 )
 
 type SavedConfig struct {
-	Commands   map[string]Command `json:"commands"`
-	ExtraPaths []string           `json:"extra_paths"`
+	Commands      map[string]Command  `json:"commands"`
+	ExtraPaths    []string            `json:"extra_paths"`
+	CommandGroups map[string][]string `json:"commandGroups"`
 }
 
 type UserConfig struct {
