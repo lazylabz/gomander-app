@@ -97,9 +97,13 @@ export const CommandMenuItem = ({ command }: { command: Command }) => {
         </SidebarMenuButton>
       </ContextMenuTrigger>
       <ContextMenuContent>
-        <ContextMenuItem onClick={handleEditCommand}>Edit</ContextMenuItem>
-        <ContextMenuItem onClick={handleDeleteCommand}>Delete</ContextMenuItem>
-        <ContextMenuItem onClick={handleDuplicateCommand}>
+        <ContextMenuItem disabled={isRunning} onClick={handleEditCommand}>
+          Edit
+        </ContextMenuItem>
+        <ContextMenuItem disabled={isRunning} onClick={handleDeleteCommand}>
+          Delete
+        </ContextMenuItem>
+        <ContextMenuItem disabled={isRunning} onClick={handleDuplicateCommand}>
           Duplicate
         </ContextMenuItem>
       </ContextMenuContent>
