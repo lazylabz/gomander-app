@@ -29,6 +29,7 @@ func (c *CommandRunner) RunCommand(command Command, extraPaths []string) error {
 
 	// Enable color output and set terminal type
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
+	cmd.Dir = command.WorkingDirectory
 
 	// Set command attributes based on OS
 	setProcAttributes(cmd)

@@ -12,6 +12,7 @@ export namespace main {
 	    id: string;
 	    name: string;
 	    command: string;
+	    workingDirectory: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Command(source);
@@ -22,6 +23,7 @@ export namespace main {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.command = source["command"];
+	        this.workingDirectory = source["workingDirectory"];
 	    }
 	}
 	export class UserConfig {

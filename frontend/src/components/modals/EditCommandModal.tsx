@@ -31,6 +31,7 @@ const formSchema = z.object({
   command: z.string().min(1, {
     message: "Command is required",
   }),
+  workingDirectory: z.string().min(0),
 });
 
 export const EditCommandModal = ({
@@ -49,6 +50,7 @@ export const EditCommandModal = ({
     values: {
       name: command?.name || "",
       command: command?.command || "",
+      workingDirectory: command?.workingDirectory || "",
     },
   });
 
@@ -61,6 +63,7 @@ export const EditCommandModal = ({
       id: command.id,
       name: values.name,
       command: values.command,
+      workingDirectory: values.workingDirectory,
     });
 
     setOpen(false);
@@ -104,6 +107,19 @@ export const EditCommandModal = ({
                     <FormLabel>Command</FormLabel>
                     <FormControl>
                       <Input placeholder={'cowsay "Hello World!"'} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="workingDirectory"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Command</FormLabel>
+                    <FormControl>
+                      <Input placeholder={"/Users/hackerman/Code"} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

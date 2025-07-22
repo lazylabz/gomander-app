@@ -30,6 +30,7 @@ const formSchema = z.object({
   command: z.string().min(1, {
     message: "Command is required",
   }),
+  workingDirectory: z.string().min(0),
 });
 
 export const CreateCommandModal = ({
@@ -46,6 +47,7 @@ export const CreateCommandModal = ({
     defaultValues: {
       name: "",
       command: "",
+      workingDirectory: "",
     },
   });
 
@@ -54,6 +56,7 @@ export const CreateCommandModal = ({
       id: crypto.randomUUID(),
       name: values.name,
       command: values.command,
+      workingDirectory: values.workingDirectory,
     });
 
     setOpen(false);
@@ -98,6 +101,19 @@ export const CreateCommandModal = ({
                     <FormLabel>Command</FormLabel>
                     <FormControl>
                       <Input placeholder={'cowsay "Hello World!"'} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="workingDirectory"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Command</FormLabel>
+                    <FormControl>
+                      <Input placeholder={"/Users/hackerman/Code"} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
