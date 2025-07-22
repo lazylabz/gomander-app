@@ -10,6 +10,10 @@ export function EditCommand(arg1) {
   return window['go']['main']['App']['EditCommand'](arg1);
 }
 
+export function GetCommandGroups() {
+  return window['go']['main']['App']['GetCommandGroups']();
+}
+
 export function GetCommands() {
   return window['go']['main']['App']['GetCommands']();
 }
@@ -24,6 +28,10 @@ export function RemoveCommand(arg1) {
 
 export function RunCommand(arg1) {
   return window['go']['main']['App']['RunCommand'](arg1);
+}
+
+export function SaveCommandGroups(arg1) {
+  return window['go']['main']['App']['SaveCommandGroups'](arg1);
 }
 
 export function SaveUserConfig(arg1) {

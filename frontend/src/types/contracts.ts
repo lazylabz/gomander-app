@@ -3,6 +3,7 @@ import { main } from "../../wailsjs/go/models";
 // Types
 export type Command = main.Command;
 export type UserConfig = main.UserConfig;
+export type CommandGroup = main.CommandGroup;
 
 // Enums
 export enum Event {
@@ -12,6 +13,7 @@ export enum Event {
   ERROR_NOTIFICATION = main.Event.ERROR_NOTIFICATION,
   PROCESS_FINISHED = main.Event.PROCESS_FINISHED,
   GET_USER_CONFIG = main.Event.GET_USER_CONFIG,
+  GET_COMMAND_GROUPS = main.Event.GET_COMMAND_GROUPS,
 }
 
 export type EventData = {
@@ -24,4 +26,5 @@ export type EventData = {
   [Event.PROCESS_FINISHED]: string;
   [Event.SUCCESS_NOTIFICATION]: string;
   [Event.GET_USER_CONFIG]: null;
+  [Event.GET_COMMAND_GROUPS]: null;
 };

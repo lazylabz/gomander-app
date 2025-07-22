@@ -6,6 +6,8 @@ export function AddCommand(arg1:main.Command):Promise<void>;
 
 export function EditCommand(arg1:main.Command):Promise<void>;
 
+export function GetCommandGroups():Promise<Array<main.CommandGroup>>;
+
 export function GetCommands():Promise<Record<string, main.Command>>;
 
 export function GetUserConfig():Promise<main.UserConfig>;
@@ -13,6 +15,8 @@ export function GetUserConfig():Promise<main.UserConfig>;
 export function RemoveCommand(arg1:string):Promise<void>;
 
 export function RunCommand(arg1:string):Promise<Record<string, main.Command>>;
+
+export function SaveCommandGroups(arg1:Array<main.CommandGroup>):Promise<void>;
 
 export function SaveUserConfig(arg1:main.UserConfig):Promise<void>;
 

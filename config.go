@@ -6,10 +6,16 @@ import (
 	"strings"
 )
 
+type CommandGroup struct {
+	Id         string   `json:"id"`
+	Name       string   `json:"name"`
+	CommandIds []string `json:"commands"`
+}
+
 type SavedConfig struct {
-	Commands      map[string]Command  `json:"commands"`
-	ExtraPaths    []string            `json:"extra_paths"`
-	CommandGroups map[string][]string `json:"commandGroups"`
+	Commands      map[string]Command `json:"commands"`
+	ExtraPaths    []string           `json:"extra_paths"`
+	CommandGroups []CommandGroup     `json:"command_groups"`
 }
 
 type UserConfig struct {
@@ -33,8 +39,9 @@ func loadConfigOrPanic() *SavedConfig {
 
 	if stat.Size() == 0 {
 		return &SavedConfig{
-			Commands:   make(map[string]Command),
-			ExtraPaths: make([]string, 0),
+			Commands:      make(map[string]Command),
+			ExtraPaths:    make([]string, 0),
+			CommandGroups: make([]CommandGroup, 0),
 		}
 	}
 

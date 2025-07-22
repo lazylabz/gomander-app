@@ -1,15 +1,22 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { Event, type EventData, type UserConfig } from "@/types/contracts.ts";
+import {
+  type CommandGroup,
+  Event,
+  type EventData,
+  type UserConfig,
+} from "@/types/contracts.ts";
 
 import {
   AddCommand,
   EditCommand,
+  GetCommandGroups,
   GetCommands,
   GetUserConfig,
   RemoveCommand,
   RunCommand,
+  SaveCommandGroups,
   SaveUserConfig,
   StopCommand,
 } from "../../wailsjs/go/main/App";
@@ -42,6 +49,11 @@ type DataContextValue = {
   // User config
   userConfig: UserConfig;
   saveUserConfig: (config: UserConfig) => Promise<void>;
+  // Command groups
+  commandGroups: CommandGroup[];
+  saveCommandGroups: (groups: CommandGroup[]) => Promise<void>;
+  runCommandGroup: (groupId: string) => Promise<void>;
+  stopCommandGroup: (groupId: string) => Promise<void>;
 };
 
 export const dataContext = createContext<DataContextValue>(
@@ -57,6 +69,7 @@ export const DataContextProvider = ({
   const [commandsStatus, setCommandsStatus] = useState<
     Record<string, CommandStatus>
   >({});
+  const [commandGroups, setCommandGroups] = useState<CommandGroup[]>([]);
 
   const [logs, setLogs] = useState<Record<string, string[]>>({});
   const [activeCommandId, setActiveCommandId] = useState<string | null>(null);
@@ -90,6 +103,10 @@ export const DataContextProvider = ({
   };
 
   const execCommand = async (commandId: string) => {
+    setCommandsStatus((prevStatus) => ({
+      ...prevStatus,
+      [commandId]: CommandStatus.RUNNING,
+    }));
     setLogs((prev) => ({
       ...prev,
       [commandId]: [], // Reset logs for the command being executed
@@ -131,6 +148,16 @@ export const DataContextProvider = ({
     await SaveUserConfig(config);
   };
 
+  // Command groups operations
+  const fetchCommandGroups = async (): Promise<void> => {
+    const groups = await GetCommandGroups();
+    setCommandGroups(groups);
+  };
+
+  const saveCommandGroups = async (groups: CommandGroup[]): Promise<void> => {
+    await SaveCommandGroups(groups);
+  };
+
   // Handlers
   const clearCurrentLogs = () => {
     if (!activeCommandId) {
@@ -149,6 +176,42 @@ export const DataContextProvider = ({
     }));
   };
 
+  const runCommandGroup = async (groupId: string) => {
+    const group = commandGroups.find((g) => g.id === groupId);
+    if (!group) {
+      toast.error("Command group not found");
+      return;
+    }
+
+    const notRunningCommands = group.commands.filter(
+      (cmdId) => commandsStatus[cmdId] !== CommandStatus.RUNNING,
+    );
+
+    await Promise.all(
+      notRunningCommands.map(async (cmdId) => {
+        await execCommand(cmdId);
+      }),
+    );
+  };
+
+  const stopCommandGroup = async (groupId: string) => {
+    const group = commandGroups.find((g) => g.id === groupId);
+    if (!group) {
+      toast.error("Command group not found");
+      return;
+    }
+
+    const runningCommands = group.commands.filter(
+      (cmdId) => commandsStatus[cmdId] === CommandStatus.RUNNING,
+    );
+
+    await Promise.all(
+      runningCommands.map(async (cmdId) => {
+        await stopRunningCommand(cmdId);
+      }),
+    );
+  };
+
   // Register events listeners
   useEffect(() => {
     EventsOn(Event.GET_COMMANDS, () => {
@@ -157,6 +220,10 @@ export const DataContextProvider = ({
 
     EventsOn(Event.GET_USER_CONFIG, () => {
       fetchUserConfig();
+    });
+
+    EventsOn(Event.GET_COMMAND_GROUPS, () => {
+      fetchCommandGroups();
     });
 
     EventsOn(Event.NEW_LOG_ENTRY, (data: EventData[Event.NEW_LOG_ENTRY]) => {
@@ -207,6 +274,7 @@ export const DataContextProvider = ({
   useEffect(() => {
     fetchCommands();
     fetchUserConfig();
+    fetchCommandGroups();
   }, []);
 
   const value: DataContextValue = {
@@ -230,6 +298,11 @@ export const DataContextProvider = ({
     // User config
     userConfig,
     saveUserConfig,
+    // Command groups
+    commandGroups,
+    saveCommandGroups,
+    runCommandGroup,
+    stopCommandGroup,
   };
 
   return <dataContext.Provider value={value}>{children}</dataContext.Provider>;

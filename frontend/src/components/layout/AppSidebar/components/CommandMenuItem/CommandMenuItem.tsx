@@ -19,7 +19,6 @@ export const CommandMenuItem = ({ command }: { command: Command }) => {
     activeCommandId,
     deleteCommand,
     duplicateCommand,
-    setCommandStatus,
     commandsStatus,
     stopRunningCommand,
   } = useDataContext();
@@ -28,7 +27,6 @@ export const CommandMenuItem = ({ command }: { command: Command }) => {
 
   const handleRunCommand = async () => {
     setActiveCommandId(command.id);
-    setCommandStatus(command.id, CommandStatus.RUNNING);
     await execCommand(command.id);
   };
 
@@ -52,6 +50,7 @@ export const CommandMenuItem = ({ command }: { command: Command }) => {
 
   const handleStopCommand = async () => {
     await stopRunningCommand(command.id);
+    setActiveCommandId(command.id);
   };
 
   const isIdle = commandsStatus[command.id] === CommandStatus.IDLE;

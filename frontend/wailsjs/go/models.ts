@@ -7,6 +7,7 @@ export namespace main {
 	    ERROR_NOTIFICATION = "error_notification",
 	    SUCCESS_NOTIFICATION = "success_notification",
 	    GET_USER_CONFIG = "get_user_config",
+	    GET_COMMAND_GROUPS = "get_command_groups",
 	}
 	export class Command {
 	    id: string;
@@ -24,6 +25,22 @@ export namespace main {
 	        this.name = source["name"];
 	        this.command = source["command"];
 	        this.workingDirectory = source["workingDirectory"];
+	    }
+	}
+	export class CommandGroup {
+	    id: string;
+	    name: string;
+	    commands: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new CommandGroup(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.commands = source["commands"];
 	    }
 	}
 	export class UserConfig {
