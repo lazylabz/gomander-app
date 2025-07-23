@@ -19,11 +19,14 @@ import {
 } from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
 import { useDataContext } from "@/contexts/DataContext.tsx";
+import type { CommandGroup } from "@/types/contracts.ts";
 
-export const CreateCommandGroupModal = ({
+export const EditCommandGroupModal = ({
+  commandGroup,
   open,
   setOpen,
 }: {
+  commandGroup: CommandGroup | null;
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
@@ -31,21 +34,28 @@ export const CreateCommandGroupModal = ({
 
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      commands: [],
+    values: {
+      name: commandGroup?.name || "",
+      commands: commandGroup?.commands || [],
     },
   });
 
   const onSubmit = async (values: FormSchemaType) => {
-    await saveCommandGroups([
-      ...commandGroups,
-      {
-        id: crypto.randomUUID(),
-        name: values.name,
-        commands: values.commands,
-      },
-    ]);
+    if (!commandGroup) {
+      return;
+    }
+
+    await saveCommandGroups(
+      commandGroups.map((cg) =>
+        cg.id === commandGroup.id
+          ? {
+              ...cg,
+              name: values.name,
+              commands: values.commands,
+            }
+          : cg,
+      ),
+    );
 
     setOpen(false);
     form.reset();
@@ -65,7 +75,7 @@ export const CreateCommandGroupModal = ({
           <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
             <DialogHeader className="flex flex-row items-center gap-2">
               <Group />
-              <DialogTitle>Create new command group</DialogTitle>
+              <DialogTitle>Edit command group</DialogTitle>
             </DialogHeader>
             <div className="space-y-6 my-4">
               <CommandGroupNameField />
@@ -77,7 +87,7 @@ export const CreateCommandGroupModal = ({
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit">Create</Button>
+              <Button type="submit">Save</Button>
             </DialogFooter>
           </form>
         </Form>

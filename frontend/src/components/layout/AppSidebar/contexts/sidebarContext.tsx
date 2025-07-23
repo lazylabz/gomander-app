@@ -1,12 +1,14 @@
 import { createContext, useContext } from "react";
 
-import type { Command } from "@/types/contracts.ts";
+import type { Command, CommandGroup } from "@/types/contracts.ts";
 
 export const sidebarContext = createContext<{
   editCommand: (command: Command) => void;
+  editCommandGroup: (commandGroup: CommandGroup) => void;
 }>(
   {} as {
     editCommand: (command: Command) => void;
+    editCommandGroup: (commandGroup: CommandGroup) => void;
   },
 );
 

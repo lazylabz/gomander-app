@@ -2,6 +2,7 @@ import { ChevronRight, Folder, Play, Square } from "lucide-react";
 import type { SyntheticEvent } from "react";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
+import { useSidebarContext } from "@/components/layout/AppSidebar/contexts/sidebarContext.tsx";
 import {
   Collapsible,
   CollapsibleContent,
@@ -37,6 +38,8 @@ export const CommandGroupSection = ({
     commandGroups,
   } = useDataContext();
 
+  const { editCommandGroup } = useSidebarContext();
+
   const numberOfCommandsRunning = commandGroup.commands.filter(
     (commandId) => commandsStatus[commandId] === CommandStatus.RUNNING,
   ).length;
@@ -64,6 +67,10 @@ export const CommandGroupSection = ({
     await saveCommandGroups(
       commandGroups.filter((cg) => cg.id !== commandGroup.id),
     );
+  };
+
+  const handleEdit = () => {
+    editCommandGroup(commandGroup);
   };
 
   return (
@@ -111,13 +118,7 @@ export const CommandGroupSection = ({
             </SidebarGroupLabel>
           </ContextMenuTrigger>
           <ContextMenuContent>
-            <ContextMenuItem
-              onClick={() => {
-                alert("Not yet implemented");
-              }}
-            >
-              Edit
-            </ContextMenuItem>
+            <ContextMenuItem onClick={handleEdit}>Edit</ContextMenuItem>
             <ContextMenuItem onClick={deleteCommandGroup}>
               Delete
             </ContextMenuItem>
