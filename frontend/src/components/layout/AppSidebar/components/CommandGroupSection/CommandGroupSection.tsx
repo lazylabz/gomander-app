@@ -37,9 +37,11 @@ export const CommandGroupSection = ({
     commandGroups,
   } = useDataContext();
 
-  const someCommandIsRunning = commandGroup.commands.some(
+  const numberOfCommandsRunning = commandGroup.commands.filter(
     (commandId) => commandsStatus[commandId] === CommandStatus.RUNNING,
-  );
+  ).length;
+
+  const someCommandIsRunning = numberOfCommandsRunning > 0;
 
   const someCommandIsIdle = commandGroup.commands.some(
     (commandId) => commandsStatus[commandId] === CommandStatus.IDLE,
@@ -83,6 +85,11 @@ export const CommandGroupSection = ({
                   <p>{commandGroup.name}</p>
                 </div>
                 <div className="flex gap-2 items-center">
+                  {someCommandIsRunning && (
+                    <span>
+                      ({numberOfCommandsRunning}/{commandGroup.commands.length})
+                    </span>
+                  )}
                   {someCommandIsIdle && (
                     <Play
                       size={16}
