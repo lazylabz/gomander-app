@@ -19,7 +19,7 @@ import {
   SaveCommandGroups,
   SaveUserConfig,
   StopCommand,
-} from "../../wailsjs/go/main/App";
+} from "../../wailsjs/go/app/App";
 import { EventsOff, EventsOn } from "../../wailsjs/runtime";
 import type { Command } from "../types/contracts";
 

@@ -1,6 +1,6 @@
 //go:build windows
 
-package main
+package platform
 
 import (
 	"os"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func setProcAttributes(cmd *exec.Cmd) {
+func SetProcAttributes(cmd *exec.Cmd) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		HideWindow:    true,
 		CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP,
@@ -19,7 +19,7 @@ func setProcAttributes(cmd *exec.Cmd) {
 }
 
 // TODO: Check if this works
-func setProcEnv(cmd *exec.Cmd, extraPaths []string) {
+func SetProcEnv(cmd *exec.Cmd, extraPaths []string) {
 	if len(extraPaths) == 0 {
 		return
 	}
@@ -48,7 +48,7 @@ func setProcEnv(cmd *exec.Cmd, extraPaths []string) {
 	cmd.Env = append(cmd.Env, "PATH="+newPath)
 }
 
-func stopProcessGracefully(cmd *exec.Cmd) error {
+func StopProcessGracefully(cmd *exec.Cmd) error {
 	pid := strconv.Itoa(cmd.Process.Pid)
 
 	// Try graceful termination
@@ -79,7 +79,7 @@ func stopProcessGracefully(cmd *exec.Cmd) error {
 }
 
 // TODO: Check if this can be abstracted to "shell" env as in unix
-func getCommand(cmdStr string) *exec.Cmd {
+func GetCommand(cmdStr string) *exec.Cmd {
 	var cmd *exec.Cmd
 
 	if strings.HasPrefix(cmdStr, "powershell ") {

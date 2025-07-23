@@ -1,4 +1,4 @@
-package main
+package logger
 
 import (
 	"context"
@@ -15,14 +15,14 @@ func NewLogger(ctx context.Context) *Logger {
 	}
 }
 
-func (l *Logger) info(message string) {
+func (l *Logger) Info(message string) {
 	runtime.LogInfo(l.ctx, message)
 }
 
-func (l *Logger) debug(message string) {
+func (l *Logger) Debug(message string) {
 	runtime.LogDebug(l.ctx, message)
 }
 
-func (l *Logger) error(message string) {
+func (l *Logger) Error(message string) {
 	runtime.LogError(l.ctx, message)
 }

@@ -1,7 +1,8 @@
-package main
+package config
 
 import (
 	"encoding/json"
+	"gomander/internal/command"
 	"os"
 	"strings"
 )
@@ -12,17 +13,17 @@ type CommandGroup struct {
 	CommandIds []string `json:"commands"`
 }
 
-type SavedConfig struct {
-	Commands      map[string]Command `json:"commands"`
-	ExtraPaths    []string           `json:"extra_paths"`
-	CommandGroups []CommandGroup     `json:"command_groups"`
+type Config struct {
+	Commands      map[string]command.Command `json:"commands"`
+	ExtraPaths    []string                   `json:"extra_paths"`
+	CommandGroups []CommandGroup             `json:"command_groups"`
 }
 
 type UserConfig struct {
 	ExtraPaths []string `json:"extraPaths"`
 }
 
-func loadConfigOrPanic() *SavedConfig {
+func LoadConfigOrPanic() *Config {
 	file, err := findOrCreateConfigFile()
 	if err != nil {
 		panic(err)
@@ -38,15 +39,15 @@ func loadConfigOrPanic() *SavedConfig {
 	}
 
 	if stat.Size() == 0 {
-		return &SavedConfig{
-			Commands:      make(map[string]Command),
+		return &Config{
+			Commands:      make(map[string]command.Command),
 			ExtraPaths:    make([]string, 0),
 			CommandGroups: make([]CommandGroup, 0),
 		}
 	}
 
 	// Read the config from the file
-	var config SavedConfig
+	var config Config
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&config)
 	if err != nil {
@@ -56,7 +57,7 @@ func loadConfigOrPanic() *SavedConfig {
 	return &config
 }
 
-func saveConfigOrPanic(config *SavedConfig) {
+func SaveConfigOrPanic(config *Config) {
 	file, err := findOrCreateConfigFile()
 	if err != nil {
 		panic(err)

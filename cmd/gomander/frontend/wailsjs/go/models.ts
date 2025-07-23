@@ -1,14 +1,5 @@
-export namespace main {
+export namespace command {
 	
-	export enum Event {
-	    GET_COMMANDS = "get_commands",
-	    PROCESS_FINISHED = "process_finished",
-	    NEW_LOG_ENTRY = "new_log_entry",
-	    ERROR_NOTIFICATION = "error_notification",
-	    SUCCESS_NOTIFICATION = "success_notification",
-	    GET_USER_CONFIG = "get_user_config",
-	    GET_COMMAND_GROUPS = "get_command_groups",
-	}
 	export class Command {
 	    id: string;
 	    name: string;
@@ -27,6 +18,11 @@ export namespace main {
 	        this.workingDirectory = source["workingDirectory"];
 	    }
 	}
+
+}
+
+export namespace config {
+	
 	export class CommandGroup {
 	    id: string;
 	    name: string;
@@ -54,6 +50,20 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.extraPaths = source["extraPaths"];
 	    }
+	}
+
+}
+
+export namespace event {
+	
+	export enum Event {
+	    GET_COMMANDS = "get_commands",
+	    PROCESS_FINISHED = "process_finished",
+	    NEW_LOG_ENTRY = "new_log_entry",
+	    ERROR_NOTIFICATION = "error_notification",
+	    SUCCESS_NOTIFICATION = "success_notification",
+	    GET_USER_CONFIG = "get_user_config",
+	    GET_COMMAND_GROUPS = "get_command_groups",
 	}
 
 }

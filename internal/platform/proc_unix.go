@@ -1,6 +1,6 @@
 //go:build !windows
 
-package main
+package platform
 
 import (
 	"os"
@@ -10,13 +10,13 @@ import (
 	"time"
 )
 
-func setProcAttributes(cmd *exec.Cmd) {
+func SetProcAttributes(cmd *exec.Cmd) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Setpgid: true,
 	}
 }
 
-func setProcEnv(cmd *exec.Cmd, extraPaths []string) {
+func SetProcEnv(cmd *exec.Cmd, extraPaths []string) {
 	if len(extraPaths) == 0 {
 		return
 	}
@@ -45,7 +45,7 @@ func setProcEnv(cmd *exec.Cmd, extraPaths []string) {
 	cmd.Env = append(cmd.Env, "PATH="+newPath)
 }
 
-func stopProcessGracefully(cmd *exec.Cmd) error {
+func StopProcessGracefully(cmd *exec.Cmd) error {
 	// Try graceful termination first
 	err := syscall.Kill(-cmd.Process.Pid, syscall.SIGTERM)
 	if err != nil {
@@ -68,7 +68,7 @@ func stopProcessGracefully(cmd *exec.Cmd) error {
 	}
 }
 
-func getCommand(cmdStr string) *exec.Cmd {
+func GetCommand(cmdStr string) *exec.Cmd {
 	shell := os.Getenv("SHELL")
 
 	return exec.Command(shell, "-c", cmdStr)

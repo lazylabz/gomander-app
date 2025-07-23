@@ -1,4 +1,4 @@
-module myproject
+module gomander
 
 go 1.23
 

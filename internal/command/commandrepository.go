@@ -1,15 +1,8 @@
-package main
+package command
 
 import (
 	"errors"
 )
-
-type Command struct {
-	Id               string `json:"id"`
-	Name             string `json:"name"`
-	Command          string `json:"command"`
-	WorkingDirectory string `json:"workingDirectory"`
-}
 
 type CommandRepository struct {
 	commands map[string]Command
@@ -55,7 +48,7 @@ func (r *CommandRepository) GetCommands() map[string]Command {
 	return r.commands
 }
 
-func (r *CommandRepository) Get(id string) (*Command, error) {
+func (r *CommandRepository) GetCommand(id string) (*Command, error) {
 	command, exists := r.commands[id]
 	if !exists {
 		return nil, errors.New("Command not found: " + id)

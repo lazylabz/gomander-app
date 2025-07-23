@@ -1,22 +1,10 @@
-package main
+package event
 
 import (
-	"context"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"strings"
 )
 
 type Event string
-
-type EventEmitter struct {
-	ctx context.Context
-}
-
-func NewEventEmitter(ctx context.Context) *EventEmitter {
-	return &EventEmitter{
-		ctx: ctx,
-	}
-}
 
 const (
 	GetCommands         Event = "get_commands"
@@ -39,8 +27,4 @@ var Events = []struct {
 	{Value: SuccessNotification, TSName: strings.ToUpper(string(SuccessNotification))},
 	{Value: GetUserConfig, TSName: strings.ToUpper(string(GetUserConfig))},
 	{Value: GetCommandGroups, TSName: strings.ToUpper(string(GetCommandGroups))},
-}
-
-func (e *EventEmitter) emitEvent(event Event, payload interface{}) {
-	runtime.EventsEmit(e.ctx, string(event), payload)
 }

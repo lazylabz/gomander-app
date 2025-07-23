@@ -1,8 +1,11 @@
-package main
+package command
 
 import (
 	"bufio"
 	"errors"
+	"gomander/internal/event"
+	"gomander/internal/logger"
+	"gomander/internal/platform"
 	"io"
 	"os"
 	"os/exec"
@@ -10,11 +13,11 @@ import (
 
 type CommandRunner struct {
 	runningCommands map[string]*exec.Cmd
-	eventEmitter    *EventEmitter
-	logger          *Logger
+	eventEmitter    *event.EventEmitter
+	logger          *logger.Logger
 }
 
-func NewCommandRunner(logger *Logger, emitter *EventEmitter) *CommandRunner {
+func NewCommandRunner(logger *logger.Logger, emitter *event.EventEmitter) *CommandRunner {
 	return &CommandRunner{
 		runningCommands: make(map[string]*exec.Cmd),
 		eventEmitter:    emitter,
@@ -25,15 +28,15 @@ func NewCommandRunner(logger *Logger, emitter *EventEmitter) *CommandRunner {
 // ExecCommand executes a command by its ID and streams its output.
 func (c *CommandRunner) RunCommand(command Command, extraPaths []string) error {
 	// Get the command object based on the command string and OS
-	cmd := getCommand(command.Command)
+	cmd := platform.GetCommand(command.Command)
 
 	// Enable color output and set terminal type
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
 	cmd.Dir = command.WorkingDirectory
 
 	// Set command attributes based on OS
-	setProcAttributes(cmd)
-	setProcEnv(cmd, extraPaths)
+	platform.SetProcAttributes(cmd)
+	platform.SetProcEnv(cmd, extraPaths)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -65,10 +68,10 @@ func (c *CommandRunner) RunCommand(command Command, extraPaths []string) error {
 		err := cmd.Wait()
 		if err != nil {
 			c.sendStreamError(command, err)
-			c.logger.error("[ERROR - Waiting for command]: " + err.Error())
+			c.logger.Error("[ERROR - Waiting for command]: " + err.Error())
 			return
 		}
-		c.eventEmitter.emitEvent(ProcessFinished, command.Id)
+		c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
 	}()
 
 	return nil
@@ -81,7 +84,7 @@ func (c *CommandRunner) StopRunningCommand(id string) error {
 		return errors.New("No running runningCommand for command: " + id)
 	}
 
-	return stopProcessGracefully(runningCommand)
+	return platform.StopProcessGracefully(runningCommand)
 }
 
 func (c *CommandRunner) streamOutput(commandId string, pipeReader io.ReadCloser) {
@@ -89,7 +92,7 @@ func (c *CommandRunner) streamOutput(commandId string, pipeReader io.ReadCloser)
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		c.logger.debug(line)
+		c.logger.Debug(line)
 
 		c.sendStreamLine(commandId, line)
 	}
@@ -97,12 +100,12 @@ func (c *CommandRunner) streamOutput(commandId string, pipeReader io.ReadCloser)
 
 func (c *CommandRunner) sendStreamError(command Command, err error) {
 	c.sendStreamLine(command.Id, err.Error())
-	c.logger.error(err.Error())
-	c.eventEmitter.emitEvent(ProcessFinished, command.Id)
+	c.logger.Error(err.Error())
+	c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
 }
 
 func (c *CommandRunner) sendStreamLine(commandId string, line string) {
-	c.eventEmitter.emitEvent(NewLogEntry, map[string]string{
+	c.eventEmitter.EmitEvent(event.NewLogEntry, map[string]string{
 		"id":   commandId,
 		"line": line,
 	})
