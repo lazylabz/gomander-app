@@ -5,7 +5,6 @@ import (
 	"gomander/internal/commandgroup"
 	"gomander/internal/config"
 	"gomander/internal/event"
-	"slices"
 )
 
 // Command handlers
@@ -28,7 +27,7 @@ func (a *App) AddCommand(newCommand command.Command) {
 	// Update the commands map in the frontend
 	a.eventEmitter.EmitEvent(event.GetCommands, nil)
 
-	a.persistConfig()
+	a.persistRepositoryInformation()
 }
 
 func (a *App) RemoveCommand(id string) {
@@ -39,7 +38,7 @@ func (a *App) RemoveCommand(id string) {
 		return
 	}
 
-	a.savedConfig.CommandGroups = a.removeCommandFromGroups(id)
+	a.commandGroupsRepository.RemoveCommandFromCommandGroups(id)
 
 	a.logger.Info("Command removed: " + id)
 	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command removed")
@@ -48,7 +47,7 @@ func (a *App) RemoveCommand(id string) {
 	a.eventEmitter.EmitEvent(event.GetCommands, nil)
 	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
 
-	a.persistConfig()
+	a.persistRepositoryInformation()
 }
 
 func (a *App) EditCommand(newCommand command.Command) {
@@ -65,7 +64,7 @@ func (a *App) EditCommand(newCommand command.Command) {
 	// Update the commands map in the frontend
 	a.eventEmitter.EmitEvent(event.GetCommands, nil)
 
-	a.persistConfig()
+	a.persistRepositoryInformation()
 }
 
 func (a *App) RunCommand(id string) map[string]command.Command {
@@ -77,7 +76,13 @@ func (a *App) RunCommand(id string) map[string]command.Command {
 		return nil
 	}
 
-	err = a.commandRunner.RunCommand(*cmd, a.savedConfig.ExtraPaths)
+	extraPaths := a.extraPathRepository.GetExtraPaths()
+	extraPathsStr := make([]string, len(extraPaths))
+	for i, path := range extraPaths {
+		extraPathsStr[i] = string(path)
+	}
+
+	err = a.commandRunner.RunCommand(*cmd, extraPathsStr)
 
 	if err != nil {
 		a.logger.Error(err.Error())
@@ -112,47 +117,25 @@ func (a *App) StopCommand(id string) {
 	a.eventEmitter.EmitEvent(event.ProcessFinished, id)
 }
 
-func (a *App) GetCommandGroups() []commandgroup.CommandGroup {
-	return a.savedConfig.CommandGroups
-}
-
 // Command group handlers
 
-func (a *App) SaveCommandGroups(commandGroups []commandgroup.CommandGroup) {
-	a.savedConfig.CommandGroups = commandGroups
-	a.persistConfig()
-	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command groups saved successfully")
-	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
+func (a *App) GetCommandGroups() []commandgroup.CommandGroup {
+	return a.commandGroupsRepository.GetCommandGroups()
 }
 
-func (a *App) removeCommandFromGroups(commandId string) []commandgroup.CommandGroup {
-	newCommandGroups := make([]commandgroup.CommandGroup, 0)
-
-	for _, group := range a.savedConfig.CommandGroups {
-		if slices.Contains(group.CommandIds, commandId) {
-			newCommandIds := make([]string, 0)
-
-			for _, cmdId := range group.CommandIds {
-				if cmdId != commandId {
-					newCommandIds = append(newCommandIds, cmdId)
-				}
-			}
-
-			group.CommandIds = newCommandIds
-		}
-		newCommandGroups = append(newCommandGroups, group)
-
-	}
-
-	return newCommandGroups
+func (a *App) SaveCommandGroups(commandGroups []commandgroup.CommandGroup) {
+	a.commandGroupsRepository.SetCommandGroups(commandGroups)
+	a.persistRepositoryInformation()
+	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command groups saved successfully")
+	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
 }
 
 // User config handlers
 
 func (a *App) SaveUserConfig(userConfig config.UserConfig) {
-	a.savedConfig.ExtraPaths = userConfig.ExtraPaths
+	a.extraPathRepository.SetExtraPaths(userConfig.ExtraPaths)
 
-	a.persistConfig()
+	a.persistRepositoryInformation()
 
 	a.logger.Info("Extra paths saved successfully")
 	a.eventEmitter.EmitEvent(event.SuccessNotification, "Extra paths saved successfully")
@@ -161,6 +144,6 @@ func (a *App) SaveUserConfig(userConfig config.UserConfig) {
 
 func (a *App) GetUserConfig() config.UserConfig {
 	return config.UserConfig{
-		ExtraPaths: a.savedConfig.ExtraPaths,
+		ExtraPaths: a.extraPathRepository.GetExtraPaths(),
 	}
 }

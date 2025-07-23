@@ -4,17 +4,17 @@ import (
 	"errors"
 )
 
-type CommandRepository struct {
+type Repository struct {
 	commands map[string]Command
 }
 
-func NewCommandRepository(commands map[string]Command) *CommandRepository {
-	return &CommandRepository{
+func NewCommandRepository(commands map[string]Command) *Repository {
+	return &Repository{
 		commands: commands,
 	}
 }
 
-func (r *CommandRepository) AddCommand(newCommand Command) error {
+func (r *Repository) AddCommand(newCommand Command) error {
 	if _, exists := r.commands[newCommand.Id]; exists {
 		return errors.New("Command already exists: " + newCommand.Id)
 	}
@@ -24,7 +24,7 @@ func (r *CommandRepository) AddCommand(newCommand Command) error {
 	return nil
 }
 
-func (r *CommandRepository) RemoveCommand(id string) error {
+func (r *Repository) RemoveCommand(id string) error {
 	if _, exists := r.commands[id]; !exists {
 		return errors.New("Command not found: " + id)
 	}
@@ -34,7 +34,7 @@ func (r *CommandRepository) RemoveCommand(id string) error {
 	return nil
 }
 
-func (r *CommandRepository) EditCommand(newCommand Command) error {
+func (r *Repository) EditCommand(newCommand Command) error {
 	if _, exists := r.commands[newCommand.Id]; !exists {
 		return errors.New("Command not found: " + newCommand.Id)
 	}
@@ -44,11 +44,11 @@ func (r *CommandRepository) EditCommand(newCommand Command) error {
 	return nil
 }
 
-func (r *CommandRepository) GetCommands() map[string]Command {
+func (r *Repository) GetCommands() map[string]Command {
 	return r.commands
 }
 
-func (r *CommandRepository) GetCommand(id string) (*Command, error) {
+func (r *Repository) GetCommand(id string) (*Command, error) {
 	command, exists := r.commands[id]
 	if !exists {
 		return nil, errors.New("Command not found: " + id)

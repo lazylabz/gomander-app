@@ -3,22 +3,23 @@ package command
 import (
 	"bufio"
 	"errors"
-	"gomander/internal/event"
-	"gomander/internal/logger"
-	"gomander/internal/platform"
 	"io"
 	"os"
 	"os/exec"
+
+	"gomander/internal/event"
+	"gomander/internal/logger"
+	"gomander/internal/platform"
 )
 
-type CommandRunner struct {
+type Runner struct {
 	runningCommands map[string]*exec.Cmd
 	eventEmitter    *event.EventEmitter
 	logger          *logger.Logger
 }
 
-func NewCommandRunner(logger *logger.Logger, emitter *event.EventEmitter) *CommandRunner {
-	return &CommandRunner{
+func NewCommandRunner(logger *logger.Logger, emitter *event.EventEmitter) *Runner {
+	return &Runner{
 		runningCommands: make(map[string]*exec.Cmd),
 		eventEmitter:    emitter,
 		logger:          logger,
@@ -26,7 +27,7 @@ func NewCommandRunner(logger *logger.Logger, emitter *event.EventEmitter) *Comma
 }
 
 // ExecCommand executes a command by its ID and streams its output.
-func (c *CommandRunner) RunCommand(command Command, extraPaths []string) error {
+func (c *Runner) RunCommand(command Command, extraPaths []string) error {
 	// Get the command object based on the command string and OS
 	cmd := platform.GetCommand(command.Command)
 
@@ -77,7 +78,7 @@ func (c *CommandRunner) RunCommand(command Command, extraPaths []string) error {
 	return nil
 }
 
-func (c *CommandRunner) StopRunningCommand(id string) error {
+func (c *Runner) StopRunningCommand(id string) error {
 	runningCommand, exists := c.runningCommands[id]
 
 	if !exists {
@@ -87,7 +88,7 @@ func (c *CommandRunner) StopRunningCommand(id string) error {
 	return platform.StopProcessGracefully(runningCommand)
 }
 
-func (c *CommandRunner) streamOutput(commandId string, pipeReader io.ReadCloser) {
+func (c *Runner) streamOutput(commandId string, pipeReader io.ReadCloser) {
 	scanner := bufio.NewScanner(pipeReader)
 
 	for scanner.Scan() {
@@ -98,13 +99,13 @@ func (c *CommandRunner) streamOutput(commandId string, pipeReader io.ReadCloser)
 	}
 }
 
-func (c *CommandRunner) sendStreamError(command Command, err error) {
+func (c *Runner) sendStreamError(command Command, err error) {
 	c.sendStreamLine(command.Id, err.Error())
 	c.logger.Error(err.Error())
 	c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
 }
 
-func (c *CommandRunner) sendStreamLine(commandId string, line string) {
+func (c *Runner) sendStreamLine(commandId string, line string) {
 	c.eventEmitter.EmitEvent(event.NewLogEntry, map[string]string{
 		"id":   commandId,
 		"line": line,

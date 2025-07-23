@@ -21,7 +21,7 @@ export namespace command {
 
 }
 
-export namespace config {
+export namespace commandgroup {
 	
 	export class CommandGroup {
 	    id: string;
@@ -39,6 +39,11 @@ export namespace config {
 	        this.commands = source["commands"];
 	    }
 	}
+
+}
+
+export namespace config {
+	
 	export class UserConfig {
 	    extraPaths: string[];
 	

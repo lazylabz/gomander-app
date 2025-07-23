@@ -1,9 +1,9 @@
-import { command,config, event } from "../../wailsjs/go/models";
+import { command, commandgroup, config, event } from "../../wailsjs/go/models";
 
 // Types
 export type Command = command.Command;
 export type UserConfig = config.UserConfig;
-export type CommandGroup = config.CommandGroup;
+export type CommandGroup = commandgroup.CommandGroup;
 
 // Enums
 export enum Event {

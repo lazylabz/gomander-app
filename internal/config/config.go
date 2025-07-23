@@ -7,16 +7,25 @@ import (
 
 	"gomander/internal/command"
 	"gomander/internal/commandgroup"
+	"gomander/internal/extrapath"
 )
 
 type Config struct {
 	Commands      map[string]command.Command  `json:"commands"`
-	ExtraPaths    []string                    `json:"extra_paths"`
+	ExtraPaths    []extrapath.ExtraPath       `json:"extra_paths"`
 	CommandGroups []commandgroup.CommandGroup `json:"command_groups"`
 }
 
+func EmptyConfig() *Config {
+	return &Config{
+		Commands:      make(map[string]command.Command),
+		ExtraPaths:    make([]extrapath.ExtraPath, 0),
+		CommandGroups: make([]commandgroup.CommandGroup, 0),
+	}
+}
+
 type UserConfig struct {
-	ExtraPaths []string `json:"extraPaths"`
+	ExtraPaths []extrapath.ExtraPath `json:"extraPaths"`
 }
 
 func LoadConfigOrPanic() *Config {
@@ -35,11 +44,7 @@ func LoadConfigOrPanic() *Config {
 	}
 
 	if stat.Size() == 0 {
-		return &Config{
-			Commands:      make(map[string]command.Command),
-			ExtraPaths:    make([]string, 0),
-			CommandGroups: make([]commandgroup.CommandGroup, 0),
-		}
+		return EmptyConfig()
 	}
 
 	// Read the config from the file
