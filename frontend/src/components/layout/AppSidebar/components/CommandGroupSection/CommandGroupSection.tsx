@@ -1,4 +1,10 @@
-import { useSortable } from "@dnd-kit/sortable";
+import { DndContext, type DragEndEvent } from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ChevronRight, Folder, GripVertical, Play, Square } from "lucide-react";
 import type { SyntheticEvent } from "react";
@@ -83,6 +89,36 @@ export const CommandGroupSection = ({
     editCommandGroup(commandGroup);
   };
 
+  const editCommandGroupCommands = async (commandGroup: CommandGroup) => {
+    await saveCommandGroups(
+      commandGroups.map((cg) =>
+        cg.id === commandGroup.id ? commandGroup : cg,
+      ),
+    );
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id && over?.id && active.id !== over.id) {
+      const oldIndex = commandGroup.commands.findIndex(
+        (cmdId) => cmdId === active.id,
+      );
+      const newIndex = commandGroup.commands.findIndex(
+        (cmdId) => cmdId === over.id,
+      );
+      const newCommandsGroups = arrayMove(
+        commandGroup.commands,
+        oldIndex,
+        newIndex,
+      );
+      await editCommandGroupCommands({
+        ...commandGroup,
+        commands: newCommandsGroups,
+      });
+    }
+  };
+
   return (
     <Collapsible
       key={commandGroup.id}
@@ -149,13 +185,21 @@ export const CommandGroupSection = ({
         <CollapsibleContent className="pl-4">
           <SidebarGroupContent>
             <SidebarMenu>
-              {Object.values(commands)
-                .filter((c) => commandGroup.commands.includes(c.id))
-                .map((command) => (
-                  <SidebarMenuItem key={command.id}>
-                    <CommandMenuItem command={command} />
-                  </SidebarMenuItem>
-                ))}
+              <DndContext onDragEnd={handleDragEnd}>
+                <SortableContext
+                  strategy={verticalListSortingStrategy}
+                  items={commandGroup.commands}
+                >
+                  {commandGroup.commands
+                    .map((cid) => Object(commands[cid]))
+                    .filter(Boolean)
+                    .map((command) => (
+                      <SidebarMenuItem key={command.id}>
+                        <CommandMenuItem draggable command={command} />
+                      </SidebarMenuItem>
+                    ))}
+                </SortableContext>
+              </DndContext>
             </SidebarMenu>
           </SidebarGroupContent>
         </CollapsibleContent>

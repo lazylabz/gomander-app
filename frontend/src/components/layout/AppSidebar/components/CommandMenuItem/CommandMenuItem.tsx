@@ -1,4 +1,6 @@
-import { Play, Square } from "lucide-react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, Play, Square } from "lucide-react";
 
 import { useSidebarContext } from "@/components/layout/AppSidebar/contexts/sidebarContext.tsx";
 import {
@@ -12,7 +14,13 @@ import { CommandStatus, useDataContext } from "@/contexts/DataContext.tsx";
 import { cn } from "@/lib/utils.ts";
 import type { Command } from "@/types/contracts.ts";
 
-export const CommandMenuItem = ({ command }: { command: Command }) => {
+export const CommandMenuItem = ({
+  command,
+  draggable = false,
+}: {
+  command: Command;
+  draggable?: boolean;
+}) => {
   const {
     execCommand,
     setActiveCommandId,
@@ -24,6 +32,14 @@ export const CommandMenuItem = ({ command }: { command: Command }) => {
   } = useDataContext();
 
   const { editCommand } = useSidebarContext();
+
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: command.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   const handleRunCommand = async () => {
     setActiveCommandId(command.id);
@@ -74,8 +90,21 @@ export const CommandMenuItem = ({ command }: { command: Command }) => {
           <div
             onClick={onCommandSectionClick}
             className="flex flex-row justify-between items-center w-full"
+            ref={setNodeRef}
+            style={style}
           >
-            {command.name}
+            <div className="flex items-center gap-2 w-full text-sm text-sidebar-foreground">
+              {draggable && (
+                <div
+                  {...attributes}
+                  {...listeners}
+                  className="cursor-grab active:cursor-grabbing pr-0.5 rounded hover:bg-sidebar-accent/50"
+                >
+                  <GripVertical size={14} className="text-muted-foreground" />
+                </div>
+              )}
+              {command.name}
+            </div>
             {isIdle && (
               <Play
                 size={18}

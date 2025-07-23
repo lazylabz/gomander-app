@@ -158,6 +158,10 @@ export const DataContextProvider = ({
     // Optimistic save to avoid flickering while drag and dropping
     const prev = commandGroups;
     setCommandGroups(groups);
+    console.log({
+      prev,
+      groups,
+    });
     try {
       await SaveCommandGroups(groups);
     } catch {
