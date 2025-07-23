@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ChevronRight, Folder, Play, Square } from "lucide-react";
+import { ChevronRight, Folder, GripVertical, Play, Square } from "lucide-react";
 import type { SyntheticEvent } from "react";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
@@ -87,10 +87,8 @@ export const CommandGroupSection = ({
     <Collapsible
       key={commandGroup.id}
       className="group/collapsible"
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
       style={style}
+      ref={setNodeRef}
     >
       <SidebarGroup className="py-0">
         <ContextMenu>
@@ -101,9 +99,16 @@ export const CommandGroupSection = ({
             >
               <CollapsibleTrigger className="group flex items-center gap-2 p-2 w-full justify-between">
                 <div className="flex items-center gap-2">
+                  <div
+                    {...attributes}
+                    {...listeners}
+                    className="cursor-grab active:cursor-grabbing pr-0.5 rounded hover:bg-sidebar-accent/50 group-data-[state=open]:hidden transition-transform"
+                  >
+                    <GripVertical size={14} className="text-muted-foreground" />
+                  </div>
                   <ChevronRight
                     size={16}
-                    className="transition-transform group-data-[state=open]:rotate-90"
+                    className="transition-transform group-data-[state=open]:rotate-90 group-data-[state=closed]:hidden"
                   />
                   <Folder size={16} />
                   <p>{commandGroup.name}</p>
