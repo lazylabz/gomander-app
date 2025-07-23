@@ -7,9 +7,9 @@ import {
 import { Settings } from "lucide-react";
 import { useState } from "react";
 
+import { AllCommandsSection } from "@/components/layout/AppSidebar/components/AllCommandsSection/AllCommandsSection.tsx";
 import { CommandGroupSection } from "@/components/layout/AppSidebar/components/CommandGroupSection/CommandGroupSection.tsx";
 import { CreateMenu } from "@/components/layout/AppSidebar/components/CreateMenu/CreateMenu.tsx";
-import { MyCommandsSection } from "@/components/layout/AppSidebar/components/MyCommandsSection/MyCommandsSection.tsx";
 import { sidebarContext } from "@/components/layout/AppSidebar/contexts/sidebarContext.tsx";
 import { EditCommandModal } from "@/components/modals/Command/EditCommandModal.tsx";
 import { EditCommandGroupModal } from "@/components/modals/CommandGroup/EditCommandGroupModal.tsx";
@@ -79,7 +79,7 @@ export const AppSidebar = () => {
           <CreateMenu />
         </SidebarHeader>
         <SidebarContent className="gap-0">
-          <MyCommandsSection />
+          <AllCommandsSection />
           <h3 className="text-sm pl-4 mt-4 mb-1 text-muted-foreground">
             Command groups
           </h3>

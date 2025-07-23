@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/sidebar.tsx";
 import { useDataContext } from "@/contexts/DataContext.tsx";
 
-export const MyCommandsSection = () => {
+export const AllCommandsSection = () => {
   const { commands } = useDataContext();
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -45,7 +45,7 @@ export const MyCommandsSection = () => {
                 <CollapsibleTrigger className="group flex items-center gap-2 p-2 w-full">
                   <ChevronRight className="transition-transform group-data-[state=open]:rotate-90" />
                   <Folder />
-                  <p>Your commands</p>
+                  <p>All commands</p>
                 </CollapsibleTrigger>
               </SidebarGroupLabel>
             </ContextMenuTrigger>
