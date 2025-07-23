@@ -1,23 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import {
-  type CommandGroup,
-  Event,
-  type EventData,
-  type UserConfig,
-} from "@/types/contracts.ts";
+import { type CommandGroup, Event, type EventData } from "@/types/contracts.ts";
 
 import {
   AddCommand,
   EditCommand,
   GetCommandGroups,
   GetCommands,
-  GetUserConfig,
   RemoveCommand,
   RunCommand,
   SaveCommandGroups,
-  SaveUserConfig,
   StopCommand,
 } from "../../wailsjs/go/app/App";
 import { EventsOff, EventsOn } from "../../wailsjs/runtime";
@@ -46,9 +39,6 @@ type DataContextValue = {
   deleteCommand: (commandId: string) => Promise<void>;
   stopRunningCommand: (commandId: string) => Promise<void>;
   duplicateCommand: (command: Command) => Promise<void>;
-  // User config
-  userConfig: UserConfig;
-  saveUserConfig: (config: UserConfig) => Promise<void>;
   // Command groups
   commandGroups: CommandGroup[];
   saveCommandGroups: (groups: CommandGroup[]) => Promise<void>;
@@ -73,10 +63,6 @@ export const DataContextProvider = ({
 
   const [logs, setLogs] = useState<Record<string, string[]>>({});
   const [activeCommandId, setActiveCommandId] = useState<string | null>(null);
-
-  const [userConfig, setUserConfig] = useState<UserConfig>({
-    extraPaths: [],
-  });
 
   // Computed values
   const currentLogs = useMemo(() => {
@@ -133,19 +119,6 @@ export const DataContextProvider = ({
       id: crypto.randomUUID(),
     };
     await AddCommand(newCommand);
-  };
-
-  // User config operations
-  const fetchUserConfig = async (): Promise<void> => {
-    const config = await GetUserConfig();
-
-    setUserConfig(config);
-  };
-
-  const saveUserConfig = async (config: UserConfig): Promise<void> => {
-    // Assuming there's a function to set user config
-    // This function should be implemented in the backend
-    await SaveUserConfig(config);
   };
 
   // Command groups operations
@@ -231,10 +204,6 @@ export const DataContextProvider = ({
       fetchCommands();
     });
 
-    EventsOn(Event.GET_USER_CONFIG, () => {
-      fetchUserConfig();
-    });
-
     EventsOn(Event.GET_COMMAND_GROUPS, () => {
       fetchCommandGroups();
     });
@@ -280,13 +249,19 @@ export const DataContextProvider = ({
 
     // Clean listeners on all events
     return () =>
-      EventsOff(Object.keys(Event)[0], ...Object.values(Event).slice(1));
+      EventsOff(
+        Event.GET_COMMANDS,
+        Event.GET_COMMAND_GROUPS,
+        Event.NEW_LOG_ENTRY,
+        Event.ERROR_NOTIFICATION,
+        Event.SUCCESS_NOTIFICATION,
+        Event.PROCESS_FINISHED,
+      );
   });
 
   // Initial fetch of data
   useEffect(() => {
     fetchCommands();
-    fetchUserConfig();
     fetchCommandGroups();
   }, []);
 
@@ -308,9 +283,6 @@ export const DataContextProvider = ({
     deleteCommand,
     stopRunningCommand,
     duplicateCommand,
-    // User config
-    userConfig,
-    saveUserConfig,
     // Command groups
     commandGroups,
     saveCommandGroups,

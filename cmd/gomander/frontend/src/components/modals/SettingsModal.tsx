@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form.tsx";
 import { Input } from "@/components/ui/input.tsx";
-import { useDataContext } from "@/contexts/DataContext.tsx";
+import { useUserConfigDataContext } from "@/contexts/UserConfigDataContext.tsx";
 
 const formSchema = z.object({
   extraPaths: z.array(
@@ -40,7 +40,7 @@ export const SettingsModal = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
-  const { saveUserConfig, userConfig } = useDataContext();
+  const { saveUserConfig, userConfig } = useUserConfigDataContext();
 
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
