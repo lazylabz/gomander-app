@@ -80,6 +80,9 @@ export const AppSidebar = () => {
         </SidebarHeader>
         <SidebarContent className="gap-0">
           <MyCommandsSection />
+          <h3 className="text-sm pl-4 mt-4 mb-1 text-muted-foreground">
+            Command groups
+          </h3>
           <DndContext onDragEnd={handleDragEnd}>
             <SortableContext
               items={commandGroups.map((cg) => cg.id)}
