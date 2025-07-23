@@ -73,27 +73,26 @@ export const CommandMenuItem = ({
   const isRunning = commandsStatus[command.id] === CommandStatus.RUNNING;
   const isActiveCommand = activeCommandId === command.id;
 
+  const className = cn(
+    isActiveCommand && "bg-sidebar-accent",
+    isRunning &&
+      "bg-green-100 hover:bg-green-100 focus:bg-green-100 active:bg-green-100",
+    isActiveCommand &&
+      isRunning &&
+      "bg-green-200 hover:bg-green-200 focus:bg-green-200 active:bg-green-200",
+  );
+
   return (
     <ContextMenu>
       <ContextMenuTrigger>
-        <SidebarMenuButton
-          asChild
-          className={cn(
-            isActiveCommand && "bg-sidebar-accent",
-            isRunning &&
-              "bg-green-100 hover:bg-green-100 focus:bg-green-100 active:bg-green-100",
-            isActiveCommand &&
-              isRunning &&
-              "bg-green-200 hover:bg-green-200 focus:bg-green-200 active:bg-green-200",
-          )}
-        >
+        <SidebarMenuButton asChild className={className}>
           <div
             onClick={onCommandSectionClick}
             className="flex flex-row justify-between items-center w-full"
             ref={setNodeRef}
             style={style}
           >
-            <div className="flex items-center gap-2 w-full text-sm text-sidebar-foreground">
+            <div className="flex items-center gap-1 w-full text-sm text-sidebar-foreground">
               {draggable && (
                 <div
                   {...attributes}
