@@ -1,3 +1,5 @@
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { ChevronRight, Folder, Play, Square } from "lucide-react";
 import type { SyntheticEvent } from "react";
 
@@ -40,6 +42,14 @@ export const CommandGroupSection = ({
 
   const { editCommandGroup } = useSidebarContext();
 
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: commandGroup.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   const numberOfCommandsRunning = commandGroup.commands.filter(
     (commandId) => commandsStatus[commandId] === CommandStatus.RUNNING,
   ).length;
@@ -74,7 +84,14 @@ export const CommandGroupSection = ({
   };
 
   return (
-    <Collapsible key={commandGroup.id} className="group/collapsible">
+    <Collapsible
+      key={commandGroup.id}
+      className="group/collapsible"
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      style={style}
+    >
       <SidebarGroup className="py-0">
         <ContextMenu>
           <ContextMenuTrigger>

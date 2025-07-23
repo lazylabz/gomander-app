@@ -1,3 +1,9 @@
+import { DndContext, type DragEndEvent } from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { Settings } from "lucide-react";
 import { useState } from "react";
 
@@ -18,7 +24,7 @@ import { useDataContext } from "@/contexts/DataContext.tsx";
 import type { Command, CommandGroup } from "@/types/contracts.ts";
 
 export const AppSidebar = () => {
-  const { commandGroups } = useDataContext();
+  const { commandGroups, saveCommandGroups } = useDataContext();
 
   const [editingCommand, setEditingCommand] = useState<Command | null>(null);
   const [editingCommandGroup, setEditingCommandGroup] =
@@ -43,6 +49,17 @@ export const AppSidebar = () => {
       setEditingCommandGroup(commandGroup),
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id && over?.id && active.id !== over.id) {
+      const oldIndex = commandGroups.findIndex((cg) => cg.id === active.id);
+      const newIndex = commandGroups.findIndex((cg) => cg.id === over.id);
+      const newCommandGroups = arrayMove(commandGroups, oldIndex, newIndex);
+      await saveCommandGroups(newCommandGroups);
+    }
+  };
+
   return (
     <sidebarContext.Provider value={value}>
       <EditCommandModal
@@ -63,9 +80,16 @@ export const AppSidebar = () => {
         </SidebarHeader>
         <SidebarContent className="gap-0">
           <MyCommandsSection />
-          {commandGroups.map((cg) => (
-            <CommandGroupSection commandGroup={cg} key={cg.id} />
-          ))}
+          <DndContext onDragEnd={handleDragEnd}>
+            <SortableContext
+              items={commandGroups.map((cg) => cg.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {commandGroups.map((cg) => (
+                <CommandGroupSection commandGroup={cg} key={cg.id} />
+              ))}
+            </SortableContext>
+          </DndContext>
         </SidebarContent>
         <SidebarFooter>
           <Settings

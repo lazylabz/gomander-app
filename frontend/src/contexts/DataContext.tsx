@@ -155,7 +155,16 @@ export const DataContextProvider = ({
   };
 
   const saveCommandGroups = async (groups: CommandGroup[]): Promise<void> => {
-    await SaveCommandGroups(groups);
+    // Optimistic save to avoid flickering while drag and dropping
+    const prev = commandGroups;
+    setCommandGroups(groups);
+    try {
+      await SaveCommandGroups(groups);
+    } catch {
+      // If saving fails, revert to previous state
+      setCommandGroups(prev);
+      toast.error("Failed to save command groups");
+    }
   };
 
   // Handlers
