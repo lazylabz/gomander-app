@@ -1,13 +1,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { Event, type UserConfig } from "@/types/contracts.ts";
+import { type UserConfig } from "@/types/contracts.ts";
 
 import { GetUserConfig, SaveUserConfig } from "../../wailsjs/go/app/App";
-import { EventsOff, EventsOn } from "../../wailsjs/runtime";
 
 type UserConfigDataContextValue = {
   userConfig: UserConfig;
   saveUserConfig: (config: UserConfig) => Promise<void>;
+  fetchUserConfig: () => Promise<void>;
 };
 
 export const userConfigDataContext = createContext<UserConfigDataContextValue>(
@@ -37,19 +37,13 @@ export const UserConfigDataContextProvider = ({
   };
 
   useEffect(() => {
-    EventsOn(Event.GET_USER_CONFIG, () => {
-      fetchUserConfig();
-    });
-
-    return () => EventsOff(Event.GET_USER_CONFIG);
-  }, []);
-
-  useEffect(() => {
     fetchUserConfig();
   }, []);
 
+  const value = { userConfig, saveUserConfig, fetchUserConfig };
+  
   return (
-    <userConfigDataContext.Provider value={{ userConfig, saveUserConfig }}>
+    <userConfigDataContext.Provider value={value}>
       {children}
     </userConfigDataContext.Provider>
   );

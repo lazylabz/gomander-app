@@ -1,7 +1,15 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  type Dispatch,
+  type SetStateAction,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { toast } from "sonner";
 
-import { type CommandGroup, Event, type EventData } from "@/types/contracts.ts";
+import { type CommandGroup } from "@/types/contracts.ts";
 
 import {
   AddCommand,
@@ -13,7 +21,6 @@ import {
   SaveCommandGroups,
   StopCommand,
 } from "../../wailsjs/go/app/App";
-import { EventsOff, EventsOn } from "../../wailsjs/runtime";
 import type { Command } from "../types/contracts";
 
 export enum CommandStatus {
@@ -44,6 +51,10 @@ type DataContextValue = {
   saveCommandGroups: (groups: CommandGroup[]) => Promise<void>;
   runCommandGroup: (groupId: string) => Promise<void>;
   stopCommandGroup: (groupId: string) => Promise<void>;
+  fetchCommands: () => Promise<void>;
+  fetchCommandGroups: () => Promise<void>;
+  setLogs: Dispatch<SetStateAction<Record<string, string[]>>>;
+  setCommandsStatus: Dispatch<SetStateAction<Record<string, CommandStatus>>>;
 };
 
 export const dataContext = createContext<DataContextValue>(
@@ -198,67 +209,6 @@ export const DataContextProvider = ({
     );
   };
 
-  // Register events listeners
-  useEffect(() => {
-    EventsOn(Event.GET_COMMANDS, () => {
-      fetchCommands();
-    });
-
-    EventsOn(Event.GET_COMMAND_GROUPS, () => {
-      fetchCommandGroups();
-    });
-
-    EventsOn(Event.NEW_LOG_ENTRY, (data: EventData[Event.NEW_LOG_ENTRY]) => {
-      const { id, line } = data;
-
-      setLogs((prevLogs) => {
-        const newLogs = { ...prevLogs };
-        if (!newLogs[id]) {
-          newLogs[id] = [];
-        }
-        newLogs[id].push(line);
-        return newLogs;
-      });
-    });
-
-    EventsOn(
-      Event.ERROR_NOTIFICATION,
-      (data: EventData[Event.ERROR_NOTIFICATION]) => {
-        toast.error("Error", {
-          description: data,
-        });
-      },
-    );
-
-    EventsOn(
-      Event.SUCCESS_NOTIFICATION,
-      (data: EventData[Event.SUCCESS_NOTIFICATION]) => {
-        toast.success(data);
-      },
-    );
-
-    EventsOn(
-      Event.PROCESS_FINISHED,
-      (data: EventData[Event.PROCESS_FINISHED]) => {
-        setCommandsStatus((prevStatus) => ({
-          ...prevStatus,
-          [data]: CommandStatus.IDLE, // Reset status to IDLE when process finishes
-        }));
-      },
-    );
-
-    // Clean listeners on all events
-    return () =>
-      EventsOff(
-        Event.GET_COMMANDS,
-        Event.GET_COMMAND_GROUPS,
-        Event.NEW_LOG_ENTRY,
-        Event.ERROR_NOTIFICATION,
-        Event.SUCCESS_NOTIFICATION,
-        Event.PROCESS_FINISHED,
-      );
-  });
-
   // Initial fetch of data
   useEffect(() => {
     fetchCommands();
@@ -288,6 +238,10 @@ export const DataContextProvider = ({
     saveCommandGroups,
     runCommandGroup,
     stopCommandGroup,
+    fetchCommands,
+    fetchCommandGroups,
+    setLogs,
+    setCommandsStatus,
   };
 
   return <dataContext.Provider value={value}>{children}</dataContext.Provider>;

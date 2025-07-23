@@ -1,6 +1,7 @@
 import { AppSidebar } from "@/components/layout/AppSidebar/AppSidebar.tsx";
 import { SidebarProvider } from "@/components/ui/sidebar.tsx";
 import { Toaster } from "@/components/ui/sonner.tsx";
+import { EventListenersContainer } from "@/components/utility/EventListenersContainer.tsx";
 import { DataContextProvider } from "@/contexts/DataContext.tsx";
 import { UserConfigDataContextProvider } from "@/contexts/UserConfigDataContext.tsx";
 
@@ -10,6 +11,7 @@ function App() {
   return (
     <DataContextProvider>
       <UserConfigDataContextProvider>
+        <EventListenersContainer />
         <SidebarProvider>
           <nav>
             <AppSidebar />
