@@ -2,6 +2,7 @@ package app
 
 import (
 	"gomander/internal/command"
+	"gomander/internal/commandgroup"
 	"gomander/internal/config"
 	"gomander/internal/event"
 	"slices"
@@ -111,21 +112,21 @@ func (a *App) StopCommand(id string) {
 	a.eventEmitter.EmitEvent(event.ProcessFinished, id)
 }
 
-func (a *App) GetCommandGroups() []config.CommandGroup {
+func (a *App) GetCommandGroups() []commandgroup.CommandGroup {
 	return a.savedConfig.CommandGroups
 }
 
 // Command group handlers
 
-func (a *App) SaveCommandGroups(commandGroups []config.CommandGroup) {
+func (a *App) SaveCommandGroups(commandGroups []commandgroup.CommandGroup) {
 	a.savedConfig.CommandGroups = commandGroups
 	a.persistConfig()
 	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command groups saved successfully")
 	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
 }
 
-func (a *App) removeCommandFromGroups(commandId string) []config.CommandGroup {
-	newCommandGroups := make([]config.CommandGroup, 0)
+func (a *App) removeCommandFromGroups(commandId string) []commandgroup.CommandGroup {
+	newCommandGroups := make([]commandgroup.CommandGroup, 0)
 
 	for _, group := range a.savedConfig.CommandGroups {
 		if slices.Contains(group.CommandIds, commandId) {

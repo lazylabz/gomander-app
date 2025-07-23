@@ -2,21 +2,17 @@ package config
 
 import (
 	"encoding/json"
-	"gomander/internal/command"
 	"os"
 	"strings"
+
+	"gomander/internal/command"
+	"gomander/internal/commandgroup"
 )
 
-type CommandGroup struct {
-	Id         string   `json:"id"`
-	Name       string   `json:"name"`
-	CommandIds []string `json:"commands"`
-}
-
 type Config struct {
-	Commands      map[string]command.Command `json:"commands"`
-	ExtraPaths    []string                   `json:"extra_paths"`
-	CommandGroups []CommandGroup             `json:"command_groups"`
+	Commands      map[string]command.Command  `json:"commands"`
+	ExtraPaths    []string                    `json:"extra_paths"`
+	CommandGroups []commandgroup.CommandGroup `json:"command_groups"`
 }
 
 type UserConfig struct {
@@ -42,7 +38,7 @@ func LoadConfigOrPanic() *Config {
 		return &Config{
 			Commands:      make(map[string]command.Command),
 			ExtraPaths:    make([]string, 0),
-			CommandGroups: make([]CommandGroup, 0),
+			CommandGroups: make([]commandgroup.CommandGroup, 0),
 		}
 	}
 

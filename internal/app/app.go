@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+
 	"gomander/internal/command"
 	"gomander/internal/config"
 	"gomander/internal/event"
@@ -23,17 +24,17 @@ func NewApp() *App {
 	return &App{}
 }
 
-// startup is called when the app starts. The context is saved
+// Startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
-	logger := logger.NewLogger(ctx)
-	eventEmitter := event.NewEventEmitter(ctx)
-	commandRunner := command.NewCommandRunner(logger, eventEmitter)
+	l := logger.NewLogger(ctx)
+	ee := event.NewEventEmitter(ctx)
+	cr := command.NewCommandRunner(l, ee)
 
-	a.logger = logger
-	a.eventEmitter = eventEmitter
-	a.commandRunner = commandRunner
+	a.logger = l
+	a.eventEmitter = ee
+	a.commandRunner = cr
 
 	a.logger.Info("Loading configuration...")
 
