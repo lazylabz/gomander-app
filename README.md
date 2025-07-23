@@ -22,7 +22,7 @@ Contributions are welcome! You can open issues to report bugs or suggest improve
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the GNUv3 License. See the LICENSE file for details.
 
 ---
 ## Development
