@@ -28,8 +28,14 @@ export const CommandGroupSection = ({
 }: {
   commandGroup: CommandGroup;
 }) => {
-  const { commands, commandsStatus, runCommandGroup, stopCommandGroup } =
-    useDataContext();
+  const {
+    commands,
+    commandsStatus,
+    runCommandGroup,
+    stopCommandGroup,
+    saveCommandGroups,
+    commandGroups,
+  } = useDataContext();
 
   const someCommandIsRunning = commandGroup.commands.some(
     (commandId) => commandsStatus[commandId] === CommandStatus.RUNNING,
@@ -50,6 +56,12 @@ export const CommandGroupSection = ({
     e.stopPropagation();
 
     stopCommandGroup(commandGroup.id);
+  };
+
+  const deleteCommandGroup = async () => {
+    await saveCommandGroups(
+      commandGroups.filter((cg) => cg.id !== commandGroup.id),
+    );
   };
 
   return (
@@ -92,8 +104,16 @@ export const CommandGroupSection = ({
             </SidebarGroupLabel>
           </ContextMenuTrigger>
           <ContextMenuContent>
-            <ContextMenuItem onClick={() => {}}>Edit</ContextMenuItem>
-            <ContextMenuItem onClick={() => {}}>Delete</ContextMenuItem>
+            <ContextMenuItem
+              onClick={() => {
+                alert("Not yet implemented");
+              }}
+            >
+              Edit
+            </ContextMenuItem>
+            <ContextMenuItem onClick={deleteCommandGroup}>
+              Delete
+            </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
         <CollapsibleContent className="pl-4">
