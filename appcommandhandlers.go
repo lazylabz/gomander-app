@@ -1,5 +1,7 @@
 package main
 
+import "slices"
+
 func (a *App) GetCommands() map[string]Command {
 	return a.commandsRepository.commands
 }
@@ -29,11 +31,14 @@ func (a *App) RemoveCommand(id string) {
 		return
 	}
 
+	a.savedConfig.CommandGroups = a.removeCommandFromGroups(id)
+
 	a.logger.info("Command removed: " + id)
 	a.eventEmitter.emitEvent(SuccessNotification, "Command removed")
 
-	// Update the commands map in the frontend
+	// Update the commands and command groups in the frontend
 	a.eventEmitter.emitEvent(GetCommands, nil)
+	a.eventEmitter.emitEvent(GetCommandGroups, nil)
 
 	a.persistSavedConfig()
 }
@@ -97,4 +102,26 @@ func (a *App) StopCommand(id string) {
 	a.logger.info("Command stopped: " + id)
 
 	a.eventEmitter.emitEvent(ProcessFinished, id)
+}
+
+func (a *App) removeCommandFromGroups(commandId string) []CommandGroup {
+	newCommandGroups := make([]CommandGroup, 0)
+
+	for _, group := range a.savedConfig.CommandGroups {
+		if slices.Contains(group.CommandIds, commandId) {
+			newCommandIds := make([]string, 0)
+
+			for _, cmdId := range group.CommandIds {
+				if cmdId != commandId {
+					newCommandIds = append(newCommandIds, cmdId)
+				}
+			}
+
+			group.CommandIds = newCommandIds
+		}
+		newCommandGroups = append(newCommandGroups, group)
+
+	}
+
+	return newCommandGroups
 }
