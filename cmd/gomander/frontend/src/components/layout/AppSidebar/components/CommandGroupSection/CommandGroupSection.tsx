@@ -6,7 +6,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ChevronRight, Folder, GripVertical, Play, Square } from "lucide-react";
+import { Folder, FolderOpen, GripVertical, Play, Square } from "lucide-react";
 import type { SyntheticEvent } from "react";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
@@ -139,15 +139,25 @@ export const CommandGroupSection = ({
                   <div
                     {...attributes}
                     {...listeners}
-                    className="cursor-grab active:cursor-grabbing pr-0.5 rounded hover:bg-sidebar-accent/50 group-data-[state=open]:hidden transition-transform"
+                    className="cursor-grab active:cursor-grabbing rounded hover:bg-sidebar-accent/50 group-data-[state=open]:hidden transition-transform"
                   >
-                    <GripVertical size={14} className="text-muted-foreground" />
+                    <GripVertical
+                      size={14}
+                      className="text-muted-foreground pr-0.5"
+                    />
                   </div>
-                  <ChevronRight
-                    size={16}
-                    className="transition-transform group-data-[state=open]:rotate-90 group-data-[state=closed]:hidden"
+                  <GripVertical
+                    size={14}
+                    className="hidden group-data-[state=open]:block pr-0.5 text-muted-foreground/50 cursor-not-allowed"
                   />
-                  <Folder size={16} />
+                  <FolderOpen
+                    size={16}
+                    className="hidden group-data-[state=open]:block"
+                  />
+                  <Folder
+                    size={16}
+                    className="block group-data-[state=open]:hidden"
+                  />
                   <p>{commandGroup.name}</p>
                 </div>
                 <div className="flex gap-2 items-center">

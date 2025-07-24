@@ -1,4 +1,4 @@
-import { ChevronRight, Folder } from "lucide-react";
+import { Folder, FolderOpen } from "lucide-react";
 import { useState } from "react";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
@@ -25,7 +25,7 @@ import { useCommandStore } from "@/store/commandStore.ts";
 
 export const AllCommandsSection = () => {
   const commands = useCommandStore((state) => state.commands);
-  
+
   const [modalOpen, setModalOpen] = useState(false);
 
   const openCreateCommandModal = () => {
@@ -44,8 +44,8 @@ export const AllCommandsSection = () => {
                 className="group/label text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm"
               >
                 <CollapsibleTrigger className="group flex items-center gap-2 p-2 w-full">
-                  <ChevronRight className="transition-transform group-data-[state=open]:rotate-90" />
-                  <Folder />
+                  <FolderOpen className="hidden group-data-[state=open]:block" />
+                  <Folder className="block group-data-[state=open]:hidden" />
                   <p>All commands</p>
                 </CollapsibleTrigger>
               </SidebarGroupLabel>
