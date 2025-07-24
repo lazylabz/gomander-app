@@ -6,7 +6,6 @@
   "frontend:build": "pnpm run build",
   "frontend:dev:watcher": "pnpm run dev",
   "frontend:dev:serverUrl": "auto",
-  "build:dir": "../../build",
   "author": {
     "name": "",
     "email": ""
