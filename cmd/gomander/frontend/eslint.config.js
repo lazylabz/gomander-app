@@ -27,6 +27,24 @@ export default tseslint.config([
     rules: {
       "simple-import-sort/imports": "error",
       "react-refresh/only-export-components": "off",
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/wailsjs/**"],
+              message:
+                'Direct WailsJs imports are not allowed. Use the "contracts" layer instead.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["src/contracts/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": "off",
     },
   },
 ]);
