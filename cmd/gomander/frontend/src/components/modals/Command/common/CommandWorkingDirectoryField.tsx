@@ -26,11 +26,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useDataContext } from "@/contexts/DataContext.tsx";
+import { useCommandStore } from "@/store/commandStore.ts";
 
 export const CommandWorkingDirectoryField = () => {
   const form = useFormContext<FormSchemaType>();
-  const { commands } = useDataContext();
+  const commands = useCommandStore((state) => state.commands);
 
   const [open, setOpen] = useState(false);
 

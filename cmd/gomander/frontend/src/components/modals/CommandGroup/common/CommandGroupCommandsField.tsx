@@ -10,10 +10,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form.tsx";
-import { useDataContext } from "@/contexts/DataContext.tsx";
+import { useCommandStore } from "@/store/commandStore.ts";
 
 export const CommandGroupCommandsField = () => {
-  const { commands } = useDataContext();
+  const commands = useCommandStore((state) => state.commands);
 
   const form = useFormContext<FormSchemaType>();
 

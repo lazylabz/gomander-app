@@ -29,22 +29,23 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
-import { CommandStatus, useDataContext } from "@/contexts/DataContext.tsx";
-import type { CommandGroup } from "@/types/contracts.ts";
+import type { CommandGroup } from "@/contracts/types.ts";
+import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
+import { useCommandStore } from "@/store/commandStore.ts";
+import { CommandStatus } from "@/types/CommandStatus.ts";
+import { runCommandGroup } from "@/useCases/commandGroup/runCommandGroup";
+import { saveCommandGroups } from "@/useCases/commandGroup/saveCommandGroups.ts";
+import { stopCommandGroup } from "@/useCases/commandGroup/stopCommandGroup.ts";
 
 export const CommandGroupSection = ({
   commandGroup,
 }: {
   commandGroup: CommandGroup;
 }) => {
-  const {
-    commands,
-    commandsStatus,
-    runCommandGroup,
-    stopCommandGroup,
-    saveCommandGroups,
-    commandGroups,
-  } = useDataContext();
+  const commandGroups = useCommandGroupStore((state) => state.commandGroups);
+
+  const commands = useCommandStore((state) => state.commands);
+  const commandsStatus = useCommandStore((state) => state.commandsStatus);
 
   const { editCommandGroup } = useSidebarContext();
 

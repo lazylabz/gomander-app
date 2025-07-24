@@ -10,9 +10,14 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu.tsx";
 import { SidebarMenuButton } from "@/components/ui/sidebar.tsx";
-import { CommandStatus, useDataContext } from "@/contexts/DataContext.tsx";
+import type { Command } from "@/contracts/types.ts";
 import { cn } from "@/lib/utils.ts";
-import type { Command } from "@/types/contracts.ts";
+import { useCommandStore } from "@/store/commandStore.ts";
+import { CommandStatus } from "@/types/CommandStatus.ts";
+import { deleteCommand } from "@/useCases/command/deleteCommand.ts";
+import { duplicateCommand } from "@/useCases/command/duplicateCommand.ts";
+import { startCommand } from "@/useCases/command/startCommand.ts";
+import { stopCommand } from "@/useCases/command/stopCommand.ts";
 
 export const CommandMenuItem = ({
   command,
@@ -21,15 +26,11 @@ export const CommandMenuItem = ({
   command: Command;
   draggable?: boolean;
 }) => {
-  const {
-    execCommand,
-    setActiveCommandId,
-    activeCommandId,
-    deleteCommand,
-    duplicateCommand,
-    commandsStatus,
-    stopRunningCommand,
-  } = useDataContext();
+  const setActiveCommandId = useCommandStore(
+    (state) => state.setActiveCommandId,
+  );
+  const commandsStatus = useCommandStore((state) => state.commandsStatus);
+  const activeCommandId = useCommandStore((state) => state.activeCommandId);
 
   const { editCommand } = useSidebarContext();
 
@@ -43,7 +44,7 @@ export const CommandMenuItem = ({
 
   const handleRunCommand = async () => {
     setActiveCommandId(command.id);
-    await execCommand(command.id);
+    await startCommand(command.id);
   };
 
   const handleDeleteCommand = async () => {
@@ -65,7 +66,7 @@ export const CommandMenuItem = ({
   };
 
   const handleStopCommand = async () => {
-    await stopRunningCommand(command.id);
+    await stopCommand(command.id);
     setActiveCommandId(command.id);
   };
 

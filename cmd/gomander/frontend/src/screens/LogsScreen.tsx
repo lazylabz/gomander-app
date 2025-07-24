@@ -1,7 +1,8 @@
 import AnsiToHtml from "ansi-to-html";
 import { BrushCleaning } from "lucide-react";
 
-import { useDataContext } from "@/contexts/DataContext.tsx";
+import { useCurrentLogs } from "@/hooks/useCurrentLogs.ts";
+import { clearCurrentLogs } from "@/useCases/logging/clearCurrentLogs.ts";
 
 const ansiConverter = new AnsiToHtml({
   fg: "#000000",
@@ -12,7 +13,7 @@ const ansiConverter = new AnsiToHtml({
 });
 
 export const LogsScreen = () => {
-  const { currentLogs, clearCurrentLogs } = useDataContext();
+  const { currentLogs } = useCurrentLogs();
 
   return (
     <div className="p-4 overflow-y-auto h-full w-full flex flex-col font-mono justify-end">

@@ -19,7 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
-import { useDataContext } from "@/contexts/DataContext.tsx";
+import { createCommand } from "@/useCases/command/createCommand.ts";
 
 export const CreateCommandModal = ({
   open,
@@ -28,8 +28,6 @@ export const CreateCommandModal = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
-  const { createCommand } = useDataContext();
-
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: {

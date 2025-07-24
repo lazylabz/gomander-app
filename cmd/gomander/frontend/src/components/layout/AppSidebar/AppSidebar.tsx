@@ -20,11 +20,12 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar.tsx";
-import { useDataContext } from "@/contexts/DataContext.tsx";
-import type { Command, CommandGroup } from "@/types/contracts.ts";
+import type { Command, CommandGroup } from "@/contracts/types.ts";
+import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
+import { saveCommandGroups } from "@/useCases/commandGroup/saveCommandGroups.ts";
 
 export const AppSidebar = () => {
-  const { commandGroups, saveCommandGroups } = useDataContext();
+  const commandGroups = useCommandGroupStore((state) => state.commandGroups);
 
   const [editingCommand, setEditingCommand] = useState<Command | null>(null);
   const [editingCommandGroup, setEditingCommandGroup] =

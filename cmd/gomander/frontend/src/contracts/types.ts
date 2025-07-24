@@ -1,4 +1,9 @@
-import { command, commandgroup, config, event } from "../../wailsjs/go/models";
+import {
+  command,
+  commandgroup,
+  config,
+  event,
+} from "../../wailsjs/go/models.ts";
 
 // Types
 export type Command = command.Command;

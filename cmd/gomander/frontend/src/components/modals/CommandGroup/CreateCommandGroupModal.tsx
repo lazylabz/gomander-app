@@ -18,7 +18,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
-import { useDataContext } from "@/contexts/DataContext.tsx";
+import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
+import { saveCommandGroups } from "@/useCases/commandGroup/saveCommandGroups.ts";
 
 export const CreateCommandGroupModal = ({
   open,
@@ -27,7 +28,7 @@ export const CreateCommandGroupModal = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
-  const { commandGroups, saveCommandGroups } = useDataContext();
+  const commandGroups = useCommandGroupStore((state) => state.commandGroups);
 
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),

@@ -21,10 +21,11 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
-import { useDataContext } from "@/contexts/DataContext.tsx";
+import { useCommandStore } from "@/store/commandStore.ts";
 
 export const AllCommandsSection = () => {
-  const { commands } = useDataContext();
+  const commands = useCommandStore((state) => state.commands);
+  
   const [modalOpen, setModalOpen] = useState(false);
 
   const openCreateCommandModal = () => {

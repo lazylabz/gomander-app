@@ -1,41 +1,47 @@
 import { Fragment, useEffect } from "react";
 import { toast } from "sonner";
 
-import { CommandStatus, useDataContext } from "@/contexts/DataContext.tsx";
-import { useUserConfigDataContext } from "@/contexts/UserConfigDataContext.tsx";
-import { Event, type EventData } from "@/types/contracts.ts";
-
-import { EventsOff, EventsOn } from "../../../wailsjs/runtime";
+import { eventService } from "@/contracts/service.ts";
+import { Event, type EventData } from "@/contracts/types.ts";
+import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
+import { fetchCommands } from "@/queries/fetchCommands.ts";
+import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
+import { useCommandStore } from "@/store/commandStore.ts";
+import { CommandStatus } from "@/types/CommandStatus.ts";
 
 export const EventListenersContainer = () => {
-  const { fetchCommands, fetchCommandGroups, setCommandsStatus, setLogs } =
-    useDataContext();
-  const { fetchUserConfig } = useUserConfigDataContext();
+  const setCommandsStatus = useCommandStore((state) => state.setCommandsStatus);
+  const commandsStatus = useCommandStore((state) => state.commandsStatus);
+  const commandsLogs = useCommandStore((state) => state.commandsLogs);
+  const setCommandsLogs = useCommandStore((state) => state.setCommandsLogs);
 
   // Register events listeners
   useEffect(() => {
-    EventsOn(Event.GET_COMMANDS, () => {
+    eventService.eventsOn(Event.GET_COMMANDS, () => {
       fetchCommands();
     });
 
-    EventsOn(Event.GET_COMMAND_GROUPS, () => {
+    eventService.eventsOn(Event.GET_COMMAND_GROUPS, () => {
       fetchCommandGroups();
     });
 
-    EventsOn(Event.NEW_LOG_ENTRY, (data: EventData[Event.NEW_LOG_ENTRY]) => {
-      const { id, line } = data;
+    eventService.eventsOn(
+      Event.NEW_LOG_ENTRY,
+      (data: EventData[Event.NEW_LOG_ENTRY]) => {
+        const { id, line } = data;
 
-      setLogs((prevLogs) => {
-        const newLogs = { ...prevLogs };
+        const newLogs = { ...commandsLogs };
+
         if (!newLogs[id]) {
           newLogs[id] = [];
         }
         newLogs[id].push(line);
-        return newLogs;
-      });
-    });
 
-    EventsOn(
+        setCommandsLogs(newLogs);
+      },
+    );
+
+    eventService.eventsOn(
       Event.ERROR_NOTIFICATION,
       (data: EventData[Event.ERROR_NOTIFICATION]) => {
         toast.error("Error", {
@@ -44,30 +50,34 @@ export const EventListenersContainer = () => {
       },
     );
 
-    EventsOn(
+    eventService.eventsOn(
       Event.SUCCESS_NOTIFICATION,
       (data: EventData[Event.SUCCESS_NOTIFICATION]) => {
         toast.success(data);
       },
     );
 
-    EventsOn(
+    eventService.eventsOn(
       Event.PROCESS_FINISHED,
       (data: EventData[Event.PROCESS_FINISHED]) => {
-        setCommandsStatus((prevStatus) => ({
-          ...prevStatus,
-          [data]: CommandStatus.IDLE, // Reset status to IDLE when process finishes
-        }));
+        const newCommandsStatus = {
+          ...commandsStatus,
+          [data]: CommandStatus.IDLE,
+        };
+        setCommandsStatus(newCommandsStatus);
       },
     );
 
-    EventsOn(Event.GET_USER_CONFIG, () => {
+    eventService.eventsOn(Event.GET_USER_CONFIG, () => {
       fetchUserConfig();
     });
 
     // Clean listeners on all events
     return () =>
-      EventsOff(Object.values(Event)[0], ...Object.values(Event).slice(1));
+      eventService.eventsOff(
+        Object.values(Event)[0],
+        ...Object.values(Event).slice(1),
+      );
   });
 
   return <Fragment />;
