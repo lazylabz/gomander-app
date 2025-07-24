@@ -36,6 +36,10 @@ export const EventListenersContainer = () => {
           newLogs[id] = [];
         }
         newLogs[id].push(line);
+        
+        if (newLogs[id].length > 100) {
+          newLogs[id] = newLogs[id].slice(-100); // Keep only the last 100 lines
+        }
 
         setCommandsLogs(newLogs);
       },
