@@ -39,6 +39,7 @@ jobs:
         uses: dAppServer/wails-build-action@main
         id: build
         with:
+          app-working-directory: './cmd/gomander'
           build-name: ${{ matrix.build.name }}
           build-platform: ${{ matrix.build.platform }}
           package: false
