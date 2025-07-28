@@ -10,9 +10,6 @@ env:
 
 jobs:
   build:
-    defaults:
-      run:
-        working-directory: './cmd/gomander'
     strategy:
       # Failure in one platform build won't impact the others
       fail-fast: false
@@ -39,7 +36,7 @@ jobs:
         with:
           version: 10
       - name: Move into gomander directory
-        run: cd gomander/cmd/gomander
+        run: cd gomander/gomander/cmd/gomander
       - name: Build wails
         uses: dAppServer/wails-build-action@main
         id: build
