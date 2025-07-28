@@ -279,12 +279,12 @@ runs:
       with:
         name: Wails Build ${{runner.os}} ${{inputs.build-name}}
         path: |
-          **build/bin/*
-          **build\bin\*
+          **/build/bin/*
+          **\build\bin\*
     - name: Release
       uses: softprops/action-gh-release@v1
       if: inputs.package == 'true' && startsWith(github.ref, 'refs/tags/')
       with:
         files: |
-          **build/bin/*
-          **build\bin\*
+          **/build/bin/*
+          **\build\bin\*
