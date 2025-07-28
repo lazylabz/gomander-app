@@ -38,8 +38,6 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 10
-      - name: Move into gomander directory
-        run: cd gomander/gomander/cmd/gomander
       - name: Build wails
         uses: dAppServer/wails-build-action@main
         id: build
