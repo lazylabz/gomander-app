@@ -286,4 +286,5 @@ runs:
       if: inputs.package == 'true' && startsWith(github.ref, 'refs/tags/')
       with:
         files: |
-          **/bin/*
+          **build/bin/*
+          **build\bin\*
