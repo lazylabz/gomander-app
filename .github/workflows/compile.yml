@@ -39,7 +39,7 @@ jobs:
         with:
           version: 10
       - name: Move into gomander directory
-        run: cd cmd/gomander
+        run: cd gomander/cmd/gomander
       - name: Build wails
         uses: dAppServer/wails-build-action@main
         id: build
