@@ -36,7 +36,8 @@ jobs:
         with:
           version: 10
       - name: Build wails
-        uses: dAppServer/wails-build-action@main
+        # uses: dAppServer/wails-build-action@main
+        uses: ./.github/actions/build
         id: build
         with:
           app-working-directory: './cmd/gomander'
