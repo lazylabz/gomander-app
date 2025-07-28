@@ -4,6 +4,7 @@
   "outputfilename": "gomander",
   "frontend:install": "pnpm install",
   "frontend:build": "pnpm run build",
+  "build:dir": "../../build",
   "frontend:dev:watcher": "pnpm run dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
