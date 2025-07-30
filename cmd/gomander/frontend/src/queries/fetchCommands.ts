@@ -1,12 +1,13 @@
 import { dataService } from "@/contracts/service.ts";
+import type { Command } from "@/contracts/types.ts";
 import { commandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 
-export const fetchCommands = async () => {
+export const loadCommandDataIntoStore = (
+  commandsData: Record<string, Command>,
+) => {
   const { setCommands, setCommandsStatus, commandsStatus } =
     commandStore.getState();
-
-  const commandsData = await dataService.getCommands();
 
   setCommands(commandsData);
 
@@ -18,4 +19,10 @@ export const fetchCommands = async () => {
   );
 
   setCommandsStatus(newCommandsStatus);
+};
+
+export const fetchCommands = async () => {
+  const commandsData = await dataService.getCommands();
+
+  loadCommandDataIntoStore(commandsData);
 };

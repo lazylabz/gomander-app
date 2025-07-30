@@ -31,6 +31,7 @@ func main() {
 		Bind: []interface{}{
 			app,
 		},
+		// TODO: Add hook to stop all running commands on shutdown
 		EnumBind: []interface{}{
 			event.Events,
 		},

@@ -6,8 +6,20 @@ export function AddCommand(arg1) {
   return window['go']['app']['App']['AddCommand'](arg1);
 }
 
+export function CloseProject() {
+  return window['go']['app']['App']['CloseProject']();
+}
+
+export function CreateProject(arg1, arg2) {
+  return window['go']['app']['App']['CreateProject'](arg1, arg2);
+}
+
 export function EditCommand(arg1) {
   return window['go']['app']['App']['EditCommand'](arg1);
+}
+
+export function GetAvailableProjects() {
+  return window['go']['app']['App']['GetAvailableProjects']();
 }
 
 export function GetCommandGroups() {
@@ -18,8 +30,16 @@ export function GetCommands() {
   return window['go']['app']['App']['GetCommands']();
 }
 
+export function GetCurrentProject() {
+  return window['go']['app']['App']['GetCurrentProject']();
+}
+
 export function GetUserConfig() {
   return window['go']['app']['App']['GetUserConfig']();
+}
+
+export function OpenProject(arg1) {
+  return window['go']['app']['App']['OpenProject'](arg1);
 }
 
 export function RemoveCommand(arg1) {

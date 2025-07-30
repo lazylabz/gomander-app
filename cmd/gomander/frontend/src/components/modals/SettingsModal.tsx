@@ -64,11 +64,10 @@ export const SettingsModal = ({
   };
 
   const onSubmit = async (data: FormType) => {
-    const config = {
+    await saveUserConfig({
+      lastOpenedProjectId: userConfig.lastOpenedProjectId,
       extraPaths: data.extraPaths.map((path) => path.value),
-    };
-
-    await saveUserConfig(config);
+    });
 
     form.reset();
 
