@@ -87,13 +87,7 @@ func (a *App) RunCommand(id string) map[string]project.Command {
 		return nil
 	}
 
-	extraPaths := a.userConfig.ExtraPaths
-	extraPathsStr := make([]string, len(extraPaths))
-	for i, path := range extraPaths {
-		extraPathsStr[i] = string(path)
-	}
-
-	err = a.commandRunner.RunCommand(*cmd, extraPathsStr)
+	err = a.commandRunner.RunCommand(*cmd, a.userConfig.ExtraPaths)
 
 	if err != nil {
 		a.logger.Error(err.Error())
