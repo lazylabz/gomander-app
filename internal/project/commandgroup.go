@@ -1,6 +1,8 @@
 package project
 
-import "slices"
+import (
+	"slices"
+)
 
 type CommandGroup struct {
 	Id         string   `json:"id"`
@@ -30,6 +32,10 @@ func (p *Project) RemoveCommandFromCommandGroups(commandId string) {
 			}
 
 			group.CommandIds = newCommandIds
+		}
+		if len(group.CommandIds) == 0 {
+			// If the group has no commands left, we can remove it
+			continue
 		}
 		newCommandGroups = append(newCommandGroups, group)
 

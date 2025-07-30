@@ -39,12 +39,12 @@ func (a *App) RemoveCommand(id string) error {
 		return err
 	}
 
+	a.selectedProject.RemoveCommandFromCommandGroups(id)
+
 	err = a.persistSelectedProjectConfig()
 	if err != nil {
 		return err
 	}
-
-	a.selectedProject.RemoveCommandFromCommandGroups(id)
 
 	a.logger.Info("Command removed: " + id)
 	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command removed")
