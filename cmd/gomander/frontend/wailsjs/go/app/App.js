@@ -10,12 +10,20 @@ export function EditCommand(arg1) {
   return window['go']['app']['App']['EditCommand'](arg1);
 }
 
+export function GetAvailableProjects() {
+  return window['go']['app']['App']['GetAvailableProjects']();
+}
+
 export function GetCommandGroups() {
   return window['go']['app']['App']['GetCommandGroups']();
 }
 
 export function GetCommands() {
   return window['go']['app']['App']['GetCommands']();
+}
+
+export function GetCurrentProject() {
+  return window['go']['app']['App']['GetCurrentProject']();
 }
 
 export function GetUserConfig() {
@@ -34,8 +42,8 @@ export function SaveCommandGroups(arg1) {
   return window['go']['app']['App']['SaveCommandGroups'](arg1);
 }
 
-export function SaveUserConfig(arg1) {
-  return window['go']['app']['App']['SaveUserConfig'](arg1);
+export function SaveExtraPaths(arg1) {
+  return window['go']['app']['App']['SaveExtraPaths'](arg1);
 }
 
 export function StopCommand(arg1) {

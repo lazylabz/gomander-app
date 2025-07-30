@@ -78,17 +78,8 @@ func StopProcessGracefully(cmd *exec.Cmd) error {
 	}
 }
 
-// TODO: Check if this can be abstracted to "shell" env as in unix
 func GetCommand(cmdStr string) *exec.Cmd {
-	var cmd *exec.Cmd
-
-	if strings.HasPrefix(cmdStr, "powershell ") {
-		cmd = exec.Command("powershell", "-Command", strings.TrimPrefix(cmdStr, "powershell "))
-	} else if strings.HasPrefix(cmdStr, "cmd ") {
-		cmd = exec.Command("cmd", "/C", strings.TrimPrefix(cmdStr, "cmd "))
-	} else {
-		cmd = exec.Command("cmd", "/C", cmdStr)
-	}
+	cmd := exec.Command("cmd", "/C", cmdStr)
 
 	return cmd
 }

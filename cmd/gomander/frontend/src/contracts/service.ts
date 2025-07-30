@@ -1,27 +1,32 @@
 import {
   AddCommand,
   EditCommand,
+  GetAvailableProjects,
   GetCommandGroups,
   GetCommands,
+  GetCurrentProject,
   GetUserConfig,
   RemoveCommand,
   RunCommand,
   SaveCommandGroups,
-  SaveUserConfig,
+  SaveExtraPaths,
   StopCommand,
 } from "../../wailsjs/go/app/App";
+import { project } from "../../wailsjs/go/models.ts";
 import { EventsOff, EventsOn } from "../../wailsjs/runtime";
 
 export const dataService = {
   addCommand: AddCommand,
   editCommand: EditCommand,
+  getAvailableProjects: GetAvailableProjects,
   getCommandGroups: GetCommandGroups,
   getCommands: GetCommands,
+  getCurrentProject: GetCurrentProject as () => Promise<project.Project | null>,
   getUserConfig: GetUserConfig,
   removeCommand: RemoveCommand,
   runCommand: RunCommand,
   saveCommandGroups: SaveCommandGroups,
-  saveUserConfig: SaveUserConfig,
+  saveExtraPaths: SaveExtraPaths,
   stopCommand: StopCommand,
 };
 

@@ -1,4 +1,4 @@
-package command
+package project
 
 import (
 	"bufio"
@@ -26,16 +26,16 @@ func NewCommandRunner(logger *logger.Logger, emitter *event.EventEmitter) *Runne
 	}
 }
 
-// ExecCommand executes a command by its ID and streams its output.
+// ExecCommand executes a project by its ID and streams its output.
 func (c *Runner) RunCommand(command Command, extraPaths []string) error {
-	// Get the command object based on the command string and OS
+	// Get the project object based on the project string and OS
 	cmd := platform.GetCommand(command.Command)
 
 	// Enable color output and set terminal type
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
 	cmd.Dir = command.WorkingDirectory
 
-	// Set command attributes based on OS
+	// Set project attributes based on OS
 	platform.SetProcAttributes(cmd)
 	platform.SetProcEnv(cmd, extraPaths)
 
@@ -56,7 +56,7 @@ func (c *Runner) RunCommand(command Command, extraPaths []string) error {
 		return err
 	}
 
-	// Save the command in the runningCommands map
+	// Save the project in the runningCommands map
 	c.runningCommands[command.Id] = cmd
 
 	// Stream stdout
@@ -69,7 +69,7 @@ func (c *Runner) RunCommand(command Command, extraPaths []string) error {
 		err := cmd.Wait()
 		if err != nil {
 			c.sendStreamError(command, err)
-			c.logger.Error("[ERROR - Waiting for command]: " + err.Error())
+			c.logger.Error("[ERROR - Waiting for project]: " + err.Error())
 			return
 		}
 		c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
@@ -82,7 +82,7 @@ func (c *Runner) StopRunningCommand(id string) error {
 	runningCommand, exists := c.runningCommands[id]
 
 	if !exists {
-		return errors.New("No running runningCommand for command: " + id)
+		return errors.New("No running runningCommand for project: " + id)
 	}
 
 	return platform.StopProcessGracefully(runningCommand)
