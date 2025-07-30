@@ -1,15 +1,18 @@
 import {
   AddCommand,
+  CloseProject,
+  CreateProject,
   EditCommand,
   GetAvailableProjects,
   GetCommandGroups,
   GetCommands,
   GetCurrentProject,
   GetUserConfig,
+  OpenProject,
   RemoveCommand,
   RunCommand,
   SaveCommandGroups,
-  SaveExtraPaths,
+  SaveUserConfig,
   StopCommand,
 } from "../../wailsjs/go/app/App";
 import { project } from "../../wailsjs/go/models.ts";
@@ -26,8 +29,11 @@ export const dataService = {
   removeCommand: RemoveCommand,
   runCommand: RunCommand,
   saveCommandGroups: SaveCommandGroups,
-  saveExtraPaths: SaveExtraPaths,
+  saveUserConfig: SaveUserConfig,
+  createProject: CreateProject,
   stopCommand: StopCommand,
+  openProject: OpenProject,
+  closeProject: CloseProject,
 };
 
 export const eventService = {

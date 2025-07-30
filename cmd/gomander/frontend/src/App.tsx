@@ -1,26 +1,40 @@
+import { useEffect } from "react";
+
 import { AppSidebar } from "@/components/layout/AppSidebar/AppSidebar.tsx";
 import { SidebarProvider } from "@/components/ui/sidebar.tsx";
 import { Toaster } from "@/components/ui/sonner.tsx";
 import { EventListenersContainer } from "@/components/utility/EventListenersContainer.tsx";
-import { useFetchInitialData } from "@/hooks/useFetchInitialData.ts";
+import { fetchProject } from "@/queries/fetchProject.ts";
+import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
+import { ProjectSelectionScreen } from "@/screens/ProjectSelectionScreen.tsx";
+import { useProjectStore } from "@/store/projectStore.ts";
 
 import { LogsScreen } from "./screens/LogsScreen.tsx";
 
 function App() {
-  useFetchInitialData();
+  const project = useProjectStore((state) => state.project);
+
+  useEffect(() => {
+    fetchProject();
+    fetchUserConfig();
+  }, []);
 
   return (
     <>
       <EventListenersContainer />
-      <SidebarProvider>
-        <nav>
-          <AppSidebar />
-        </nav>
-        <main className="w-full h-screen bg-white">
-          <LogsScreen />
-        </main>
-        <Toaster richColors />
-      </SidebarProvider>
+      <Toaster richColors />
+      {project && (
+        <SidebarProvider>
+          <nav>
+            <AppSidebar />
+          </nav>
+
+          <main className="w-full h-screen bg-white">
+            <LogsScreen />
+          </main>
+        </SidebarProvider>
+      )}
+      {!project && <ProjectSelectionScreen />}
     </>
   );
 }

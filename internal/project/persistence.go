@@ -27,7 +27,7 @@ func GetAllProjectsAvailableInProjectsFolder() ([]*Project, error) {
 		return nil, err
 	}
 
-	var projects []*Project
+	projects := make([]*Project, 0, len(files))
 
 	for _, file := range files {
 		if !file.IsDir() && filepath.Ext(file.Name()) == ".json" {

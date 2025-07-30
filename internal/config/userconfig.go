@@ -7,8 +7,8 @@ import (
 )
 
 type UserConfig struct {
-	ExtraPaths          []string `json:"extra_paths"`
-	LastOpenedProjectId string   `json:"last_opened_project_id"`
+	ExtraPaths          []string `json:"extraPaths"`
+	LastOpenedProjectId string   `json:"lastOpenedProjectId"`
 }
 
 func EmptyUserConfig() *UserConfig {

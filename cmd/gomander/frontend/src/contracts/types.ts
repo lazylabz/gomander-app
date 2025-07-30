@@ -1,9 +1,10 @@
-import { config, event,project } from "../../wailsjs/go/models.ts";
+import { config, event, project } from "../../wailsjs/go/models.ts";
 
 // Types
 export type Command = project.Command;
 export type UserConfig = config.UserConfig;
 export type CommandGroup = project.CommandGroup;
+export type Project = project.Project;
 
 // Enums
 export enum Event {

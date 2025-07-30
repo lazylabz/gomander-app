@@ -1,8 +1,8 @@
 export namespace config {
 	
 	export class UserConfig {
-	    extra_paths: string[];
-	    last_opened_project_id: string;
+	    extraPaths: string[];
+	    lastOpenedProjectId: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new UserConfig(source);
@@ -10,8 +10,8 @@ export namespace config {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.extra_paths = source["extra_paths"];
-	        this.last_opened_project_id = source["last_opened_project_id"];
+	        this.extraPaths = source["extraPaths"];
+	        this.lastOpenedProjectId = source["lastOpenedProjectId"];
 	    }
 	}
 
@@ -36,7 +36,7 @@ export namespace project {
 	export class Command {
 	    id: string;
 	    name: string;
-	    project: string;
+	    command: string;
 	    workingDirectory: string;
 	
 	    static createFrom(source: any = {}) {
@@ -47,7 +47,7 @@ export namespace project {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.name = source["name"];
-	        this.project = source["project"];
+	        this.command = source["command"];
 	        this.workingDirectory = source["workingDirectory"];
 	    }
 	}
@@ -71,7 +71,7 @@ export namespace project {
 	    id: string;
 	    name: string;
 	    commands: Record<string, Command>;
-	    command_groups: CommandGroup[];
+	    commandGroups: CommandGroup[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Project(source);
@@ -82,7 +82,7 @@ export namespace project {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.commands = this.convertValues(source["commands"], Command, true);
-	        this.command_groups = this.convertValues(source["command_groups"], CommandGroup);
+	        this.commandGroups = this.convertValues(source["commandGroups"], CommandGroup);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

@@ -5,6 +5,10 @@ import {config} from '../models';
 
 export function AddCommand(arg1:project.Command):Promise<void>;
 
+export function CloseProject():Promise<void>;
+
+export function CreateProject(arg1:string,arg2:string):Promise<void>;
+
 export function EditCommand(arg1:project.Command):Promise<void>;
 
 export function GetAvailableProjects():Promise<Array<project.Project>>;
@@ -17,12 +21,14 @@ export function GetCurrentProject():Promise<project.Project>;
 
 export function GetUserConfig():Promise<config.UserConfig>;
 
+export function OpenProject(arg1:string):Promise<project.Project>;
+
 export function RemoveCommand(arg1:string):Promise<void>;
 
 export function RunCommand(arg1:string):Promise<Record<string, project.Command>>;
 
 export function SaveCommandGroups(arg1:Array<project.CommandGroup>):Promise<void>;
 
-export function SaveExtraPaths(arg1:Array<string>):Promise<void>;
+export function SaveUserConfig(arg1:config.UserConfig):Promise<void>;
 
 export function StopCommand(arg1:string):Promise<void>;

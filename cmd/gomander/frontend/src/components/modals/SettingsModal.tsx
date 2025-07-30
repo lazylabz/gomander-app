@@ -68,7 +68,7 @@ export const SettingsModal = ({
       extraPaths: data.extraPaths.map((path) => path.value),
     };
 
-    await saveUserConfig(config);
+    await saveUserConfig({ ...userConfig, ...config });
 
     form.reset();
 
