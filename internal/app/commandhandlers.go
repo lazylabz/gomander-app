@@ -49,7 +49,7 @@ func (a *App) RemoveCommand(id string) error {
 	a.logger.Info("Command removed: " + id)
 	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command removed")
 
-	// Update the commands and project groups in the frontend
+	// Update the commands and command groups in the frontend
 	a.eventEmitter.EmitEvent(event.GetCommands, nil)
 	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
 
@@ -97,7 +97,7 @@ func (a *App) RunCommand(id string) map[string]project.Command {
 
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to run project: "+id+" - "+err.Error())
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to run command: "+id+" - "+err.Error())
 		return nil
 	}
 
@@ -119,7 +119,7 @@ func (a *App) StopCommand(id string) {
 
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to stop project gracefully: "+id+" - "+err.Error())
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to stop command gracefully: "+id+" - "+err.Error())
 		return
 	}
 
