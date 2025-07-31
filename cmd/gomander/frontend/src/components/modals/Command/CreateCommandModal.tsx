@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Terminal } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { CommandCommandField } from "@/components/modals/Command/common/CommandCommandField.tsx";
@@ -19,6 +20,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
+import { helpersService } from "@/contracts/service.ts";
+import { useProjectStore } from "@/store/projectStore.ts";
 import { createCommand } from "@/useCases/command/createCommand.ts";
 
 export const CreateCommandModal = ({
@@ -28,6 +31,12 @@ export const CreateCommandModal = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
+  const projectBaseWorkingDirectory =
+    useProjectStore((state) => state.project?.baseWorkingDirectory) || "";
+  const [calculatedPath, setCalculatedPath] = useState(
+    projectBaseWorkingDirectory || "",
+  );
+
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,6 +65,15 @@ export const CreateCommandModal = ({
     }
   };
 
+  const workingDirectoryWatcher = form.watch("workingDirectory");
+  useEffect(() => {
+    helpersService
+      .getComputedPath(projectBaseWorkingDirectory, workingDirectoryWatcher)
+      .then((calculatedPath) => {
+        setCalculatedPath(calculatedPath);
+      });
+  }, [projectBaseWorkingDirectory, workingDirectoryWatcher]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[628px]">
@@ -68,6 +86,7 @@ export const CreateCommandModal = ({
             <div className="space-y-6 my-4">
               <CommandNameField />
               <CommandCommandField />
+              Calculated path: {calculatedPath}
               <CommandWorkingDirectoryField />
             </div>
             <DialogFooter>

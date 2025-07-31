@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 
+import { BaseWorkingDirectoryField } from "@/components/modals/Project/common/BaseWorkingDirectoryField.tsx";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
 import {
   formSchema,
@@ -55,6 +56,7 @@ export const CreateProjectModal = ({
               className="w-full mt-2 flex flex-col gap-4"
             >
               <ProjectNameField />
+              <BaseWorkingDirectoryField />
               <Button className="self-end" type="submit">
                 Save
               </Button>
