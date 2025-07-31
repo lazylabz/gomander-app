@@ -26,6 +26,7 @@ export const CreateProjectModal = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      baseWorkingDirectory: "",
     },
   });
 
@@ -37,7 +38,7 @@ export const CreateProjectModal = ({
   };
 
   const onSubmit = async (values: FormSchemaType) => {
-    await dataService.createProject(crypto.randomUUID(), values.name);
+    await dataService.createProject(crypto.randomUUID(), values.name, values.baseWorkingDirectory);
 
     onSuccess();
     handleOpenChange(false);

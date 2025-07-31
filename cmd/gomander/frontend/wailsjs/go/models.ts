@@ -38,6 +38,7 @@ export namespace project {
 	export interface Project {
 	    id: string;
 	    name: string;
+	    baseWorkingDirectory: string;
 	    commands: Record<string, Command>;
 	    commandGroups: CommandGroup[];
 	}

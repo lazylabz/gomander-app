@@ -35,12 +35,13 @@ func (a *App) OpenProject(projectConfigId string) (*project.Project, error) {
 	return p, nil
 }
 
-func (a *App) CreateProject(id, name string) error {
+func (a *App) CreateProject(id, name, baseWorkingDirectory string) error {
 	err := project.SaveProject(&project.Project{
-		Id:            id,
-		Name:          name,
-		Commands:      make(map[string]project.Command),
-		CommandGroups: make([]project.CommandGroup, 0),
+		Id:                   id,
+		Name:                 name,
+		BaseWorkingDirectory: baseWorkingDirectory,
+		Commands:             make(map[string]project.Command),
+		CommandGroups:        make([]project.CommandGroup, 0),
 	})
 
 	if err != nil {

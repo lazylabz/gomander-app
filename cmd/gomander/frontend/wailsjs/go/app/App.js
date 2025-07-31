@@ -10,8 +10,8 @@ export function CloseProject() {
   return window['go']['app']['App']['CloseProject']();
 }
 
-export function CreateProject(arg1, arg2) {
-  return window['go']['app']['App']['CreateProject'](arg1, arg2);
+export function CreateProject(arg1, arg2, arg3) {
+  return window['go']['app']['App']['CreateProject'](arg1, arg2, arg3);
 }
 
 export function DeleteProject(arg1) {

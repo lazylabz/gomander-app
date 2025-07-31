@@ -28,10 +28,11 @@ func NewApp() *App {
 
 func (a *App) persistSelectedProjectConfig() error {
 	err := project.SaveProject(&project.Project{
-		Id:            a.selectedProject.Id,
-		Name:          a.selectedProject.Name,
-		Commands:      a.selectedProject.Commands,
-		CommandGroups: a.selectedProject.CommandGroups,
+		Id:                   a.selectedProject.Id,
+		Name:                 a.selectedProject.Name,
+		BaseWorkingDirectory: a.selectedProject.BaseWorkingDirectory,
+		Commands:             a.selectedProject.Commands,
+		CommandGroups:        a.selectedProject.CommandGroups,
 	})
 
 	if err != nil {
