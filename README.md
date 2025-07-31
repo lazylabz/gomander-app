@@ -1,5 +1,7 @@
 # Gomander - A simple GUI to launch and monitor commands
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=moisesrj97_gomander&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=moisesrj97_gomander)
+
 ## About
 
 Gomander is a simple GUI that allows you to easily launch, monitor, and organize commands. It is designed for users who need to launch and monitor multiple commands at the same time.
