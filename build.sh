@@ -3,7 +3,7 @@
 # Clean up the build directory
 rm -rf build/bin
 
-# First, we'll craete the windows and darwin builds
+# First, we'll create the windows and darwin builds
 cd cmd/gomander
 wails build --platform="darwin/amd64" && mv ../../build/bin/gomander.app ../../build/bin/gomander-darwin-amd64.app
 wails build --platform="darwin/arm64" && mv ../../build/bin/gomander.app ../../build/bin/gomander-darwin-arm64.app
