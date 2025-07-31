@@ -51,9 +51,6 @@ func LoadProject(projectConfigId string) (*Project, error) {
 
 	defer func(file *os.File) {
 		err = file.Close()
-		if err != nil {
-			panic(err)
-		}
 	}(file)
 
 	// Read the config from the file
@@ -75,9 +72,6 @@ func SaveProject(config *Project) error {
 
 	defer func(file *os.File) {
 		err = file.Close()
-		if err != nil {
-			panic(err)
-		}
 	}(file)
 
 	// Truncate the file to ensure clean write
