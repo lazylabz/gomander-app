@@ -25,7 +25,10 @@ func LoadUserConfig() (*UserConfig, error) {
 	}
 
 	defer func(file *os.File) {
-		err = file.Close()
+		closeErr := file.Close()
+		if err == nil {
+			err = closeErr
+		}
 	}(file)
 
 	stat, err := os.Stat(file.Name())
@@ -59,7 +62,10 @@ func SaveUserConfig(config *UserConfig) error {
 	}
 
 	defer func(file *os.File) {
-		err = file.Close()
+		closeErr := file.Close()
+		if err == nil {
+			err = closeErr
+		}
 	}(file)
 
 	// Truncate the file to ensure clean write
