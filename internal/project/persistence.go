@@ -50,9 +50,9 @@ func LoadProject(projectConfigId string) (*Project, error) {
 	}
 
 	defer func(file *os.File) {
-		err = file.Close()
-		if err != nil {
-			panic(err)
+		closeErr := file.Close()
+		if err == nil {
+			err = closeErr
 		}
 	}(file)
 
@@ -74,9 +74,9 @@ func SaveProject(config *Project) error {
 	}
 
 	defer func(file *os.File) {
-		err = file.Close()
-		if err != nil {
-			panic(err)
+		closeErr := file.Close()
+		if err == nil {
+			err = closeErr
 		}
 	}(file)
 

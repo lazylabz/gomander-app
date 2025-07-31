@@ -52,7 +52,7 @@ func (a *App) Startup(ctx context.Context) {
 		if err != nil {
 			a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to load last opened project config")
 			a.userConfig.LastOpenedProjectId = ""
-			err := a.persistUserConfig()
+			err = a.persistUserConfig()
 			if err != nil {
 				panic(err)
 			}
