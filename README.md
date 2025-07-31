@@ -41,7 +41,10 @@ wails dev
 
 ### Building
 
-To build a redistributable package in production mode, use the following command:
-```bash
-wails build
-```
+Pre-requisites:
+- [create-dmg](https://formulae.brew.sh/formula/create-dmg)
+- [makensis](https://formulae.brew.sh/formula/makensis)
+
+#### From Mac OS system
+
+Execute `build.sh`
