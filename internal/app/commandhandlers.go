@@ -87,7 +87,7 @@ func (a *App) RunCommand(id string) map[string]project.Command {
 		return nil
 	}
 
-	err = a.commandRunner.RunCommand(*cmd, a.userConfig.ExtraPaths)
+	err = a.commandRunner.RunCommand(*cmd, a.userConfig.EnvironmentPaths)
 
 	if err != nil {
 		a.logger.Error(err.Error())

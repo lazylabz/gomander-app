@@ -83,7 +83,7 @@ func (a *App) persistSelectedProjectConfig() error {
 
 func (a *App) persistUserConfig() error {
 	err := config.SaveUserConfig(&config.UserConfig{
-		ExtraPaths:          a.userConfig.ExtraPaths,
+		EnvironmentPaths:    a.userConfig.EnvironmentPaths,
 		LastOpenedProjectId: a.userConfig.LastOpenedProjectId,
 	})
 	if err != nil {

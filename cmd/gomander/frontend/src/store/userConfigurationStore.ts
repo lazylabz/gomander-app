@@ -11,7 +11,7 @@ type UserConfigurationStore = {
 export const userConfigurationStore = createStore<UserConfigurationStore>()(
   (set) => ({
     userConfig: {
-      extraPaths: [],
+      environmentPaths: [],
       lastOpenedProjectId: "",
     },
     setUserConfig: (config: UserConfig) => {
