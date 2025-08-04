@@ -75,12 +75,10 @@ func DeleteProject(projectConfigId string) error {
 		return err
 	}
 
-	defer func(file *os.File) {
-		closeFileErr := file.Close()
-		if err == nil && closeFileErr != nil {
-			err = closeFileErr
-		}
-	}(file)
+	err = file.Close()
+	if err == nil {
+		return err
+	}
 
 	// Remove the file
 	err = os.Remove(file.Name())
