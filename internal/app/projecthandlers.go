@@ -3,6 +3,9 @@ package app
 import (
 	"errors"
 
+	"github.com/wailsapp/wails/v2/pkg/runtime"
+
+	"gomander/internal/event"
 	"gomander/internal/project"
 )
 
@@ -66,5 +69,65 @@ func (a *App) CloseProject() error {
 		return errors.New("error stopping running commands")
 	}
 
+	return nil
+}
+
+func (a *App) DeleteProject(projectConfigId string) error {
+	err := project.DeleteProject(projectConfigId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *App) ExportProject(projectConfigId string) error {
+	p, err := project.LoadProject(projectConfigId)
+	if err != nil {
+		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
+		return err
+	}
+	if p == nil {
+		return errors.New("project not found")
+	}
+
+	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{Title: "Select a destination", CanCreateDirectories: true, DefaultFilename: p.Name + ".json"})
+	if err != nil {
+		return err
+	}
+
+	if filePath == "" {
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Export cancelled")
+		return nil
+	}
+
+	err = project.ExportProject(p, filePath)
+	if err != nil {
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to export project: "+err.Error())
+		return err
+	}
+
+	a.eventEmitter.EmitEvent(event.SuccessNotification, "Project exported successfully")
+	return nil
+}
+
+func (a *App) ImportProject() error {
+	filePath, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{Title: "Select a project file", Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}}})
+	if err != nil {
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to open file dialog: "+err.Error())
+		return err
+	}
+	if filePath == "" {
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Import cancelled")
+		return nil
+	}
+
+	err = project.ImportProject(filePath)
+	if err != nil {
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to import project: "+err.Error())
+		return err
+	}
+
+	a.eventEmitter.EmitEvent(event.SuccessNotification, "Project imported successfully")
 	return nil
 }

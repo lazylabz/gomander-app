@@ -9,7 +9,11 @@ export function CloseProject():Promise<void>;
 
 export function CreateProject(arg1:string,arg2:string):Promise<void>;
 
+export function DeleteProject(arg1:string):Promise<void>;
+
 export function EditCommand(arg1:project.Command):Promise<void>;
+
+export function ExportProject(arg1:string):Promise<void>;
 
 export function GetAvailableProjects():Promise<Array<project.Project>>;
 
@@ -20,6 +24,8 @@ export function GetCommands():Promise<Record<string, project.Command>>;
 export function GetCurrentProject():Promise<project.Project>;
 
 export function GetUserConfig():Promise<config.UserConfig>;
+
+export function ImportProject():Promise<void>;
 
 export function OpenProject(arg1:string):Promise<project.Project>;
 

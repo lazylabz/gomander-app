@@ -2,8 +2,11 @@ package project
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
+
+	"github.com/google/uuid"
 )
 
 const ProjectsFolder = "projects"
@@ -43,42 +46,68 @@ func GetAllProjectsAvailableInProjectsFolder() ([]*Project, error) {
 	return projects, nil
 }
 
-func LoadProject(projectConfigId string) (*Project, error) {
+func LoadProject(projectConfigId string) (p *Project, err error) {
 	file, err := findOrCreateProjectConfigFile(projectConfigId)
 	if err != nil {
 		return nil, err
 	}
 
-	defer func(file *os.File) {
+	defer func() {
 		closeErr := file.Close()
 		if err == nil {
 			err = closeErr
 		}
-	}(file)
+	}()
+
+	p = &Project{}
 
 	// Read the config from the file
-	var config Project
 	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&config)
+	err = decoder.Decode(p)
 	if err != nil {
 		return nil, err
 	}
 
-	return &config, nil
+	return
 }
 
-func SaveProject(config *Project) error {
+func DeleteProject(projectConfigId string) error {
+	exists, err := projectFileExists(projectConfigId)
+
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return errors.New("project not found")
+	}
+
+	filePath, err := getProjectPath(projectConfigId)
+	if err != nil {
+		return err
+	}
+
+	// Remove the file
+	err = os.Remove(filePath)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func SaveProject(config *Project) (err error) {
 	file, err := findOrCreateProjectConfigFile(config.Id)
 	if err != nil {
 		return err
 	}
 
-	defer func(file *os.File) {
+	defer func() {
 		closeErr := file.Close()
 		if err == nil {
 			err = closeErr
 		}
-	}(file)
+	}()
 
 	// Truncate the file to ensure clean write
 	err = file.Truncate(0)
@@ -94,17 +123,106 @@ func SaveProject(config *Project) error {
 		return err
 	}
 
-	return nil
+	return
+}
+
+func ExportProject(project *Project, exportPath string) (err error) {
+	// Ensure the export directory exists
+	err = os.MkdirAll(filepath.Dir(exportPath), 0755)
+	if err != nil {
+		return err
+	}
+
+	// Create or open the export file
+	file, err := os.OpenFile(exportPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		closeFileErr := file.Close()
+		if err == nil {
+			err = closeFileErr
+		}
+	}()
+
+	// Write the project config to the file
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ")
+	err = encoder.Encode(project)
+	if err != nil {
+		return err
+	}
+
+	return
+}
+
+func ImportProject(filePath string) (err error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		closeFileErr := file.Close()
+		if err == nil {
+			err = closeFileErr
+		}
+	}()
+
+	var project Project
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&project)
+	if err != nil {
+		return err
+	}
+
+	// Check if there is a project with the same ID. If so, generate a new UUID for the project.
+	exists, err := projectFileExists(project.Id)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		project.Id = uuid.New().String()
+	}
+
+	// Save the imported project
+	err = SaveProject(&project)
+	if err != nil {
+		return err
+	}
+
+	return
+}
+
+func projectFileExists(projectId string) (bool, error) {
+	projectFilePath, err := getProjectPath(projectId)
+	if err != nil {
+		return false, err
+	}
+
+	_, err = os.Stat(projectFilePath)
+
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil // File does not exist
+		}
+		return false, err // Some other error occurred
+	}
+
+	return true, nil // File exists
 }
 
 func findOrCreateProjectConfigFile(projectConfigId string) (*os.File, error) {
-	configDir, err := os.UserConfigDir()
+	folderPath, err := getProjectFolderPath()
 	if err != nil {
 		return nil, err
 	}
-
-	folderPath := filepath.Join(configDir, "gomander", ProjectsFolder)
-	filePath := filepath.Join(folderPath, projectConfigId+".json")
+	filePath, err := getProjectPath(projectConfigId)
+	if err != nil {
+		return nil, err
+	}
 
 	// Ensure the directory exists
 	err = os.MkdirAll(folderPath, 0755)
@@ -120,4 +238,24 @@ func findOrCreateProjectConfigFile(projectConfigId string) (*os.File, error) {
 	}
 
 	return file, nil
+}
+
+func getProjectFolderPath() (string, error) {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	folderPath := filepath.Join(configDir, "gomander", ProjectsFolder)
+
+	return folderPath, nil
+}
+
+func getProjectPath(projectId string) (string, error) {
+	folderPath, err := getProjectFolderPath()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(folderPath, projectId+".json"), nil
 }
