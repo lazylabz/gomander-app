@@ -1,4 +1,5 @@
-import { config, event, project } from "../../wailsjs/go/models.ts";
+import type { config, project } from "../../wailsjs/go/models.ts";
+import { event } from "../../wailsjs/go/models.ts";
 
 // Types
 export type Command = project.Command;
