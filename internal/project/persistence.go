@@ -177,12 +177,7 @@ func ImportProject(filePath string) error {
 	}
 
 	if exists {
-		newUUID, err := uuid.NewUUID()
-		if err != nil {
-			return err
-		}
-
-		project.Id = newUUID.String()
+		project.Id = uuid.New().String()
 	}
 
 	// Save the imported project
