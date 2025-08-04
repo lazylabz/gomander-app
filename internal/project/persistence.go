@@ -2,6 +2,7 @@ package project
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -46,6 +47,8 @@ func GetAllProjectsAvailableInProjectsFolder() ([]*Project, error) {
 }
 
 func LoadProject(projectConfigId string) (*Project, error) {
+	var err error
+
 	file, err := findOrCreateProjectConfigFile(projectConfigId)
 	if err != nil {
 		return nil, err
@@ -66,22 +69,27 @@ func LoadProject(projectConfigId string) (*Project, error) {
 		return nil, err
 	}
 
-	return &config, nil
+	return &config, err
 }
 
 func DeleteProject(projectConfigId string) error {
-	file, err := findOrCreateProjectConfigFile(projectConfigId)
+	exists, err := projectFileExists(projectConfigId)
+
 	if err != nil {
 		return err
 	}
 
-	err = file.Close()
+	if !exists {
+		return errors.New("project not found")
+	}
+
+	filePath, err := getProjectPath(projectConfigId)
 	if err != nil {
 		return err
 	}
 
 	// Remove the file
-	err = os.Remove(file.Name())
+	err = os.Remove(filePath)
 	if err != nil {
 		return err
 	}
@@ -90,6 +98,8 @@ func DeleteProject(projectConfigId string) error {
 }
 
 func SaveProject(config *Project) error {
+	var err error
+
 	file, err := findOrCreateProjectConfigFile(config.Id)
 	if err != nil {
 		return err
@@ -116,12 +126,14 @@ func SaveProject(config *Project) error {
 		return err
 	}
 
-	return nil
+	return err
 }
 
 func ExportProject(project *Project, exportPath string) error {
+	var err error
+
 	// Ensure the export directory exists
-	err := os.MkdirAll(filepath.Dir(exportPath), 0755)
+	err = os.MkdirAll(filepath.Dir(exportPath), 0755)
 	if err != nil {
 		return err
 	}
@@ -147,10 +159,12 @@ func ExportProject(project *Project, exportPath string) error {
 		return err
 	}
 
-	return nil
+	return err
 }
 
 func ImportProject(filePath string) error {
+	var err error
+
 	file, err := os.Open(filePath)
 	if err != nil {
 		return err
@@ -171,7 +185,7 @@ func ImportProject(filePath string) error {
 	}
 
 	// Check if there is a project with the same ID. If so, generate a new UUID for the project.
-	exists, err := projectFileExists(project)
+	exists, err := projectFileExists(project.Id)
 	if err != nil {
 		return err
 	}
@@ -186,15 +200,16 @@ func ImportProject(filePath string) error {
 		return err
 	}
 
-	return nil
+	return err
 }
 
-func projectFileExists(project Project) (bool, error) {
-	userConfigDir, err := os.UserConfigDir()
+func projectFileExists(projectId string) (bool, error) {
+	projectFilePath, err := getProjectPath(projectId)
 	if err != nil {
 		return false, err
 	}
-	_, err = os.Stat(filepath.Join(userConfigDir, "gomander", ProjectsFolder, project.Id+".json"))
+
+	_, err = os.Stat(projectFilePath)
 
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -207,13 +222,14 @@ func projectFileExists(project Project) (bool, error) {
 }
 
 func findOrCreateProjectConfigFile(projectConfigId string) (*os.File, error) {
-	configDir, err := os.UserConfigDir()
+	folderPath, err := getProjectFolderPath()
 	if err != nil {
 		return nil, err
 	}
-
-	folderPath := filepath.Join(configDir, "gomander", ProjectsFolder)
-	filePath := filepath.Join(folderPath, projectConfigId+".json")
+	filePath, err := getProjectPath(projectConfigId)
+	if err != nil {
+		return nil, err
+	}
 
 	// Ensure the directory exists
 	err = os.MkdirAll(folderPath, 0755)
@@ -229,4 +245,24 @@ func findOrCreateProjectConfigFile(projectConfigId string) (*os.File, error) {
 	}
 
 	return file, nil
+}
+
+func getProjectFolderPath() (string, error) {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	folderPath := filepath.Join(configDir, "gomander", ProjectsFolder)
+
+	return folderPath, nil
+}
+
+func getProjectPath(projectId string) (string, error) {
+	folderPath, err := getProjectFolderPath()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(folderPath, projectId+".json"), nil
 }
