@@ -46,6 +46,10 @@ export function GetUserConfig() {
   return window['go']['app']['App']['GetUserConfig']();
 }
 
+export function ImportProject() {
+  return window['go']['app']['App']['ImportProject']();
+}
+
 export function OpenProject(arg1) {
   return window['go']['app']['App']['OpenProject'](arg1);
 }

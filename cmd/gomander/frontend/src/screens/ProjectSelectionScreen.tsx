@@ -1,4 +1,4 @@
-import { EllipsisVertical, Plus } from "lucide-react";
+import { EllipsisVertical, Import, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { CreateProjectModal } from "@/components/modals/Project/CreateProjectModal.tsx";
@@ -15,6 +15,7 @@ import type { Project } from "@/contracts/types.ts";
 import { fetchProject } from "@/queries/fetchProject.ts";
 import { deleteProject } from "@/useCases/project/deleteProject.ts";
 import { exportProject } from "@/useCases/project/exportProject.ts";
+import { importProject } from "@/useCases/project/importProject.ts";
 
 export const ProjectSelectionScreen = () => {
   const [projectMenuOpen, setProjectMenuOpen] = useState<string | null>(null);
@@ -69,6 +70,11 @@ export const ProjectSelectionScreen = () => {
     setProjectIdBeingDeleted(null);
   };
 
+  const handleImportProject = async () => {
+    await importProject();
+    await fetchAvailableProjects();
+  };
+
   useEffect(() => {
     fetchAvailableProjects();
   }, []);
@@ -85,7 +91,7 @@ export const ProjectSelectionScreen = () => {
         onConfirm={confirmDeleteProject}
         onClose={cancelDeleteProject}
       />
-      <div className="w-full h-full flex flex-col items-center justify-center gap-6">
+      <div className="w-full h-full flex flex-col items-center justify-center gap-10">
         <h1 className="text-3xl">Open project </h1>
         {availableProjects.length > 0 && (
           <div className="flex flex-col items-center justify-center gap-2">
@@ -129,10 +135,17 @@ export const ProjectSelectionScreen = () => {
           </div>
         )}
         <div className="flex flex-col items-center justify-center gap-2">
-          {availableProjects.length === 0 && <p>You don't have projects yet</p>}
-          <Button onClick={openCreateProjectModal} variant="outline">
-            <Plus /> Create a new project
-          </Button>
+          {availableProjects.length === 0 && (
+            <p>You don't have projects yet. Create or import one.</p>
+          )}
+          <div className="flex flex-row items-center gap-2 justify-center">
+            <Button onClick={openCreateProjectModal} variant="ghost">
+              <Plus /> Create a new project
+            </Button>
+            <Button onClick={handleImportProject} variant="ghost">
+              <Import /> Import an existing project
+            </Button>
+          </div>
         </div>
         <div></div>
       </div>

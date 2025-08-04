@@ -109,3 +109,24 @@ func (a *App) ExportProject(projectConfigId string) error {
 	a.eventEmitter.EmitEvent(event.SuccessNotification, "Project exported successfully")
 	return nil
 }
+
+func (a *App) ImportProject() error {
+	filePath, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{Title: "Select a project file", Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}}})
+	if err != nil {
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to open file dialog: "+err.Error())
+		return err
+	}
+	if filePath == "" {
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Import cancelled")
+		return nil
+	}
+
+	err = project.ImportProject(filePath)
+	if err != nil {
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to import project: "+err.Error())
+		return err
+	}
+
+	a.eventEmitter.EmitEvent(event.SuccessNotification, "Project imported successfully")
+	return nil
+}

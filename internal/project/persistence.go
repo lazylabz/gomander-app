@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+
+	"github.com/google/uuid"
 )
 
 const ProjectsFolder = "projects"
@@ -143,6 +145,46 @@ func ExportProject(project *Project, exportPath string) error {
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
 	err = encoder.Encode(project)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ImportProject(filePath string) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+
+	defer func(file *os.File) {
+		closeFileErr := file.Close()
+		if err != nil && closeFileErr != nil {
+			err = closeFileErr
+		}
+	}(file)
+
+	var project Project
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&project)
+	if err != nil {
+		return err
+	}
+
+	// Check if there is a project with the same ID. If so, generate a new UUID for the project.
+	existingProject, err := LoadProject(project.Id)
+	if existingProject != nil {
+		newUUID, err := uuid.NewUUID()
+		if err != nil {
+			return err
+		}
+
+		project.Id = newUUID.String()
+	}
+
+	// Save the imported project
+	err = SaveProject(&project)
 	if err != nil {
 		return err
 	}

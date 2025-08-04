@@ -25,6 +25,8 @@ export function GetCurrentProject():Promise<project.Project>;
 
 export function GetUserConfig():Promise<config.UserConfig>;
 
+export function ImportProject():Promise<void>;
+
 export function OpenProject(arg1:string):Promise<project.Project>;
 
 export function RemoveCommand(arg1:string):Promise<void>;
