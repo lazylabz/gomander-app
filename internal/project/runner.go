@@ -16,15 +16,13 @@ type Runner struct {
 	runningCommands map[string]*exec.Cmd
 	eventEmitter    *event.EventEmitter
 	logger          *logger.Logger
-	pathHelper      *helpers.PathHelper
 }
 
-func NewCommandRunner(logger *logger.Logger, emitter *event.EventEmitter, pathHelper *helpers.PathHelper) *Runner {
+func NewCommandRunner(logger *logger.Logger, emitter *event.EventEmitter) *Runner {
 	return &Runner{
 		runningCommands: make(map[string]*exec.Cmd),
 		eventEmitter:    emitter,
 		logger:          logger,
-		pathHelper:      pathHelper,
 	}
 }
 
@@ -35,7 +33,7 @@ func (c *Runner) RunCommand(command Command, environmentPaths []string, baseWork
 
 	// Enable color output and set terminal type
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
-	cmd.Dir = c.pathHelper.GetComputedPath(baseWorkingDirectory, command.WorkingDirectory)
+	cmd.Dir = helpers.GetComputedPath(baseWorkingDirectory, command.WorkingDirectory)
 
 	// Set project attributes based on OS
 	platform.SetProcAttributes(cmd)

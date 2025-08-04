@@ -8,7 +8,6 @@ import {
   GetAvailableProjects,
   GetCommandGroups,
   GetCommands,
-  GetComputedPath,
   GetCurrentProject,
   GetUserConfig,
   ImportProject,
@@ -20,6 +19,7 @@ import {
   StopCommand,
 } from "../../wailsjs/go/app/App";
 import type { project } from "../../wailsjs/go/models.ts";
+import { GetComputedPath } from "../../wailsjs/go/uihelpers/UiPathHelper";
 import { EventsOff, EventsOn } from "../../wailsjs/runtime";
 
 export const dataService = {

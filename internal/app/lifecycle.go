@@ -5,7 +5,6 @@ import (
 
 	"gomander/internal/config"
 	"gomander/internal/event"
-	"gomander/internal/helpers"
 	"gomander/internal/logger"
 	"gomander/internal/project"
 )
@@ -16,12 +15,10 @@ func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
 	l := logger.NewLogger(ctx)
 	ee := event.NewEventEmitter(ctx)
-	ph := helpers.NewPathHelper()
 
 	a.logger = l
 	a.eventEmitter = ee
-	a.pathHelper = ph
-	a.commandRunner = project.NewCommandRunner(l, ee, ph)
+	a.commandRunner = project.NewCommandRunner(l, ee)
 
 	uc, err := config.LoadUserConfig()
 	if uc == nil || err != nil {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"gomander/internal/uihelpers"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -17,6 +18,7 @@ var assets embed.FS
 func main() {
 	// Create an instance of the app structure
 	app := internalapp.NewApp()
+	uiPathHelper := uihelpers.NewUiPathHelper()
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -30,6 +32,7 @@ func main() {
 		OnStartup:        app.Startup,
 		Bind: []interface{}{
 			app,
+			uiPathHelper,
 		},
 		OnBeforeClose: app.OnBeforeClose,
 		EnumBind: []interface{}{

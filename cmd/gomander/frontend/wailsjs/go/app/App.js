@@ -38,10 +38,6 @@ export function GetCommands() {
   return window['go']['app']['App']['GetCommands']();
 }
 
-export function GetComputedPath(arg1, arg2) {
-  return window['go']['app']['App']['GetComputedPath'](arg1, arg2);
-}
-
 export function GetCurrentProject() {
   return window['go']['app']['App']['GetCurrentProject']();
 }

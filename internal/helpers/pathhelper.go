@@ -2,14 +2,7 @@ package helpers
 
 import "path/filepath"
 
-type PathHelper struct {
-}
-
-func NewPathHelper() *PathHelper {
-	return &PathHelper{}
-}
-
-func (ph PathHelper) GetComputedPath(basePath, path string) string {
+func GetComputedPath(basePath, path string) string {
 	if path == "" {
 		return basePath
 	}
