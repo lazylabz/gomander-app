@@ -173,17 +173,12 @@ func ImportProject(filePath string) error {
 	}
 
 	// Check if there is a project with the same ID. If so, generate a new UUID for the project.
-	userConfigDir, err := os.UserConfigDir()
+	exists, err := projectFileExists(project)
 	if err != nil {
 		return err
 	}
-	_, err = os.Stat(filepath.Join(userConfigDir, "gomander", ProjectsFolder, project.Id+".json"))
 
-	if err != nil && !os.IsNotExist(err) {
-		return err
-	}
-
-	if err != nil /* The file exists */ {
+	if exists /* The file exists */ {
 		newUUID, err := uuid.NewUUID()
 		if err != nil {
 			return err
@@ -199,6 +194,23 @@ func ImportProject(filePath string) error {
 	}
 
 	return nil
+}
+
+func projectFileExists(project Project) (bool, error) {
+	userConfigDir, err := os.UserConfigDir()
+	if err != nil {
+		return false, err
+	}
+	_, err = os.Stat(filepath.Join(userConfigDir, "gomander", ProjectsFolder, project.Id+".json"))
+
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil // File does not exist
+		}
+		return false, err // Some other error occurred
+	}
+
+	return true, nil // File exists
 }
 
 func findOrCreateProjectConfigFile(projectConfigId string) (*os.File, error) {
