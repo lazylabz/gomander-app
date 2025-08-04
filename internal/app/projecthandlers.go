@@ -68,3 +68,16 @@ func (a *App) CloseProject() error {
 
 	return nil
 }
+
+func (a *App) DeleteProject(projectConfigId string) error {
+	err := project.DeleteProject(projectConfigId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//func (a *App) ExportProject(projectConfigId string) error {
+//	return nil
+//}

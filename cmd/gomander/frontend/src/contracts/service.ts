@@ -2,6 +2,7 @@ import {
   AddCommand,
   CloseProject,
   CreateProject,
+  DeleteProject,
   EditCommand,
   GetAvailableProjects,
   GetCommandGroups,
@@ -34,6 +35,7 @@ export const dataService = {
   stopCommand: StopCommand,
   openProject: OpenProject,
   closeProject: CloseProject,
+  deleteProject: DeleteProject,
 };
 
 export const eventService = {

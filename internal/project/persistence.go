@@ -67,6 +67,28 @@ func LoadProject(projectConfigId string) (*Project, error) {
 	return &config, nil
 }
 
+func DeleteProject(projectConfigId string) error {
+	file, err := findOrCreateProjectConfigFile(projectConfigId)
+	if err != nil {
+		return err
+	}
+
+	defer func(file *os.File) {
+		closeErr := file.Close()
+		if err == nil {
+			err = closeErr
+		}
+	}(file)
+
+	// Remove the file
+	err = os.Remove(file.Name())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func SaveProject(config *Project) error {
 	file, err := findOrCreateProjectConfigFile(config.Id)
 	if err != nil {
