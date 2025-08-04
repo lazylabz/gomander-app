@@ -7,7 +7,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 
-	"gomander/internal/app"
+	internalapp "gomander/internal/app"
 	"gomander/internal/event"
 )
 
@@ -16,7 +16,7 @@ var assets embed.FS
 
 func main() {
 	// Create an instance of the app structure
-	app := app.NewApp()
+	app := internalapp.NewApp()
 
 	// Create application with options
 	err := wails.Run(&options.App{
