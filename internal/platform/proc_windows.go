@@ -18,9 +18,8 @@ func SetProcAttributes(cmd *exec.Cmd) {
 	}
 }
 
-// TODO: Check if this works
-func SetProcEnv(cmd *exec.Cmd, extraPaths []string) {
-	if len(extraPaths) == 0 {
+func SetProcEnv(cmd *exec.Cmd, environmentPaths []string) {
+	if len(environmentPaths) == 0 {
 		return
 	}
 
@@ -28,8 +27,7 @@ func SetProcEnv(cmd *exec.Cmd, extraPaths []string) {
 
 	separator := ";"
 
-	// Prepend extra paths to existing PATH
-	newPath := strings.Join(extraPaths, separator) + separator + currentPath
+	newPath := strings.Join(environmentPaths, separator) + separator + currentPath
 
 	// Set the environment
 	if cmd.Env == nil {

@@ -27,7 +27,7 @@ func NewCommandRunner(logger *logger.Logger, emitter *event.EventEmitter) *Runne
 }
 
 // ExecCommand executes a project by its ID and streams its output.
-func (c *Runner) RunCommand(command Command, extraPaths []string) error {
+func (c *Runner) RunCommand(command Command, environmentPaths []string) error {
 	// Get the project object based on the project string and OS
 	cmd := platform.GetCommand(command.Command)
 
@@ -37,7 +37,7 @@ func (c *Runner) RunCommand(command Command, extraPaths []string) error {
 
 	// Set project attributes based on OS
 	platform.SetProcAttributes(cmd)
-	platform.SetProcEnv(cmd, extraPaths)
+	platform.SetProcEnv(cmd, environmentPaths)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {

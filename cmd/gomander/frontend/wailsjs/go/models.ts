@@ -1,7 +1,7 @@
 export namespace config {
 	
 	export class UserConfig {
-	    extraPaths: string[];
+	    environmentPaths: string[];
 	    lastOpenedProjectId: string;
 	
 	    static createFrom(source: any = {}) {
@@ -10,7 +10,7 @@ export namespace config {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.extraPaths = source["extraPaths"];
+	        this.environmentPaths = source["environmentPaths"];
 	        this.lastOpenedProjectId = source["lastOpenedProjectId"];
 	    }
 	}

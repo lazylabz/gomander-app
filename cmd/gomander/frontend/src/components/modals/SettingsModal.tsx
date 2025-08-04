@@ -25,7 +25,7 @@ import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 import { saveUserConfig } from "@/useCases/userConfig/saveUserConfig.ts";
 
 const formSchema = z.object({
-  extraPaths: z.array(
+  environmentPaths: z.array(
     z.object({
       value: z.string().min(1, "Path cannot be empty"),
     }),
@@ -46,13 +46,14 @@ export const SettingsModal = ({
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
     values: {
-      extraPaths: userConfig.extraPaths.map((p) => ({ value: p })) || [],
+      environmentPaths:
+        userConfig.environmentPaths.map((p) => ({ value: p })) || [],
     },
   });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "extraPaths" as const,
+    name: "environmentPaths" as const,
   });
 
   const addNewPath = () => {
@@ -66,7 +67,7 @@ export const SettingsModal = ({
   const onSubmit = async (data: FormType) => {
     await saveUserConfig({
       lastOpenedProjectId: userConfig.lastOpenedProjectId,
-      extraPaths: data.extraPaths.map((path) => path.value),
+      environmentPaths: data.environmentPaths.map((path) => path.value),
     });
 
     form.reset();
@@ -91,11 +92,11 @@ export const SettingsModal = ({
               <DialogTitle>Settings</DialogTitle>
             </DialogHeader>
             <div className="my-4">
-              <FormLabel className="mt-8 mb-4">Extra paths</FormLabel>
+              <FormLabel className="mt-8 mb-4">Environment paths</FormLabel>
               {fields.length === 0 && (
                 <p className="text-sm text-muted-foreground">
-                  Add extra paths to your system. These paths will be used to
-                  resolve commands and executables.
+                  Add extra environment paths to your system PATH. These paths
+                  will be used to resolve commands and executables.
                 </p>
               )}
               {fields.length !== 0 && (
@@ -107,7 +108,7 @@ export const SettingsModal = ({
                     >
                       <FormField
                         control={form.control}
-                        name={`extraPaths.${index}.value` as const}
+                        name={`environmentPaths.${index}.value` as const}
                         render={({ field }) => (
                           <FormItem className="flex-1">
                             <FormControl>
