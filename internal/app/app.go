@@ -29,13 +29,7 @@ func NewApp() *App {
 }
 
 func (a *App) persistSelectedProjectConfig() error {
-	err := project.SaveProject(&project.Project{
-		Id:                   a.selectedProject.Id,
-		Name:                 a.selectedProject.Name,
-		BaseWorkingDirectory: a.selectedProject.BaseWorkingDirectory,
-		Commands:             a.selectedProject.Commands,
-		CommandGroups:        a.selectedProject.CommandGroups,
-	})
+	err := project.SaveProject(a.selectedProject)
 
 	if err != nil {
 		return err
