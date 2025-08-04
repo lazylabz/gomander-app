@@ -13,6 +13,8 @@ export function DeleteProject(arg1:string):Promise<void>;
 
 export function EditCommand(arg1:project.Command):Promise<void>;
 
+export function ExportProject(arg1:string):Promise<void>;
+
 export function GetAvailableProjects():Promise<Array<project.Project>>;
 
 export function GetCommandGroups():Promise<Array<project.CommandGroup>>;

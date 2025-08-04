@@ -119,6 +119,37 @@ func SaveProject(config *Project) error {
 	return nil
 }
 
+func ExportProject(project *Project, exportPath string) error {
+	// Ensure the export directory exists
+	err := os.MkdirAll(filepath.Dir(exportPath), 0755)
+	if err != nil {
+		return err
+	}
+
+	// Create or open the export file
+	file, err := os.OpenFile(exportPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+
+	defer func(file *os.File) {
+		closeFileErr := file.Close()
+		if err != nil && closeFileErr != nil {
+			err = closeFileErr
+		}
+	}(file)
+
+	// Write the project config to the file
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ")
+	err = encoder.Encode(project)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func findOrCreateProjectConfigFile(projectConfigId string) (*os.File, error) {
 	configDir, err := os.UserConfigDir()
 	if err != nil {

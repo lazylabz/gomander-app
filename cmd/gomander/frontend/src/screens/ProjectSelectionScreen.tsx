@@ -13,6 +13,8 @@ import {
 import { dataService } from "@/contracts/service.ts";
 import type { Project } from "@/contracts/types.ts";
 import { fetchProject } from "@/queries/fetchProject.ts";
+import { deleteProject } from "@/useCases/project/deleteProject.ts";
+import { exportProject } from "@/useCases/project/exportProject.ts";
 
 export const ProjectSelectionScreen = () => {
   const [projectMenuOpen, setProjectMenuOpen] = useState<string | null>(null);
@@ -58,7 +60,7 @@ export const ProjectSelectionScreen = () => {
   };
 
   const confirmDeleteProject = async () => {
-    await dataService.deleteProject(projectIdBeingDeleted!);
+    await deleteProject(projectIdBeingDeleted!);
     setProjectIdBeingDeleted(null);
     await fetchAvailableProjects();
   };
@@ -107,7 +109,9 @@ export const ProjectSelectionScreen = () => {
                     <DropdownMenuItem onClick={handleDeleteProject(p.id)}>
                       Delete
                     </DropdownMenuItem>
-                    <DropdownMenuItem>Export</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => exportProject(p.id)}>
+                      Export
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <p
