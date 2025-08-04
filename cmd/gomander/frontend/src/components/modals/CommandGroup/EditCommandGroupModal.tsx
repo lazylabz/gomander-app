@@ -19,8 +19,7 @@ import {
 } from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
 import type { CommandGroup } from "@/contracts/types.ts";
-import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
-import { saveCommandGroups } from "@/useCases/commandGroup/saveCommandGroups.ts";
+import { editCommandGroup } from "@/useCases/commandGroup/editCommandGroup.ts";
 
 export const EditCommandGroupModal = ({
   commandGroup,
@@ -31,8 +30,6 @@ export const EditCommandGroupModal = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
-  const commandGroups = useCommandGroupStore((state) => state.commandGroups);
-
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     values: {
@@ -46,17 +43,13 @@ export const EditCommandGroupModal = ({
       return;
     }
 
-    await saveCommandGroups(
-      commandGroups.map((cg) =>
-        cg.id === commandGroup.id
-          ? {
-              ...cg,
-              name: values.name,
-              commands: values.commands,
-            }
-          : cg,
-      ),
-    );
+    const editedCommandGroup = {
+      ...commandGroup,
+      name: values.name,
+      commands: values.commands,
+    };
+
+    await editCommandGroup(editedCommandGroup);
 
     setOpen(false);
     form.reset();

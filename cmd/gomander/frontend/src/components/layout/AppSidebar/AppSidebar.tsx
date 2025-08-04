@@ -53,12 +53,6 @@ export const AppSidebar = () => {
     setSettingsModalOpen(true);
   };
 
-  const value = {
-    editCommand: (command: Command) => setEditingCommand(command),
-    editCommandGroup: (commandGroup: CommandGroup) =>
-      setEditingCommandGroup(commandGroup),
-  };
-
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -71,7 +65,13 @@ export const AppSidebar = () => {
   };
 
   return (
-    <sidebarContext.Provider value={value}>
+    <sidebarContext.Provider
+      value={{
+        startEditingCommand: (command: Command) => setEditingCommand(command),
+        startEditingCommandGroup: (commandGroup: CommandGroup) =>
+          setEditingCommandGroup(commandGroup),
+      }}
+    >
       <EditCommandModal
         command={editingCommand}
         open={!!editingCommand}

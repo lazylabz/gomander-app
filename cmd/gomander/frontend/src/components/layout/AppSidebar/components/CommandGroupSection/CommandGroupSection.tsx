@@ -30,11 +30,11 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
 import type { CommandGroup } from "@/contracts/types.ts";
-import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
+import { deleteCommandGroup } from "@/useCases/commandGroup/deleteCommandGroup.ts";
+import { editCommandGroup } from "@/useCases/commandGroup/editCommandGroup";
 import { runCommandGroup } from "@/useCases/commandGroup/runCommandGroup";
-import { saveCommandGroups } from "@/useCases/commandGroup/saveCommandGroups.ts";
 import { stopCommandGroup } from "@/useCases/commandGroup/stopCommandGroup.ts";
 
 export const CommandGroupSection = ({
@@ -42,12 +42,10 @@ export const CommandGroupSection = ({
 }: {
   commandGroup: CommandGroup;
 }) => {
-  const commandGroups = useCommandGroupStore((state) => state.commandGroups);
-
   const commands = useCommandStore((state) => state.commands);
   const commandsStatus = useCommandStore((state) => state.commandsStatus);
 
-  const { editCommandGroup } = useSidebarContext();
+  const { startEditingCommandGroup } = useSidebarContext();
 
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: commandGroup.id });
@@ -80,22 +78,18 @@ export const CommandGroupSection = ({
     stopCommandGroup(commandGroup.id);
   };
 
-  const deleteCommandGroup = async () => {
-    await saveCommandGroups(
-      commandGroups.filter((cg) => cg.id !== commandGroup.id),
-    );
+  const handleDelete = async () => {
+    await deleteCommandGroup(commandGroup.id);
   };
 
   const handleEdit = () => {
-    editCommandGroup(commandGroup);
+    startEditingCommandGroup(commandGroup);
   };
 
-  const editCommandGroupCommands = async (commandGroup: CommandGroup) => {
-    await saveCommandGroups(
-      commandGroups.map((cg) =>
-        cg.id === commandGroup.id ? commandGroup : cg,
-      ),
-    );
+  const handleSaveReorderedCommandGroup = async (
+    reorderedCommandGroup: CommandGroup,
+  ) => {
+    await editCommandGroup(reorderedCommandGroup);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -113,10 +107,12 @@ export const CommandGroupSection = ({
         oldIndex,
         newIndex,
       );
-      await editCommandGroupCommands({
+      const reorderedCommandGroup = {
         ...commandGroup,
         commands: newCommandsGroups,
-      });
+      };
+
+      await handleSaveReorderedCommandGroup(reorderedCommandGroup);
     }
   };
 
@@ -188,9 +184,7 @@ export const CommandGroupSection = ({
           </ContextMenuTrigger>
           <ContextMenuContent>
             <ContextMenuItem onClick={handleEdit}>Edit</ContextMenuItem>
-            <ContextMenuItem onClick={deleteCommandGroup}>
-              Delete
-            </ContextMenuItem>
+            <ContextMenuItem onClick={handleDelete}>Delete</ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
         <CollapsibleContent className="pl-4">
