@@ -32,7 +32,7 @@ export const CommandMenuItem = ({
   const commandsStatus = useCommandStore((state) => state.commandsStatus);
   const activeCommandId = useCommandStore((state) => state.activeCommandId);
 
-  const { editCommand } = useSidebarContext();
+  const { startEditingCommand } = useSidebarContext();
 
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: command.id });
@@ -53,7 +53,7 @@ export const CommandMenuItem = ({
   };
 
   const handleEditCommand = () => {
-    editCommand(command);
+    startEditingCommand(command);
   };
 
   const handleDuplicateCommand = async () => {
