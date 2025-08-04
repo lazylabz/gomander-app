@@ -22,6 +22,7 @@ export namespace event {
 	export enum Event {
 	    GET_COMMANDS = "get_commands",
 	    PROCESS_FINISHED = "process_finished",
+	    PROCESS_STARTED = "process_started",
 	    NEW_LOG_ENTRY = "new_log_entry",
 	    ERROR_NOTIFICATION = "error_notification",
 	    SUCCESS_NOTIFICATION = "success_notification",

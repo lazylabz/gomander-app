@@ -8,10 +8,9 @@ import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
+import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
 
 export const EventListenersContainer = () => {
-  const setCommandsStatus = useCommandStore((state) => state.setCommandsStatus);
-  const commandsStatus = useCommandStore((state) => state.commandsStatus);
   const commandsLogs = useCommandStore((state) => state.commandsLogs);
   const setCommandsLogs = useCommandStore((state) => state.setCommandsLogs);
 
@@ -36,7 +35,7 @@ export const EventListenersContainer = () => {
           newLogs[id] = [];
         }
         newLogs[id].push(line);
-        
+
         if (newLogs[id].length > 100) {
           newLogs[id] = newLogs[id].slice(-100); // Keep only the last 100 lines
         }
@@ -63,13 +62,14 @@ export const EventListenersContainer = () => {
 
     eventService.eventsOn(
       Event.PROCESS_FINISHED,
-      (data: EventData[Event.PROCESS_FINISHED]) => {
-        const newCommandsStatus = {
-          ...commandsStatus,
-          [data]: CommandStatus.IDLE,
-        };
-        setCommandsStatus(newCommandsStatus);
-      },
+      (data: EventData[Event.PROCESS_FINISHED]) =>
+        updateCommandStatus(data, CommandStatus.IDLE),
+    );
+
+    eventService.eventsOn(
+      Event.PROCESS_STARTED,
+      (data: EventData[Event.PROCESS_STARTED]) =>
+        updateCommandStatus(data, CommandStatus.RUNNING),
     );
 
     eventService.eventsOn(Event.GET_USER_CONFIG, () => {

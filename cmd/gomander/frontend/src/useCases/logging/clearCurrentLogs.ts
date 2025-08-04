@@ -1,15 +1,12 @@
 import { commandStore } from "@/store/commandStore.ts";
+import { cleanCommandLogs } from "@/useCases/command/cleanCommandLogs.ts";
 
 export const clearCurrentLogs = () => {
-  const { activeCommandId, commandsLogs, setCommandsLogs } =
-    commandStore.getState();
+  const { activeCommandId } = commandStore.getState();
 
   if (!activeCommandId) {
     return;
   }
 
-  setCommandsLogs({
-    ...commandsLogs,
-    [activeCommandId]: [],
-  });
+  cleanCommandLogs(activeCommandId);
 };

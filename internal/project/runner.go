@@ -56,6 +56,8 @@ func (c *Runner) RunCommand(command Command, environmentPaths []string) error {
 		return err
 	}
 
+	c.eventEmitter.EmitEvent(event.ProcessStarted, command.Id)
+
 	// Save the project in the runningCommands map
 	c.runningCommands[command.Id] = cmd
 
