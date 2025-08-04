@@ -3,6 +3,7 @@ import { Terminal } from "lucide-react";
 import { useForm } from "react-hook-form";
 
 import { CommandCommandField } from "@/components/modals/Command/common/CommandCommandField.tsx";
+import { CommandComputedPath } from "@/components/modals/Command/common/CommandComputedPath.tsx";
 import { CommandNameField } from "@/components/modals/Command/common/CommandNameField.tsx";
 import { CommandWorkingDirectoryField } from "@/components/modals/Command/common/CommandWorkingDirectoryField.tsx";
 import {
@@ -75,6 +76,7 @@ export const EditCommandModal = ({
               <CommandNameField />
               <CommandCommandField />
               <CommandWorkingDirectoryField />
+              <CommandComputedPath />
             </div>
             <DialogFooter>
               <DialogClose asChild>
