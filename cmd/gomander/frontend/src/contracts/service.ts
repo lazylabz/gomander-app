@@ -15,7 +15,7 @@ import {
   SaveUserConfig,
   StopCommand,
 } from "../../wailsjs/go/app/App";
-import { project } from "../../wailsjs/go/models.ts";
+import type { project } from "../../wailsjs/go/models.ts";
 import { EventsOff, EventsOn } from "../../wailsjs/runtime";
 
 export const dataService = {
