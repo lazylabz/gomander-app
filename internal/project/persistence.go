@@ -76,7 +76,7 @@ func DeleteProject(projectConfigId string) error {
 	}
 
 	err = file.Close()
-	if err == nil {
+	if err != nil {
 		return err
 	}
 
@@ -176,7 +176,7 @@ func ImportProject(filePath string) error {
 		return err
 	}
 
-	if exists /* The file exists */ {
+	if exists {
 		newUUID, err := uuid.NewUUID()
 		if err != nil {
 			return err
