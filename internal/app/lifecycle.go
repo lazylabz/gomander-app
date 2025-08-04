@@ -51,10 +51,11 @@ func (a *App) Startup(ctx context.Context) {
 
 func (a *App) OnBeforeClose(ctx context.Context) (prevent bool) {
 	err := a.commandRunner.StopAllRunningCommands()
+
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
-		prevent = true // Prevent the application from closing
+		return true // Prevent the application from closing
 	}
 
 	return false // Allow the application to close
