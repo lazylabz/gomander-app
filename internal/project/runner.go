@@ -3,27 +3,28 @@ package project
 import (
 	"bufio"
 	"errors"
+	"gomander/internal/event"
+	"gomander/internal/helpers"
+	"gomander/internal/logger"
+	"gomander/internal/platform"
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
-
-	"gomander/internal/event"
-	"gomander/internal/logger"
-	"gomander/internal/platform"
 )
 
 type Runner struct {
 	runningCommands map[string]*exec.Cmd
 	eventEmitter    *event.EventEmitter
 	logger          *logger.Logger
+	pathHelper      *helpers.PathHelper
 }
 
-func NewCommandRunner(logger *logger.Logger, emitter *event.EventEmitter) *Runner {
+func NewCommandRunner(logger *logger.Logger, emitter *event.EventEmitter, pathHelper *helpers.PathHelper) *Runner {
 	return &Runner{
 		runningCommands: make(map[string]*exec.Cmd),
 		eventEmitter:    emitter,
 		logger:          logger,
+		pathHelper:      pathHelper,
 	}
 }
 
@@ -34,7 +35,7 @@ func (c *Runner) RunCommand(command Command, environmentPaths []string, baseWork
 
 	// Enable color output and set terminal type
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
-	cmd.Dir = getCommandExecutionDirectory(command, baseWorkingDirectory)
+	cmd.Dir = c.pathHelper.GetComputedPath(baseWorkingDirectory, command.WorkingDirectory)
 
 	// Set project attributes based on OS
 	platform.SetProcAttributes(cmd)
@@ -79,16 +80,6 @@ func (c *Runner) RunCommand(command Command, environmentPaths []string, baseWork
 	}()
 
 	return nil
-}
-
-func getCommandExecutionDirectory(command Command, baseWorkingDirectory string) string {
-	if command.WorkingDirectory == "" {
-		return baseWorkingDirectory
-	}
-	if filepath.IsAbs(command.WorkingDirectory) {
-		return command.WorkingDirectory
-	}
-	return filepath.Join(baseWorkingDirectory, command.WorkingDirectory)
 }
 
 func (c *Runner) StopRunningCommand(id string) error {

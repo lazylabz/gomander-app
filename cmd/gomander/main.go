@@ -9,7 +9,6 @@ import (
 
 	internalapp "gomander/internal/app"
 	"gomander/internal/event"
-	"gomander/internal/helpers"
 )
 
 //go:embed all:frontend/dist
@@ -31,7 +30,6 @@ func main() {
 		OnStartup:        app.Startup,
 		Bind: []interface{}{
 			app,
-			&helpers.PathHelper{},
 		},
 		OnBeforeClose: app.OnBeforeClose,
 		EnumBind: []interface{}{

@@ -5,6 +5,7 @@ import (
 
 	"gomander/internal/config"
 	"gomander/internal/event"
+	"gomander/internal/helpers"
 	"gomander/internal/logger"
 	"gomander/internal/project"
 )
@@ -16,6 +17,7 @@ type App struct {
 	logger        *logger.Logger
 	eventEmitter  *event.EventEmitter
 	commandRunner *project.Runner
+	pathHelper    *helpers.PathHelper
 
 	userConfig      *config.UserConfig
 	selectedProject *project.Project

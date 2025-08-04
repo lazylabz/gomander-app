@@ -21,6 +21,8 @@ export function GetCommandGroups():Promise<Array<project.CommandGroup>>;
 
 export function GetCommands():Promise<Record<string, project.Command>>;
 
+export function GetComputedPath(arg1:string,arg2:string):Promise<string>;
+
 export function GetCurrentProject():Promise<project.Project>;
 
 export function GetUserConfig():Promise<config.UserConfig>;
