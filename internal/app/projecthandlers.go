@@ -59,5 +59,10 @@ func (a *App) CloseProject() error {
 		return err
 	}
 
+	err = a.commandRunner.StopAllRunningCommands()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
