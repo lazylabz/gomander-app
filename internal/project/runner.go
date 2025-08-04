@@ -89,13 +89,15 @@ func (c *Runner) StopRunningCommand(id string) error {
 	return platform.StopProcessGracefully(runningCommand)
 }
 
-func (c *Runner) StopAllRunningCommands() error {
+func (c *Runner) StopAllRunningCommands() []error {
+	errs := make([]error, 0)
+
 	for id, cmd := range c.runningCommands {
 		err := platform.StopProcessGracefully(cmd)
 
 		if err != nil {
 			c.logger.Error("[ERROR - Stopping project]: " + err.Error())
-			return err
+			errs = append(errs, err)
 		} else {
 			c.eventEmitter.EmitEvent(event.ProcessFinished, id)
 		}
@@ -103,7 +105,7 @@ func (c *Runner) StopAllRunningCommands() error {
 		delete(c.runningCommands, id)
 	}
 
-	return nil
+	return errs
 }
 
 func (c *Runner) streamOutput(commandId string, pipeReader io.ReadCloser) {
