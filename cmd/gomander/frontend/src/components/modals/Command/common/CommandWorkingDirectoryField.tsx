@@ -61,11 +61,7 @@ export const CommandWorkingDirectoryField = () => {
           <FormLabel>Working Directory</FormLabel>
           <FormControl>
             <div className="w-full flex items-center gap-2">
-              <Input
-                className="flex-1"
-                placeholder={"/Users/hackerman/Code"}
-                {...field}
-              />
+              <Input className="flex-1" {...field} />
               <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger>
                   <Tooltip>
