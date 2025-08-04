@@ -18,8 +18,8 @@ import {
   SaveUserConfig,
   StopCommand,
 } from "../../wailsjs/go/app/App";
+import { GetComputedPath } from "../../wailsjs/go/helpers/PathHelper";
 import type { project } from "../../wailsjs/go/models.ts";
-import { GetComputedPath } from "../../wailsjs/go/uihelpers/PathHelper";
 import { EventsOff, EventsOn } from "../../wailsjs/runtime";
 
 export const dataService = {

@@ -1,4 +1,4 @@
-package uihelpers
+package helpers
 
 import "path/filepath"
 
