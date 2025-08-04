@@ -173,12 +173,17 @@ func ImportProject(filePath string) error {
 	}
 
 	// Check if there is a project with the same ID. If so, generate a new UUID for the project.
-	existingProject, err := LoadProject(project.Id)
+	userConfigDir, err := os.UserConfigDir()
 	if err != nil {
 		return err
 	}
+	_, err = os.Stat(filepath.Join(userConfigDir, "gomander", ProjectsFolder, project.Id+".json"))
 
-	if existingProject != nil {
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	if err != nil /* The file exists */ {
 		newUUID, err := uuid.NewUUID()
 		if err != nil {
 			return err
