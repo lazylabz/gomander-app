@@ -46,30 +46,29 @@ func GetAllProjectsAvailableInProjectsFolder() ([]*Project, error) {
 	return projects, nil
 }
 
-func LoadProject(projectConfigId string) (*Project, error) {
-	var err error
-
+func LoadProject(projectConfigId string) (p *Project, err error) {
 	file, err := findOrCreateProjectConfigFile(projectConfigId)
 	if err != nil {
 		return nil, err
 	}
 
-	defer func(file *os.File) {
+	defer func() {
 		closeErr := file.Close()
 		if err == nil {
 			err = closeErr
 		}
-	}(file)
+	}()
+
+	p = &Project{}
 
 	// Read the config from the file
-	var config Project
 	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&config)
+	err = decoder.Decode(p)
 	if err != nil {
 		return nil, err
 	}
 
-	return &config, err
+	return
 }
 
 func DeleteProject(projectConfigId string) error {
@@ -97,20 +96,18 @@ func DeleteProject(projectConfigId string) error {
 	return nil
 }
 
-func SaveProject(config *Project) error {
-	var err error
-
+func SaveProject(config *Project) (err error) {
 	file, err := findOrCreateProjectConfigFile(config.Id)
 	if err != nil {
 		return err
 	}
 
-	defer func(file *os.File) {
+	defer func() {
 		closeErr := file.Close()
 		if err == nil {
 			err = closeErr
 		}
-	}(file)
+	}()
 
 	// Truncate the file to ensure clean write
 	err = file.Truncate(0)
@@ -126,12 +123,10 @@ func SaveProject(config *Project) error {
 		return err
 	}
 
-	return err
+	return
 }
 
-func ExportProject(project *Project, exportPath string) error {
-	var err error
-
+func ExportProject(project *Project, exportPath string) (err error) {
 	// Ensure the export directory exists
 	err = os.MkdirAll(filepath.Dir(exportPath), 0755)
 	if err != nil {
@@ -144,12 +139,12 @@ func ExportProject(project *Project, exportPath string) error {
 		return err
 	}
 
-	defer func(file *os.File) {
+	defer func() {
 		closeFileErr := file.Close()
-		if err == nil && closeFileErr != nil {
+		if err == nil {
 			err = closeFileErr
 		}
-	}(file)
+	}()
 
 	// Write the project config to the file
 	encoder := json.NewEncoder(file)
@@ -159,23 +154,21 @@ func ExportProject(project *Project, exportPath string) error {
 		return err
 	}
 
-	return err
+	return
 }
 
-func ImportProject(filePath string) error {
-	var err error
-
+func ImportProject(filePath string) (err error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return err
 	}
 
-	defer func(file *os.File) {
+	defer func() {
 		closeFileErr := file.Close()
-		if err == nil && closeFileErr != nil {
+		if err == nil {
 			err = closeFileErr
 		}
-	}(file)
+	}()
 
 	var project Project
 	decoder := json.NewDecoder(file)
@@ -200,7 +193,7 @@ func ImportProject(filePath string) error {
 		return err
 	}
 
-	return err
+	return
 }
 
 func projectFileExists(projectId string) (bool, error) {

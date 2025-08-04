@@ -18,18 +18,18 @@ func EmptyUserConfig() *UserConfig {
 	}
 }
 
-func LoadUserConfig() (*UserConfig, error) {
+func LoadUserConfig() (c *UserConfig, err error) {
 	file, err := findOrCreateUserConfigFile()
 	if err != nil {
 		return nil, err
 	}
 
-	defer func(file *os.File) {
+	defer func() {
 		closeErr := file.Close()
 		if err == nil {
 			err = closeErr
 		}
-	}(file)
+	}()
 
 	stat, err := os.Stat(file.Name())
 	if err != nil {
@@ -45,28 +45,28 @@ func LoadUserConfig() (*UserConfig, error) {
 	}
 
 	// Read the config from the file
-	var config UserConfig
+	c = &UserConfig{}
 	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&config)
+	err = decoder.Decode(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return &config, nil
+	return
 }
 
-func SaveUserConfig(config *UserConfig) error {
+func SaveUserConfig(config *UserConfig) (err error) {
 	file, err := findOrCreateUserConfigFile()
 	if err != nil {
 		return err
 	}
 
-	defer func(file *os.File) {
+	defer func() {
 		closeErr := file.Close()
 		if err == nil {
 			err = closeErr
 		}
-	}(file)
+	}()
 
 	// Truncate the file to ensure clean write
 	err = file.Truncate(0)
@@ -82,7 +82,7 @@ func SaveUserConfig(config *UserConfig) error {
 		return err
 	}
 
-	return nil
+	return
 }
 
 func findOrCreateUserConfigFile() (*os.File, error) {
