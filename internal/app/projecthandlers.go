@@ -1,6 +1,8 @@
 package app
 
 import (
+	"errors"
+
 	"gomander/internal/project"
 )
 
@@ -57,6 +59,11 @@ func (a *App) CloseProject() error {
 	err := a.persistUserConfig()
 	if err != nil {
 		return err
+	}
+
+	errs := a.commandRunner.StopAllRunningCommands()
+	if len(errs) > 0 {
+		return errors.New("error stopping running commands")
 	}
 
 	return nil

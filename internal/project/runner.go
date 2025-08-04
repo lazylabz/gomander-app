@@ -26,7 +26,6 @@ func NewCommandRunner(logger *logger.Logger, emitter *event.EventEmitter) *Runne
 	}
 }
 
-// ExecCommand executes a project by its ID and streams its output.
 func (c *Runner) RunCommand(command Command, environmentPaths []string) error {
 	// Get the project object based on the project string and OS
 	cmd := platform.GetCommand(command.Command)
@@ -88,6 +87,25 @@ func (c *Runner) StopRunningCommand(id string) error {
 	}
 
 	return platform.StopProcessGracefully(runningCommand)
+}
+
+func (c *Runner) StopAllRunningCommands() []error {
+	errs := make([]error, 0)
+
+	for id, cmd := range c.runningCommands {
+		err := platform.StopProcessGracefully(cmd)
+
+		if err != nil {
+			c.logger.Error("[ERROR - Stopping project]: " + err.Error())
+			errs = append(errs, err)
+		} else {
+			c.eventEmitter.EmitEvent(event.ProcessFinished, id)
+		}
+
+		delete(c.runningCommands, id)
+	}
+
+	return errs
 }
 
 func (c *Runner) streamOutput(commandId string, pipeReader io.ReadCloser) {
