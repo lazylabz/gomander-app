@@ -76,9 +76,9 @@ func DeleteProject(projectConfigId string) error {
 	}
 
 	defer func(file *os.File) {
-		closeErr := file.Close()
-		if err == nil {
-			err = closeErr
+		closeFileErr := file.Close()
+		if err == nil && closeFileErr != nil {
+			err = closeFileErr
 		}
 	}(file)
 
@@ -136,7 +136,7 @@ func ExportProject(project *Project, exportPath string) error {
 
 	defer func(file *os.File) {
 		closeFileErr := file.Close()
-		if err != nil && closeFileErr != nil {
+		if err == nil && closeFileErr != nil {
 			err = closeFileErr
 		}
 	}(file)
@@ -160,7 +160,7 @@ func ImportProject(filePath string) error {
 
 	defer func(file *os.File) {
 		closeFileErr := file.Close()
-		if err != nil && closeFileErr != nil {
+		if err == nil && closeFileErr != nil {
 			err = closeFileErr
 		}
 	}(file)
@@ -174,6 +174,10 @@ func ImportProject(filePath string) error {
 
 	// Check if there is a project with the same ID. If so, generate a new UUID for the project.
 	existingProject, err := LoadProject(project.Id)
+	if err != nil {
+		return err
+	}
+
 	if existingProject != nil {
 		newUUID, err := uuid.NewUUID()
 		if err != nil {

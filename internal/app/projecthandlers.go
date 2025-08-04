@@ -85,6 +85,7 @@ func (a *App) ExportProject(projectConfigId string) error {
 	p, err := project.LoadProject(projectConfigId)
 	if err != nil {
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
+		return err
 	}
 	if p == nil {
 		return errors.New("project not found")
