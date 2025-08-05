@@ -3,13 +3,14 @@ package project
 import (
 	"bufio"
 	"errors"
+	"io"
+	"os"
+	"os/exec"
+
 	"gomander/internal/event"
 	"gomander/internal/helpers"
 	"gomander/internal/logger"
 	"gomander/internal/platform"
-	"io"
-	"os"
-	"os/exec"
 )
 
 type Runner struct {
@@ -87,7 +88,15 @@ func (c *Runner) StopRunningCommand(id string) error {
 		return errors.New("No running runningCommand for project: " + id)
 	}
 
-	return platform.StopProcessGracefully(runningCommand)
+	err := platform.StopProcessGracefully(runningCommand)
+
+	if err != nil {
+		return err
+	}
+
+	delete(c.runningCommands, id)
+
+	return nil
 }
 
 func (c *Runner) StopAllRunningCommands() []error {
