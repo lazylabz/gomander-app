@@ -112,7 +112,15 @@ func (c *Runner) StopRunningCommand(id string) error {
 func (c *Runner) StopAllRunningCommands() []error {
 	errs := make([]error, 0)
 
+	// Create a slice to hold commands to stop
+	// this is necessary because we should not modify the map while iterating over it
+	commandsToStop := make([]*exec.Cmd, 0, len(c.runningCommands))
+
 	for _, cmd := range c.runningCommands {
+		commandsToStop = append(commandsToStop, cmd)
+	}
+
+	for _, cmd := range commandsToStop {
 		err := platform.StopProcessGracefully(cmd)
 
 		if err != nil {
