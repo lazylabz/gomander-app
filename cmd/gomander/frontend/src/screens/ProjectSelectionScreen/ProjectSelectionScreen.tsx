@@ -1,34 +1,31 @@
 import { Import, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { CreateProjectModal } from "@/components/modals/Project/CreateProjectModal.tsx";
 import { DeleteProjectModal } from "@/components/modals/Project/DeleteProjectModal.tsx";
+import { ImportProjectModal } from "@/components/modals/Project/ImportProjectModal.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { dataService } from "@/contracts/service.ts";
 import type { Project } from "@/contracts/types.ts";
 import { ProjectCard } from "@/screens/ProjectSelectionScreen/components/ProjectCard.tsx";
+import { useGetAvailableProjects } from "@/screens/ProjectSelectionScreen/hooks/useGetAvailableProjects.ts";
 import { deleteProject } from "@/useCases/project/deleteProject.ts";
-import { importProject } from "@/useCases/project/importProject.ts";
 
 export const ProjectSelectionScreen = () => {
   const [projectIdBeingDeleted, setProjectIdBeingDeleted] = useState<
     string | null
   >(null);
+  const [projectBeingImported, setProjectBeingImported] =
+    useState<Project | null>(null);
 
   const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false);
-  const [availableProjects, setAvailableProjects] = useState<Project[]>([]);
 
-  const fetchAvailableProjects = async () => {
-    const projects = await dataService.getAvailableProjects();
-    setAvailableProjects(projects);
-  };
+  const { availableProjects, fetchAvailableProjects } =
+    useGetAvailableProjects();
 
   const openCreateProjectModal = () => {
     setCreateProjectModalOpen(true);
-  };
-
-  const handleSuccess = async () => {
-    await fetchAvailableProjects();
   };
 
   const handleDeleteProject = (projectId: string) => async () => {
@@ -46,8 +43,13 @@ export const ProjectSelectionScreen = () => {
   };
 
   const handleImportProject = async () => {
-    await importProject();
-    await fetchAvailableProjects();
+    try {
+      const projectToImport = await dataService.getProjectToImport();
+      setProjectBeingImported(projectToImport);
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to select project. Please try again.");
+    }
   };
 
   useEffect(() => {
@@ -57,9 +59,15 @@ export const ProjectSelectionScreen = () => {
   return (
     <>
       <CreateProjectModal
-        onSuccess={handleSuccess}
+        onSuccess={fetchAvailableProjects}
         open={createProjectModalOpen}
         setOpen={setCreateProjectModalOpen}
+      />
+      <ImportProjectModal
+        open={!!projectBeingImported}
+        onSuccess={fetchAvailableProjects}
+        onClose={() => setProjectBeingImported(null)}
+        project={projectBeingImported}
       />
       <DeleteProjectModal
         open={!!projectIdBeingDeleted}

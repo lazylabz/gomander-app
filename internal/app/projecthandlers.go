@@ -112,18 +112,8 @@ func (a *App) ExportProject(projectConfigId string) error {
 	return nil
 }
 
-func (a *App) ImportProject() error {
-	filePath, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{Title: "Select a project file", Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}}})
-	if err != nil {
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to open file dialog: "+err.Error())
-		return err
-	}
-	if filePath == "" {
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Import cancelled")
-		return nil
-	}
-
-	err = project.ImportProject(filePath)
+func (a *App) ImportProject(p project.Project) error {
+	err := project.ImportProject(p)
 	if err != nil {
 		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to import project: "+err.Error())
 		return err
@@ -131,4 +121,16 @@ func (a *App) ImportProject() error {
 
 	a.eventEmitter.EmitEvent(event.SuccessNotification, "Project imported successfully")
 	return nil
+}
+
+func (a *App) GetProjectToImport() (*project.Project, error) {
+	filePath, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{Title: "Select a project file", Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}}})
+	if err != nil {
+		return nil, err
+	}
+	if filePath == "" {
+		return nil, errors.New("import cancelled")
+	}
+
+	return project.LoadProjectFromPath(filePath)
 }

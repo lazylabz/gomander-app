@@ -42,12 +42,16 @@ export function GetCurrentProject() {
   return window['go']['app']['App']['GetCurrentProject']();
 }
 
+export function GetProjectToImport() {
+  return window['go']['app']['App']['GetProjectToImport']();
+}
+
 export function GetUserConfig() {
   return window['go']['app']['App']['GetUserConfig']();
 }
 
-export function ImportProject() {
-  return window['go']['app']['App']['ImportProject']();
+export function ImportProject(arg1) {
+  return window['go']['app']['App']['ImportProject'](arg1);
 }
 
 export function OpenProject(arg1) {

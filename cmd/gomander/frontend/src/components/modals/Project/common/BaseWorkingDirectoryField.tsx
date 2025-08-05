@@ -1,6 +1,5 @@
-import { useFormContext } from "react-hook-form";
+import { type Path, useFormContext } from "react-hook-form";
 
-import type { FormSchemaType } from "@/components/modals/Project/common/schema.ts";
 import {
   FormControl,
   FormField,
@@ -10,13 +9,17 @@ import {
 } from "@/components/ui/form.tsx";
 import { Input } from "@/components/ui/input.tsx";
 
-export const BaseWorkingDirectoryField = () => {
-  const form = useFormContext<FormSchemaType>();
+export const BaseWorkingDirectoryField = <
+  T extends { baseWorkingDirectory: string },
+>() => {
+  const form = useFormContext<T>();
+
+  const name = "baseWorkingDirectory" satisfies keyof T as Path<T>;
 
   return (
     <FormField
       control={form.control}
-      name="baseWorkingDirectory"
+      name={name}
       render={({ field }) => (
         <FormItem>
           <FormLabel>Base Working Directory</FormLabel>
