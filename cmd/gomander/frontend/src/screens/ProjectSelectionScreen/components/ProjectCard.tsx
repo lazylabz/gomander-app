@@ -1,5 +1,4 @@
 import { EllipsisVertical } from "lucide-react";
-import { useState } from "react";
 
 import {
   DropdownMenu,
@@ -19,23 +18,16 @@ export const ProjectCard = ({
   project: Project;
   handleDeleteProject: () => void;
 }) => {
-  const [projectMenuOpen, setProjectMenuOpen] = useState<boolean>(false);
-
   const handleOpenProject = (projectId: string) => async () => {
     await dataService.openProject(projectId);
     await fetchProject();
   };
 
-  const handleProjectMenuClick = () => {
-    setProjectMenuOpen(true);
-  };
-
   return (
     <div className="relative px-4 py-2 border border-neutral-100 rounded-xl shadow hover:shadow-md transition-all w-80">
-      <DropdownMenu open={projectMenuOpen} onOpenChange={setProjectMenuOpen}>
+      <DropdownMenu>
         <DropdownMenuTrigger className="absolute top-2 right-2 ">
           <EllipsisVertical
-            onClick={handleProjectMenuClick}
             size={16}
             className="text-muted-foreground cursor-pointer hover:text-primary"
           />
@@ -50,6 +42,7 @@ export const ProjectCard = ({
         </DropdownMenuContent>
       </DropdownMenu>
       <div
+        role="button"
         className="flex flex-col items-start gap-1 cursor-pointer"
         onClick={handleOpenProject(project.id)}
       >
