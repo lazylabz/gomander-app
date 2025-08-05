@@ -157,7 +157,11 @@ func ExportProject(project *Project, exportPath string) (err error) {
 		}
 	}()
 
-	pj := JSONFromProject(project)
+	// Create project copy and omit fields that should not be exported
+	projectToExport := *project
+	projectToExport.BaseWorkingDirectory = ""
+
+	pj := JSONFromProject(projectToExport)
 
 	// Write the project config to the file
 	encoder := json.NewEncoder(file)
