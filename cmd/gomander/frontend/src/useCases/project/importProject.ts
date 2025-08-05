@@ -1,6 +1,9 @@
 import { dataService } from "@/contracts/service.ts";
-import type { Project } from "@/contracts/types.ts";
+import type { ExportableProject } from "@/contracts/types.ts";
 
-export const importProject = async (project: Project) => {
-  await dataService.importProject(project);
+export const importProject = async (
+  project: ExportableProject,
+  newBaseWorkingDir: string,
+) => {
+  await dataService.importProject(project, newBaseWorkingDir);
 };

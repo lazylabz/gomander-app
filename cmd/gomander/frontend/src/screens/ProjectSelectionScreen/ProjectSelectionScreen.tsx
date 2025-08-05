@@ -7,7 +7,7 @@ import { DeleteProjectModal } from "@/components/modals/Project/DeleteProjectMod
 import { ImportProjectModal } from "@/components/modals/Project/ImportProjectModal.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { dataService } from "@/contracts/service.ts";
-import type { Project } from "@/contracts/types.ts";
+import type { ExportableProject } from "@/contracts/types.ts";
 import { ProjectCard } from "@/screens/ProjectSelectionScreen/components/ProjectCard.tsx";
 import { useGetAvailableProjects } from "@/screens/ProjectSelectionScreen/hooks/useGetAvailableProjects.ts";
 import { deleteProject } from "@/useCases/project/deleteProject.ts";
@@ -17,7 +17,7 @@ export const ProjectSelectionScreen = () => {
     string | null
   >(null);
   const [projectBeingImported, setProjectBeingImported] =
-    useState<Project | null>(null);
+    useState<ExportableProject | null>(null);
 
   const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false);
 

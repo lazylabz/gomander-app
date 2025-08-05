@@ -112,8 +112,8 @@ func (a *App) ExportProject(projectConfigId string) error {
 	return nil
 }
 
-func (a *App) ImportProject(p project.Project) error {
-	err := project.ImportProject(p)
+func (a *App) ImportProject(ep project.ExportableProject, baseWorkingDir string) error {
+	err := project.ImportProject(ep, baseWorkingDir)
 	if err != nil {
 		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to import project: "+err.Error())
 		return err
@@ -123,7 +123,7 @@ func (a *App) ImportProject(p project.Project) error {
 	return nil
 }
 
-func (a *App) GetProjectToImport() (*project.Project, error) {
+func (a *App) GetProjectToImport() (*project.ExportableProject, error) {
 	filePath, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{Title: "Select a project file", Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}}})
 	if err != nil {
 		return nil, err
@@ -132,5 +132,5 @@ func (a *App) GetProjectToImport() (*project.Project, error) {
 		return nil, errors.New("import cancelled")
 	}
 
-	return project.LoadProjectFromPath(filePath)
+	return project.LoadExportedProjectFromPath(filePath)
 }

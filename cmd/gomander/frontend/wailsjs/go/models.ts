@@ -35,6 +35,12 @@ export namespace project {
 	    name: string;
 	    commands: string[];
 	}
+	export interface ExportableProject {
+	    id: string;
+	    name: string;
+	    commands: Record<string, Command>;
+	    commandGroups: CommandGroup[];
+	}
 	export interface Project {
 	    id: string;
 	    name: string;

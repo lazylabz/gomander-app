@@ -147,9 +147,10 @@ func ExportProject(project *Project, exportPath string) (err error) {
 	}()
 
 	// Write the project config to the file
+	exportableProject := project.ToExportable()
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
-	err = encoder.Encode(project)
+	err = encoder.Encode(exportableProject)
 	if err != nil {
 		return err
 	}
@@ -157,19 +158,22 @@ func ExportProject(project *Project, exportPath string) (err error) {
 	return
 }
 
-func ImportProject(project Project) (err error) {
+func ImportProject(exportableProject ExportableProject, baseWorkingDir string) (err error) {
 	// Check if there is a project with the same ID. If so, generate a new UUID for the project.
-	exists, err := projectFileExists(project.Id)
+	exists, err := projectFileExists(exportableProject.Id)
 	if err != nil {
 		return err
 	}
 
 	if exists {
-		project.Id = uuid.New().String()
+		exportableProject.Id = uuid.New().String()
 	}
 
+	// Convert the ExportableProject to a Project
+	project := exportableProject.ToProject(baseWorkingDir)
+
 	// Save the imported project
-	err = SaveProject(&project)
+	err = SaveProject(project)
 	if err != nil {
 		return err
 	}
@@ -177,7 +181,7 @@ func ImportProject(project Project) (err error) {
 	return
 }
 
-func LoadProjectFromPath(filePath string) (project *Project, err error) {
+func LoadExportedProjectFromPath(filePath string) (ep *ExportableProject, err error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
@@ -190,10 +194,10 @@ func LoadProjectFromPath(filePath string) (project *Project, err error) {
 		}
 	}()
 
-	project = &Project{}
+	ep = &ExportableProject{}
 
 	decoder := json.NewDecoder(file)
-	err = decoder.Decode(project)
+	err = decoder.Decode(ep)
 	if err != nil {
 		return nil, err
 	}
