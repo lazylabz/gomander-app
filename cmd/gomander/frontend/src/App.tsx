@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/sonner.tsx";
 import { EventListenersContainer } from "@/components/utility/EventListenersContainer.tsx";
 import { fetchProject } from "@/queries/fetchProject.ts";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
-import { ProjectSelectionScreen } from "@/screens/ProjectSelectionScreen.tsx";
+import { ProjectSelectionScreen } from "@/screens/ProjectSelectionScreen/ProjectSelectionScreen.tsx";
 import { useProjectStore } from "@/store/projectStore.ts";
 
 import { LogsScreen } from "./screens/LogsScreen.tsx";
