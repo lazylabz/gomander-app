@@ -1,51 +1,62 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 
 import { BaseWorkingDirectoryField } from "@/components/modals/Project/common/BaseWorkingDirectoryField.tsx";
 import {
   formSchema,
   type FormSchemaType,
-} from "@/components/modals/Project/common/createAndEditSchema.ts";
+} from "@/components/modals/Project/common/importAndExportSchema.ts";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { Dialog, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DialogContent } from "@/components/ui/dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
-import { dataService } from "@/contracts/service";
+import type { Project } from "@/contracts/types.ts";
+import { importProject } from "@/useCases/project/importProject.ts";
 
-export const CreateProjectModal = ({
+export const ImportProjectModal = ({
   open,
-  setOpen,
   onSuccess,
+  onClose,
+  project,
 }: {
   open: boolean;
-  setOpen: React.Dispatch<SetStateAction<boolean>>;
   onSuccess: () => Promise<void>;
+  onClose: () => void;
+  project: Project | null;
 }) => {
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      baseWorkingDirectory: "",
+    values: {
+      name: project?.name || "",
+      baseWorkingDirectory: project?.baseWorkingDirectory || "",
     },
   });
 
   const handleOpenChange = (open: boolean) => {
-    setOpen(open);
     if (!open) {
+      onClose();
       form.reset();
     }
   };
 
   const onSubmit = async (values: FormSchemaType) => {
-    await dataService.createProject(
-      crypto.randomUUID(),
-      values.name,
-      values.baseWorkingDirectory,
-    );
+    if (!project) {
+      return;
+    }
 
-    onSuccess();
+    await importProject({
+      ...project,
+      name: values.name,
+      baseWorkingDirectory: values.baseWorkingDirectory,
+    });
+
+    await onSuccess();
     handleOpenChange(false);
   };
 
@@ -53,7 +64,10 @@ export const CreateProjectModal = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create project</DialogTitle>
+          <DialogTitle>Import project</DialogTitle>
+          <DialogDescription>
+            Feel free to modify the values to the ones you prefer
+          </DialogDescription>
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}

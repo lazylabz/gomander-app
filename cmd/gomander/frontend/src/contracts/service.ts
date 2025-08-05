@@ -9,6 +9,7 @@ import {
   GetCommandGroups,
   GetCommands,
   GetCurrentProject,
+  GetProjectToImport,
   GetUserConfig,
   ImportProject,
   OpenProject,
@@ -41,6 +42,7 @@ export const dataService = {
   deleteProject: DeleteProject,
   exportProject: ExportProject,
   importProject: ImportProject,
+  getProjectToImport: GetProjectToImport,
 };
 
 export const helpersService = {
