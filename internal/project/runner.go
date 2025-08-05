@@ -112,13 +112,11 @@ func (c *Runner) StopRunningCommand(id string) error {
 func (c *Runner) StopAllRunningCommands() []error {
 	errs := make([]error, 0)
 
-	for id, cmd := range c.runningCommands {
+	for _, cmd := range c.runningCommands {
 		err := platform.StopProcessGracefully(cmd)
 
 		if err != nil {
 			errs = append(errs, err)
-		} else {
-			c.eventEmitter.EmitEvent(event.ProcessFinished, id)
 		}
 	}
 
