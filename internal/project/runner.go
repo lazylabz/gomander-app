@@ -15,7 +15,6 @@ import (
 
 var ExpectedTerminationLogs = []string{
 	"signal: terminated",
-	"signal: terminated",
 	"signal: interrupt",
 	"signal: killed",
 	"exit status 143",
@@ -78,7 +77,7 @@ func (c *Runner) RunCommand(command Command, environmentPaths []string, baseWork
 	// Stream stderr
 	go c.streamOutput(command.Id, stderr)
 
-	// Wait in background until the command finishes
+	// Wait in background until the command finishes, because it ends naturally or because it is stopped.
 	go func() {
 		err := cmd.Wait()
 		// Notify the event emitter that the command has finished and remove it from the runningCommands map
@@ -107,13 +106,7 @@ func (c *Runner) StopRunningCommand(id string) error {
 		return errors.New("No running command with id: " + id)
 	}
 
-	err := platform.StopProcessGracefully(runningCommand)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return platform.StopProcessGracefully(runningCommand)
 }
 
 func (c *Runner) StopAllRunningCommands() []error {
