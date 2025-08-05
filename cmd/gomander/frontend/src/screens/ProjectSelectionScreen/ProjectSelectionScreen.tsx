@@ -9,7 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu.tsx";
 import { dataService } from "@/contracts/service.ts";
 import type { Project } from "@/contracts/types.ts";
 import { fetchProject } from "@/queries/fetchProject.ts";
