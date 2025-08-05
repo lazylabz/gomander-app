@@ -1,6 +1,6 @@
 import { useFormContext } from "react-hook-form";
 
-import type { FormSchemaType } from "@/components/modals/Command/common/formSchema.ts";
+import type { FormSchemaType } from "@/components/modals/Project/common/schema.ts";
 import {
   FormControl,
   FormField,
@@ -10,18 +10,18 @@ import {
 } from "@/components/ui/form.tsx";
 import { Input } from "@/components/ui/input.tsx";
 
-export const CommandWorkingDirectoryField = () => {
+export const BaseWorkingDirectoryField = () => {
   const form = useFormContext<FormSchemaType>();
 
   return (
     <FormField
       control={form.control}
-      name="workingDirectory"
+      name="baseWorkingDirectory"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Working Directory</FormLabel>
+          <FormLabel>Base Working Directory</FormLabel>
           <FormControl>
-            <Input {...field} />
+            <Input placeholder="/Users/hackerman/Code" {...field} />
           </FormControl>
           <FormMessage />
         </FormItem>

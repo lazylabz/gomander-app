@@ -19,6 +19,7 @@ import {
   StopCommand,
 } from "../../wailsjs/go/app/App";
 import type { project } from "../../wailsjs/go/models.ts";
+import { GetComputedPath } from "../../wailsjs/go/uihelpers/UiPathHelper";
 import { EventsOff, EventsOn } from "../../wailsjs/runtime";
 
 export const dataService = {
@@ -40,6 +41,10 @@ export const dataService = {
   deleteProject: DeleteProject,
   exportProject: ExportProject,
   importProject: ImportProject,
+};
+
+export const helpersService = {
+  getComputedPath: GetComputedPath,
 };
 
 export const eventService = {

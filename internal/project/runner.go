@@ -3,13 +3,13 @@ package project
 import (
 	"bufio"
 	"errors"
+	"gomander/internal/event"
+	"gomander/internal/helpers"
+	"gomander/internal/logger"
+	"gomander/internal/platform"
 	"io"
 	"os"
 	"os/exec"
-
-	"gomander/internal/event"
-	"gomander/internal/logger"
-	"gomander/internal/platform"
 )
 
 type Runner struct {
@@ -26,13 +26,14 @@ func NewCommandRunner(logger *logger.Logger, emitter *event.EventEmitter) *Runne
 	}
 }
 
-func (c *Runner) RunCommand(command Command, environmentPaths []string) error {
+// RunCommand executes a command and streams its output.
+func (c *Runner) RunCommand(command Command, environmentPaths []string, baseWorkingDirectory string) error {
 	// Get the project object based on the project string and OS
 	cmd := platform.GetCommand(command.Command)
 
 	// Enable color output and set terminal type
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
-	cmd.Dir = command.WorkingDirectory
+	cmd.Dir = helpers.GetComputedPath(baseWorkingDirectory, command.WorkingDirectory)
 
 	// Set project attributes based on OS
 	platform.SetProcAttributes(cmd)
