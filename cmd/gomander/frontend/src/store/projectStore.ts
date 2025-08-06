@@ -4,7 +4,7 @@ import { createStore } from "zustand/vanilla";
 import type { Project } from "@/contracts/types.ts";
 
 type ProjectStore = {
-  project: Project | null;
+  project: Project | null; // TODO: only store basic project data here
   setProject: (project: Project | null) => void;
 };
 
