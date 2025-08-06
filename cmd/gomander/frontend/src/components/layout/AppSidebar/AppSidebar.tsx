@@ -45,7 +45,6 @@ export const AppSidebar = () => {
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
   const openEditProjectModal = () => {
-    console.log("Opening edit project modal", { project });
     setEditingProject(project);
   };
 
