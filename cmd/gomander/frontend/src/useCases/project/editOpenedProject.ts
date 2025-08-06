@@ -1,11 +1,9 @@
 import { dataService } from "@/contracts/service.ts";
-import type { Project } from "@/contracts/types.ts";
+import type { ProjectInfo } from "@/contracts/types.ts";
 import { commandGroupStore } from "@/store/commandGroupStore.ts";
 import { commandStore } from "@/store/commandStore.ts";
 
-type ProjectBasicData = Pick<Project, "id" | "name" | "baseWorkingDirectory">;
-
-export const editOpenedProject = async (project: ProjectBasicData) => {
+export const editOpenedProject = async (project: ProjectInfo) => {
   const { commands } = commandStore.getState();
   const { commandGroups } = commandGroupStore.getState();
 

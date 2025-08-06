@@ -27,7 +27,7 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar.tsx";
-import type { Command, CommandGroup, Project } from "@/contracts/types.ts";
+import type { Command, CommandGroup, ProjectInfo } from "@/contracts/types.ts";
 import { fetchProject } from "@/queries/fetchProject.ts";
 import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
@@ -36,9 +36,11 @@ import { closeProject } from "@/useCases/project/closeProject.ts";
 
 export const AppSidebar = () => {
   const commandGroups = useCommandGroupStore((state) => state.commandGroups);
-  const project = useProjectStore((state) => state.project);
+  const project = useProjectStore((state) => state.projectInfo);
 
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editingProject, setEditingProject] = useState<ProjectInfo | null>(
+    null,
+  );
   const [editingCommand, setEditingCommand] = useState<Command | null>(null);
   const [editingCommandGroup, setEditingCommandGroup] =
     useState<CommandGroup | null>(null);

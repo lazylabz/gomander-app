@@ -6,9 +6,13 @@ import { projectStore } from "@/store/projectStore.ts";
 
 const loadProjectDataIntoStores = (project: Project) => {
   const { setCommandGroups } = commandGroupStore.getState();
-  const { setProject } = projectStore.getState();
-  
-  setProject(project);
+  const { setProjectInfo } = projectStore.getState();
+
+  setProjectInfo({
+    id: project.id,
+    name: project.name,
+    baseWorkingDirectory: project.baseWorkingDirectory,
+  });
   setCommandGroups(project.commandGroups);
   loadCommandDataIntoStore(project.commands);
 };

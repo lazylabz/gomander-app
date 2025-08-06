@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Dialog, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DialogContent } from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
-import type { Project } from "@/contracts/types.ts";
+import type { ProjectInfo } from "@/contracts/types.ts";
 import { editOpenedProject } from "@/useCases/project/editOpenedProject.ts";
 
 export const EditOpenedProjectModal = ({
@@ -20,7 +20,7 @@ export const EditOpenedProjectModal = ({
   onClose,
   onSuccess,
 }: {
-  project: Project | null;
+  project: ProjectInfo | null;
   open: boolean;
   onClose: () => void;
   onSuccess: () => Promise<void>;
