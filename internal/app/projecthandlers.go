@@ -54,6 +54,7 @@ func (a *App) CreateProject(id, name, baseWorkingDirectory string) error {
 func (a *App) EditProject(p project.Project) error {
 	isEditingSelectedProject := a.selectedProject != nil && a.selectedProject.Id == p.Id
 
+	// TODO: Edit project should only be able to update the name and base working directory
 	err := project.SaveProject(&p)
 
 	if err != nil {
