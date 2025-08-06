@@ -22,6 +22,10 @@ export function EditCommand(arg1) {
   return window['go']['app']['App']['EditCommand'](arg1);
 }
 
+export function EditProject(arg1) {
+  return window['go']['app']['App']['EditProject'](arg1);
+}
+
 export function ExportProject(arg1) {
   return window['go']['app']['App']['ExportProject'](arg1);
 }
