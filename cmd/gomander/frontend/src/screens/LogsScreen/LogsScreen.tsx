@@ -1,6 +1,12 @@
 import parse, { type DOMNode, domToReact, Element } from "html-react-parser";
 import { BrushCleaning } from "lucide-react";
-import { type ChangeEvent, type KeyboardEventHandler, useState } from "react";
+import {
+  type ChangeEvent,
+  type KeyboardEventHandler,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { Input } from "@/components/ui/input.tsx";
 import { useCurrentLogs } from "@/hooks/useCurrentLogs.ts";
@@ -11,6 +17,8 @@ import { clearCurrentLogs } from "@/useCases/logging/clearCurrentLogs.ts";
 
 export const LogsScreen = () => {
   const { currentLogs } = useCurrentLogs();
+
+  const searchInput = useRef<HTMLInputElement | null>(null);
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -65,12 +73,19 @@ export const LogsScreen = () => {
 
   const focusedMatchId = matchesIds[focusedMatchIndex];
 
+  useEffect(() => {
+    if (searchOpen) {
+      searchInput.current?.focus();
+    }
+  }, [searchOpen]);
+
   return (
     <div className="p-4 overflow-y-auto h-full w-full flex flex-col font-mono justify-end">
       <div className="fixed top-3 right-6 z-1 flex items-center gap-2">
         {searchOpen && (
           <div className="flex flex-col">
             <Input
+              ref={searchInput}
               autoCorrect="off"
               autoComplete="off"
               className="bg-background"
