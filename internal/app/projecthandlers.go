@@ -51,18 +51,25 @@ func (a *App) CreateProject(id, name, baseWorkingDirectory string) error {
 	return nil
 }
 
-func (a *App) EditProject(p project.Project) error {
-	isEditingSelectedProject := a.selectedProject != nil && a.selectedProject.Id == p.Id
+func (a *App) EditProject(dto EditProjectDTO) error {
+	isEditingSelectedProject := a.selectedProject != nil && a.selectedProject.Id == dto.Id
 
-	// TODO: Edit project should only be able to update the name and base working directory
-	err := project.SaveProject(&p)
+	p, err := project.LoadProject(dto.Id)
+	if err != nil {
+		return err
+	}
+
+	p.Name = dto.Name
+	p.BaseWorkingDirectory = dto.BaseWorkingDirectory
+
+	err = project.SaveProject(p)
 
 	if err != nil {
 		return err
 	}
 
 	if isEditingSelectedProject {
-		a.selectedProject = &p
+		a.selectedProject = p
 	}
 
 	a.eventEmitter.EmitEvent(event.SuccessNotification, "Project edited successfully")

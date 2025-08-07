@@ -1,3 +1,13 @@
+export namespace app {
+	
+	export interface EditProjectDTO {
+	    id: string;
+	    name: string;
+	    baseWorkingDirectory: string;
+	}
+
+}
+
 export namespace config {
 	
 	export interface UserConfig {
