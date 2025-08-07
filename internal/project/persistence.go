@@ -9,7 +9,14 @@ import (
 	"github.com/google/uuid"
 )
 
+const DesiredProjectJSONVersion = 1
+
 const ProjectsFolder = "projects"
+
+type ProjectPersistedJSON struct {
+	*Project
+	Version int `json:"version"`
+}
 
 func GetAllProjectsAvailableInProjectsFolder() ([]*Project, error) {
 	configDir, err := os.UserConfigDir()
@@ -59,14 +66,16 @@ func LoadProject(projectConfigId string) (p *Project, err error) {
 		}
 	}()
 
-	p = &Project{}
+	pj := &ProjectPersistedJSON{}
 
 	// Read the config from the file
 	decoder := json.NewDecoder(file)
-	err = decoder.Decode(p)
+	err = decoder.Decode(pj)
 	if err != nil {
 		return nil, err
 	}
+
+	p = ProjectFromJSON(pj)
 
 	return
 }
@@ -115,10 +124,12 @@ func SaveProject(config *Project) (err error) {
 		return err
 	}
 
+	pj := JSONFromProject(config)
+
 	// Save the config to the file
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
-	err = encoder.Encode(config)
+	err = encoder.Encode(pj)
 	if err != nil {
 		return err
 	}
@@ -146,10 +157,12 @@ func ExportProject(project *Project, exportPath string) (err error) {
 		}
 	}()
 
+	pj := JSONFromProject(project)
+
 	// Write the project config to the file
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
-	err = encoder.Encode(project)
+	err = encoder.Encode(pj)
 	if err != nil {
 		return err
 	}
@@ -190,13 +203,15 @@ func LoadProjectFromPath(filePath string) (project *Project, err error) {
 		}
 	}()
 
-	project = &Project{}
+	pj := &ProjectPersistedJSON{}
 
 	decoder := json.NewDecoder(file)
-	err = decoder.Decode(project)
+	err = decoder.Decode(pj)
 	if err != nil {
 		return nil, err
 	}
+
+	project = ProjectFromJSON(pj)
 
 	return
 }
@@ -263,4 +278,30 @@ func getProjectPath(projectId string) (string, error) {
 	}
 
 	return filepath.Join(folderPath, projectId+".json"), nil
+}
+
+func ProjectFromJSON(pj *ProjectPersistedJSON) (p *Project) {
+	if pj.Version != DesiredProjectJSONVersion {
+		// TODO: Execute migration logic when needed
+		panic(errors.New("project version mismatch"))
+	}
+
+	p = &Project{
+		Id:                   pj.Id,
+		Name:                 pj.Name,
+		BaseWorkingDirectory: pj.BaseWorkingDirectory,
+		Commands:             pj.Commands,
+		CommandGroups:        pj.CommandGroups,
+	}
+
+	return
+}
+
+func JSONFromProject(p *Project) (pj *ProjectPersistedJSON) {
+	pj = &ProjectPersistedJSON{
+		Project: p,
+		Version: DesiredProjectJSONVersion,
+	}
+
+	return
 }
