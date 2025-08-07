@@ -132,24 +132,27 @@ export const LogsScreen = () => {
         <p className="w-full wrap-anywhere" key={index}>
           {parse(log, {
             replace: (domNode) => {
-              if (domNode instanceof Element && domNode.attribs) {
-                if (domNode.attribs.class?.includes("match")) {
-                  const dataMatch = domNode.attribs["data-match"] || "";
-                  const isMatch = dataMatch === focusedMatchId;
-
-                  return (
-                    <span
-                      data-match={dataMatch}
-                      className={cn(
-                        "match bg-yellow-100",
-                        isMatch && "bg-yellow-300",
-                      )}
-                    >
-                      {domToReact(domNode.children as DOMNode[])}
-                    </span>
-                  );
-                }
+              if (!(domNode instanceof Element && domNode.attribs)) {
+                return;
               }
+              if (!domNode.attribs.class?.includes("match")) {
+                return;
+              }
+              
+              const dataMatch = domNode.attribs["data-match"] || "";
+              const isMatch = dataMatch === focusedMatchId;
+
+              return (
+                <span
+                  data-match={dataMatch}
+                  className={cn(
+                    "match bg-yellow-100",
+                    isMatch && "bg-yellow-300",
+                  )}
+                >
+                  {domToReact(domNode.children as DOMNode[])}
+                </span>
+              );
             },
           })}
         </p>
