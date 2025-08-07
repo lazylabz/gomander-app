@@ -6,6 +6,7 @@ export type Command = project.Command;
 export type UserConfig = config.UserConfig;
 export type CommandGroup = project.CommandGroup;
 export type Project = project.Project;
+export type ProjectInfo = Pick<Project, "id" | "name" | "baseWorkingDirectory">;
 
 // Enums
 export enum Event {

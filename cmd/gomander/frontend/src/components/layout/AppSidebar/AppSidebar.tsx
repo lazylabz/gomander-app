@@ -13,6 +13,7 @@ import { CreateMenu } from "@/components/layout/AppSidebar/components/CreateMenu
 import { sidebarContext } from "@/components/layout/AppSidebar/contexts/sidebarContext.tsx";
 import { EditCommandModal } from "@/components/modals/Command/EditCommandModal.tsx";
 import { EditCommandGroupModal } from "@/components/modals/CommandGroup/EditCommandGroupModal.tsx";
+import { EditOpenedProjectModal } from "@/components/modals/Project/EditOpenedProjectModal.tsx";
 import { SettingsModal } from "@/components/modals/SettingsModal.tsx";
 import {
   DropdownMenu,
@@ -26,7 +27,8 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar.tsx";
-import type { Command, CommandGroup } from "@/contracts/types.ts";
+import type { Command, CommandGroup, ProjectInfo } from "@/contracts/types.ts";
+import { fetchProject } from "@/queries/fetchProject.ts";
 import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { saveCommandGroups } from "@/useCases/commandGroup/saveCommandGroups.ts";
@@ -34,12 +36,23 @@ import { closeProject } from "@/useCases/project/closeProject.ts";
 
 export const AppSidebar = () => {
   const commandGroups = useCommandGroupStore((state) => state.commandGroups);
-  const project = useProjectStore((state) => state.project);
+  const project = useProjectStore((state) => state.projectInfo);
 
+  const [editingProject, setEditingProject] = useState<ProjectInfo | null>(
+    null,
+  );
   const [editingCommand, setEditingCommand] = useState<Command | null>(null);
   const [editingCommandGroup, setEditingCommandGroup] =
     useState<CommandGroup | null>(null);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+
+  const openEditProjectModal = () => {
+    setEditingProject(project);
+  };
+
+  const closeEditProjectModal = () => {
+    setEditingProject(null);
+  };
 
   const closeEditCommandModal = () => {
     setEditingCommand(null);
@@ -72,6 +85,12 @@ export const AppSidebar = () => {
           setEditingCommandGroup(commandGroup),
       }}
     >
+      <EditOpenedProjectModal
+        open={!!editingProject}
+        onClose={closeEditProjectModal}
+        onSuccess={fetchProject}
+        project={editingProject}
+      />
       <EditCommandModal
         command={editingCommand}
         open={!!editingCommand}
@@ -93,6 +112,9 @@ export const AppSidebar = () => {
                 <ChevronDown className="mt-1" size={20} />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
+                <DropdownMenuItem onClick={openEditProjectModal}>
+                  Edit
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={closeProject}>
                   Close
                 </DropdownMenuItem>

@@ -12,7 +12,7 @@ import { useProjectStore } from "@/store/projectStore.ts";
 import { LogsScreen } from "./screens/LogsScreen.tsx";
 
 function App() {
-  const project = useProjectStore((state) => state.project);
+  const project = useProjectStore((state) => state.projectInfo);
 
   useEffect(() => {
     fetchProject();
