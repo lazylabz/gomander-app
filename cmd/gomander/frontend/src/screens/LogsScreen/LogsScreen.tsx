@@ -1,5 +1,5 @@
 import parse, { type DOMNode, domToReact, Element } from "html-react-parser";
-import { BrushCleaning } from "lucide-react";
+import { BrushCleaning, ChevronLeft, ChevronRight, X } from "lucide-react";
 import {
   type ChangeEvent,
   type KeyboardEventHandler,
@@ -24,6 +24,9 @@ export const LogsScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [focusedMatchIndex, setFocusedMatchIndex] = useState(0);
 
+  const openSearch = () => setSearchOpen(true);
+  const closeSearch = () => setSearchOpen(false);
+
   const handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFocusedMatchIndex(0);
     setSearchQuery(event.target.value);
@@ -41,7 +44,7 @@ export const LogsScreen = () => {
       : [];
 
   useShortcut("Meta-F", () => {
-    setSearchOpen(true);
+    openSearch();
   });
 
   const focusElementByMatchId = (id: string) => {
@@ -51,23 +54,30 @@ export const LogsScreen = () => {
     }
   };
 
+  const nextMatch = () => {
+    const newIndex = focusedMatchIndex + 1;
+    const correctedIndex = newIndex >= matchesIds.length ? 0 : newIndex;
+    setFocusedMatchIndex(correctedIndex);
+    focusElementByMatchId(matchesIds[correctedIndex]);
+  };
+  const prevMatch = () => {
+    const newIndex = focusedMatchIndex - 1;
+    const correctedIndex = newIndex < 0 ? matchesIds.length - 1 : newIndex;
+    setFocusedMatchIndex(correctedIndex);
+    focusElementByMatchId(matchesIds[correctedIndex]);
+  };
+
   const handleInputKeyPress: KeyboardEventHandler = (event) => {
     if (event.key === "Escape") {
       setSearchOpen(false);
     }
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      const newIndex = focusedMatchIndex + 1;
-      const correctedIndex = newIndex >= matchesIds.length ? 0 : newIndex;
-      setFocusedMatchIndex(correctedIndex);
-      focusElementByMatchId(matchesIds[correctedIndex]);
+      nextMatch();
     }
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      const newIndex = focusedMatchIndex - 1;
-      const correctedIndex = newIndex < 0 ? matchesIds.length - 1 : newIndex;
-      setFocusedMatchIndex(correctedIndex);
-      focusElementByMatchId(matchesIds[correctedIndex]);
+      prevMatch();
     }
   };
 
@@ -83,26 +93,43 @@ export const LogsScreen = () => {
     <div className="p-4 overflow-y-auto h-full w-full flex flex-col font-mono justify-end">
       <div className="fixed top-3 right-6 z-1 flex items-center gap-2">
         {searchOpen && (
-          <div className="flex flex-col">
+          <div className="flex flex-col bg-background gap-1.5">
             <Input
               ref={searchInput}
               autoCorrect="off"
               autoComplete="off"
-              className="bg-background"
+              className="w-64"
               value={searchQuery}
               onChange={handleSearchInputChange}
               onKeyDown={handleInputKeyPress}
             />
-            {searchQuery && (
-              <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground pl-2 flex items-center gap-2 pb-1 justify-between">
+              <div className="flex flex-row items-center gap-2">
+                <div className="flex flex-row items-center">
+                  <ChevronLeft
+                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                    onClick={prevMatch}
+                    size={14}
+                  />
+                  <ChevronRight
+                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                    onClick={nextMatch}
+                    size={14}
+                  />
+                </div>
                 {matchesIds.length} matches
-              </span>
-            )}
+              </div>
+              <X
+                size={14}
+                onClick={closeSearch}
+                className="text-muted-foreground hover:text-foreground cursor-pointer"
+              />
+            </span>
           </div>
         )}
         <BrushCleaning
           onClick={clearCurrentLogs}
-          className="text-foreground opacity-25 hover:opacity-100 transition-opacity cursor-pointer"
+          className="text-foreground opacity-25 hover:opacity-100 transition-opacity cursor-pointer self-start mt-1.5"
         />
       </div>
       {parsedLogs.map((log, index) => (
