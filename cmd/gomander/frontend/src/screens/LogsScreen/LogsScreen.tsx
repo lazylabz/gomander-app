@@ -15,6 +15,13 @@ import { cn } from "@/lib/utils.ts";
 import { extractMatchesIds, parseLog } from "@/screens/LogsScreen/helpers.ts";
 import { clearCurrentLogs } from "@/useCases/logging/clearCurrentLogs.ts";
 
+const focusElementByMatchId = (id: string) => {
+  const matchElement = document.querySelector(`[data-match="${id}"]`);
+  if (matchElement) {
+    matchElement.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+};
+
 export const LogsScreen = () => {
   const { currentLogs } = useCurrentLogs();
 
@@ -37,22 +44,11 @@ export const LogsScreen = () => {
   );
 
   const matchesIds =
-    searchQuery && searchOpen
-      ? parsedLogs.flatMap((log) => {
-          return extractMatchesIds(log);
-        })
-      : [];
+    searchQuery && searchOpen ? parsedLogs.flatMap(extractMatchesIds) : [];
 
   useShortcut("Meta-F", () => {
     openSearch();
   });
-
-  const focusElementByMatchId = (id: string) => {
-    const matchElement = document.querySelector(`[data-match="${id}"]`);
-    if (matchElement) {
-      matchElement.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  };
 
   const nextMatch = () => {
     const newIndex = focusedMatchIndex + 1;
@@ -103,7 +99,7 @@ export const LogsScreen = () => {
               onChange={handleSearchInputChange}
               onKeyDown={handleInputKeyPress}
             />
-            <span className="text-xs text-muted-foreground pl-2 flex items-center gap-2 pb-1 justify-between">
+            <span className="text-xs text-muted-foreground pl-2 flex items-center gap-2 pb-1 justify-between select-none">
               <div className="flex flex-row items-center gap-2">
                 <div className="flex flex-row items-center">
                   <ChevronLeft
