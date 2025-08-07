@@ -9,7 +9,7 @@ import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { ProjectSelectionScreen } from "@/screens/ProjectSelectionScreen/ProjectSelectionScreen.tsx";
 import { useProjectStore } from "@/store/projectStore.ts";
 
-import { LogsScreen } from "./screens/LogsScreen.tsx";
+import { LogsScreen } from "./screens/LogsScreen/LogsScreen.tsx";
 
 function App() {
   const project = useProjectStore((state) => state.projectInfo);
