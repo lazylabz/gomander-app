@@ -16,6 +16,11 @@ import { EditCommandGroupModal } from "@/components/modals/CommandGroup/EditComm
 import { EditOpenedProjectModal } from "@/components/modals/Project/EditOpenedProjectModal.tsx";
 import { SettingsModal } from "@/components/modals/SettingsModal.tsx";
 import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar.tsx";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -104,11 +109,16 @@ export const AppSidebar = () => {
       <SettingsModal open={settingsModalOpen} setOpen={setSettingsModalOpen} />
       <Sidebar collapsible="icon">
         <SidebarHeader className="flex flex-row items-center justify-between p-2">
-          <div className="flex items-center ml-2 gap-2">
-            <p className="text-xl font-extralight">G.</p>
+          <div className="flex items-center ml-2 gap-1">
+            <Avatar className="size-9 rounded-lg">
+              <AvatarImage src="/logo.png" />
+              <AvatarFallback className="text-xl font-extralight">
+                G.
+              </AvatarFallback>
+            </Avatar>
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex gap-1 items-center hover:bg-sidebar-foreground/8 p-1 px-1 pr-2 rounded-md">
-                <h1 className="text-xl font-semibold pl-2">{project?.name}</h1>
+              <DropdownMenuTrigger className="flex gap-1 items-center hover:bg-sidebar-foreground/8 p-1 px-2 rounded-md">
+                <h1 className="text-xl font-semibold pl-1">{project?.name}</h1>
                 <ChevronDown className="mt-1" size={20} />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
