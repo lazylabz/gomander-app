@@ -1,5 +1,4 @@
 import { ArrowLeft, PanelsTopLeft, Settings, User } from "lucide-react";
-import { useLocation, useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -8,28 +7,25 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs.tsx";
+import {
+  SettingsTab,
+  useSettingsContext,
+} from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import { ProjectSettings } from "@/screens/SettingsScreen/tabs/ProjectSettings/ProjectSettings.tsx";
 import { UserSettings } from "@/screens/SettingsScreen/tabs/UserSettings/UserSettings.tsx";
 
-export enum SettingsTab {
-  User = "user",
-  Project = "project",
-}
-
 export const SettingsScreen = () => {
-  const navigate = useNavigate();
-  const { state } = useLocation();
-
-  const handleBack = () => {
-    navigate(-1);
-  };
-
-  const defaultTab = state?.tab || SettingsTab.User;
+  const { initialTab, closeSettings } = useSettingsContext();
 
   return (
     <div className="bg-background p-6 flex flex-col h-full">
       <div className="flex items-center space-x-4 mb-6">
-        <Button variant="ghost" size="sm" className="p-2" onClick={handleBack}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="p-2"
+          onClick={closeSettings}
+        >
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex items-center space-x-2">
@@ -37,7 +33,7 @@ export const SettingsScreen = () => {
           <h1 className="text-2xl font-bold">Settings</h1>
         </div>
       </div>
-      <Tabs defaultValue={defaultTab} className="w-full flex-1">
+      <Tabs defaultValue={initialTab} className="w-full flex-1">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger
             value={SettingsTab.User}

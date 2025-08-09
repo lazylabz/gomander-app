@@ -8,6 +8,7 @@ import { fetchProject } from "@/queries/fetchProject.ts";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { ScreenRoutes } from "@/routes.ts";
 import { ProjectSelectionScreen } from "@/screens/ProjectSelectionScreen/ProjectSelectionScreen.tsx";
+import { SettingsContextProvider } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import { SettingsScreen } from "@/screens/SettingsScreen/SettingsScreen.tsx";
 
 import { LogsScreen } from "./screens/LogsScreen/LogsScreen.tsx";
@@ -28,7 +29,15 @@ function App() {
           element={<ProjectSelectionScreen />}
         />
         <Route path={ScreenRoutes.Logs} element={<LogsScreen />} />
-        <Route path={ScreenRoutes.Settings} element={<SettingsScreen />} />
+
+        <Route
+          path={ScreenRoutes.Settings}
+          element={
+            <SettingsContextProvider>
+              <SettingsScreen />
+            </SettingsContextProvider>
+          }
+        />
       </Routes>
     </ThemeProvider>
   );

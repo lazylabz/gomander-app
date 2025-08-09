@@ -9,10 +9,10 @@ import {
   FormMessage,
 } from "@/components/ui/form.tsx";
 import { Input } from "@/components/ui/input.tsx";
-import type { FormType } from "@/screens/SettingsScreen/tabs/ProjectSettings/formSchema.ts";
+import type { SettingsFormType } from "@/screens/SettingsScreen/contexts/settingsFormSchema.ts";
 
 export const EnvironmentPathsField = () => {
-  const { control } = useFormContext<FormType>();
+  const { control } = useFormContext<SettingsFormType>();
 
   const { fields, append, remove } = useFieldArray({
     control,

@@ -1,7 +1,4 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Route, Save, WandSparkles } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button.tsx";
 import {
@@ -27,48 +24,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useTheme } from "@/contexts/theme.tsx";
+import { useSettingsContext } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import { EnvironmentPathsField } from "@/screens/SettingsScreen/tabs/ProjectSettings/components/EnvironmentPathsField.tsx";
-import {
-  formSchema,
-  type FormType,
-} from "@/screens/SettingsScreen/tabs/ProjectSettings/formSchema.ts";
 import { EnvironmentPathsInfoDialog } from "@/screens/SettingsScreen/tabs/UserSettings/components/EnvironmentPathsInfoDialog.tsx";
-import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
-import { saveUserConfig } from "@/useCases/userConfig/saveUserConfig.ts";
 
 export const UserSettings = () => {
-  const userConfig = useUserConfigurationStore((state) => state.userConfig);
-  const { setTheme, theme } = useTheme();
-
-  const navigate = useNavigate();
-
-  const form = useForm<FormType>({
-    resolver: zodResolver(formSchema),
-    values: {
-      environmentPaths:
-        userConfig.environmentPaths.map((p) => ({ value: p })) || [],
-      theme: theme || "system",
-    },
-  });
-
-  const onSubmit = async (data: FormType) => {
-    setTheme(data.theme);
-
-    await saveUserConfig({
-      lastOpenedProjectId: userConfig.lastOpenedProjectId,
-      environmentPaths: data.environmentPaths.map((path) => path.value),
-    });
-
-    form.reset();
-
-    navigate(-1);
-  };
+  const { settingsForm, saveSettings, hasUnsavedChanges } =
+    useSettingsContext();
 
   return (
-    <Form {...form}>
+    <Form {...settingsForm}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={settingsForm.handleSubmit(saveSettings)}
         className="w-full h-full flex flex-col justify-between"
       >
         <div className="flex flex-col gap-2">
@@ -97,7 +64,7 @@ export const UserSettings = () => {
             </CardHeader>
             <CardContent>
               <FormField
-                control={form.control}
+                control={settingsForm.control}
                 name="theme"
                 render={({ field }) => (
                   <FormItem>
@@ -132,7 +99,11 @@ export const UserSettings = () => {
             </CardContent>
           </Card>
         </div>
-        <Button type="submit" className="self-end">
+        <Button
+          type="submit"
+          className="self-end"
+          disabled={!hasUnsavedChanges}
+        >
           <Save />
           Save
         </Button>
