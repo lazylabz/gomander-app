@@ -23,7 +23,7 @@ export const SettingsScreen = () => {
         <Button
           variant="ghost"
           size="sm"
-          className="p-2"
+          className="p-2 cursor-pointer"
           onClick={closeSettings}
         >
           <ArrowLeft className="h-4 w-4" />

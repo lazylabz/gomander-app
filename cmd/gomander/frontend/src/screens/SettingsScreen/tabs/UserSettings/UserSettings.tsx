@@ -101,7 +101,7 @@ export const UserSettings = () => {
         </div>
         <Button
           type="submit"
-          className="self-end"
+          className="self-end cursor-pointer"
           disabled={!hasUnsavedChanges}
         >
           <Save />
