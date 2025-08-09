@@ -43,7 +43,7 @@ export const UserSettings = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Route size={20} />
-                <span className="ml-2 mr-1">Environment paths</span>
+                <span className="ml-2 mr-2">Environment paths</span>
                 <EnvironmentPathsInfoDialog />
               </CardTitle>
               <CardDescription>

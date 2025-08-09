@@ -7,10 +7,7 @@ import {
 export const EnvironmentPathsInfoDialog = () => {
   return (
     <HoverCard openDelay={100}>
-      <HoverCardTrigger
-        type="button"
-        className="text-xs self-start cursor-help text-muted-foreground hover:text-foreground"
-      >
+      <HoverCardTrigger className="text-xs self-center cursor-help text-muted-foreground hover:text-foreground border rounded-full size-4 flex items-center justify-center">
         ?
       </HoverCardTrigger>
       <HoverCardContent
