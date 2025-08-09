@@ -6,6 +6,7 @@ import {
 } from "@dnd-kit/sortable";
 import { ChevronDown, Settings } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 import { AllCommandsSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/AllCommandsSection/AllCommandsSection.tsx";
 import { CommandGroupSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandGroupSection/CommandGroupSection.tsx";
@@ -34,6 +35,8 @@ import {
 } from "@/components/ui/sidebar.tsx";
 import type { Command, CommandGroup, ProjectInfo } from "@/contracts/types.ts";
 import { fetchProject } from "@/queries/fetchProject.ts";
+import { ScreenRoutes } from "@/routes.ts";
+import { SettingsTab } from "@/screens/SettingsScreen/SettingsScreen.tsx";
 import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { saveCommandGroups } from "@/useCases/commandGroup/saveCommandGroups.ts";
@@ -43,6 +46,8 @@ export const AppSidebar = () => {
   const commandGroups = useCommandGroupStore((state) => state.commandGroups);
   const project = useProjectStore((state) => state.projectInfo);
 
+  const navigate = useNavigate();
+
   const [editingProject, setEditingProject] = useState<ProjectInfo | null>(
     null,
   );
@@ -50,10 +55,6 @@ export const AppSidebar = () => {
   const [editingCommandGroup, setEditingCommandGroup] =
     useState<CommandGroup | null>(null);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
-
-  const openEditProjectModal = () => {
-    setEditingProject(project);
-  };
 
   const closeEditProjectModal = () => {
     setEditingProject(null);
@@ -67,8 +68,8 @@ export const AppSidebar = () => {
     setEditingCommandGroup(null);
   };
 
-  const openSettingsModal = () => {
-    setSettingsModalOpen(true);
+  const goToSettings = (tab: SettingsTab) => {
+    navigate(ScreenRoutes.Settings, { state: { tab } });
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -80,6 +81,11 @@ export const AppSidebar = () => {
       const newCommandGroups = arrayMove(commandGroups, oldIndex, newIndex);
       await saveCommandGroups(newCommandGroups);
     }
+  };
+
+  const handleCloseProject = async () => {
+    await closeProject();
+    navigate(ScreenRoutes.ProjectSelection);
   };
 
   return (
@@ -122,10 +128,12 @@ export const AppSidebar = () => {
                 <ChevronDown className="mt-1" size={20} />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={openEditProjectModal}>
+                <DropdownMenuItem
+                  onClick={() => goToSettings(SettingsTab.Project)}
+                >
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={closeProject}>
+                <DropdownMenuItem onClick={handleCloseProject}>
                   Close
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -151,7 +159,7 @@ export const AppSidebar = () => {
         </SidebarContent>
         <SidebarFooter>
           <Settings
-            onClick={openSettingsModal}
+            onClick={() => goToSettings(SettingsTab.User)}
             size={20}
             className="text-muted-foreground cursor-pointer hover:text-primary"
           />
