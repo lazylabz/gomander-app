@@ -39,7 +39,7 @@ import { saveUserConfig } from "@/useCases/userConfig/saveUserConfig.ts";
 
 export const UserSettings = () => {
   const userConfig = useUserConfigurationStore((state) => state.userConfig);
-  const { setTheme, theme } = useTheme();
+  const { setRawTheme, rawTheme } = useTheme();
 
   const navigate = useNavigate();
 
@@ -48,12 +48,12 @@ export const UserSettings = () => {
     values: {
       environmentPaths:
         userConfig.environmentPaths.map((p) => ({ value: p })) || [],
-      theme: theme || "system",
+      theme: rawTheme || "system",
     },
   });
 
   const onSubmit = async (data: FormType) => {
-    setTheme(data.theme);
+    setRawTheme(data.theme);
 
     await saveUserConfig({
       lastOpenedProjectId: userConfig.lastOpenedProjectId,

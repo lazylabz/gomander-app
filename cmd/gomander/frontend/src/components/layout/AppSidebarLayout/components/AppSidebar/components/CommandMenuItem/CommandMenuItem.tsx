@@ -27,7 +27,7 @@ export const CommandMenuItem = ({
   command: Command;
   draggable?: boolean;
 }) => {
-  const { correctedTheme } = useTheme();
+  const { theme } = useTheme();
 
   const setActiveCommandId = useCommandStore(
     (state) => state.setActiveCommandId,
@@ -82,14 +82,14 @@ export const CommandMenuItem = ({
     isRunning &&
       "bg-green-100 hover:bg-green-200 focus:bg-green-100 active:bg-green-100",
     isRunning &&
-      correctedTheme === "dark" &&
+      theme === "dark" &&
       "bg-green-100/50 hover:bg-green-200/50 focus:bg-green-100/50 active:bg-green-100/50",
     isActiveCommand &&
       isRunning &&
       "bg-green-200 hover:bg-green-200 focus:bg-green-200 active:bg-green-200",
     isActiveCommand &&
       isRunning &&
-      correctedTheme === "dark" &&
+      theme === "dark" &&
       "bg-green-200/50 hover:bg-green-200/50 focus:bg-green-200/50 active:bg-green-200/50",
   );
 
