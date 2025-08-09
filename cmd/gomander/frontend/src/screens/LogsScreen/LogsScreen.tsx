@@ -10,6 +10,7 @@ import {
 
 import { AppSidebarLayout } from "@/components/layout/AppSidebarLayout/AppSidebarLayout.tsx";
 import { Input } from "@/components/ui/input.tsx";
+import { useTheme } from "@/contexts/theme.tsx";
 import { useCurrentLogs } from "@/hooks/useCurrentLogs.ts";
 import { useShortcut } from "@/hooks/useShortcut.ts";
 import { cn } from "@/lib/utils.ts";
@@ -26,6 +27,8 @@ const focusElementByMatchId = (id: string) => {
 export const LogsScreen = () => {
   const { currentLogs } = useCurrentLogs();
 
+  const { correctedTheme } = useTheme();
+
   const searchInput = useRef<HTMLInputElement | null>(null);
 
   const [searchOpen, setSearchOpen] = useState(false);
@@ -41,7 +44,7 @@ export const LogsScreen = () => {
   };
 
   const parsedLogs = currentLogs.map((log) =>
-    parseLog(log, searchOpen ? searchQuery : ""),
+    parseLog(log, searchOpen ? searchQuery : "", correctedTheme),
   );
 
   const matchesIds =
@@ -88,7 +91,7 @@ export const LogsScreen = () => {
 
   return (
     <AppSidebarLayout>
-      <div className="p-4 overflow-y-auto h-full w-full flex flex-col font-mono justify-end">
+      <div className="p-4 overflow-y-auto h-full w-full flex flex-col font-mono justify-end bg-background text-foreground">
         <div className="fixed top-3 right-6 z-1 flex items-center gap-2">
           {searchOpen && (
             <div className="flex flex-col bg-background gap-1.5">

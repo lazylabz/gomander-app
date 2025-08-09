@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router";
 
 import { Toaster } from "@/components/ui/sonner.tsx";
 import { EventListenersContainer } from "@/components/utility/EventListenersContainer.tsx";
+import { ThemeProvider } from "@/contexts/theme.tsx";
 import { fetchProject } from "@/queries/fetchProject.ts";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { ScreenRoutes } from "@/routes.ts";
@@ -18,7 +19,7 @@ function App() {
   }, []);
 
   return (
-    <>
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <EventListenersContainer />
       <Toaster richColors />
       <Routes>
@@ -29,7 +30,7 @@ function App() {
         <Route path={ScreenRoutes.Logs} element={<LogsScreen />} />
         <Route path={ScreenRoutes.Settings} element={<SettingsScreen />} />
       </Routes>
-    </>
+    </ThemeProvider>
   );
 }
 
