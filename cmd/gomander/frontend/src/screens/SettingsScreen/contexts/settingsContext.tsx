@@ -28,19 +28,19 @@ type SettingsUseFormReturn = UseFormReturn<
 
 // Define context
 export interface SettingsContextData {
-  initialTab: SettingsTab;
-  closeSettings: () => void;
-  saveSettings: (formData: SettingsFormType) => Promise<void>;
-  hasUnsavedChanges: boolean;
   settingsForm: SettingsUseFormReturn;
+  hasUnsavedChanges: boolean;
+  initialTab: SettingsTab;
+  saveSettings: (formData: SettingsFormType) => Promise<void>;
+  closeSettings: () => void;
 }
 
 export const settingsContext = createContext<SettingsContextData>({
-  initialTab: SettingsTab.User,
-  closeSettings: () => {},
-  saveSettings: async () => {},
-  hasUnsavedChanges: false,
   settingsForm: {} as SettingsUseFormReturn,
+  hasUnsavedChanges: false,
+  initialTab: SettingsTab.User,
+  saveSettings: async () => {},
+  closeSettings: () => {},
 });
 
 // Define provider
@@ -68,40 +68,49 @@ export const SettingsContextProvider = ({
     },
   });
 
-  const closeSettings = () => {
-    navigate(-1);
-    settingsForm.reset();
-  };
+  const { dirtyFields } = settingsForm.formState;
 
+  const hasUserChanges = dirtyFields.environmentPaths || dirtyFields.theme;
+  const hasProjectChanges =
+    dirtyFields.name || dirtyFields.baseWorkingDirectory;
   const saveSettings = async (formData: SettingsFormType) => {
     if (!projectInfo) {
       return;
     }
 
     // Save user settings
-    setRawTheme(formData.theme);
-    await saveUserConfig({
-      lastOpenedProjectId: userConfig.lastOpenedProjectId,
-      environmentPaths: formData.environmentPaths.map((path) => path.value),
-    });
+    if (hasUserChanges) {
+      setRawTheme(formData.theme);
+      await saveUserConfig({
+        lastOpenedProjectId: userConfig.lastOpenedProjectId,
+        environmentPaths: formData.environmentPaths.map((path) => path.value),
+      });
+    }
 
     // Save project settings
-    await editOpenedProject({
-      ...projectInfo,
-      name: formData.name,
-      baseWorkingDirectory: formData.baseWorkingDirectory,
-    });
-    await fetchProject();
+    if (hasProjectChanges) {
+      await editOpenedProject({
+        ...projectInfo,
+        name: formData.name,
+        baseWorkingDirectory: formData.baseWorkingDirectory,
+      });
+      await fetchProject();
+    }
 
     settingsForm.reset();
   };
 
+  const closeSettings = () => {
+    navigate(-1);
+    settingsForm.reset();
+  };
+
   const value: SettingsContextData = {
-    initialTab,
-    closeSettings,
-    saveSettings,
-    hasUnsavedChanges: settingsForm.formState.isDirty,
     settingsForm,
+    hasUnsavedChanges: settingsForm.formState.isDirty,
+    initialTab,
+    saveSettings,
+    closeSettings,
   };
 
   return (
