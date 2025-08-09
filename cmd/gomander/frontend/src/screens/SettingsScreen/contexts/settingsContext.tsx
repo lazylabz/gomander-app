@@ -3,7 +3,7 @@ import { createContext, useContext } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router";
 
-import { type Theme, useTheme } from "@/contexts/theme.tsx";
+import { useTheme } from "@/contexts/theme.tsx";
 import { fetchProject } from "@/queries/fetchProject.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
@@ -20,19 +20,10 @@ export enum SettingsTab {
   Project = "project",
 }
 
-interface SettingsFormData {
-  // User settings
-  environmentPaths: { value: string }[];
-  theme: Theme;
-  // Project settings
-  name: string;
-  baseWorkingDirectory: string;
-}
-
 type SettingsUseFormReturn = UseFormReturn<
-  SettingsFormData,
+  SettingsFormType,
   unknown,
-  SettingsFormData
+  SettingsFormType
 >;
 
 // Define context
