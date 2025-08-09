@@ -86,11 +86,9 @@ export const UserSettings = () => {
                         </SelectContent>
                       </Select>
                     </FormControl>
-                    <FormDescription>
-                      <p className="text-xs">
-                        (The system theme will adapt to your operating system's
-                        theme settings)
-                      </p>
+                    <FormDescription className="text-xs">
+                      (The system theme will adapt to your operating system's
+                      theme settings)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
