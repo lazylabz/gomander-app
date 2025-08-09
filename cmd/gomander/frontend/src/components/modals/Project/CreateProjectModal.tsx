@@ -6,7 +6,7 @@ import { BaseWorkingDirectoryField } from "@/components/modals/Project/common/Ba
 import {
   formSchema,
   type FormSchemaType,
-} from "@/components/modals/Project/common/createAndEditSchema.ts";
+} from "@/components/modals/Project/common/createSchema.ts";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Dialog, DialogHeader, DialogTitle } from "@/components/ui/dialog";
