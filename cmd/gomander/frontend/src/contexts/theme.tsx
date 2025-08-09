@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 export const availableThemes = ["dark", "light", "system"] as const;
 
-type Theme = (typeof availableThemes)[number];
+export type Theme = (typeof availableThemes)[number];
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -13,10 +13,12 @@ type ThemeProviderProps = {
 type ThemeProviderState = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  correctedTheme: "light" | "dark";
 };
 
 const initialState: ThemeProviderState = {
   theme: "system",
+  correctedTheme: "light",
   setTheme: () => null,
 };
 
@@ -50,8 +52,16 @@ export function ThemeProvider({
     root.classList.add(theme);
   }, [theme]);
 
+  const correctedTheme =
+    theme !== "system"
+      ? theme
+      : window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+
   const value = {
     theme,
+    correctedTheme,
     setTheme: (theme: Theme) => {
       localStorage.setItem(storageKey, theme);
       setTheme(theme);

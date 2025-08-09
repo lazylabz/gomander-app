@@ -10,6 +10,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu.tsx";
 import { SidebarMenuButton } from "@/components/ui/sidebar.tsx";
+import { useTheme } from "@/contexts/theme.tsx";
 import type { Command } from "@/contracts/types.ts";
 import { cn } from "@/lib/utils.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
@@ -26,6 +27,8 @@ export const CommandMenuItem = ({
   command: Command;
   draggable?: boolean;
 }) => {
+  const { correctedTheme } = useTheme();
+
   const setActiveCommandId = useCommandStore(
     (state) => state.setActiveCommandId,
   );
@@ -77,10 +80,17 @@ export const CommandMenuItem = ({
   const className = cn(
     isActiveCommand && "bg-sidebar-accent",
     isRunning &&
-      "bg-green-100 hover:bg-green-100 focus:bg-green-100 active:bg-green-100",
+      "bg-green-100 hover:bg-green-200 focus:bg-green-100 active:bg-green-100",
+    isRunning &&
+      correctedTheme === "dark" &&
+      "bg-green-100/50 hover:bg-green-200/50 focus:bg-green-100/50 active:bg-green-100/50",
     isActiveCommand &&
       isRunning &&
       "bg-green-200 hover:bg-green-200 focus:bg-green-200 active:bg-green-200",
+    isActiveCommand &&
+      isRunning &&
+      correctedTheme === "dark" &&
+      "bg-green-200/50 hover:bg-green-200/50 focus:bg-green-200/50 active:bg-green-200/50",
   );
 
   return (

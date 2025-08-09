@@ -1,12 +1,6 @@
 import AnsiToHtml from "ansi-to-html";
 
-const ansiConverter = new AnsiToHtml({
-  fg: "#000000",
-  bg: "#ffffff",
-  escapeXML: true,
-  newline: true,
-  stream: false,
-});
+import type { Theme } from "@/contexts/theme";
 
 const addSearchHighlight = (element: HTMLElement, searchQuery: string) => {
   if (
@@ -39,7 +33,15 @@ const addSearchHighlight = (element: HTMLElement, searchQuery: string) => {
   return element.innerHTML;
 };
 
-export const parseLog = (log: string, searchQuery: string) => {
+export const parseLog = (log: string, searchQuery: string, theme: Theme) => {
+  const ansiConverter = new AnsiToHtml({
+    fg: theme === "light" ? "#000000" : "#ffffff",
+    bg: theme === "light" ? "#ffffff" : "#000000",
+    escapeXML: true,
+    newline: true,
+    stream: false,
+  });
+
   const html = ansiConverter.toHtml(log);
 
   if (!searchQuery) {
