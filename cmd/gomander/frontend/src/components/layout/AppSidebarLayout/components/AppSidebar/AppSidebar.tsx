@@ -14,7 +14,6 @@ import { CreateMenu } from "@/components/layout/AppSidebarLayout/components/AppS
 import { sidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import { EditCommandModal } from "@/components/modals/Command/EditCommandModal.tsx";
 import { EditCommandGroupModal } from "@/components/modals/CommandGroup/EditCommandGroupModal.tsx";
-import { EditOpenedProjectModal } from "@/components/modals/Project/EditOpenedProjectModal.tsx";
 import {
   Avatar,
   AvatarFallback,
@@ -32,8 +31,7 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar.tsx";
-import type { Command, CommandGroup, ProjectInfo } from "@/contracts/types.ts";
-import { fetchProject } from "@/queries/fetchProject.ts";
+import type { Command, CommandGroup } from "@/contracts/types.ts";
 import { ScreenRoutes } from "@/routes.ts";
 import { SettingsTab } from "@/screens/SettingsScreen/SettingsScreen.tsx";
 import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
@@ -47,16 +45,9 @@ export const AppSidebar = () => {
 
   const navigate = useNavigate();
 
-  const [editingProject, setEditingProject] = useState<ProjectInfo | null>(
-    null,
-  );
   const [editingCommand, setEditingCommand] = useState<Command | null>(null);
   const [editingCommandGroup, setEditingCommandGroup] =
     useState<CommandGroup | null>(null);
-
-  const closeEditProjectModal = () => {
-    setEditingProject(null);
-  };
 
   const closeEditCommandModal = () => {
     setEditingCommand(null);
@@ -94,12 +85,6 @@ export const AppSidebar = () => {
           setEditingCommandGroup(commandGroup),
       }}
     >
-      <EditOpenedProjectModal
-        open={!!editingProject}
-        onClose={closeEditProjectModal}
-        onSuccess={fetchProject}
-        project={editingProject}
-      />
       <EditCommandModal
         command={editingCommand}
         open={!!editingCommand}
