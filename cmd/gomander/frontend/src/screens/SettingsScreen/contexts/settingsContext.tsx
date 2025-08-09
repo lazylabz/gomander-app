@@ -4,12 +4,15 @@ import { useForm, type UseFormReturn } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router";
 
 import { type Theme, useTheme } from "@/contexts/theme.tsx";
+import { fetchProject } from "@/queries/fetchProject.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
+import { editOpenedProject } from "@/useCases/project/editOpenedProject.ts";
+import { saveUserConfig } from "@/useCases/userConfig/saveUserConfig.ts";
 
 import {
   settingsFormSchema,
-  type SettingsFormSchemaType,
+  type SettingsFormType,
 } from "./settingsFormSchema";
 
 export enum SettingsTab {
@@ -28,7 +31,7 @@ interface SettingsFormData {
 
 type SettingsUseFormReturn = UseFormReturn<
   SettingsFormData,
-  never,
+  unknown,
   SettingsFormData
 >;
 
@@ -36,7 +39,7 @@ type SettingsUseFormReturn = UseFormReturn<
 export interface SettingsContextData {
   initialTab: SettingsTab;
   closeSettings: () => void;
-  saveSettings: (closeOnSave: boolean) => Promise<void>;
+  saveSettings: (formData: SettingsFormType) => Promise<void>;
   hasUnsavedChanges: boolean;
   settingsForm: SettingsUseFormReturn;
 }
@@ -57,18 +60,14 @@ export const SettingsContextProvider = ({
 }) => {
   const userConfig = useUserConfigurationStore((state) => state.userConfig);
   const projectInfo = useProjectStore((state) => state.projectInfo);
-  const { rawTheme } = useTheme();
+  const { rawTheme, setRawTheme } = useTheme();
 
   const navigate = useNavigate();
   const { state } = useLocation();
 
   const initialTab = state?.tab || SettingsTab.User;
 
-  const closeSettings = () => {
-    navigate(-1);
-  };
-
-  const settingsForm = useForm<SettingsFormSchemaType>({
+  const settingsForm = useForm<SettingsFormType>({
     resolver: zodResolver(settingsFormSchema),
     values: {
       environmentPaths: userConfig.environmentPaths.map((p) => ({ value: p })),
@@ -78,15 +77,34 @@ export const SettingsContextProvider = ({
     },
   });
 
+  const closeSettings = () => {
+    navigate(-1);
+  };
+
+  const saveSettings = async (formData: SettingsFormType) => {
+    // Save user settings
+    setRawTheme(formData.theme);
+    await saveUserConfig({
+      lastOpenedProjectId: userConfig.lastOpenedProjectId,
+      environmentPaths: formData.environmentPaths.map((path) => path.value),
+    });
+
+    // Save project settings
+    if (!projectInfo) {
+      return;
+    }
+    await editOpenedProject({
+      ...projectInfo,
+      name: formData.name,
+      baseWorkingDirectory: formData.baseWorkingDirectory,
+    });
+    await fetchProject();
+  };
+
   const value: SettingsContextData = {
     initialTab,
     closeSettings,
-    saveSettings: async (closeOnSave) => {
-      // TODO: Logic to save settings
-      if (closeOnSave) {
-        // TODO: Logic to close settings after saving
-      }
-    },
+    saveSettings,
     hasUnsavedChanges: false, // TODO: Implement logic to track unsaved changes
     settingsForm,
   };

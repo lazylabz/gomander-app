@@ -15,4 +15,4 @@ export const settingsFormSchema = z.object({
   baseWorkingDirectory: z.string().min(1, "Base working directory is required"),
 });
 
-export type SettingsFormSchemaType = z.infer<typeof settingsFormSchema>;
+export type SettingsFormType = z.infer<typeof settingsFormSchema>;
