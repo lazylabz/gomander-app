@@ -15,7 +15,6 @@ import { sidebarContext } from "@/components/layout/AppSidebarLayout/components/
 import { EditCommandModal } from "@/components/modals/Command/EditCommandModal.tsx";
 import { EditCommandGroupModal } from "@/components/modals/CommandGroup/EditCommandGroupModal.tsx";
 import { EditOpenedProjectModal } from "@/components/modals/Project/EditOpenedProjectModal.tsx";
-import { SettingsModal } from "@/components/modals/SettingsModal.tsx";
 import {
   Avatar,
   AvatarFallback,
@@ -54,7 +53,6 @@ export const AppSidebar = () => {
   const [editingCommand, setEditingCommand] = useState<Command | null>(null);
   const [editingCommandGroup, setEditingCommandGroup] =
     useState<CommandGroup | null>(null);
-  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
   const closeEditProjectModal = () => {
     setEditingProject(null);
@@ -112,7 +110,6 @@ export const AppSidebar = () => {
         open={!!editingCommandGroup}
         setOpen={closeEditCommandGroupModal}
       />
-      <SettingsModal open={settingsModalOpen} setOpen={setSettingsModalOpen} />
       <Sidebar collapsible="icon">
         <SidebarHeader className="flex flex-row items-center justify-between p-2">
           <div className="flex items-center ml-2 gap-1">
