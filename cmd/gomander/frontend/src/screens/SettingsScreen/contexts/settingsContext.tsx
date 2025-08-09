@@ -105,7 +105,7 @@ export const SettingsContextProvider = ({
     initialTab,
     closeSettings,
     saveSettings,
-    hasUnsavedChanges: false, // TODO: Implement logic to track unsaved changes
+    hasUnsavedChanges: settingsForm.formState.isDirty,
     settingsForm,
   };
 
