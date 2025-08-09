@@ -9,7 +9,7 @@ export const EnvironmentPathsInfoDialog = () => {
     <HoverCard openDelay={100}>
       <HoverCardTrigger
         type="button"
-        className="text-xs self-start cursor-pointer text-muted-foreground hover:text-foreground"
+        className="text-xs self-start cursor-help text-muted-foreground hover:text-foreground"
       >
         ?
       </HoverCardTrigger>
