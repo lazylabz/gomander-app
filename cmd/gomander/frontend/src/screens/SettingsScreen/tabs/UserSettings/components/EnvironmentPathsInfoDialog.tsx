@@ -20,8 +20,8 @@ export const EnvironmentPathsInfoDialog = () => {
           by files as <code>.bashrc</code>, <code>.zshrc</code>, or{" "}
           <code>.profile</code>.
         </p>
-        <p>
-          <code>e.g. /path/to/.nvm/versions/node/&lt;version&gt;/bin/</code>
+        <p className="text-xs">
+          e.g. <code>/path/to/.nvm/versions/node/&lt;version&gt;/bin/</code>
         </p>
       </HoverCardContent>
     </HoverCard>
