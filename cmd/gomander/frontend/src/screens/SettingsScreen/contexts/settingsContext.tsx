@@ -79,6 +79,7 @@ export const SettingsContextProvider = ({
 
   const closeSettings = () => {
     navigate(-1);
+    settingsForm.reset();
   };
 
   const saveSettings = async (formData: SettingsFormType) => {
