@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import type { UseFormReturn } from "react-hook-form";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 export enum SettingsTab {
   User = "user",
@@ -37,15 +37,18 @@ export const SettingsContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const navigate = useNavigate();
   const { state } = useLocation();
 
   const initialTab = state?.tab || SettingsTab.User;
 
+  const closeSettings = () => {
+    navigate(-1);
+  };
+
   const value: SettingsContextData = {
     initialTab,
-    closeSettings: () => {
-      // TODO: Logic to close settings
-    },
+    closeSettings,
     saveSettings: async (closeOnSave) => {
       // TODO: Logic to save settings
       if (closeOnSave) {
