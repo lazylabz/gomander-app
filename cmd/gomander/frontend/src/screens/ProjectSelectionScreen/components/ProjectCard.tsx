@@ -24,7 +24,7 @@ export const ProjectCard = ({
   };
 
   return (
-    <div className="relative px-4 py-2 border border-neutral-100 rounded-xl shadow hover:shadow-md transition-all w-80">
+    <div className="relative px-4 py-2 border border-neutral-100 dark:border-neutral-900 rounded-xl shadow hover:shadow-md transition-all w-80">
       <DropdownMenu>
         <DropdownMenuTrigger className="absolute top-2 right-2 ">
           <EllipsisVertical

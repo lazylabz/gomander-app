@@ -43,7 +43,7 @@ export const ProjectSettings = () => {
         </Card>
 
         <Button
-          className="self-end"
+          className="self-end cursor-pointer"
           type="submit"
           disabled={!hasUnsavedChanges}
         >

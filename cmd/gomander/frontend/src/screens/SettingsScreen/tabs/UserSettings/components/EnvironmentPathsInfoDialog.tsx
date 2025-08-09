@@ -7,10 +7,7 @@ import {
 export const EnvironmentPathsInfoDialog = () => {
   return (
     <HoverCard openDelay={100}>
-      <HoverCardTrigger
-        type="button"
-        className="text-xs self-start cursor-pointer text-muted-foreground hover:text-foreground"
-      >
+      <HoverCardTrigger className="text-xs self-center cursor-help text-muted-foreground hover:text-foreground border rounded-full size-4 flex items-center justify-center">
         ?
       </HoverCardTrigger>
       <HoverCardContent
@@ -23,8 +20,8 @@ export const EnvironmentPathsInfoDialog = () => {
           by files as <code>.bashrc</code>, <code>.zshrc</code>, or{" "}
           <code>.profile</code>.
         </p>
-        <p>
-          <code>e.g. /path/to/.nvm/versions/node/&lt;version&gt;/bin/</code>
+        <p className="text-xs">
+          e.g. <code>/path/to/.nvm/versions/node/&lt;version&gt;/bin/</code>
         </p>
       </HoverCardContent>
     </HoverCard>

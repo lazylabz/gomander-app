@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/sidebar.tsx";
 import type { Command, CommandGroup } from "@/contracts/types.ts";
 import { ScreenRoutes } from "@/routes.ts";
-import { SettingsTab } from "@/screens/SettingsScreen/SettingsScreen.tsx";
+import { SettingsTab } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { saveCommandGroups } from "@/useCases/commandGroup/saveCommandGroups.ts";

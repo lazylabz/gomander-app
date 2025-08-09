@@ -83,14 +83,14 @@ export const CommandMenuItem = ({
       "bg-green-100 hover:bg-green-200 focus:bg-green-100 active:bg-green-100",
     isRunning &&
       theme === "dark" &&
-      "bg-green-100/50 hover:bg-green-200/50 focus:bg-green-100/50 active:bg-green-100/50",
+      "bg-green-300/30 hover:bg-green-200/40 focus:bg-green-300/30 active:bg-green-300/30",
     isActiveCommand &&
       isRunning &&
       "bg-green-200 hover:bg-green-200 focus:bg-green-200 active:bg-green-200",
     isActiveCommand &&
       isRunning &&
       theme === "dark" &&
-      "bg-green-200/50 hover:bg-green-200/50 focus:bg-green-200/50 active:bg-green-200/50",
+      "bg-green-200/40 hover:bg-green-200/40 focus:bg-green-200/40 active:bg-green-200/40",
   );
 
   return (
@@ -126,7 +126,7 @@ export const CommandMenuItem = ({
               <div className="group/command p-0 m-0">
                 <Square
                   size={18}
-                  className="text-muted-foreground cursor-pointer hover:text-primary"
+                  className="text-muted-foreground dark:text-primary/70 cursor-pointer hover:text-primary dark:hover:text-primary"
                   onClick={handleStopCommand}
                 />
               </div>
