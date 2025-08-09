@@ -1,6 +1,16 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createContext, useContext } from "react";
-import type { UseFormReturn } from "react-hook-form";
+import { useForm, type UseFormReturn } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router";
+
+import { type Theme, useTheme } from "@/contexts/theme.tsx";
+import { useProjectStore } from "@/store/projectStore.ts";
+import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
+
+import {
+  settingsFormSchema,
+  type SettingsFormSchemaType,
+} from "./settingsFormSchema";
 
 export enum SettingsTab {
   User = "user",
@@ -8,11 +18,19 @@ export enum SettingsTab {
 }
 
 interface SettingsFormData {
+  // User settings
   environmentPaths: { value: string }[];
-  theme: string;
-  name: string; // Project name
+  theme: Theme;
+  // Project settings
+  name: string;
   baseWorkingDirectory: string;
 }
+
+type SettingsUseFormReturn = UseFormReturn<
+  SettingsFormData,
+  never,
+  SettingsFormData
+>;
 
 // Define context
 export interface SettingsContextData {
@@ -20,7 +38,7 @@ export interface SettingsContextData {
   closeSettings: () => void;
   saveSettings: (closeOnSave: boolean) => Promise<void>;
   hasUnsavedChanges: boolean;
-  settingsForm: UseFormReturn<SettingsFormData>;
+  settingsForm: SettingsUseFormReturn;
 }
 
 export const settingsContext = createContext<SettingsContextData>({
@@ -28,7 +46,7 @@ export const settingsContext = createContext<SettingsContextData>({
   closeSettings: () => {},
   saveSettings: async () => {},
   hasUnsavedChanges: false,
-  settingsForm: {} as UseFormReturn<SettingsFormData>,
+  settingsForm: {} as SettingsUseFormReturn,
 });
 
 // Define provider
@@ -37,6 +55,10 @@ export const SettingsContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const userConfig = useUserConfigurationStore((state) => state.userConfig);
+  const projectInfo = useProjectStore((state) => state.projectInfo);
+  const { rawTheme } = useTheme();
+
   const navigate = useNavigate();
   const { state } = useLocation();
 
@@ -45,6 +67,16 @@ export const SettingsContextProvider = ({
   const closeSettings = () => {
     navigate(-1);
   };
+
+  const settingsForm = useForm<SettingsFormSchemaType>({
+    resolver: zodResolver(settingsFormSchema),
+    values: {
+      environmentPaths: userConfig.environmentPaths.map((p) => ({ value: p })),
+      theme: rawTheme,
+      name: projectInfo?.name || "",
+      baseWorkingDirectory: projectInfo?.baseWorkingDirectory || "",
+    },
+  });
 
   const value: SettingsContextData = {
     initialTab,
@@ -56,7 +88,7 @@ export const SettingsContextProvider = ({
       }
     },
     hasUnsavedChanges: false, // TODO: Implement logic to track unsaved changes
-    settingsForm: {} as UseFormReturn<SettingsFormData>, // TODO
+    settingsForm,
   };
 
   return (
