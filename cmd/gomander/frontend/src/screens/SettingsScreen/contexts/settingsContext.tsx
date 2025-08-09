@@ -101,8 +101,8 @@ export const SettingsContextProvider = ({
   };
 
   const closeSettings = () => {
-    navigate(-1);
     settingsForm.reset();
+    navigate(-1);
   };
 
   const value: SettingsContextData = {
