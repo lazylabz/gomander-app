@@ -9,7 +9,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs.tsx";
 import { ProjectSettings } from "@/screens/SettingsScreen/tabs/ProjectSettings/ProjectSettings.tsx";
-import { UserSettings } from "@/screens/SettingsScreen/tabs/UserSettings.tsx";
+import { UserSettings } from "@/screens/SettingsScreen/tabs/UserSettings/UserSettings.tsx";
 
 export enum SettingsTab {
   User = "user",

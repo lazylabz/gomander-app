@@ -17,6 +17,7 @@ import {
   formSchema,
   type FormType,
 } from "@/screens/SettingsScreen/tabs/ProjectSettings/formSchema.ts";
+import { EnvironmentPathsInfoDialog } from "@/screens/SettingsScreen/tabs/UserSettings/components/EnvironmentPathsInfoDialog.tsx";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 import { saveUserConfig } from "@/useCases/userConfig/saveUserConfig.ts";
 
@@ -52,13 +53,13 @@ export const UserSettings = () => {
       >
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center">
               <Route size={20} />
-              <span>Extra environment paths</span>
+              <span className="ml-2 mr-1">Environment paths</span>
+              <EnvironmentPathsInfoDialog />
             </CardTitle>
             <CardDescription>
-              Add extra environment paths to your system PATH. These paths will
-              be used to resolve commands and executables.
+              These paths will be used to resolve commands and executables.
             </CardDescription>
           </CardHeader>
           <CardContent>
