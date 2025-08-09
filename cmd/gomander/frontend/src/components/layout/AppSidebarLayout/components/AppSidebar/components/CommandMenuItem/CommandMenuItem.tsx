@@ -2,7 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Play, Square } from "lucide-react";
 
-import { useSidebarContext } from "@/components/layout/AppSidebar/contexts/sidebarContext.tsx";
+import { useSidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import {
   ContextMenu,
   ContextMenuContent,

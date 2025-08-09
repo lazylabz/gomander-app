@@ -7,10 +7,10 @@ import {
 import { ChevronDown, Settings } from "lucide-react";
 import { useState } from "react";
 
-import { AllCommandsSection } from "@/components/layout/AppSidebar/components/AllCommandsSection/AllCommandsSection.tsx";
-import { CommandGroupSection } from "@/components/layout/AppSidebar/components/CommandGroupSection/CommandGroupSection.tsx";
-import { CreateMenu } from "@/components/layout/AppSidebar/components/CreateMenu/CreateMenu.tsx";
-import { sidebarContext } from "@/components/layout/AppSidebar/contexts/sidebarContext.tsx";
+import { AllCommandsSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/AllCommandsSection/AllCommandsSection.tsx";
+import { CommandGroupSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandGroupSection/CommandGroupSection.tsx";
+import { CreateMenu } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CreateMenu/CreateMenu.tsx";
+import { sidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import { EditCommandModal } from "@/components/modals/Command/EditCommandModal.tsx";
 import { EditCommandGroupModal } from "@/components/modals/CommandGroup/EditCommandGroupModal.tsx";
 import { EditOpenedProjectModal } from "@/components/modals/Project/EditOpenedProjectModal.tsx";
@@ -25,7 +25,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu.tsx";
 import {
   Sidebar,
   SidebarContent,

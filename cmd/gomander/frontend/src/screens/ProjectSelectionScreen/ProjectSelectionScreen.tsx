@@ -54,7 +54,7 @@ export const ProjectSelectionScreen = () => {
 
   useEffect(() => {
     fetchAvailableProjects();
-  }, []);
+  }, [fetchAvailableProjects]);
 
   return (
     <>
@@ -80,6 +80,7 @@ export const ProjectSelectionScreen = () => {
           <div className="flex flex-col items-center justify-center gap-2">
             {availableProjects.map((p) => (
               <ProjectCard
+                key={p.id}
                 project={p}
                 handleDeleteProject={handleDeleteProject(p.id)}
               />
