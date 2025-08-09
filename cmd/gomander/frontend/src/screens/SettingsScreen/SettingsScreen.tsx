@@ -37,14 +37,14 @@ export const SettingsScreen = () => {
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger
             value={SettingsTab.User}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 cursor-pointer"
           >
             <User className="h-4 w-4" />
             <span>User Settings</span>
           </TabsTrigger>
           <TabsTrigger
             value={SettingsTab.Project}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 cursor-pointer"
           >
             <PanelsTopLeft className="h-4 w-4" />
             <span>Project Settings</span>
