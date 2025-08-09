@@ -1,7 +1,7 @@
 import { Folder, FolderOpen } from "lucide-react";
 import { useState } from "react";
 
-import { CommandMenuItem } from "@/components/layout/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
+import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
 import { CreateCommandModal } from "@/components/modals/Command/CreateCommandModal.tsx";
 import {
   Collapsible,
@@ -13,7 +13,7 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "@/components/ui/context-menu";
+} from "@/components/ui/context-menu.tsx";
 import {
   SidebarGroup,
   SidebarGroupContent,

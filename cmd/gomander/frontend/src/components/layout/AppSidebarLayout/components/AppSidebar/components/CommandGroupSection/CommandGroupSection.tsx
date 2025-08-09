@@ -9,8 +9,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { Folder, FolderOpen, GripVertical, Play, Square } from "lucide-react";
 import type { SyntheticEvent } from "react";
 
-import { CommandMenuItem } from "@/components/layout/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
-import { useSidebarContext } from "@/components/layout/AppSidebar/contexts/sidebarContext.tsx";
+import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
+import { useSidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import {
   Collapsible,
   CollapsibleContent,
@@ -33,8 +33,8 @@ import type { CommandGroup } from "@/contracts/types.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { deleteCommandGroup } from "@/useCases/commandGroup/deleteCommandGroup.ts";
-import { editCommandGroup } from "@/useCases/commandGroup/editCommandGroup";
-import { runCommandGroup } from "@/useCases/commandGroup/runCommandGroup";
+import { editCommandGroup } from "@/useCases/commandGroup/editCommandGroup.ts";
+import { runCommandGroup } from "@/useCases/commandGroup/runCommandGroup.ts";
 import { stopCommandGroup } from "@/useCases/commandGroup/stopCommandGroup.ts";
 
 export const CommandGroupSection = ({

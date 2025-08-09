@@ -1,5 +1,6 @@
 import { Import, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { CreateProjectModal } from "@/components/modals/Project/CreateProjectModal.tsx";
@@ -8,14 +9,20 @@ import { ImportProjectModal } from "@/components/modals/Project/ImportProjectMod
 import { Button } from "@/components/ui/button.tsx";
 import { dataService } from "@/contracts/service.ts";
 import type { Project } from "@/contracts/types.ts";
+import { ScreenRoutes } from "@/routes.ts";
 import { ProjectCard } from "@/screens/ProjectSelectionScreen/components/ProjectCard.tsx";
 import { useGetAvailableProjects } from "@/screens/ProjectSelectionScreen/hooks/useGetAvailableProjects.ts";
+import { useProjectStore } from "@/store/projectStore.ts";
 import { deleteProject } from "@/useCases/project/deleteProject.ts";
 
 export const ProjectSelectionScreen = () => {
   const [projectIdBeingDeleted, setProjectIdBeingDeleted] = useState<
     string | null
   >(null);
+  const project = useProjectStore((state) => state.projectInfo);
+
+  const navigate = useNavigate();
+
   const [projectBeingImported, setProjectBeingImported] =
     useState<Project | null>(null);
 
@@ -54,7 +61,13 @@ export const ProjectSelectionScreen = () => {
 
   useEffect(() => {
     fetchAvailableProjects();
-  }, []);
+  }, [fetchAvailableProjects]);
+
+  useEffect(() => {
+    if (project) {
+      navigate(ScreenRoutes.Logs);
+    }
+  }, [navigate, project]);
 
   return (
     <>
@@ -80,6 +93,7 @@ export const ProjectSelectionScreen = () => {
           <div className="flex flex-col items-center justify-center gap-2">
             {availableProjects.map((p) => (
               <ProjectCard
+                key={p.id}
                 project={p}
                 handleDeleteProject={handleDeleteProject(p.id)}
               />
