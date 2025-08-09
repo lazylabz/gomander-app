@@ -83,6 +83,10 @@ export const SettingsContextProvider = ({
   };
 
   const saveSettings = async (formData: SettingsFormType) => {
+    if (!projectInfo) {
+      return;
+    }
+
     // Save user settings
     setRawTheme(formData.theme);
     await saveUserConfig({
@@ -91,9 +95,6 @@ export const SettingsContextProvider = ({
     });
 
     // Save project settings
-    if (!projectInfo) {
-      return;
-    }
     await editOpenedProject({
       ...projectInfo,
       name: formData.name,
