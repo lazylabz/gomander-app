@@ -99,6 +99,8 @@ export const SettingsContextProvider = ({
       baseWorkingDirectory: formData.baseWorkingDirectory,
     });
     await fetchProject();
+
+    settingsForm.reset();
   };
 
   const value: SettingsContextData = {
