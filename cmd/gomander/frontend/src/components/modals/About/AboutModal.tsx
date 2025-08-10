@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button.tsx";
 import { Dialog, DialogContent } from "@/components/ui/dialog.tsx";
 import { useVersionContext } from "@/contexts/version.tsx";
+import { externalBrowserService } from "@/contracts/service.ts";
 import { cn } from "@/lib/utils.ts";
 
 export const AboutModal = ({
@@ -19,6 +20,16 @@ export const AboutModal = ({
 }) => {
   const { currentVersion, newVersion, openLatestReleasePage } =
     useVersionContext();
+
+  const handleGithubClick = () => {
+    const url = `https://github.com/lazylabz/gomander-app`;
+    externalBrowserService.browserOpenURL(url);
+  };
+
+  const handleTeamClick = () => {
+    const url = `https://lazylabz.github.io/`;
+    externalBrowserService.browserOpenURL(url);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -70,7 +81,7 @@ export const AboutModal = ({
         <div className={cn("flex gap-4", newVersion ? "flex-row" : "flex-col")}>
           {/* GitHub CTA */}
           <button
-            onClick={() => {}}
+            onClick={handleGithubClick}
             className="cursor-pointer w-full flex flex-1 items-center justify-center gap-3 px-4 py-3 bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md rounded-lg transition-colors group"
           >
             <svg
@@ -97,7 +108,7 @@ export const AboutModal = ({
 
           {/* LazyLabz CTA */}
           <button
-            onClick={() => {}}
+            onClick={handleTeamClick}
             className="cursor-pointer w-full flex flex-1 items-center justify-center gap-3 px-4 py-3 bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md rounded-lg transition-all group"
           >
             <Heart className="size-5 text-foreground" />
