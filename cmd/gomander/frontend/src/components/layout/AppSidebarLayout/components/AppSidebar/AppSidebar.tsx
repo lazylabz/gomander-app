@@ -150,7 +150,7 @@ export const AppSidebar = () => {
             size={20}
             className="text-muted-foreground cursor-pointer hover:text-primary"
           />
-          <VersionSection onInfoClick={() => setAboutModalOpen(true)} />
+          <VersionSection openAboutModal={() => setAboutModalOpen(true)} />
         </SidebarFooter>
       </Sidebar>
     </sidebarContext.Provider>
