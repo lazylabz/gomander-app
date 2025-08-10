@@ -6,11 +6,7 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-} from "@/components/ui/dialog.tsx";
+import { Dialog, DialogContent } from "@/components/ui/dialog.tsx";
 import { useVersionContext } from "@/contexts/version.tsx";
 
 export const AboutModal = ({
@@ -28,7 +24,7 @@ export const AboutModal = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[628px] pb-0">
+      <DialogContent className="sm:max-w-[628px]">
         {/* Logo and Title */}
         <div className="text-center">
           <Avatar className="size-16 mx-auto mb-4 rounded-xl">
@@ -115,26 +111,6 @@ export const AboutModal = ({
             <ExternalLink className="size-4 text-muted-foreground group-hover:text-foreground transition-colors ml-auto" />
           </button>
         </div>
-        {/* Footer */}
-        <DialogFooter className="-mx-6 px-6 py-3 mt-1 bg-muted/50 rounded-b-lg border-t border-border">
-          <div className="w-full flex items-center gap-4 text-muted-foreground">
-            <p className="text-xs">Powered by</p>
-            <div className="flex items-center justify-center gap-4 text-xs">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-amber-600 rounded-sm"></div>
-                <span>Wails</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-cyan-500 rounded-sm"></div>
-                <span>Go</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-blue-400 rounded-sm"></div>
-                <span>React</span>
-              </div>
-            </div>
-          </div>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
