@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -35,7 +36,7 @@ func (a *App) IsThereANewRelease() (release string, err error) {
 	latestRelease, err := getLatestRelease()
 	if err != nil {
 		a.logger.Error("Failed to get latest release: " + err.Error())
-		return "", fmt.Errorf("failed to get latest release: %w", err)
+		return "", errors.New("failed to get latest release: " + err.Error())
 	}
 	if latestRelease == nil {
 		a.logger.Info("No new releases found.")
@@ -69,13 +70,13 @@ func getLatestRelease() (release *semver.Version, err error) {
 
 	bodyBytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
+		return nil, errors.New("failed to read response body: " + err.Error())
 	}
 
 	var releasesXml ReleasesFeedXML
 	err = xml.Unmarshal(bodyBytes, &releasesXml)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
+		return nil, errors.New("failed to unmarshal response body: " + err.Error())
 	}
 
 	if len(releasesXml.Entry) == 0 {
