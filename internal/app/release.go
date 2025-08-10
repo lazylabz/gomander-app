@@ -21,7 +21,7 @@ type ReleasesFeedXML struct {
 }
 
 func (a *App) GetCurrentRelease() string {
-	return CurrentRelease
+	return semver.MustParse(CurrentRelease).String()
 }
 
 // IsThereANewRelease checks if there is a new release available.

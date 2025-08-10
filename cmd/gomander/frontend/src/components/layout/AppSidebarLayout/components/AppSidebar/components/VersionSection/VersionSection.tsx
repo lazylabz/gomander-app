@@ -1,83 +1,55 @@
 import { CircleAlert, CircleCheck } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip.tsx";
-import { externalBrowserService, helpersService } from "@/contracts/service.ts";
+import { useVersionContext } from "@/contexts/version.tsx";
+import { externalBrowserService } from "@/contracts/service.ts";
 
 export const VersionSection = () => {
-  const [currentRelease, setCurrentRelease] = useState<string>("");
-  const [newRelease, setNewRelease] = useState<string | null>(null);
-  const [errorLoadingNewRelease, setErrorLoadingNewRelease] =
-    useState<Error | null>(null);
+  const { newVersion, currentVersion, errorLoadingNewVersion } =
+    useVersionContext();
 
-  const fetchCurrentRelease = async () => {
-    const release = await helpersService.getCurrentRelease();
-    setCurrentRelease(release);
-  };
-
-  const checkNewRelease = async () => {
-    setErrorLoadingNewRelease(null);
-    try {
-      const release = await helpersService.isThereANewRelease();
-      if (release) {
-        setNewRelease(release);
-      }
-    } catch (err) {
-      setErrorLoadingNewRelease(err as Error);
-      console.error("Error checking for new releases:", err);
-      toast.error(`Error checking for new releases`);
-    }
-  };
-
-  useEffect(() => {
-    fetchCurrentRelease();
-    checkNewRelease();
-  }, []);
-
-  const openNewReleasePage = () => {
-    if (!newRelease) return;
-
-    const url = `https://github.com/lazylabz/gomander-app/releases/tag/v${newRelease}`;
+  const openVersionPage = (version: string) => {
+    const url = `https://github.com/lazylabz/gomander-app/releases/tag/v${version}`;
 
     externalBrowserService.browserOpenURL(url);
   };
 
   return (
     <p className="text-sm text-muted-foreground flex items-center gap-1">
-      {currentRelease ? `${currentRelease}` : "..."}
-      {newRelease && (
+      {currentVersion ? `v${currentVersion}` : "..."}
+      {newVersion && (
         <Tooltip>
           <TooltipTrigger>
             <CircleAlert
               className="text-orange-400 dark:text-yellow-400 cursor-pointer"
               size={15}
-              onClick={openNewReleasePage}
+              onClick={() => openVersionPage(newVersion)}
             />
           </TooltipTrigger>
           <TooltipContent>
             <span className="font-semibold">
-              New Release v{newRelease} Available!
+              New Version v{newVersion} Available!
             </span>
           </TooltipContent>
         </Tooltip>
       )}
-      {currentRelease && !newRelease && !errorLoadingNewRelease && (
+      {currentVersion && !newVersion && !errorLoadingNewVersion && (
         <Tooltip>
           <TooltipTrigger>
             <CircleCheck
               className="text-green-600 dark:text-green-200 cursor-pointer"
               size={15}
+              onClick={() => openVersionPage(currentVersion)}
             />
           </TooltipTrigger>
           <TooltipContent>You are using the latest version!</TooltipContent>
         </Tooltip>
       )}
-      {errorLoadingNewRelease && (
+      {errorLoadingNewVersion && (
         <Tooltip>
           <TooltipTrigger>
             <CircleAlert
@@ -85,7 +57,7 @@ export const VersionSection = () => {
               size={15}
             />
           </TooltipTrigger>
-          <TooltipContent>Error checking for new releases</TooltipContent>
+          <TooltipContent>Error checking for new version</TooltipContent>
         </Tooltip>
       )}
     </p>
