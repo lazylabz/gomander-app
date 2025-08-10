@@ -1,4 +1,4 @@
-import { CircleAlert, CircleCheck } from "lucide-react";
+import { Info } from "lucide-react";
 
 import {
   Tooltip,
@@ -16,14 +16,14 @@ export const VersionSection = () => {
   } = useVersionContext();
 
   return (
-    <p className="text-sm text-muted-foreground flex items-center gap-1">
+    <p className="text-sm text-muted-foreground flex items-center gap-2">
       {currentVersion ? `v${currentVersion}` : "..."}
       {newVersion && (
         <Tooltip>
           <TooltipTrigger>
-            <CircleAlert
+            <Info
               className="text-orange-400 dark:text-yellow-400 cursor-pointer"
-              size={15}
+              size={16}
               onClick={openLatestReleasePage}
             />
           </TooltipTrigger>
@@ -37,9 +37,9 @@ export const VersionSection = () => {
       {currentVersion && !newVersion && !errorLoadingNewVersion && (
         <Tooltip>
           <TooltipTrigger>
-            <CircleCheck
+            <Info
               className="text-green-600 dark:text-green-200 cursor-pointer"
-              size={15}
+              size={16}
               onClick={openLatestReleasePage}
             />
           </TooltipTrigger>
@@ -49,9 +49,10 @@ export const VersionSection = () => {
       {errorLoadingNewVersion && (
         <Tooltip>
           <TooltipTrigger>
-            <CircleAlert
+            <Info
               className="text-red-600 dark:text-red-400 cursor-pointer"
-              size={15}
+              size={16}
+              onClick={openLatestReleasePage}
             />
           </TooltipTrigger>
           <TooltipContent>Error checking for new version</TooltipContent>
