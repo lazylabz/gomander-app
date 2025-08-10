@@ -68,9 +68,17 @@ export const SettingsContextProvider = ({
     },
   });
 
+  // Apply theme when it changes without needing to submit the form
+  settingsForm.register("theme", {
+    onChange: (e) => {
+      const newTheme = e.target.value;
+      setRawTheme(newTheme);
+    },
+  });
+
   const { dirtyFields } = settingsForm.formState;
 
-  const hasUserChanges = dirtyFields.environmentPaths || dirtyFields.theme;
+  const hasUserChanges = !!dirtyFields.environmentPaths;
   const hasProjectChanges =
     dirtyFields.name || dirtyFields.baseWorkingDirectory;
   const saveSettings = async (formData: SettingsFormType) => {
@@ -80,7 +88,6 @@ export const SettingsContextProvider = ({
 
     // Save user settings
     if (hasUserChanges) {
-      setRawTheme(formData.theme);
       await saveUserConfig({
         lastOpenedProjectId: userConfig.lastOpenedProjectId,
         environmentPaths: formData.environmentPaths.map((path) => path.value),

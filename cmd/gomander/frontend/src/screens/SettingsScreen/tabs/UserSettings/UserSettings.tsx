@@ -43,7 +43,7 @@ export const UserSettings = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Route size={20} />
-                <span className="ml-2 mr-1">Environment paths</span>
+                <span className="ml-2 mr-2">Environment paths</span>
                 <EnvironmentPathsInfoDialog />
               </CardTitle>
               <CardDescription>
@@ -86,11 +86,9 @@ export const UserSettings = () => {
                         </SelectContent>
                       </Select>
                     </FormControl>
-                    <FormDescription>
-                      <p className="text-xs">
-                        (The system theme will adapt to your operating system's
-                        theme settings)
-                      </p>
+                    <FormDescription className="text-xs">
+                      (The system theme will adapt to your operating system's
+                      theme settings)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -101,7 +99,7 @@ export const UserSettings = () => {
         </div>
         <Button
           type="submit"
-          className="self-end"
+          className="self-end cursor-pointer"
           disabled={!hasUnsavedChanges}
         >
           <Save />
