@@ -148,7 +148,7 @@ body,
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.90 0 0);
+  background: oklch(0.85 0 0);
 }
 
 .dark * {
@@ -160,5 +160,5 @@ body,
 }
 
 .dark *::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.300 0 0);
+  background: oklch(0.350 0 0);
 }
