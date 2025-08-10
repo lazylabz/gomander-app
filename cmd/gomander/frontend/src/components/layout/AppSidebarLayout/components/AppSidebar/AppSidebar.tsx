@@ -4,7 +4,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { ChevronDown, Info, Settings } from "lucide-react";
+import { ChevronDown, Settings } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -145,19 +145,12 @@ export const AppSidebar = () => {
           </DndContext>
         </SidebarContent>
         <SidebarFooter className="flex flex-row items-center justify-between p-2">
-          <div className="flex items-center gap-2">
-            <Settings
-              onClick={() => goToSettings(SettingsTab.User)}
-              size={20}
-              className="text-muted-foreground cursor-pointer hover:text-primary"
-            />
-            <Info
-              onClick={() => setAboutModalOpen(true)}
-              size={20}
-              className="text-muted-foreground cursor-pointer hover:text-primary"
-            />
-          </div>
-          <VersionSection />
+          <Settings
+            onClick={() => goToSettings(SettingsTab.User)}
+            size={20}
+            className="text-muted-foreground cursor-pointer hover:text-primary"
+          />
+          <VersionSection onInfoClick={() => setAboutModalOpen(true)} />
         </SidebarFooter>
       </Sidebar>
     </sidebarContext.Provider>

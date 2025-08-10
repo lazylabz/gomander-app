@@ -7,13 +7,13 @@ import {
 } from "@/components/ui/tooltip.tsx";
 import { useVersionContext } from "@/contexts/version.tsx";
 
-export const VersionSection = () => {
-  const {
-    newVersion,
-    currentVersion,
-    errorLoadingNewVersion,
-    openLatestReleasePage,
-  } = useVersionContext();
+export const VersionSection = ({
+  onInfoClick,
+}: {
+  onInfoClick: () => void;
+}) => {
+  const { newVersion, currentVersion, errorLoadingNewVersion } =
+    useVersionContext();
 
   return (
     <p className="text-sm text-muted-foreground flex items-center gap-2">
@@ -24,7 +24,7 @@ export const VersionSection = () => {
             <Info
               className="text-orange-400 dark:text-yellow-400 cursor-pointer"
               size={16}
-              onClick={openLatestReleasePage}
+              onClick={onInfoClick}
             />
           </TooltipTrigger>
           <TooltipContent>
@@ -40,7 +40,7 @@ export const VersionSection = () => {
             <Info
               className="text-green-600 dark:text-green-200 cursor-pointer"
               size={16}
-              onClick={openLatestReleasePage}
+              onClick={onInfoClick}
             />
           </TooltipTrigger>
           <TooltipContent>You are using the latest version!</TooltipContent>
@@ -52,7 +52,7 @@ export const VersionSection = () => {
             <Info
               className="text-red-600 dark:text-red-400 cursor-pointer"
               size={16}
-              onClick={openLatestReleasePage}
+              onClick={onInfoClick}
             />
           </TooltipTrigger>
           <TooltipContent>Error checking for new version</TooltipContent>
