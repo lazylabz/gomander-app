@@ -6,17 +6,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip.tsx";
 import { useVersionContext } from "@/contexts/version.tsx";
-import { externalBrowserService } from "@/contracts/service.ts";
 
 export const VersionSection = () => {
-  const { newVersion, currentVersion, errorLoadingNewVersion } =
-    useVersionContext();
-
-  const openVersionPage = (version: string) => {
-    const url = `https://github.com/lazylabz/gomander-app/releases/tag/v${version}`;
-
-    externalBrowserService.browserOpenURL(url);
-  };
+  const {
+    newVersion,
+    currentVersion,
+    errorLoadingNewVersion,
+    openLatestReleasePage,
+  } = useVersionContext();
 
   return (
     <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -27,7 +24,7 @@ export const VersionSection = () => {
             <CircleAlert
               className="text-orange-400 dark:text-yellow-400 cursor-pointer"
               size={15}
-              onClick={() => openVersionPage(newVersion)}
+              onClick={openLatestReleasePage}
             />
           </TooltipTrigger>
           <TooltipContent>
@@ -43,7 +40,7 @@ export const VersionSection = () => {
             <CircleCheck
               className="text-green-600 dark:text-green-200 cursor-pointer"
               size={15}
-              onClick={() => openVersionPage(currentVersion)}
+              onClick={openLatestReleasePage}
             />
           </TooltipTrigger>
           <TooltipContent>You are using the latest version!</TooltipContent>
