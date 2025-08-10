@@ -55,7 +55,7 @@ export const AboutModal = ({
                 variant="outline"
                 className="cursor-pointer"
               >
-                <Download className="w-3 h-3" />
+                <Download className="size-4" />
                 Download Update
               </Button>
             </div>
@@ -74,7 +74,7 @@ export const AboutModal = ({
             className="cursor-pointer w-full flex flex-1 items-center justify-center gap-3 px-4 py-3 bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md rounded-lg transition-colors group"
           >
             <svg
-              className="w-5 h-5 text-foreground"
+              className="size-5 text-foreground"
               role="img"
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
