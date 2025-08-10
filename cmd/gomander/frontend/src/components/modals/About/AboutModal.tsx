@@ -39,20 +39,10 @@ export const AboutModal = ({
           </Avatar>
           <h3 className="text-xl font-bold text-foreground">
             Gomander
-            {!newVersion && (
-              <span className="ml-2 font-normal text-sm text-muted-foreground">
-                v{currentVersion}
-              </span>
-            )}
+            <span className="ml-2 font-normal text-sm text-muted-foreground">
+              v{currentVersion}
+            </span>
           </h3>
-          {newVersion && !errorLoadingNewVersion && (
-            <div className="flex items-center justify-center mt-2 gap-2 text-sm text-muted-foreground">
-              <span>v{currentVersion}</span>
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-secondary-foreground/10">
-                Update available
-              </span>
-            </div>
-          )}
         </div>
         {/* Update Notice */}
         {hasNewVersion && (
