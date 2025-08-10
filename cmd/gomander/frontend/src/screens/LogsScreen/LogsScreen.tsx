@@ -27,7 +27,7 @@ const focusElementByMatchId = (id: string) => {
 export const LogsScreen = () => {
   const { currentLogs } = useCurrentLogs();
 
-  const { correctedTheme } = useTheme();
+  const { theme } = useTheme();
 
   const searchInput = useRef<HTMLInputElement | null>(null);
 
@@ -44,7 +44,7 @@ export const LogsScreen = () => {
   };
 
   const parsedLogs = currentLogs.map((log) =>
-    parseLog(log, searchOpen ? searchQuery : "", correctedTheme),
+    parseLog(log, searchOpen ? searchQuery : "", theme),
   );
 
   const matchesIds =
