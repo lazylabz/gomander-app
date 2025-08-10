@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+
 	"gomander/internal/uihelpers"
 
 	"github.com/wailsapp/wails/v2"

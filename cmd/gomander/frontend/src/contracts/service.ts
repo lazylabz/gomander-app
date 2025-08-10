@@ -10,9 +10,11 @@ import {
   GetCommandGroups,
   GetCommands,
   GetCurrentProject,
+  GetCurrentRelease,
   GetProjectToImport,
   GetUserConfig,
   ImportProject,
+  IsThereANewRelease,
   OpenProject,
   RemoveCommand,
   RunCommand,
@@ -22,7 +24,7 @@ import {
 } from "../../wailsjs/go/app/App";
 import type { project } from "../../wailsjs/go/models.ts";
 import { GetComputedPath } from "../../wailsjs/go/uihelpers/UiPathHelper";
-import { EventsOff, EventsOn } from "../../wailsjs/runtime";
+import { BrowserOpenURL, EventsOff, EventsOn } from "../../wailsjs/runtime";
 
 export const dataService = {
   addCommand: AddCommand,
@@ -49,9 +51,15 @@ export const dataService = {
 
 export const helpersService = {
   getComputedPath: GetComputedPath,
+  isThereANewRelease: IsThereANewRelease,
+  getCurrentRelease: GetCurrentRelease,
 };
 
 export const eventService = {
   eventsOn: EventsOn,
   eventsOff: EventsOff,
+};
+
+export const externalBrowserService = {
+  browserOpenURL: BrowserOpenURL,
 };

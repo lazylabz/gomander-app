@@ -11,6 +11,7 @@ import { useNavigate } from "react-router";
 import { AllCommandsSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/AllCommandsSection/AllCommandsSection.tsx";
 import { CommandGroupSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandGroupSection/CommandGroupSection.tsx";
 import { CreateMenu } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CreateMenu/CreateMenu.tsx";
+import { VersionSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/VersionSection/VersionSection.tsx";
 import { sidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import { EditCommandModal } from "@/components/modals/Command/EditCommandModal.tsx";
 import { EditCommandGroupModal } from "@/components/modals/CommandGroup/EditCommandGroupModal.tsx";
@@ -139,12 +140,13 @@ export const AppSidebar = () => {
             </SortableContext>
           </DndContext>
         </SidebarContent>
-        <SidebarFooter>
+        <SidebarFooter className="flex flex-row items-center justify-between p-2">
           <Settings
             onClick={() => goToSettings(SettingsTab.User)}
             size={20}
             className="text-muted-foreground cursor-pointer hover:text-primary"
           />
+          <VersionSection />
         </SidebarFooter>
       </Sidebar>
     </sidebarContext.Provider>

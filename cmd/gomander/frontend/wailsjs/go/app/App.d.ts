@@ -26,11 +26,15 @@ export function GetCommands():Promise<Record<string, project.Command>>;
 
 export function GetCurrentProject():Promise<project.Project>;
 
+export function GetCurrentRelease():Promise<string>;
+
 export function GetProjectToImport():Promise<project.Project>;
 
 export function GetUserConfig():Promise<config.UserConfig>;
 
 export function ImportProject(arg1:project.Project):Promise<void>;
+
+export function IsThereANewRelease():Promise<string>;
 
 export function OpenProject(arg1:string):Promise<project.Project>;
 

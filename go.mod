@@ -3,6 +3,7 @@ module gomander
 go 1.23
 
 require (
+	github.com/Masterminds/semver v1.5.0
 	github.com/google/uuid v1.6.0
 	github.com/wailsapp/wails/v2 v2.10.2
 )
