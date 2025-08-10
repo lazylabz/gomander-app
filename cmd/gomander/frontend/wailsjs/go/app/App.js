@@ -46,6 +46,10 @@ export function GetCurrentProject() {
   return window['go']['app']['App']['GetCurrentProject']();
 }
 
+export function GetCurrentRelease() {
+  return window['go']['app']['App']['GetCurrentRelease']();
+}
+
 export function GetProjectToImport() {
   return window['go']['app']['App']['GetProjectToImport']();
 }
@@ -56,6 +60,10 @@ export function GetUserConfig() {
 
 export function ImportProject(arg1) {
   return window['go']['app']['App']['ImportProject'](arg1);
+}
+
+export function IsThereANewRelease() {
+  return window['go']['app']['App']['IsThereANewRelease']();
 }
 
 export function OpenProject(arg1) {
