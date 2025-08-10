@@ -17,7 +17,8 @@ export const AboutModal = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
-  const { currentVersion, newVersion } = useVersionContext();
+  const { currentVersion, newVersion, openLatestReleasePage } =
+    useVersionContext();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -50,7 +51,7 @@ export const AboutModal = ({
                 </p>
               </div>
               <Button
-                onClick={() => {}}
+                onClick={openLatestReleasePage}
                 variant="outline"
                 className="cursor-pointer"
               >
