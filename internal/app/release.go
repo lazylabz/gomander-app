@@ -1,7 +1,7 @@
 package app
 
 import (
-	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,16 +11,13 @@ import (
 
 const CurrentRelease = "v1.0.0"
 
-const RepoURL = "Lazylabz/gomander-app"
+const RepoOwnerAndName = "Lazylabz/gomander-app"
 
-type ReleaseAssetJSON struct {
-	DownloadURL string `json:"browser_download_url"`
-	Name        string `json:"name"`
-}
-
-type ReleaseJSON struct {
-	TagName string             `json:"tag_name"`
-	Assets  []ReleaseAssetJSON `json:"assets"` // Will be used in the future to download the latest release automatically
+type ReleasesFeedXML struct {
+	XMLName xml.Name `xml:"feed"`
+	Entry   []struct {
+		Title string `xml:"title"`
+	} `xml:"entry"`
 }
 
 func (a *App) GetCurrentRelease() string {
@@ -53,7 +50,7 @@ func (a *App) IsThereANewRelease() (release string, err error) {
 }
 
 func getLatestRelease() (release *semver.Version, err error) {
-	latestReleaseUrl := fmt.Sprintf("https://api.github.com/repos/%s/releases/latest", RepoURL)
+	latestReleaseUrl := fmt.Sprintf("https://github.com/%s/releases.atom", RepoOwnerAndName)
 
 	res, err := http.Get(latestReleaseUrl)
 	if err != nil {
@@ -61,10 +58,6 @@ func getLatestRelease() (release *semver.Version, err error) {
 	}
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to fetch latest release: received status code %d", res.StatusCode)
-	}
-
-	if res.StatusCode == 404 {
-		return nil, nil
 	}
 
 	defer func(Body io.ReadCloser) {
@@ -79,13 +72,17 @@ func getLatestRelease() (release *semver.Version, err error) {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	var releaseJSON ReleaseJSON
-	err = json.Unmarshal(bodyBytes, &releaseJSON)
+	var releasesXml ReleasesFeedXML
+	err = xml.Unmarshal(bodyBytes, &releasesXml)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
 
-	release, err = semver.NewVersion(releaseJSON.TagName)
+	if len(releasesXml.Entry) == 0 {
+		return nil, nil
+	}
+
+	release, err = semver.NewVersion(releasesXml.Entry[0].Title)
 
 	return
 }
