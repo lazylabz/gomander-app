@@ -1,18 +1,20 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { helpersService } from "@/contracts/service.ts";
+import { externalBrowserService, helpersService } from "@/contracts/service.ts";
 
 type VersionContext = {
   currentVersion: string;
   newVersion: string | null;
   errorLoadingNewVersion: Error | null;
+  openLatestReleasePage: () => void;
 };
 
 export const versionContext = createContext<VersionContext>({
   currentVersion: "",
   newVersion: null,
   errorLoadingNewVersion: null,
+  openLatestReleasePage: () => {},
 });
 
 export const VersionProvider = ({
@@ -49,12 +51,19 @@ export const VersionProvider = ({
     checkNewRelease();
   }, []);
 
+  const openLatestReleasePage = () => {
+    const url = `https://github.com/lazylabz/gomander-app/releases/latest`;
+
+    externalBrowserService.browserOpenURL(url);
+  };
+
   return (
     <versionContext.Provider
       value={{
         currentVersion: currentRelease,
         newVersion: newRelease,
         errorLoadingNewVersion,
+        openLatestReleasePage,
       }}
     >
       {children}

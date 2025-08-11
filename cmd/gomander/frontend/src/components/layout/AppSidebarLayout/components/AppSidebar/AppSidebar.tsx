@@ -13,6 +13,7 @@ import { CommandGroupSection } from "@/components/layout/AppSidebarLayout/compon
 import { CreateMenu } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CreateMenu/CreateMenu.tsx";
 import { VersionSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/VersionSection/VersionSection.tsx";
 import { sidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
+import { AboutModal } from "@/components/modals/About/AboutModal.tsx";
 import { EditCommandModal } from "@/components/modals/Command/EditCommandModal.tsx";
 import { EditCommandGroupModal } from "@/components/modals/CommandGroup/EditCommandGroupModal.tsx";
 import {
@@ -49,6 +50,8 @@ export const AppSidebar = () => {
   const [editingCommand, setEditingCommand] = useState<Command | null>(null);
   const [editingCommandGroup, setEditingCommandGroup] =
     useState<CommandGroup | null>(null);
+
+  const [aboutModalOpen, setAboutModalOpen] = useState(false);
 
   const closeEditCommandModal = () => {
     setEditingCommand(null);
@@ -96,11 +99,12 @@ export const AppSidebar = () => {
         open={!!editingCommandGroup}
         setOpen={closeEditCommandGroupModal}
       />
+      <AboutModal open={aboutModalOpen} setOpen={setAboutModalOpen} />
       <Sidebar collapsible="icon">
         <SidebarHeader className="flex flex-row items-center justify-between p-2">
           <div className="flex items-center ml-2 gap-1">
             <Avatar className="size-9 rounded-lg">
-              <AvatarImage src="/logo.png" />
+              <AvatarImage src="/sidebar-logo.png" />
               <AvatarFallback className="text-xl font-extralight">
                 G.
               </AvatarFallback>
@@ -146,7 +150,7 @@ export const AppSidebar = () => {
             size={20}
             className="text-muted-foreground cursor-pointer hover:text-primary"
           />
-          <VersionSection />
+          <VersionSection openAboutModal={() => setAboutModalOpen(true)} />
         </SidebarFooter>
       </Sidebar>
     </sidebarContext.Provider>
