@@ -82,7 +82,7 @@ export const AboutModal = ({
           {/* GitHub CTA */}
           <button
             onClick={handleGithubClick}
-            className="cursor-pointer w-full flex flex-1 items-center justify-center gap-3 px-4 py-3 bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md rounded-lg transition-colors group"
+            className="focus-visible:outline-none cursor-pointer w-full flex flex-1 items-center justify-center gap-3 px-4 py-3 bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md rounded-lg transition-colors group"
           >
             <svg
               className="size-5 text-foreground"
@@ -109,7 +109,7 @@ export const AboutModal = ({
           {/* LazyLabz CTA */}
           <button
             onClick={handleTeamClick}
-            className="cursor-pointer w-full flex flex-1 items-center justify-center gap-3 px-4 py-3 bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md rounded-lg transition-all group"
+            className="focus-visible:outline-none cursor-pointer w-full flex flex-1 items-center justify-center gap-3 px-4 py-3 bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md rounded-lg transition-all group"
           >
             <Heart className="size-5 text-foreground" />
             <div className="text-left">
