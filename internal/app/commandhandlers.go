@@ -9,6 +9,10 @@ func (a *App) GetCommands() map[string]project.Command {
 	return a.selectedProject.GetCommands()
 }
 
+func (a *App) GetOrderedCommands() []project.Command {
+	return a.selectedProject.GetOrderedCommands()
+}
+
 func (a *App) AddCommand(newCommand project.Command) error {
 	err := a.selectedProject.AddCommand(newCommand)
 	if err != nil {
