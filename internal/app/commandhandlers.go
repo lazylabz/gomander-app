@@ -82,6 +82,27 @@ func (a *App) EditCommand(newCommand project.Command) error {
 	return nil
 }
 
+func (a *App) ReorderCommands(orderedIds []string) error {
+	err := a.selectedProject.ReorderCommands(orderedIds)
+	if err != nil {
+		a.logger.Error(err.Error())
+		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
+		return err
+	}
+
+	err = a.persistSelectedProjectConfig()
+	if err != nil {
+		return err
+	}
+
+	a.logger.Info("Commands reordered")
+
+	// Update the commands map in the frontend
+	a.eventEmitter.EmitEvent(event.GetCommands, nil)
+
+	return nil
+}
+
 func (a *App) RunCommand(id string) map[string]project.Command {
 	cmd, err := a.selectedProject.GetCommand(id)
 
