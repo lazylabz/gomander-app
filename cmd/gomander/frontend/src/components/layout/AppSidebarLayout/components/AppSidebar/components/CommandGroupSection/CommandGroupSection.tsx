@@ -196,8 +196,10 @@ export const CommandGroupSection = ({
                   items={commandGroup.commands}
                 >
                   {commandGroup.commands
-                    .map((cid) => Object(commands[cid]))
-                    .filter(Boolean)
+                    .map((cid) =>
+                      commands.find((command) => command.id === cid),
+                    )
+                    .filter((command) => command !== undefined)
                     .map((command) => (
                       <SidebarMenuItem key={command.id}>
                         <CommandMenuItem draggable command={command} />

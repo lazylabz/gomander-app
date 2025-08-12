@@ -59,7 +59,7 @@ export const AllCommandsSection = () => {
           <CollapsibleContent className="pl-4">
             <SidebarGroupContent>
               <SidebarMenu>
-                {Object.values(commands).map((command) => (
+                {commands.map((command) => (
                   <SidebarMenuItem key={command.id}>
                     <CommandMenuItem command={command} />
                   </SidebarMenuItem>
