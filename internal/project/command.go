@@ -50,10 +50,6 @@ func (p *Project) EditCommand(newCommand Command) error {
 	return nil
 }
 
-func (p *Project) GetCommands() map[string]Command {
-	return p.Commands
-}
-
 func (p *Project) GetOrderedCommands() []Command {
 	ordered := make([]Command, 0, len(p.OrderedCommandIds))
 	for _, id := range p.OrderedCommandIds {

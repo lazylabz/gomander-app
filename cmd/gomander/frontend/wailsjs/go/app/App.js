@@ -38,10 +38,6 @@ export function GetCommandGroups() {
   return window['go']['app']['App']['GetCommandGroups']();
 }
 
-export function GetCommands() {
-  return window['go']['app']['App']['GetCommands']();
-}
-
 export function GetCurrentProject() {
   return window['go']['app']['App']['GetCurrentProject']();
 }
