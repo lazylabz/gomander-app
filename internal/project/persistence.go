@@ -297,6 +297,7 @@ func ProjectFromJSON(pj *ProjectPersistedJSON) (p *Project) {
 		CommandGroups:        pj.CommandGroups,
 		OrderedCommandIds:    pj.OrderedCommandIds,
 	}
+	p.ensureOrderedCommandsConsistency()
 
 	return
 }
