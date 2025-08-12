@@ -50,7 +50,7 @@ func (p *Project) EditCommand(newCommand Command) error {
 	return nil
 }
 
-func (p *Project) GetOrderedCommands() []Command {
+func (p *Project) GetCommands() []Command {
 	ordered := make([]Command, 0, len(p.OrderedCommandIds))
 	for _, id := range p.OrderedCommandIds {
 		if command, exists := p.Commands[id]; exists {

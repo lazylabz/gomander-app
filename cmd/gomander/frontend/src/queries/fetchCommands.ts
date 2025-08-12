@@ -21,7 +21,7 @@ export const loadCommandDataIntoStore = (commands: Command[]) => {
 };
 
 export const fetchCommands = async () => {
-  const commands = await dataService.getOrderedCommands();
+  const commands = await dataService.getCommands();
 
   loadCommandDataIntoStore(commands);
 };

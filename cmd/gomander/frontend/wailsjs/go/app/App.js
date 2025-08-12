@@ -38,16 +38,16 @@ export function GetCommandGroups() {
   return window['go']['app']['App']['GetCommandGroups']();
 }
 
+export function GetCommands() {
+  return window['go']['app']['App']['GetCommands']();
+}
+
 export function GetCurrentProject() {
   return window['go']['app']['App']['GetCurrentProject']();
 }
 
 export function GetCurrentRelease() {
   return window['go']['app']['App']['GetCurrentRelease']();
-}
-
-export function GetOrderedCommands() {
-  return window['go']['app']['App']['GetOrderedCommands']();
 }
 
 export function GetProjectToImport() {

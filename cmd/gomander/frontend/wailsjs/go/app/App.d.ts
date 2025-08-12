@@ -22,11 +22,11 @@ export function GetAvailableProjects():Promise<Array<project.Project>>;
 
 export function GetCommandGroups():Promise<Array<project.CommandGroup>>;
 
+export function GetCommands():Promise<Array<project.Command>>;
+
 export function GetCurrentProject():Promise<project.Project>;
 
 export function GetCurrentRelease():Promise<string>;
-
-export function GetOrderedCommands():Promise<Array<project.Command>>;
 
 export function GetProjectToImport():Promise<project.Project>;
 

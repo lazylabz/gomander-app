@@ -5,8 +5,8 @@ import (
 	"gomander/internal/project"
 )
 
-func (a *App) GetOrderedCommands() []project.Command {
-	return a.selectedProject.GetOrderedCommands()
+func (a *App) GetCommands() []project.Command {
+	return a.selectedProject.GetCommands()
 }
 
 func (a *App) AddCommand(newCommand project.Command) error {
