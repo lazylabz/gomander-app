@@ -50,6 +50,10 @@ export function GetCurrentRelease() {
   return window['go']['app']['App']['GetCurrentRelease']();
 }
 
+export function GetOrderedCommands() {
+  return window['go']['app']['App']['GetOrderedCommands']();
+}
+
 export function GetProjectToImport() {
   return window['go']['app']['App']['GetProjectToImport']();
 }
@@ -72,6 +76,10 @@ export function OpenProject(arg1) {
 
 export function RemoveCommand(arg1) {
   return window['go']['app']['App']['RemoveCommand'](arg1);
+}
+
+export function ReorderCommands(arg1) {
+  return window['go']['app']['App']['ReorderCommands'](arg1);
 }
 
 export function RunCommand(arg1) {

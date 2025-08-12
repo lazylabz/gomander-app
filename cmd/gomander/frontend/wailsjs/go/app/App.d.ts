@@ -28,6 +28,8 @@ export function GetCurrentProject():Promise<project.Project>;
 
 export function GetCurrentRelease():Promise<string>;
 
+export function GetOrderedCommands():Promise<Array<project.Command>>;
+
 export function GetProjectToImport():Promise<project.Project>;
 
 export function GetUserConfig():Promise<config.UserConfig>;
@@ -39,6 +41,8 @@ export function IsThereANewRelease():Promise<string>;
 export function OpenProject(arg1:string):Promise<project.Project>;
 
 export function RemoveCommand(arg1:string):Promise<void>;
+
+export function ReorderCommands(arg1:Array<string>):Promise<void>;
 
 export function RunCommand(arg1:string):Promise<Record<string, project.Command>>;
 

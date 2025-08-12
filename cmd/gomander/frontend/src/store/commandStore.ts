@@ -5,8 +5,8 @@ import type { Command } from "@/contracts/types.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 
 type CommandStore = {
-  commands: Record<string, Command>;
-  setCommands: (commands: Record<string, Command>) => void;
+  commands: Command[];
+  setCommands: (commands: Command[]) => void;
 
   commandsStatus: Record<string, CommandStatus>;
   setCommandsStatus: (commandsStatus: Record<string, CommandStatus>) => void;
@@ -20,7 +20,7 @@ type CommandStore = {
 
 // To be used in use cases
 export const commandStore = createStore<CommandStore>()((set) => ({
-  commands: {},
+  commands: [],
   setCommands: (commands) => set({ commands }),
 
   commandsStatus: {},

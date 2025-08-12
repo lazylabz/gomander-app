@@ -1,6 +1,6 @@
 import { dataService } from "@/contracts/service.ts";
 import type { Project } from "@/contracts/types.ts";
-import { loadCommandDataIntoStore } from "@/queries/fetchCommands.ts";
+import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { commandGroupStore } from "@/store/commandGroupStore.ts";
 import { projectStore } from "@/store/projectStore.ts";
 
@@ -14,7 +14,6 @@ const loadProjectDataIntoStores = (project: Project) => {
     baseWorkingDirectory: project.baseWorkingDirectory,
   });
   setCommandGroups(project.commandGroups);
-  loadCommandDataIntoStore(project.commands);
 };
 export const fetchProject = async () => {
   const project = await dataService.getCurrentProject();
@@ -22,6 +21,7 @@ export const fetchProject = async () => {
   console.log({ project });
 
   if (project) {
+    await fetchCommands();
     loadProjectDataIntoStores(project);
   }
 };
