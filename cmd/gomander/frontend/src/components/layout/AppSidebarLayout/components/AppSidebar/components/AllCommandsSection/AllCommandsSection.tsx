@@ -74,7 +74,7 @@ export const AllCommandsSection = () => {
                 asChild
                 className="group/label text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm"
               >
-                <CollapsibleTrigger className="group flex items-center gap-2 p-2 w-full">
+                <CollapsibleTrigger className="group flex items-center gap-2 p-2 pl-1 w-full">
                   <ChevronDown className="hidden group-data-[state=open]:block" />
                   <ChevronRight className="block group-data-[state=open]:hidden" />
                   <p>All commands</p>
@@ -87,7 +87,7 @@ export const AllCommandsSection = () => {
               </ContextMenuItem>
             </ContextMenuContent>
           </ContextMenu>
-          <CollapsibleContent className="pl-4">
+          <CollapsibleContent>
             <SidebarGroupContent>
               <SidebarMenu>
                 <DndContext onDragEnd={handleDragEnd}>
