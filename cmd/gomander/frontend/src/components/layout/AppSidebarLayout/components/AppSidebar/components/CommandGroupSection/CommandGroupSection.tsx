@@ -30,6 +30,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
 import type { CommandGroup } from "@/contracts/types.ts";
+import { isDefined } from "@/helpers/mapHelpers.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { deleteCommandGroup } from "@/useCases/commandGroup/deleteCommandGroup.ts";
@@ -116,6 +117,10 @@ export const CommandGroupSection = ({
     }
   };
 
+  const groupCommands = commandGroup.commands
+    .map((commandId) => commands.find((command) => command.id === commandId))
+    .filter(isDefined);
+
   return (
     <Collapsible
       key={commandGroup.id}
@@ -195,14 +200,11 @@ export const CommandGroupSection = ({
                   strategy={verticalListSortingStrategy}
                   items={commandGroup.commands}
                 >
-                  {commandGroup.commands
-                    .map((cid) => Object(commands[cid]))
-                    .filter(Boolean)
-                    .map((command) => (
-                      <SidebarMenuItem key={command.id}>
-                        <CommandMenuItem draggable command={command} />
-                      </SidebarMenuItem>
-                    ))}
+                  {groupCommands.map((command) => (
+                    <SidebarMenuItem key={command.id}>
+                      <CommandMenuItem draggable command={command} />
+                    </SidebarMenuItem>
+                  ))}
                 </SortableContext>
               </DndContext>
             </SidebarMenu>

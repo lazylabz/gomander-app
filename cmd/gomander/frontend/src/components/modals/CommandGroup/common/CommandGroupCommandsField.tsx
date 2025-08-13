@@ -29,7 +29,7 @@ export const CommandGroupCommandsField = () => {
               Don't worry about the order, you'll be able to change it later
             </FormDescription>
           </div>
-          {Object.values(commands).map((item) => (
+          {commands.map((item) => (
             <FormField
               key={item.id}
               control={form.control}

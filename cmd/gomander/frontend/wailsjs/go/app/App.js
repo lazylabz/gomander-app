@@ -74,6 +74,10 @@ export function RemoveCommand(arg1) {
   return window['go']['app']['App']['RemoveCommand'](arg1);
 }
 
+export function ReorderCommands(arg1) {
+  return window['go']['app']['App']['ReorderCommands'](arg1);
+}
+
 export function RunCommand(arg1) {
   return window['go']['app']['App']['RunCommand'](arg1);
 }

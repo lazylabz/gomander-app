@@ -5,7 +5,7 @@ import (
 	"gomander/internal/project"
 )
 
-func (a *App) GetCommands() map[string]project.Command {
+func (a *App) GetCommands() []project.Command {
 	return a.selectedProject.GetCommands()
 }
 
@@ -71,6 +71,27 @@ func (a *App) EditCommand(newCommand project.Command) error {
 
 	a.logger.Info("Command edited: " + newCommand.Id)
 	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command edited")
+
+	// Update the commands map in the frontend
+	a.eventEmitter.EmitEvent(event.GetCommands, nil)
+
+	return nil
+}
+
+func (a *App) ReorderCommands(orderedIds []string) error {
+	err := a.selectedProject.ReorderCommands(orderedIds)
+	if err != nil {
+		a.logger.Error(err.Error())
+		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
+		return err
+	}
+
+	err = a.persistSelectedProjectConfig()
+	if err != nil {
+		return err
+	}
+
+	a.logger.Info("Commands reordered")
 
 	// Update the commands map in the frontend
 	a.eventEmitter.EmitEvent(event.GetCommands, nil)

@@ -50,6 +50,7 @@ export namespace project {
 	    name: string;
 	    baseWorkingDirectory: string;
 	    commands: Record<string, Command>;
+	    orderedCommandIds: string[];
 	    commandGroups: CommandGroup[];
 	}
 

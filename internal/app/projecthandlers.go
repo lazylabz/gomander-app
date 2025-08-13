@@ -42,6 +42,7 @@ func (a *App) CreateProject(id, name, baseWorkingDirectory string) error {
 		BaseWorkingDirectory: baseWorkingDirectory,
 		Commands:             make(map[string]project.Command),
 		CommandGroups:        make([]project.CommandGroup, 0),
+		OrderedCommandIds:    make([]string, 0),
 	})
 
 	if err != nil {

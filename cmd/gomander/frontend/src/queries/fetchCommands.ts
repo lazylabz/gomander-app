@@ -3,26 +3,25 @@ import type { Command } from "@/contracts/types.ts";
 import { commandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 
-export const loadCommandDataIntoStore = (
-  commandsData: Record<string, Command>,
-) => {
+export const loadCommandDataIntoStore = (commands: Command[]) => {
   const { setCommands, setCommandsStatus, commandsStatus } =
     commandStore.getState();
 
-  setCommands(commandsData);
+  setCommands(commands);
 
-  const newCommandsStatus = Object.fromEntries(
-    Object.keys(commandsData).map((id) => [
-      id,
-      commandsStatus[id] || CommandStatus.IDLE,
-    ]),
-  );
+  const newCommandsStatus: Record<string, CommandStatus> = {};
+  commands.forEach((command) => {
+    if (!newCommandsStatus[command.id]) {
+      newCommandsStatus[command.id] =
+        commandsStatus[command.id] || CommandStatus.IDLE;
+    }
+  });
 
   setCommandsStatus(newCommandsStatus);
 };
 
 export const fetchCommands = async () => {
-  const commandsData = await dataService.getCommands();
+  const commands = await dataService.getCommands();
 
-  loadCommandDataIntoStore(commandsData);
+  loadCommandDataIntoStore(commands);
 };

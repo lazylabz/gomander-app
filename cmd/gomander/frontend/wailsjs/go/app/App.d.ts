@@ -22,7 +22,7 @@ export function GetAvailableProjects():Promise<Array<project.Project>>;
 
 export function GetCommandGroups():Promise<Array<project.CommandGroup>>;
 
-export function GetCommands():Promise<Record<string, project.Command>>;
+export function GetCommands():Promise<Array<project.Command>>;
 
 export function GetCurrentProject():Promise<project.Project>;
 
@@ -39,6 +39,8 @@ export function IsThereANewRelease():Promise<string>;
 export function OpenProject(arg1:string):Promise<project.Project>;
 
 export function RemoveCommand(arg1:string):Promise<void>;
+
+export function ReorderCommands(arg1:Array<string>):Promise<void>;
 
 export function RunCommand(arg1:string):Promise<Record<string, project.Command>>;
 
