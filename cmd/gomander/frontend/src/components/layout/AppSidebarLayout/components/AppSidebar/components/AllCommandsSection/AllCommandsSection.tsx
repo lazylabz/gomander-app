@@ -28,7 +28,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
 import { useCommandStore } from "@/store/commandStore.ts";
-import { reorderCommands } from "@/useCases/command/reoderCommands.ts";
+import { reorderCommands } from "@/useCases/command/reorderCommands.ts";
 
 export const AllCommandsSection = () => {
   const commands = useCommandStore((state) => state.commands);
@@ -56,10 +56,10 @@ export const AllCommandsSection = () => {
     const oldIndex = commandsIds.indexOf(active.id.toString());
     const newIndex = commandsIds.indexOf(over.id.toString());
 
-    // 2.Reorder the commands array
+    // 2. Reorder the commands array
     const newOrder = arrayMove(commandsIds, oldIndex, newIndex);
 
-    // 3.Persist the new order
+    // 3. Persist the new order
     await handleSaveReorderedCommands(newOrder);
   };
 
