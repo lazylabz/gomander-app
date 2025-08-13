@@ -142,14 +142,11 @@ export const CommandGroupSection = ({
                     {...listeners}
                     className="cursor-grab active:cursor-grabbing rounded hover:bg-sidebar-accent/50 group-data-[state=open]:hidden transition-transform"
                   >
-                    <GripVertical
-                      size={14}
-                      className="text-muted-foreground pr-0.5"
-                    />
+                    <GripVertical size={14} className="text-muted-foreground" />
                   </div>
                   <GripVertical
                     size={14}
-                    className="hidden group-data-[state=open]:block pr-0.5 text-muted-foreground/50 cursor-not-allowed"
+                    className="hidden group-data-[state=open]:block text-muted-foreground/50 cursor-not-allowed"
                   />
                   <FolderOpen
                     size={16}
