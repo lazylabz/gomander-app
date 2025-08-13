@@ -17,6 +17,7 @@ import {
   IsThereANewRelease,
   OpenProject,
   RemoveCommand,
+  ReorderCommands,
   RunCommand,
   SaveCommandGroups,
   SaveUserConfig,
@@ -29,6 +30,7 @@ import { BrowserOpenURL, EventsOff, EventsOn } from "../../wailsjs/runtime";
 export const dataService = {
   addCommand: AddCommand,
   editCommand: EditCommand,
+  reorderCommands: ReorderCommands,
   getAvailableProjects: GetAvailableProjects,
   getCommandGroups: GetCommandGroups,
   getCommands: GetCommands,

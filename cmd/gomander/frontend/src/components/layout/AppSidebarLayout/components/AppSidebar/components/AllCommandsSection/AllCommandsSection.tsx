@@ -1,3 +1,9 @@
+import { DndContext, type DragEndEvent } from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
@@ -22,6 +28,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
 import { useCommandStore } from "@/store/commandStore.ts";
+import { reorderCommands } from "@/useCases/command/reoderCommands.ts";
 
 export const AllCommandsSection = () => {
   const commands = useCommandStore((state) => state.commands);
@@ -30,6 +37,30 @@ export const AllCommandsSection = () => {
 
   const openCreateCommandModal = () => {
     setModalOpen(true);
+  };
+
+  const handleSaveReorderedCommands = async (newOrder: string[]) => {
+    await reorderCommands(newOrder);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    const shouldReorder = active.id && over?.id && active.id !== over.id;
+    if (!shouldReorder) {
+      return;
+    }
+
+    const commandsIds = commands.map((command) => command.id);
+    // 1. Find old and new indexes of the dragged command
+    const oldIndex = commandsIds.indexOf(active.id.toString());
+    const newIndex = commandsIds.indexOf(over.id.toString());
+
+    // 2.Reorder the commands array
+    const newOrder = arrayMove(commandsIds, oldIndex, newIndex);
+
+    // 3.Persist the new order
+    await handleSaveReorderedCommands(newOrder);
   };
 
   return (
@@ -59,11 +90,18 @@ export const AllCommandsSection = () => {
           <CollapsibleContent className="pl-4">
             <SidebarGroupContent>
               <SidebarMenu>
-                {commands.map((command) => (
-                  <SidebarMenuItem key={command.id}>
-                    <CommandMenuItem command={command} />
-                  </SidebarMenuItem>
-                ))}
+                <DndContext onDragEnd={handleDragEnd}>
+                  <SortableContext
+                    strategy={verticalListSortingStrategy}
+                    items={commands}
+                  >
+                    {commands.map((command) => (
+                      <SidebarMenuItem key={command.id}>
+                        <CommandMenuItem draggable command={command} />
+                      </SidebarMenuItem>
+                    ))}
+                  </SortableContext>
+                </DndContext>
               </SidebarMenu>
             </SidebarGroupContent>
           </CollapsibleContent>
