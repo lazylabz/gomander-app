@@ -90,6 +90,10 @@ export function SaveUserConfig(arg1) {
   return window['go']['app']['App']['SaveUserConfig'](arg1);
 }
 
+export function Startup(arg1) {
+  return window['go']['app']['App']['Startup'](arg1);
+}
+
 export function StopCommand(arg1) {
   return window['go']['app']['App']['StopCommand'](arg1);
 }

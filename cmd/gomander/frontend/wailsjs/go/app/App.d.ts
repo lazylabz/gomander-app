@@ -3,6 +3,7 @@
 import {project} from '../models';
 import {app} from '../models';
 import {config} from '../models';
+import {context} from '../models';
 
 export function AddCommand(arg1:project.Command):Promise<void>;
 
@@ -47,5 +48,7 @@ export function RunCommand(arg1:string):Promise<Record<string, project.Command>>
 export function SaveCommandGroups(arg1:Array<project.CommandGroup>):Promise<void>;
 
 export function SaveUserConfig(arg1:config.UserConfig):Promise<void>;
+
+export function Startup(arg1:context.Context):Promise<void>;
 
 export function StopCommand(arg1:string):Promise<void>;
