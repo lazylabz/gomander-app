@@ -3,6 +3,7 @@ package app
 import (
 	"sort"
 
+	commanddomain "gomander/internal/command/domain"
 	"gomander/internal/commandgroup/domain"
 	"gomander/internal/event"
 	"gomander/internal/helpers/array"
@@ -73,4 +74,42 @@ func (a *App) ReorderCommandGroups(newOrderedIds []string) error {
 	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
 
 	return nil
+}
+
+func (a *App) RemoveCommandFromCommandGroups(id string) {
+	commandGroups, err := a.commandGroupRepository.GetCommandGroups(a.openedProjectId)
+	if err != nil {
+		a.logger.Error(err.Error())
+		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
+		return
+	}
+
+	for _, commandGroup := range commandGroups {
+		commands := commandGroup.Commands
+		commandIds := array.Map(commands, func(c commanddomain.Command) string { return c.Id })
+
+		if array.Contains(commandIds, id) {
+			commandGroup.Commands = array.Filter(commandGroup.Commands, func(c commanddomain.Command) bool {
+				return c.Id != id
+			})
+
+			if len(commandGroup.Commands) == 0 {
+				err := a.commandGroupRepository.DeleteCommandGroup(commandGroup.Id)
+				if err != nil {
+					a.logger.Error(err.Error())
+					a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
+					return
+				}
+			} else {
+				err := a.commandGroupRepository.UpdateCommandGroup(&commandGroup)
+				if err != nil {
+					a.logger.Error(err.Error())
+					a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
+					return
+				}
+			}
+		}
+	}
+
+	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
 }

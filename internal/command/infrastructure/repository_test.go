@@ -248,6 +248,61 @@ func TestGormCommandRepository_DeleteCommand(t *testing.T) {
 			t.Fatalf("Failed to remove temporary database file: %v", err)
 		}
 	})
+	t.Run("Should delete an existing command and adjust other commands positions", func(t *testing.T) {
+		cmd1 := &CommandModel{
+			Id:               "cmd1",
+			ProjectId:        "proj1",
+			Name:             "Command to Delete",
+			Command:          "echo 'Delete Me'",
+			WorkingDirectory: "/tmp",
+			Position:         0,
+		}
+		cmd2 := &CommandModel{
+			Id:               "cmd2",
+			ProjectId:        "proj1",
+			Name:             "Command 2",
+			Command:          "echo 'Command 2'",
+			WorkingDirectory: "/tmp",
+			Position:         1,
+		}
+		cmd3 := &CommandModel{
+			Id:               "cmd3",
+			ProjectId:        "proj1",
+			Name:             "Command 3",
+			Command:          "echo 'Command 3'",
+			WorkingDirectory: "/tmp",
+			Position:         2,
+		}
+
+		preloadedCommandModels := []*CommandModel{cmd1, cmd2, cmd3}
+
+		repo, tmpDbFilePath := arrange(preloadedCommandModels)
+
+		err := repo.DeleteCommand("cmd2")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+
+		cmd1AfterDelete, err := repo.GetCommand("cmd1")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		cmd3AfterDelete, err := repo.GetCommand("cmd3")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+
+		if cmd1AfterDelete.Position != cmd1.Position {
+			t.Errorf("Expected command cmd1 position to remain %d, got %d", cmd1.Position, cmd1AfterDelete.Position)
+		}
+		if cmd3AfterDelete.Position != cmd3.Position-1 {
+			t.Errorf("Expected command cmd3 position to be adjusted to %d, got %d", cmd3.Position-1, cmd3AfterDelete.Position)
+		}
+
+		if err := os.Remove(tmpDbFilePath); err != nil {
+			t.Fatalf("Failed to remove temporary database file: %v", err)
+		}
+	})
 }
 
 func arrange(preloadedCommandModels []*CommandModel) (repo *GormCommandRepository, tmpDbFilePath string) {

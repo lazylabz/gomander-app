@@ -1,6 +1,8 @@
 package app
 
 import (
+	"sort"
+
 	"gomander/internal/command/domain"
 	domain2 "gomander/internal/config/domain"
 	"gomander/internal/event"
@@ -12,7 +14,18 @@ func (a *App) GetCommands() ([]domain.Command, error) {
 }
 
 func (a *App) AddCommand(newCommand domain.Command) error {
-	err := a.commandRepository.SaveCommand(&newCommand)
+	allCommands, err := a.commandRepository.GetCommands(a.openedProjectId)
+	if err != nil {
+		a.logger.Error(err.Error())
+		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
+		return err
+	}
+
+	newPosition := len(allCommands)
+
+	newCommand.Position = newPosition
+
+	err = a.commandRepository.SaveCommand(&newCommand)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
@@ -36,7 +49,7 @@ func (a *App) RemoveCommand(id string) error {
 		return err
 	}
 
-	// TODO: Remove command from all groups
+	a.RemoveCommandFromCommandGroups(id)
 
 	a.logger.Info("Command removed: " + id)
 	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command removed")
@@ -66,14 +79,26 @@ func (a *App) EditCommand(newCommand domain.Command) error {
 }
 
 func (a *App) ReorderCommands(orderedIds []string) error {
-	// TODO: Implement the reordering logic
+	existingCommands, err := a.commandRepository.GetCommands(a.openedProjectId)
+	if err != nil {
+		a.logger.Error(err.Error())
+		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
+	}
+	// Sort the existing commands based on the new order
+	sort.Slice(existingCommands, func(i, j int) bool {
+		return array.IndexOf(orderedIds, existingCommands[i].Id) < array.IndexOf(orderedIds, existingCommands[j].Id)
+	})
 
-	//err := a.selectedProject.ReorderCommands(orderedIds)
-	//if err != nil {
-	//	a.logger.Error(err.Error())
-	//	a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
-	//	return err
-	//}
+	// Update the position of each command based on the new order
+	for i := range existingCommands {
+		existingCommands[i].Position = i
+		err := a.commandRepository.EditCommand(&existingCommands[i])
+		if err != nil {
+			a.logger.Error(err.Error())
+			a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
+			return err
+		}
+	}
 
 	a.logger.Info("Commands reordered")
 

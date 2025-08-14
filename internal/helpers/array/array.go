@@ -26,3 +26,7 @@ func IndexOf[T comparable](array []T, item T) int {
 	}
 	return -1 // Not found
 }
+
+func Contains[T comparable](array []T, item T) bool {
+	return IndexOf(array, item) != -1
+}
