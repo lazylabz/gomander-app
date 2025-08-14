@@ -6,7 +6,7 @@ type ConfigModel struct {
 }
 
 func (ConfigModel) TableName() string {
-	return "global_config"
+	return "user_config"
 }
 
 type EnvironmentPathModel struct {
@@ -15,5 +15,5 @@ type EnvironmentPathModel struct {
 }
 
 func (EnvironmentPathModel) TableName() string {
-	return "global_config_environment_paths"
+	return "user_config_environment_paths"
 }

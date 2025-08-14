@@ -39,11 +39,11 @@ func upCreateInitialTables(ctx context.Context, tx *sql.Tx) error {
             position INTEGER,
             PRIMARY KEY (command_id, command_group_id)
         );
-		CREATE TABLE global_config (
+		CREATE TABLE user_config (
             id TEXT PRIMARY KEY CHECK (id = 1),
             last_opened_project_id TEXT
         );
-		CREATE TABLE global_config_environment_paths (
+		CREATE TABLE user_config_environment_paths (
             id TEXT,
             path TEXT
         );
@@ -59,8 +59,8 @@ func downCreateInitialTables(ctx context.Context, tx *sql.Tx) error {
 		DROP TABLE project;
 		DROP TABLE command_group;
 		DROP TABLE command_group_command;
-		DROP TABLE global_config;
-		DROP TABLE global_config_environment_paths;
+		DROP TABLE user_config;
+		DROP TABLE user_config_environment_paths;
 	`)
 	return err
 }
