@@ -8,7 +8,7 @@ import (
 	"os/exec"
 
 	"gomander/internal/event"
-	"gomander/internal/helpers"
+	"gomander/internal/helpers/path"
 	"gomander/internal/logger"
 	"gomander/internal/platform"
 )
@@ -44,7 +44,7 @@ func (c *Runner) RunCommand(command Command, environmentPaths []string, baseWork
 
 	// Enable color output and set terminal type
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
-	cmd.Dir = helpers.GetComputedPath(baseWorkingDirectory, command.WorkingDirectory)
+	cmd.Dir = path.GetComputedPath(baseWorkingDirectory, command.WorkingDirectory)
 
 	// Set project attributes based on OS
 	platform.SetProcAttributes(cmd)

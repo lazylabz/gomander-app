@@ -11,7 +11,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	"gomander/internal/uihelpers"
+	"gomander/internal/uihelpers/path"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -30,7 +30,7 @@ const ConfigFolderPathName = "gomander"
 func main() {
 	// Create an instance of the app structure
 	app := internalapp.NewApp()
-	uiPathHelper := uihelpers.NewUiPathHelper()
+	uiPathHelper := path.NewUiPathHelper()
 
 	// Create application with options
 	err := wails.Run(&options.App{

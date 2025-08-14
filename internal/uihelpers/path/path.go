@@ -1,8 +1,6 @@
-package uihelpers
+package path
 
-import (
-	"gomander/internal/helpers"
-)
+import pathhelpers "gomander/internal/helpers/path"
 
 type UiPathHelper struct {
 }
@@ -12,5 +10,5 @@ func NewUiPathHelper() *UiPathHelper {
 }
 
 func (ph UiPathHelper) GetComputedPath(basePath, path string) string {
-	return helpers.GetComputedPath(basePath, path)
+	return pathhelpers.GetComputedPath(basePath, path)
 }
