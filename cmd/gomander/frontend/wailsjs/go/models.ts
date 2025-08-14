@@ -1,3 +1,24 @@
+export namespace app {
+	
+	export interface CommandGroupJSONv1 {
+	    name: string;
+	    commandIds: string[];
+	}
+	export interface CommandJSONv1 {
+	    id: string;
+	    name: string;
+	    command: string;
+	    workingDirectory: string;
+	}
+	export interface ProjectExportJSONv1 {
+	    version: number;
+	    name: string;
+	    commands: CommandJSONv1[];
+	    commandGroups: CommandGroupJSONv1[];
+	}
+
+}
+
 export namespace domain {
 	
 	export interface Command {

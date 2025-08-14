@@ -66,8 +66,8 @@ export function GetUserConfig() {
   return window['go']['app']['App']['GetUserConfig']();
 }
 
-export function ImportProject() {
-  return window['go']['app']['App']['ImportProject']();
+export function ImportProject(arg1, arg2) {
+  return window['go']['app']['App']['ImportProject'](arg1, arg2);
 }
 
 export function IsThereANewRelease() {
@@ -86,8 +86,12 @@ export function RemoveCommand(arg1) {
   return window['go']['app']['App']['RemoveCommand'](arg1);
 }
 
-export function ReorderCommandGroups() {
-  return window['go']['app']['App']['ReorderCommandGroups']();
+export function RemoveCommandFromCommandGroups(arg1) {
+  return window['go']['app']['App']['RemoveCommandFromCommandGroups'](arg1);
+}
+
+export function ReorderCommandGroups(arg1) {
+  return window['go']['app']['App']['ReorderCommandGroups'](arg1);
 }
 
 export function ReorderCommands(arg1) {
