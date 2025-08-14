@@ -23,7 +23,7 @@ func (a *App) Startup(ctx context.Context) {
 	a.logger.Info("Configuration loaded successfully")
 }
 
-func (a *App) OnBeforeClose(ctx context.Context) (prevent bool) {
+func (a *App) OnBeforeClose(_ context.Context) (prevent bool) {
 	errs := a.commandRunner.StopAllRunningCommands()
 
 	if len(errs) > 0 {
