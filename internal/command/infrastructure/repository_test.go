@@ -18,25 +18,26 @@ import (
 func TestGormCommandRepository_Get(t *testing.T) {
 	t.Parallel()
 	t.Run("Should return command when it exists", func(t *testing.T) {
+		preloadedCommand := NewCommandModelBuilder().
+			WithId("cmd1").
+			WithProjectId("proj1").
+			WithName("Test Command").
+			WithCommand("echo 'Hello, World!'").
+			WithWorkingDirectory("/tmp").
+			WithPosition(0).
+			BuildPtr()
 		preloadedCommandModels := []*CommandModel{
-			{
-				Id:               "cmd1",
-				ProjectId:        "proj1",
-				Name:             "Test Command",
-				Command:          "echo 'Hello, World!'",
-				WorkingDirectory: "/tmp",
-				Position:         0,
-			},
+			preloadedCommand,
 		}
 
-		expectedCommand := &domain.Command{
-			Id:               "cmd1",
-			ProjectId:        "proj1",
-			Name:             "Test Command",
-			Command:          "echo 'Hello, World!'",
-			WorkingDirectory: "/tmp",
-			Position:         0,
-		}
+		expectedCommand := domain.NewCommandBuilder().
+			WithId("cmd1").
+			WithProjectId("proj1").
+			WithName("Test Command").
+			WithCommand("echo 'Hello, World!'").
+			WithWorkingDirectory("/tmp").
+			WithPosition(0).
+			BuildPtr()
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
@@ -76,41 +77,41 @@ func TestGormCommandRepository_Get(t *testing.T) {
 func TestGormCommandRepository_GetAll(t *testing.T) {
 	t.Run("Should return all commands for a project", func(t *testing.T) {
 		preloadedCommandModels := []*CommandModel{
-			{
-				Id:               "cmd2",
-				ProjectId:        "proj1",
-				Name:             "Test Command 2",
-				Command:          "echo 'Goodbye, World!'",
-				WorkingDirectory: "/tmp",
-				Position:         1,
-			},
-			{
-				Id:               "cmd1",
-				ProjectId:        "proj1",
-				Name:             "Test Command 1",
-				Command:          "echo 'Hello, World!'",
-				WorkingDirectory: "/tmp",
-				Position:         0,
-			},
+			NewCommandModelBuilder().
+				WithId("cmd2").
+				WithProjectId("proj1").
+				WithName("Test Command 2").
+				WithCommand("echo 'Goodbye, World!'").
+				WithWorkingDirectory("/tmp").
+				WithPosition(1).
+				BuildPtr(),
+			NewCommandModelBuilder().
+				WithId("cmd1").
+				WithProjectId("proj1").
+				WithName("Test Command 1").
+				WithCommand("echo 'Hello, World!'").
+				WithWorkingDirectory("/tmp").
+				WithPosition(0).
+				BuildPtr(),
 		}
 
 		expectedCommands := []*domain.Command{
-			{
-				Id:               "cmd1",
-				ProjectId:        "proj1",
-				Name:             "Test Command 1",
-				Command:          "echo 'Hello, World!'",
-				WorkingDirectory: "/tmp",
-				Position:         0,
-			},
-			{
-				Id:               "cmd2",
-				ProjectId:        "proj1",
-				Name:             "Test Command 2",
-				Command:          "echo 'Goodbye, World!'",
-				WorkingDirectory: "/tmp",
-				Position:         1,
-			},
+			domain.NewCommandBuilder().
+				WithId("cmd1").
+				WithProjectId("proj1").
+				WithName("Test Command 1").
+				WithCommand("echo 'Hello, World!'").
+				WithWorkingDirectory("/tmp").
+				WithPosition(0).
+				BuildPtr(),
+			domain.NewCommandBuilder().
+				WithId("cmd2").
+				WithProjectId("proj1").
+				WithName("Test Command 2").
+				WithCommand("echo 'Goodbye, World!'").
+				WithWorkingDirectory("/tmp").
+				WithPosition(1).
+				BuildPtr(),
 		}
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
@@ -139,14 +140,14 @@ func TestGormCommandRepository_Save(t *testing.T) {
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
-		newCommand := &domain.Command{
-			Id:               "cmd3",
-			ProjectId:        "proj1",
-			Name:             "New Command",
-			Command:          "echo 'New Command'",
-			WorkingDirectory: "/tmp",
-			Position:         2,
-		}
+		newCommand := domain.NewCommandBuilder().
+			WithId("cmd3").
+			WithProjectId("proj1").
+			WithName("New Command").
+			WithCommand("echo 'New Command'").
+			WithWorkingDirectory("/tmp").
+			WithPosition(2).
+			BuildPtr()
 
 		err := repo.Create(newCommand)
 		if err != nil {
@@ -172,26 +173,26 @@ func TestGormCommandRepository_Edit(t *testing.T) {
 	t.Parallel()
 	t.Run("Should edit an existing command", func(t *testing.T) {
 		preloadedCommandModels := []*CommandModel{
-			{
-				Id:               "cmd1",
-				ProjectId:        "proj1",
-				Name:             "Old Command",
-				Command:          "echo 'Old Command'",
-				WorkingDirectory: "/tmp",
-				Position:         0,
-			},
+			NewCommandModelBuilder().
+				WithId("cmd1").
+				WithProjectId("proj1").
+				WithName("Old Command").
+				WithCommand("echo 'Old Command'").
+				WithWorkingDirectory("/tmp").
+				WithPosition(0).
+				BuildPtr(),
 		}
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
-		editedCommand := &domain.Command{
-			Id:               "cmd1",
-			ProjectId:        "proj1",
-			Name:             "Edited Command",
-			Command:          "echo 'Edited Command'",
-			WorkingDirectory: "/tmp",
-			Position:         0,
-		}
+		editedCommand := domain.NewCommandBuilder().
+			WithId("cmd1").
+			WithProjectId("proj1").
+			WithName("Edited Command").
+			WithCommand("echo 'Edited Command'").
+			WithWorkingDirectory("/tmp").
+			WithPosition(0).
+			BuildPtr()
 
 		err := repo.Update(editedCommand)
 		if err != nil {
@@ -217,14 +218,14 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 	t.Parallel()
 	t.Run("Should delete an existing command", func(t *testing.T) {
 		preloadedCommandModels := []*CommandModel{
-			{
-				Id:               "cmd1",
-				ProjectId:        "proj1",
-				Name:             "Command to Delete",
-				Command:          "echo 'Delete Me'",
-				WorkingDirectory: "/tmp",
-				Position:         0,
-			},
+			NewCommandModelBuilder().
+				WithId("cmd1").
+				WithProjectId("proj1").
+				WithName("Command to Delete").
+				WithCommand("echo 'Delete Me'").
+				WithWorkingDirectory("/tmp").
+				WithPosition(0).
+				BuildPtr(),
 		}
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
@@ -249,30 +250,30 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 		}
 	})
 	t.Run("Should delete an existing command and adjust other commands positions", func(t *testing.T) {
-		cmd1 := &CommandModel{
-			Id:               "cmd1",
-			ProjectId:        "proj1",
-			Name:             "Command to Delete",
-			Command:          "echo 'Delete Me'",
-			WorkingDirectory: "/tmp",
-			Position:         0,
-		}
-		cmd2 := &CommandModel{
-			Id:               "cmd2",
-			ProjectId:        "proj1",
-			Name:             "Command 2",
-			Command:          "echo 'Command 2'",
-			WorkingDirectory: "/tmp",
-			Position:         1,
-		}
-		cmd3 := &CommandModel{
-			Id:               "cmd3",
-			ProjectId:        "proj1",
-			Name:             "Command 3",
-			Command:          "echo 'Command 3'",
-			WorkingDirectory: "/tmp",
-			Position:         2,
-		}
+		cmd1 := NewCommandModelBuilder().
+			WithId("cmd1").
+			WithProjectId("proj1").
+			WithName("Command to Delete").
+			WithCommand("echo 'Delete Me'").
+			WithWorkingDirectory("/tmp").
+			WithPosition(0).
+			BuildPtr()
+		cmd2 := NewCommandModelBuilder().
+			WithId("cmd2").
+			WithProjectId("proj1").
+			WithName("Command 2").
+			WithCommand("echo 'Command 2'").
+			WithWorkingDirectory("/tmp").
+			WithPosition(1).
+			BuildPtr()
+		cmd3 := NewCommandModelBuilder().
+			WithId("cmd3").
+			WithProjectId("proj1").
+			WithName("Command 3").
+			WithCommand("echo 'Command 3'").
+			WithWorkingDirectory("/tmp").
+			WithPosition(2).
+			BuildPtr()
 
 		preloadedCommandModels := []*CommandModel{cmd1, cmd2, cmd3}
 
