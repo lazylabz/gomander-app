@@ -229,7 +229,7 @@ func TestGormCommandRepository_DeleteCommand(t *testing.T) {
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
-		err := repo.DeleteCommand("")
+		err := repo.DeleteCommand("cmd1")
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
