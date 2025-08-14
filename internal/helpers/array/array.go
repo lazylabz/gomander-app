@@ -17,3 +17,12 @@ func Map[T, R any](array []T, mapper func(T) R) []R {
 	}
 	return result
 }
+
+func IndexOf[T comparable](array []T, item T) int {
+	for i, v := range array {
+		if v == item {
+			return i
+		}
+	}
+	return -1 // Not found
+}
