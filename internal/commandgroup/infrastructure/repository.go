@@ -113,26 +113,24 @@ func (r GormCommandGroupRepository) UpdateCommandGroup(commandGroup *domain.Comm
 			return err
 		}
 
-		if len(commandGroup.Commands) > 0 {
-			// Delete existing command associations
-			_, err = gorm.G[CommandToCommandGroupModel](tx).
-				Where("command_group_id = ?", commandGroupModel.Id).
-				Delete(r.ctx)
+		// Delete existing command associations
+		_, err = gorm.G[CommandToCommandGroupModel](tx).
+			Where("command_group_id = ?", commandGroupModel.Id).
+			Delete(r.ctx)
+		if err != nil {
+			return err
+		}
+
+		// Create new command associations
+		for i, cmd := range commandGroup.Commands {
+			cmdToGroup := CommandToCommandGroupModel{
+				CommandId:      cmd.Id,
+				CommandGroupId: commandGroupModel.Id,
+				Position:       i,
+			}
+			err = gorm.G[CommandToCommandGroupModel](tx).Create(r.ctx, &cmdToGroup)
 			if err != nil {
 				return err
-			}
-
-			// Create new command associations
-			for i, cmd := range commandGroup.Commands {
-				cmdToGroup := CommandToCommandGroupModel{
-					CommandId:      cmd.Id,
-					CommandGroupId: commandGroupModel.Id,
-					Position:       i,
-				}
-				err = gorm.G[CommandToCommandGroupModel](tx).Create(r.ctx, &cmdToGroup)
-				if err != nil {
-					return err
-				}
 			}
 		}
 
@@ -147,18 +145,37 @@ func (r GormCommandGroupRepository) UpdateCommandGroup(commandGroup *domain.Comm
 }
 
 func (r GormCommandGroupRepository) DeleteCommandGroup(commandGroupId string) error {
-	err := r.db.Transaction(func(tx *gorm.DB) error {
-		_, err := gorm.G[CommandGroupModel](tx).Where("id = ?", commandGroupId).Delete(r.ctx)
+	existingGroup, err := gorm.G[CommandGroupModel](r.db).Where("id = ?", commandGroupId).First(r.ctx)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil // If the command group does not exist, nothing to delete
+		}
+		return err
+	}
+
+	err = r.db.Transaction(func(tx *gorm.DB) error {
+		// Delete the command group
+		_, err = gorm.G[CommandGroupModel](tx).Where("id = ?", commandGroupId).Delete(r.ctx)
 		if err != nil {
 			return err
 		}
 
+		// Delete all command associations for this command group
 		_, err = gorm.G[CommandToCommandGroupModel](tx).
 			Where("command_group_id = ?", commandGroupId).
 			Delete(r.ctx)
 		if err != nil {
 			return err
 		}
+
+		// Decrease the position of all command groups with a higher position
+		_, err = gorm.G[CommandGroupModel](tx).
+			Where("project_id = ? AND position > ?", existingGroup.ProjectId, existingGroup.Position).
+			Update(r.ctx, "position", gorm.Expr("position - 1"))
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 

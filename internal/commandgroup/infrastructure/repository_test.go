@@ -180,7 +180,7 @@ func TestGormCommandGroupRepository_GetCommandGroups(t *testing.T) {
 			}
 			for i, group := range result {
 				if !group.Equals(&testCase.expectedCommandGroups[i]) {
-					t.Errorf("Expected command group %v, got %v", testCase.expectedCommandGroups[i], group)
+					t.Fatalf("Expected command group %v, got %v", testCase.expectedCommandGroups[i], group)
 				}
 			}
 
@@ -206,7 +206,7 @@ func TestGormCommandGroupRepository_GetCommandGroupById(t *testing.T) {
 			t.Fatal("Expected command group, got nil")
 		}
 		if !result.Equals(&testCase.expectedCommandGroups[0]) {
-			t.Errorf("Expected command group %v, got %v", testCase.expectedCommandGroups[0], result)
+			t.Fatalf("Expected command group %v, got %v", testCase.expectedCommandGroups[0], result)
 		}
 		if err := os.Remove(tempDbFilePath); err != nil {
 			t.Fatalf("Failed to remove temporary database file: %v", err)
@@ -225,7 +225,7 @@ func TestGormCommandGroupRepository_GetCommandGroupById(t *testing.T) {
 			t.Fatal("Expected command group, got nil")
 		}
 		if !testCase.expectedCommandGroups[1].Equals(result) {
-			t.Errorf("Expected command group %v, got %v", testCase.expectedCommandGroups[1], result)
+			t.Fatalf("Expected command group %v, got %v", testCase.expectedCommandGroups[1], result)
 		}
 
 		if err := os.Remove(tempDbFilePath); err != nil {
@@ -279,7 +279,7 @@ func TestGormCommandGroupRepository_CreateCommandGroup(t *testing.T) {
 			t.Fatal("Expected command group, got nil")
 		}
 		if !result.Equals(newGroup) {
-			t.Errorf("Expected command group %v, got %v", newGroup, result)
+			t.Fatalf("Expected command group %v, got %v", newGroup, result)
 		}
 
 		if err := os.Remove(tempDbFilePath); err != nil {
@@ -320,7 +320,7 @@ func TestGormCommandGroupRepository_UpdateCommandGroup(t *testing.T) {
 			t.Fatal("Expected command group, got nil")
 		}
 		if !result.Equals(groupToUpdate) {
-			t.Errorf("Expected command group %v, got %v", groupToUpdate, result)
+			t.Fatalf("Expected command group %v, got %v", groupToUpdate, result)
 		}
 
 		if err := os.Remove(tempDbFilePath); err != nil {
@@ -330,7 +330,7 @@ func TestGormCommandGroupRepository_UpdateCommandGroup(t *testing.T) {
 }
 
 func TestGormCommandGroupRepository_DeleteCommandGroup(t *testing.T) {
-	t.Run("Should delete an existing command group", func(t *testing.T) {
+	t.Run("Should delete an existing command group and its associations", func(t *testing.T) {
 		preloadedCommandModels := []commandinfrastructure.CommandModel{command1}
 		preloadedCommandGroupModels := []infrastructure.CommandGroupModel{group1Model}
 		preloadedCommandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{group1command1relation}
@@ -364,6 +364,46 @@ func TestGormCommandGroupRepository_DeleteCommandGroup(t *testing.T) {
 		}
 		if len(existingCommands) == 0 {
 			t.Fatal("Expected command to still exist, it was deleted")
+		}
+
+		if err := os.Remove(tempDbFilePath); err != nil {
+			t.Fatalf("Failed to remove temporary database file: %v", err)
+		}
+	})
+	t.Run("Should delete an existing command groups and correctly update positions of other command groups", func(t *testing.T) {
+		preloadedCommandModels := []commandinfrastructure.CommandModel{}
+		preloadedCommandGroupModels := []infrastructure.CommandGroupModel{group1Model, group2Model, group3Model}
+		preloadedCommandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{}
+
+		repo, tempDbFilePath, _ := arrange(preloadedCommandModels, preloadedCommandGroupModels, preloadedCommandToCommandGroupModels)
+
+		err := repo.DeleteCommandGroup(group2Model.Id)
+		if err != nil {
+			t.Fatalf("Failed to delete command group: %v", err)
+		}
+
+		resultGroup1, err := repo.GetCommandGroupById(group1Model.Id)
+		if err != nil {
+			t.Fatalf("Failed to get command group by id: %v", err)
+		}
+		if resultGroup1 == nil {
+			t.Fatal("Expected command group 1, got nil")
+		}
+
+		resultGroup3, err := repo.GetCommandGroupById(group3Model.Id)
+		if err != nil {
+			t.Fatalf("Failed to get command group by id: %v", err)
+		}
+		if resultGroup3 == nil {
+			t.Fatal("Expected command group 3, got nil")
+		}
+
+		// Check if the positions of the remaining command groups are updated correctly
+		if resultGroup1.Position != group1Model.Position {
+			t.Fatalf("Expected command group 1 position to be %d, got %d", group1Model.Position, resultGroup1.Position)
+		}
+		if resultGroup3.Position != group3Model.Position-1 {
+			t.Fatalf("Expected command group 3 position to be %d, got %d", group3Model.Position-1, resultGroup3.Position)
 		}
 
 		if err := os.Remove(tempDbFilePath); err != nil {
