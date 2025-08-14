@@ -1,10 +1,13 @@
 package infrastructure
 
+import "gomander/internal/command/infrastructure"
+
 type CommandGroupModel struct {
-	Id        string `gorm:"primaryKey;column:id"`
-	ProjectId string `gorm:"column:project_id"`
-	Name      string `gorm:"column:name"`
-	Position  int    `gorm:"column:position"`
+	Id        string                        `gorm:"primaryKey;column:id"`
+	ProjectId string                        `gorm:"column:project_id"`
+	Name      string                        `gorm:"column:name"`
+	Position  int                           `gorm:"column:position"`
+	Commands  []infrastructure.CommandModel `gorm:"many2many:command_group_command;foreignKey:id;references:id;joinForeignKey:command_group_id;joinReferences:command_id;"`
 }
 
 func (CommandGroupModel) TableName() string {

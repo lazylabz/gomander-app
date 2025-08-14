@@ -1,8 +1,9 @@
 package infrastructure
 
 import (
-	commandDomain "gomander/internal/command/domain"
+	"gomander/internal/command/infrastructure"
 	"gomander/internal/commandgroup/domain"
+	"gomander/internal/helpers/array"
 )
 
 func ToDomainCommandGroup(commandGroupModel CommandGroupModel) *domain.CommandGroup {
@@ -11,7 +12,7 @@ func ToDomainCommandGroup(commandGroupModel CommandGroupModel) *domain.CommandGr
 		Name:      commandGroupModel.Name,
 		ProjectId: commandGroupModel.ProjectId,
 		Position:  commandGroupModel.Position,
-		Commands:  make([]*commandDomain.Command, 0),
+		Commands:  array.Map(commandGroupModel.Commands, infrastructure.ToDomainCommand),
 	}
 }
 

@@ -3,12 +3,9 @@ package infrastructure
 import (
 	"context"
 	"errors"
-	"slices"
-	"sort"
 
 	"gorm.io/gorm"
 
-	"gomander/internal/command/infrastructure"
 	"gomander/internal/commandgroup/domain"
 	"gomander/internal/helpers/array"
 )
@@ -19,6 +16,10 @@ type GormCommandGroupRepository struct {
 }
 
 func NewGormCommandGroupRepository(db *gorm.DB, ctx context.Context) *GormCommandGroupRepository {
+	err := db.SetupJoinTable(&CommandGroupModel{}, "Commands", &CommandToCommandGroupModel{})
+	if err != nil {
+		panic(err)
+	}
 	return &GormCommandGroupRepository{
 		db:  db,
 		ctx: ctx,
@@ -26,64 +27,44 @@ func NewGormCommandGroupRepository(db *gorm.DB, ctx context.Context) *GormComman
 }
 
 func (r GormCommandGroupRepository) GetCommandGroups(projectId string) ([]*domain.CommandGroup, error) {
-	commandGroupModels, err := gorm.G[CommandGroupModel](r.db).
-		Where("project_id = ?", projectId).
+	var cgModels []CommandGroupModel
+	err := r.db.Where("project_id = ?", projectId).
 		Order("position ASC").
-		Find(r.ctx)
+		Preload("Commands", func(db *gorm.DB) *gorm.DB {
+			return db.
+				Joins("JOIN command_group_command ON command_group_command.command_id = command.id").
+				Order("command_group_command.position")
+		}).
+		Find(&cgModels).Error
+
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 
-	cgs := make([]*domain.CommandGroup, len(commandGroupModels))
-
-	for i, model := range commandGroupModels {
-		cg, err := r.GetCommandGroupById(model.Id)
-		if err != nil {
-			return nil, err
-		}
-		if cg == nil {
-			return nil, errors.New("command group not found")
-		}
-		cgs[i] = cg
-	}
-
-	return cgs, nil
+	return array.Map(cgModels, ToDomainCommandGroup), err
 }
 
 func (r GormCommandGroupRepository) GetCommandGroupById(id string) (*domain.CommandGroup, error) {
-	commandGroupModel, err := gorm.G[CommandGroupModel](r.db).
-		Where("id = ?", id).
-		First(r.ctx)
+	var cgModel CommandGroupModel
+	err := r.db.Where("id = ?", id).
+		Preload("Commands", func(db *gorm.DB) *gorm.DB {
+			return db.
+				Joins("JOIN command_group_command ON command_group_command.command_id = command.id").
+				Order("command_group_command.position")
+		}).
+		First(&cgModel).Error
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
-	}
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 
-	relations, err := gorm.G[CommandToCommandGroupModel](r.db).
-		Where("command_group_id = ?", id).
-		Order("position ASC").
-		Find(r.ctx)
-
-	commandIds := array.Map(relations, func(r CommandToCommandGroupModel) string { return r.CommandId })
-
-	commandModels, err := gorm.G[infrastructure.CommandModel](r.db).
-		Where("id IN ?", commandIds).
-		Find(r.ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	sort.Slice(commandModels, func(i, j int) bool {
-		return slices.Index(commandIds, commandModels[i].Id) < slices.Index(commandIds, commandModels[j].Id)
-	})
-
-	commandGroup := ToDomainCommandGroup(commandGroupModel)
-	commandGroup.Commands = array.Map(commandModels, infrastructure.ToDomainCommand)
-
-	return commandGroup, nil
+	return ToDomainCommandGroup(cgModel), err
 }
 
 func (r GormCommandGroupRepository) CreateCommandGroup(commandGroup *domain.CommandGroup) error {
