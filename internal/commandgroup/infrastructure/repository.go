@@ -72,7 +72,29 @@ func (r GormCommandGroupRepository) GetCommandGroupById(id string) (*domain.Comm
 func (r GormCommandGroupRepository) CreateCommandGroup(commandGroup *domain.CommandGroup) error {
 	commandGroupModel := ToCommandGroupModel(commandGroup)
 
-	err := gorm.G[CommandGroupModel](r.db).Create(r.ctx, &commandGroupModel)
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		err := gorm.G[CommandGroupModel](tx).Create(r.ctx, &commandGroupModel)
+		if err != nil {
+			return err
+		}
+
+		if len(commandGroup.Commands) > 0 {
+			// Create command associations
+			for i, cmd := range commandGroup.Commands {
+				cmdToGroup := CommandToCommandGroupModel{
+					CommandId:      cmd.Id,
+					CommandGroupId: commandGroupModel.Id,
+					Position:       i,
+				}
+				err = gorm.G[CommandToCommandGroupModel](tx).Create(r.ctx, &cmdToGroup)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	})
 
 	if err != nil {
 		return err
@@ -84,7 +106,39 @@ func (r GormCommandGroupRepository) CreateCommandGroup(commandGroup *domain.Comm
 func (r GormCommandGroupRepository) UpdateCommandGroup(commandGroup *domain.CommandGroup) error {
 	commandGroupModel := ToCommandGroupModel(commandGroup)
 
-	_, err := gorm.G[CommandGroupModel](r.db).Where("id = ?", commandGroupModel.Id).Updates(r.ctx, commandGroupModel)
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		// Update the command group data
+		_, err := gorm.G[CommandGroupModel](tx).Where("id = ?", commandGroupModel.Id).Updates(r.ctx, commandGroupModel)
+		if err != nil {
+			return err
+		}
+
+		if len(commandGroup.Commands) > 0 {
+			// Delete existing command associations
+			_, err = gorm.G[CommandToCommandGroupModel](tx).
+				Where("command_group_id = ?", commandGroupModel.Id).
+				Delete(r.ctx)
+			if err != nil {
+				return err
+			}
+
+			// Create new command associations
+			for i, cmd := range commandGroup.Commands {
+				cmdToGroup := CommandToCommandGroupModel{
+					CommandId:      cmd.Id,
+					CommandGroupId: commandGroupModel.Id,
+					Position:       i,
+				}
+				err = gorm.G[CommandToCommandGroupModel](tx).Create(r.ctx, &cmdToGroup)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		return err
 	}
@@ -93,7 +147,21 @@ func (r GormCommandGroupRepository) UpdateCommandGroup(commandGroup *domain.Comm
 }
 
 func (r GormCommandGroupRepository) DeleteCommandGroup(commandGroupId string) error {
-	_, err := gorm.G[CommandGroupModel](r.db).Where("id = ?", commandGroupId).Delete(r.ctx)
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		_, err := gorm.G[CommandGroupModel](tx).Where("id = ?", commandGroupId).Delete(r.ctx)
+		if err != nil {
+			return err
+		}
+
+		_, err = gorm.G[CommandToCommandGroupModel](tx).
+			Where("command_group_id = ?", commandGroupId).
+			Delete(r.ctx)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
 	if err != nil {
 		return err
 	}
