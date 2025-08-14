@@ -43,7 +43,7 @@ func upCreateInitialTables(ctx context.Context, tx *sql.Tx) error {
             id TEXT PRIMARY KEY CHECK (id = 1),
             last_opened_project_id TEXT
         );
-		CREATE TABLE global_config_extra_path (
+		CREATE TABLE global_config_environment_paths (
             id TEXT,
             path TEXT
         );
@@ -60,7 +60,7 @@ func downCreateInitialTables(ctx context.Context, tx *sql.Tx) error {
 		DROP TABLE command_group;
 		DROP TABLE command_group_command;
 		DROP TABLE global_config;
-		DROP TABLE global_config_extra_path;
+		DROP TABLE global_config_environment_paths;
 	`)
 	return err
 }
