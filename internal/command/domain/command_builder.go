@@ -1,18 +1,16 @@
-package testbuilders
+package domain
 
 import (
-	"gomander/internal/command/domain"
-
 	"github.com/google/uuid"
 )
 
 type CommandBuilder struct {
-	command domain.Command
+	command Command
 }
 
 func NewCommandBuilder() *CommandBuilder {
 	return &CommandBuilder{
-		command: domain.Command{
+		command: Command{
 			Id:               uuid.New().String(),
 			ProjectId:        uuid.New().String(),
 			Name:             "Default Command",
@@ -53,10 +51,10 @@ func (b *CommandBuilder) WithPosition(position int) *CommandBuilder {
 	return b
 }
 
-func (b *CommandBuilder) Build() domain.Command {
+func (b *CommandBuilder) Build() Command {
 	return b.command
 }
 
-func (b *CommandBuilder) BuildPtr() *domain.Command {
+func (b *CommandBuilder) BuildPtr() *Command {
 	return &b.command
 }

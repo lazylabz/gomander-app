@@ -1,19 +1,18 @@
-package testbuilders
+package domain
 
 import (
 	commanddomain "gomander/internal/command/domain"
-	groupdomain "gomander/internal/commandgroup/domain"
 
 	"github.com/google/uuid"
 )
 
 type CommandGroupBuilder struct {
-	group groupdomain.CommandGroup
+	group CommandGroup
 }
 
 func NewCommandGroupBuilder() *CommandGroupBuilder {
 	return &CommandGroupBuilder{
-		group: groupdomain.CommandGroup{
+		group: CommandGroup{
 			Id:        uuid.New().String(),
 			ProjectId: uuid.New().String(),
 			Name:      "Default Command Group",
@@ -48,11 +47,11 @@ func (b *CommandGroupBuilder) WithPosition(position int) *CommandGroupBuilder {
 	return b
 }
 
-func (b *CommandGroupBuilder) Build() groupdomain.CommandGroup {
+func (b *CommandGroupBuilder) Build() CommandGroup {
 	return b.group
 }
 
-func (b *CommandGroupBuilder) BuildPtr() *groupdomain.CommandGroup {
+func (b *CommandGroupBuilder) BuildPtr() *CommandGroup {
 	return &b.group
 }
 
@@ -63,7 +62,7 @@ func (b *CommandGroupBuilder) AddCommand(command commanddomain.Command) *Command
 	return b
 }
 
-func (b *CommandGroupBuilder) AddCommandBuilder(commandBuilder *CommandBuilder) *CommandGroupBuilder {
+func (b *CommandGroupBuilder) AddCommandBuilder(commandBuilder *commanddomain.CommandBuilder) *CommandGroupBuilder {
 	// Ensure command and group have the same ProjectId
 	command := commandBuilder.WithProjectId(b.group.ProjectId).Build()
 	return b.AddCommand(command)
