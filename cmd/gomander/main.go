@@ -11,6 +11,12 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
+	"gomander/internal/command/infrastructure"
+	commandgroupinfrastructure "gomander/internal/commandgroup/infrastructure"
+	configinfrastructure "gomander/internal/config/infrastructure"
+	logger "gomander/internal/logger"
+	projectinfrastructure "gomander/internal/project/infrastructure"
+	"gomander/internal/runner"
 	"gomander/internal/uihelpers/path"
 
 	"github.com/wailsapp/wails/v2"
@@ -43,9 +49,10 @@ func main() {
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup: func(ctx context.Context) {
 			// Initialize the database
-			_ = configDB(ctx)
+			gormDb := configDB(ctx)
 
-			// TODO: Register deps
+			// Register deps
+			registerDeps(gormDb, ctx, app)
 
 			// Start app
 			app.Startup(ctx)
@@ -105,4 +112,20 @@ func getDbFile() string {
 	dbLocation := filepath.Join(configFolderPath, "data.db")
 
 	return dbLocation
+}
+
+func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
+	// Initialize deps
+	l := logger.NewDefaultLogger(ctx)
+	ee := event.NewDefaultEventEmitter(ctx)
+	r := runner.NewDefaulRunner(l, ee)
+
+	// Initialize repos
+	comandRepo := commandinfrastructure.NewGormCommandRepository(gormDb, ctx)
+	comandGroupRepo := commandgroupinfrastructure.NewGormCommandGroupRepository(gormDb, ctx)
+	projectRepo := projectinfrastructure.NewGormProjectRepository(gormDb, ctx)
+	configRepo := configinfrastructure.NewGormConfigRepository(gormDb, ctx)
+
+	// Initialize event emitter
+	app.LoadDependencies(l, ee, r, comandRepo, comandGroupRepo, projectRepo, configRepo)
 }

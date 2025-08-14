@@ -2,19 +2,24 @@ package event
 
 import (
 	"context"
+
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-type EventEmitter struct {
+type EventEmitter interface {
+	EmitEvent(event Event, payload interface{})
+}
+
+type DefaultEventEmitter struct {
 	ctx context.Context
 }
 
-func NewEventEmitter(ctx context.Context) *EventEmitter {
-	return &EventEmitter{
+func NewDefaultEventEmitter(ctx context.Context) *DefaultEventEmitter {
+	return &DefaultEventEmitter{
 		ctx: ctx,
 	}
 }
 
-func (e *EventEmitter) EmitEvent(event Event, payload interface{}) {
+func (e *DefaultEventEmitter) EmitEvent(event Event, payload interface{}) {
 	runtime.EventsEmit(e.ctx, string(event), payload)
 }

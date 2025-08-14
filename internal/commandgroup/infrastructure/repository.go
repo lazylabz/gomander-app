@@ -26,7 +26,7 @@ func NewGormCommandGroupRepository(db *gorm.DB, ctx context.Context) *GormComman
 	}
 }
 
-func (r GormCommandGroupRepository) GetCommandGroups(projectId string) ([]*domain.CommandGroup, error) {
+func (r GormCommandGroupRepository) GetCommandGroups(projectId string) ([]domain.CommandGroup, error) {
 	var cgModels []CommandGroupModel
 	err := r.db.Where("project_id = ?", projectId).
 		Order("position ASC").
@@ -44,7 +44,9 @@ func (r GormCommandGroupRepository) GetCommandGroups(projectId string) ([]*domai
 		return nil, err
 	}
 
-	return array.Map(cgModels, ToDomainCommandGroup), err
+	return array.Map(cgModels, func(cgModel CommandGroupModel) domain.CommandGroup {
+		return *ToDomainCommandGroup(cgModel)
+	}), err
 }
 
 func (r GormCommandGroupRepository) GetCommandGroupById(id string) (*domain.CommandGroup, error) {

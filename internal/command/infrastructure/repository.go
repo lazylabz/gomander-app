@@ -1,4 +1,4 @@
-package infrastructure
+package commandinfrastructure
 
 import (
 	"context"
@@ -31,10 +31,12 @@ func (g GormCommandRepository) GetCommand(commandId string) (*domain.Command, er
 		return nil, err
 	}
 
-	return ToDomainCommand(cmd), nil
+	command := ToDomainCommand(cmd)
+
+	return &command, nil
 }
 
-func (g GormCommandRepository) GetCommands(projectId string) ([]*domain.Command, error) {
+func (g GormCommandRepository) GetCommands(projectId string) ([]domain.Command, error) {
 	cmds, err := gorm.G[CommandModel](g.db).Where("project_id = ?", projectId).Order("position").Find(g.ctx)
 	if err != nil {
 		return nil, err

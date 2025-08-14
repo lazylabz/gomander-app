@@ -1,11 +1,11 @@
-package infrastructure
+package commandinfrastructure
 
 import (
 	"gomander/internal/command/domain"
 )
 
-func ToDomainCommand(commandModel CommandModel) *domain.Command {
-	return &domain.Command{
+func ToDomainCommand(commandModel CommandModel) domain.Command {
+	return domain.Command{
 		Id:               commandModel.Id,
 		Name:             commandModel.Name,
 		Command:          commandModel.Command,

@@ -12,7 +12,7 @@ func ToDomainCommandGroup(commandGroupModel CommandGroupModel) *domain.CommandGr
 		Name:      commandGroupModel.Name,
 		ProjectId: commandGroupModel.ProjectId,
 		Position:  commandGroupModel.Position,
-		Commands:  array.Map(commandGroupModel.Commands, infrastructure.ToDomainCommand),
+		Commands:  array.Map(commandGroupModel.Commands, commandinfrastructure.ToDomainCommand),
 	}
 }
 

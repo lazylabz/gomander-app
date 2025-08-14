@@ -2,8 +2,8 @@ package infrastructure
 
 import "gomander/internal/project/domain"
 
-func ToDomainProject(model ProjectModel) *domain.Project {
-	return &domain.Project{
+func ToDomainProject(model ProjectModel) domain.Project {
+	return domain.Project{
 		Id:               model.Id,
 		Name:             model.Name,
 		WorkingDirectory: model.WorkingDirectory,

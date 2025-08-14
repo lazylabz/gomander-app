@@ -15,7 +15,14 @@ type GormProjectRepository struct {
 	ctx context.Context
 }
 
-func (r GormProjectRepository) GetAllProjects() ([]*domain.Project, error) {
+func NewGormProjectRepository(db *gorm.DB, ctx context.Context) *GormProjectRepository {
+	return &GormProjectRepository{
+		db:  db,
+		ctx: ctx,
+	}
+}
+
+func (r GormProjectRepository) GetAllProjects() ([]domain.Project, error) {
 	projectModels, err := gorm.G[ProjectModel](r.db).Find(r.ctx)
 	if err != nil {
 		return nil, err
@@ -32,7 +39,9 @@ func (r GormProjectRepository) GetProjectById(id string) (*domain.Project, error
 		return nil, err // Return the error if something else went wrong
 	}
 
-	return ToDomainProject(project), nil
+	domainProject := ToDomainProject(project)
+
+	return &domainProject, nil
 }
 
 func (r GormProjectRepository) CreateProject(project domain.Project) error {

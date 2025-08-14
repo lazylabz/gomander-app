@@ -8,7 +8,7 @@ type CommandGroup struct {
 	Id        string
 	ProjectId string
 	Name      string
-	Commands  []*domain.Command
+	Commands  []domain.Command
 	Position  int
 }
 
@@ -23,7 +23,7 @@ func (cg *CommandGroup) Equals(other *CommandGroup) bool {
 		return false
 	}
 	for i, cmd := range cg.Commands {
-		if !cmd.Equals(other.Commands[i]) {
+		if !cmd.Equals(&other.Commands[i]) {
 			return false
 		}
 	}

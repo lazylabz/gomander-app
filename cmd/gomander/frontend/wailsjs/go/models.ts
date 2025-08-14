@@ -1,18 +1,33 @@
-export namespace app {
+export namespace domain {
 	
-	export interface EditProjectDTO {
+	export interface Command {
+	    id: string;
+	    projectId: string;
+	    name: string;
+	    command: string;
+	    workingDirectory: string;
+	    position: number;
+	}
+	export interface CommandGroup {
+	    Id: string;
+	    ProjectId: string;
+	    Name: string;
+	    Commands: Command[];
+	    Position: number;
+	}
+	export interface EnvironmentPath {
+	    Id: string;
+	    Path: string;
+	}
+	export interface Config {
+	    LastOpenedProjectId: string;
+	    EnvironmentPaths: EnvironmentPath[];
+	}
+	
+	export interface Project {
 	    id: string;
 	    name: string;
-	    baseWorkingDirectory: string;
-	}
-
-}
-
-export namespace config {
-	
-	export interface UserConfig {
-	    environmentPaths: string[];
-	    lastOpenedProjectId: string;
+	    workingDirectory: string;
 	}
 
 }
@@ -28,30 +43,6 @@ export namespace event {
 	    SUCCESS_NOTIFICATION = "success_notification",
 	    GET_USER_CONFIG = "get_user_config",
 	    GET_COMMAND_GROUPS = "get_command_groups",
-	}
-
-}
-
-export namespace project {
-	
-	export interface Command {
-	    id: string;
-	    name: string;
-	    command: string;
-	    workingDirectory: string;
-	}
-	export interface CommandGroup {
-	    id: string;
-	    name: string;
-	    commands: string[];
-	}
-	export interface Project {
-	    id: string;
-	    name: string;
-	    baseWorkingDirectory: string;
-	    commands: Record<string, Command>;
-	    orderedCommandIds: string[];
-	    commandGroups: CommandGroup[];
 	}
 
 }

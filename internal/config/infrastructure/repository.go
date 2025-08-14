@@ -14,6 +14,13 @@ type GormConfigRepository struct {
 	ctx context.Context
 }
 
+func NewGormConfigRepository(db *gorm.DB, ctx context.Context) *GormConfigRepository {
+	return &GormConfigRepository{
+		db:  db,
+		ctx: ctx,
+	}
+}
+
 func (g GormConfigRepository) GetOrCreateConfig() (*domain.Config, error) {
 	var configModel ConfigModel
 

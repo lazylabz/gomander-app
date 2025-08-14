@@ -1,4 +1,4 @@
-package project
+package runner
 
 import (
 	"bufio"
@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 
+	"gomander/internal/command/domain"
 	"gomander/internal/event"
 	"gomander/internal/helpers/path"
 	"gomander/internal/logger"
@@ -23,14 +24,20 @@ var ExpectedTerminationLogs = []string{
 	"wait: no child processes",
 }
 
-type Runner struct {
+type DefaultRunner struct {
 	runningCommands map[string]*exec.Cmd
-	eventEmitter    *event.EventEmitter
-	logger          *logger.Logger
+	eventEmitter    event.EventEmitter
+	logger          logger.Logger
 }
 
-func NewCommandRunner(logger *logger.Logger, emitter *event.EventEmitter) *Runner {
-	return &Runner{
+type Runner interface {
+	RunCommand(command domain.Command, environmentPaths []string, baseWorkingDirectory string) error
+	StopRunningCommand(id string) error
+	StopAllRunningCommands() []error
+}
+
+func NewDefaulRunner(logger logger.Logger, emitter event.EventEmitter) *DefaultRunner {
+	return &DefaultRunner{
 		runningCommands: make(map[string]*exec.Cmd),
 		eventEmitter:    emitter,
 		logger:          logger,
@@ -38,7 +45,7 @@ func NewCommandRunner(logger *logger.Logger, emitter *event.EventEmitter) *Runne
 }
 
 // RunCommand executes a command and streams its output.
-func (c *Runner) RunCommand(command Command, environmentPaths []string, baseWorkingDirectory string) error {
+func (c *DefaultRunner) RunCommand(command domain.Command, environmentPaths []string, baseWorkingDirectory string) error {
 	// Get the project object based on the project string and OS
 	cmd := platform.GetCommand(command.Command)
 
@@ -99,7 +106,7 @@ func (c *Runner) RunCommand(command Command, environmentPaths []string, baseWork
 	return nil
 }
 
-func (c *Runner) StopRunningCommand(id string) error {
+func (c *DefaultRunner) StopRunningCommand(id string) error {
 	runningCommand, exists := c.runningCommands[id]
 
 	if !exists {
@@ -109,7 +116,7 @@ func (c *Runner) StopRunningCommand(id string) error {
 	return platform.StopProcessGracefully(runningCommand)
 }
 
-func (c *Runner) StopAllRunningCommands() []error {
+func (c *DefaultRunner) StopAllRunningCommands() []error {
 	errs := make([]error, 0)
 
 	// Create a slice to hold commands to stop
@@ -141,7 +148,7 @@ func isExpectedError(err error) bool {
 	return false
 }
 
-func (c *Runner) streamOutput(commandId string, pipeReader io.ReadCloser) {
+func (c *DefaultRunner) streamOutput(commandId string, pipeReader io.ReadCloser) {
 	scanner := bufio.NewScanner(pipeReader)
 
 	for scanner.Scan() {
@@ -152,13 +159,13 @@ func (c *Runner) streamOutput(commandId string, pipeReader io.ReadCloser) {
 	}
 }
 
-func (c *Runner) sendStreamErrorWhileStartingCommand(command Command, err error) {
+func (c *DefaultRunner) sendStreamErrorWhileStartingCommand(command domain.Command, err error) {
 	c.sendStreamLine(command.Id, err.Error())
 	c.logger.Error(err.Error())
 	c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
 }
 
-func (c *Runner) sendStreamLine(commandId string, line string) {
+func (c *DefaultRunner) sendStreamLine(commandId string, line string) {
 	c.eventEmitter.EmitEvent(event.NewLogEntry, map[string]string{
 		"id":   commandId,
 		"line": line,
