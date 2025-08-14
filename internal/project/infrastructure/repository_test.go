@@ -15,7 +15,7 @@ import (
 	_ "gomander/migrations"
 )
 
-func TestGormProjectRepository_GetAllProjects(t *testing.T) {
+func TestGormProjectRepository_GetAll(t *testing.T) {
 	t.Run("Should return all projects", func(t *testing.T) {
 		preloadedProjects := []*ProjectModel{
 			{Id: "p1", Name: "Project 1", WorkingDirectory: "/tmp/1"},
@@ -26,7 +26,7 @@ func TestGormProjectRepository_GetAllProjects(t *testing.T) {
 			{Id: "p2", Name: "Project 2", WorkingDirectory: "/tmp/2"},
 		}
 		repo, tmpDbFilePath := arrange(preloadedProjects)
-		projects, err := repo.GetAllProjects()
+		projects, err := repo.GetAll()
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
@@ -42,14 +42,14 @@ func TestGormProjectRepository_GetAllProjects(t *testing.T) {
 	})
 }
 
-func TestGormProjectRepository_GetProjectById(t *testing.T) {
+func TestGormProjectRepository_Get(t *testing.T) {
 	t.Run("Should return project when it exists", func(t *testing.T) {
 		preloadedProjects := []*ProjectModel{
 			{Id: "p1", Name: "Project 1", WorkingDirectory: "/tmp/1"},
 		}
 		expectedProject := domain.Project{Id: "p1", Name: "Project 1", WorkingDirectory: "/tmp/1"}
 		repo, tmpDbFilePath := arrange(preloadedProjects)
-		project, err := repo.GetProjectById("p1")
+		project, err := repo.Get("p1")
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
@@ -63,7 +63,7 @@ func TestGormProjectRepository_GetProjectById(t *testing.T) {
 	})
 	t.Run("Should return nil when project does not exist", func(t *testing.T) {
 		repo, tmpDbFilePath := arrange(nil)
-		project, err := repo.GetProjectById("nonexistent")
+		project, err := repo.Get("nonexistent")
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
@@ -74,15 +74,15 @@ func TestGormProjectRepository_GetProjectById(t *testing.T) {
 	})
 }
 
-func TestGormProjectRepository_CreateProject(t *testing.T) {
+func TestGormProjectRepository_Create(t *testing.T) {
 	t.Run("Should create a new project", func(t *testing.T) {
 		repo, tmpDbFilePath := arrange(nil)
 		newProject := domain.Project{Id: "p3", Name: "Project 3", WorkingDirectory: "/tmp/3"}
-		err := repo.CreateProject(newProject)
+		err := repo.Create(newProject)
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
-		project, err := repo.GetProjectById("p3")
+		project, err := repo.Get("p3")
 		if err != nil || project == nil || project.Id != "p3" {
 			t.Errorf("Expected project with id p3, got %v (err: %v)", project, err)
 		}
@@ -90,18 +90,18 @@ func TestGormProjectRepository_CreateProject(t *testing.T) {
 	})
 }
 
-func TestGormProjectRepository_UpdateProject(t *testing.T) {
+func TestGormProjectRepository_Update(t *testing.T) {
 	t.Run("Should update an existing project", func(t *testing.T) {
 		preloadedProjects := []*ProjectModel{
 			{Id: "p1", Name: "Old Name", WorkingDirectory: "/tmp/old"},
 		}
 		repo, tmpDbFilePath := arrange(preloadedProjects)
 		updated := domain.Project{Id: "p1", Name: "New Name", WorkingDirectory: "/tmp/new"}
-		err := repo.UpdateProject(updated)
+		err := repo.Update(updated)
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
-		project, _ := repo.GetProjectById("p1")
+		project, _ := repo.Get("p1")
 		if project == nil || project.Name != "New Name" || project.WorkingDirectory != "/tmp/new" {
 			t.Errorf("Expected updated project, got %v", project)
 		}
@@ -109,17 +109,17 @@ func TestGormProjectRepository_UpdateProject(t *testing.T) {
 	})
 }
 
-func TestGormProjectRepository_DeleteProject(t *testing.T) {
+func TestGormProjectRepository_Delete(t *testing.T) {
 	t.Run("Should delete an existing project", func(t *testing.T) {
 		preloadedProjects := []*ProjectModel{
 			{Id: "p1", Name: "To Delete", WorkingDirectory: "/tmp/del"},
 		}
 		repo, tmpDbFilePath := arrange(preloadedProjects)
-		err := repo.DeleteProject("p1")
+		err := repo.Delete("p1")
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
-		project, _ := repo.GetProjectById("p1")
+		project, _ := repo.Get("p1")
 		if project != nil {
 			t.Errorf("Expected nil after delete, got %v", project)
 		}

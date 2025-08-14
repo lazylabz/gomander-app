@@ -6,11 +6,11 @@ import (
 )
 
 func (a *App) GetUserConfig() (*domain.Config, error) {
-	return a.userConfigRepository.GetOrCreateConfig()
+	return a.userConfigRepository.GetOrCreate()
 }
 
 func (a *App) SaveUserConfig(newUserConfig domain.Config) error {
-	err := a.userConfigRepository.SaveConfig(&newUserConfig)
+	err := a.userConfigRepository.Update(&newUserConfig)
 	if err != nil {
 		a.logger.Error("Failed to save user configuration: " + err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to save user configuration")

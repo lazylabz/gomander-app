@@ -1,9 +1,9 @@
 package domain
 
 type Repository interface {
-	GetAllProjects() ([]Project, error)
-	GetProjectById(id string) (*Project, error)
-	CreateProject(project Project) error
-	UpdateProject(project Project) error
-	DeleteProject(id string) error
+	GetAll() ([]Project, error)
+	Get(id string) (*Project, error)
+	Create(project Project) error
+	Update(project Project) error
+	Delete(id string) error
 }

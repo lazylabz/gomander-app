@@ -10,11 +10,11 @@ import (
 )
 
 func (a *App) GetCommands() ([]domain.Command, error) {
-	return a.commandRepository.GetCommands(a.openedProjectId)
+	return a.commandRepository.GetAll(a.openedProjectId)
 }
 
 func (a *App) AddCommand(newCommand domain.Command) error {
-	allCommands, err := a.commandRepository.GetCommands(a.openedProjectId)
+	allCommands, err := a.commandRepository.GetAll(a.openedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
@@ -25,7 +25,7 @@ func (a *App) AddCommand(newCommand domain.Command) error {
 
 	newCommand.Position = newPosition
 
-	err = a.commandRepository.SaveCommand(&newCommand)
+	err = a.commandRepository.Create(&newCommand)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
@@ -42,7 +42,7 @@ func (a *App) AddCommand(newCommand domain.Command) error {
 }
 
 func (a *App) RemoveCommand(id string) error {
-	err := a.commandRepository.DeleteCommand(id)
+	err := a.commandRepository.Delete(id)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
@@ -62,7 +62,7 @@ func (a *App) RemoveCommand(id string) error {
 }
 
 func (a *App) EditCommand(newCommand domain.Command) error {
-	err := a.commandRepository.EditCommand(&newCommand)
+	err := a.commandRepository.Update(&newCommand)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
@@ -79,7 +79,7 @@ func (a *App) EditCommand(newCommand domain.Command) error {
 }
 
 func (a *App) ReorderCommands(orderedIds []string) error {
-	existingCommands, err := a.commandRepository.GetCommands(a.openedProjectId)
+	existingCommands, err := a.commandRepository.GetAll(a.openedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
@@ -92,7 +92,7 @@ func (a *App) ReorderCommands(orderedIds []string) error {
 	// Update the position of each command based on the new order
 	for i := range existingCommands {
 		existingCommands[i].Position = i
-		err := a.commandRepository.EditCommand(&existingCommands[i])
+		err := a.commandRepository.Update(&existingCommands[i])
 		if err != nil {
 			a.logger.Error(err.Error())
 			a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
@@ -109,7 +109,7 @@ func (a *App) ReorderCommands(orderedIds []string) error {
 }
 
 func (a *App) RunCommand(id string) error {
-	cmd, err := a.commandRepository.GetCommand(id)
+	cmd, err := a.commandRepository.Get(id)
 
 	if err != nil {
 		a.logger.Error(err.Error())
@@ -117,14 +117,14 @@ func (a *App) RunCommand(id string) error {
 		return nil
 	}
 
-	userConfig, err := a.userConfigRepository.GetOrCreateConfig()
+	userConfig, err := a.userConfigRepository.GetOrCreate()
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to get user config: "+err.Error())
 		return nil
 	}
 
-	currentProject, err := a.projectRepository.GetProjectById(a.openedProjectId)
+	currentProject, err := a.projectRepository.Get(a.openedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to get current project: "+err.Error())
@@ -147,7 +147,7 @@ func (a *App) RunCommand(id string) error {
 
 func (a *App) StopCommand(id string) {
 	// Check if the command exists before trying to stop it
-	_, err := a.commandRepository.GetCommand(id)
+	_, err := a.commandRepository.Get(id)
 
 	if err != nil {
 		a.logger.Error(err.Error())

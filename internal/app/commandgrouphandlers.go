@@ -10,11 +10,11 @@ import (
 )
 
 func (a *App) GetCommandGroups() ([]domain.CommandGroup, error) {
-	return a.commandGroupRepository.GetCommandGroups(a.openedProjectId)
+	return a.commandGroupRepository.GetAll(a.openedProjectId)
 }
 
 func (a *App) CreateCommandGroup(commandGroup *domain.CommandGroup) error {
-	existingCommandGroups, err := a.commandGroupRepository.GetCommandGroups(a.openedProjectId)
+	existingCommandGroups, err := a.commandGroupRepository.GetAll(a.openedProjectId)
 	if err != nil {
 		return err
 	}
@@ -23,7 +23,7 @@ func (a *App) CreateCommandGroup(commandGroup *domain.CommandGroup) error {
 
 	commandGroup.Position = newPosition
 
-	if err := a.commandGroupRepository.CreateCommandGroup(commandGroup); err != nil {
+	if err := a.commandGroupRepository.Create(commandGroup); err != nil {
 		return err
 	}
 
@@ -33,7 +33,7 @@ func (a *App) CreateCommandGroup(commandGroup *domain.CommandGroup) error {
 }
 
 func (a *App) UpdateCommandGroup(commandGroup *domain.CommandGroup) error {
-	if err := a.commandGroupRepository.UpdateCommandGroup(commandGroup); err != nil {
+	if err := a.commandGroupRepository.Update(commandGroup); err != nil {
 		return err
 	}
 
@@ -43,7 +43,7 @@ func (a *App) UpdateCommandGroup(commandGroup *domain.CommandGroup) error {
 }
 
 func (a *App) DeleteCommandGroup(commandGroupId string) error {
-	if err := a.commandGroupRepository.DeleteCommandGroup(commandGroupId); err != nil {
+	if err := a.commandGroupRepository.Delete(commandGroupId); err != nil {
 		return err
 	}
 
@@ -53,7 +53,7 @@ func (a *App) DeleteCommandGroup(commandGroupId string) error {
 }
 
 func (a *App) ReorderCommandGroups(newOrderedIds []string) error {
-	existingCommandGroups, err := a.commandGroupRepository.GetCommandGroups(a.openedProjectId)
+	existingCommandGroups, err := a.commandGroupRepository.GetAll(a.openedProjectId)
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func (a *App) ReorderCommandGroups(newOrderedIds []string) error {
 	for i := range existingCommandGroups {
 		existingCommandGroups[i].Position = i
 
-		err := a.commandGroupRepository.UpdateCommandGroup(&existingCommandGroups[i])
+		err := a.commandGroupRepository.Update(&existingCommandGroups[i])
 		if err != nil {
 			return err
 		}
@@ -77,7 +77,7 @@ func (a *App) ReorderCommandGroups(newOrderedIds []string) error {
 }
 
 func (a *App) RemoveCommandFromCommandGroups(id string) {
-	commandGroups, err := a.commandGroupRepository.GetCommandGroups(a.openedProjectId)
+	commandGroups, err := a.commandGroupRepository.GetAll(a.openedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
@@ -94,14 +94,14 @@ func (a *App) RemoveCommandFromCommandGroups(id string) {
 			})
 
 			if len(commandGroup.Commands) == 0 {
-				err := a.commandGroupRepository.DeleteCommandGroup(commandGroup.Id)
+				err := a.commandGroupRepository.Delete(commandGroup.Id)
 				if err != nil {
 					a.logger.Error(err.Error())
 					a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 					return
 				}
 			} else {
-				err := a.commandGroupRepository.UpdateCommandGroup(&commandGroup)
+				err := a.commandGroupRepository.Update(&commandGroup)
 				if err != nil {
 					a.logger.Error(err.Error())
 					a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())

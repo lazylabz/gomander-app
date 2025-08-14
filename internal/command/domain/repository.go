@@ -1,9 +1,9 @@
 package domain
 
 type Repository interface {
-	GetCommand(commandId string) (*Command, error)
-	GetCommands(projectId string) ([]Command, error)
-	SaveCommand(command *Command) error
-	EditCommand(command *Command) error
-	DeleteCommand(commandId string) error
+	Get(commandId string) (*Command, error)
+	GetAll(projectId string) ([]Command, error)
+	Create(command *Command) error
+	Update(command *Command) error
+	Delete(commandId string) error
 }

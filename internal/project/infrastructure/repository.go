@@ -22,7 +22,7 @@ func NewGormProjectRepository(db *gorm.DB, ctx context.Context) *GormProjectRepo
 	}
 }
 
-func (r GormProjectRepository) GetAllProjects() ([]domain.Project, error) {
+func (r GormProjectRepository) GetAll() ([]domain.Project, error) {
 	projectModels, err := gorm.G[ProjectModel](r.db).Find(r.ctx)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func (r GormProjectRepository) GetAllProjects() ([]domain.Project, error) {
 	return array.Map(projectModels, ToDomainProject), nil
 }
 
-func (r GormProjectRepository) GetProjectById(id string) (*domain.Project, error) {
+func (r GormProjectRepository) Get(id string) (*domain.Project, error) {
 	project, err := gorm.G[ProjectModel](r.db).Where("id = ?", id).First(r.ctx)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -44,7 +44,7 @@ func (r GormProjectRepository) GetProjectById(id string) (*domain.Project, error
 	return &domainProject, nil
 }
 
-func (r GormProjectRepository) CreateProject(project domain.Project) error {
+func (r GormProjectRepository) Create(project domain.Project) error {
 	projectModel := ToProjectModel(project)
 	err := gorm.G[ProjectModel](r.db).Create(r.ctx, &projectModel)
 	if err != nil {
@@ -53,7 +53,7 @@ func (r GormProjectRepository) CreateProject(project domain.Project) error {
 	return nil
 }
 
-func (r GormProjectRepository) UpdateProject(project domain.Project) error {
+func (r GormProjectRepository) Update(project domain.Project) error {
 	projectModel := ToProjectModel(project)
 	_, err := gorm.G[ProjectModel](r.db).Where("id = ?", project.Id).Updates(r.ctx, projectModel)
 	if err != nil {
@@ -62,7 +62,7 @@ func (r GormProjectRepository) UpdateProject(project domain.Project) error {
 	return nil
 }
 
-func (r GormProjectRepository) DeleteProject(id string) error {
+func (r GormProjectRepository) Delete(id string) error {
 	_, err := gorm.G[ProjectModel](r.db).Where("id = ?", id).Delete(r.ctx)
 	if err != nil {
 		return err

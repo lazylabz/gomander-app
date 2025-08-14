@@ -26,7 +26,7 @@ func NewGormCommandGroupRepository(db *gorm.DB, ctx context.Context) *GormComman
 	}
 }
 
-func (r GormCommandGroupRepository) GetCommandGroups(projectId string) ([]domain.CommandGroup, error) {
+func (r GormCommandGroupRepository) GetAll(projectId string) ([]domain.CommandGroup, error) {
 	var cgModels []CommandGroupModel
 	err := r.db.Where("project_id = ?", projectId).
 		Order("position ASC").
@@ -49,7 +49,7 @@ func (r GormCommandGroupRepository) GetCommandGroups(projectId string) ([]domain
 	}), err
 }
 
-func (r GormCommandGroupRepository) GetCommandGroupById(id string) (*domain.CommandGroup, error) {
+func (r GormCommandGroupRepository) Get(id string) (*domain.CommandGroup, error) {
 	var cgModel CommandGroupModel
 	err := r.db.Where("id = ?", id).
 		Preload("Commands", func(db *gorm.DB) *gorm.DB {
@@ -69,7 +69,7 @@ func (r GormCommandGroupRepository) GetCommandGroupById(id string) (*domain.Comm
 	return ToDomainCommandGroup(cgModel), err
 }
 
-func (r GormCommandGroupRepository) CreateCommandGroup(commandGroup *domain.CommandGroup) error {
+func (r GormCommandGroupRepository) Create(commandGroup *domain.CommandGroup) error {
 	commandGroupModel := ToCommandGroupModel(commandGroup)
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
@@ -103,7 +103,7 @@ func (r GormCommandGroupRepository) CreateCommandGroup(commandGroup *domain.Comm
 	return nil
 }
 
-func (r GormCommandGroupRepository) UpdateCommandGroup(commandGroup *domain.CommandGroup) error {
+func (r GormCommandGroupRepository) Update(commandGroup *domain.CommandGroup) error {
 	commandGroupModel := ToCommandGroupModel(commandGroup)
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
@@ -144,7 +144,7 @@ func (r GormCommandGroupRepository) UpdateCommandGroup(commandGroup *domain.Comm
 	return nil
 }
 
-func (r GormCommandGroupRepository) DeleteCommandGroup(commandGroupId string) error {
+func (r GormCommandGroupRepository) Delete(commandGroupId string) error {
 	existingGroup, err := gorm.G[CommandGroupModel](r.db).Where("id = ?", commandGroupId).First(r.ctx)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

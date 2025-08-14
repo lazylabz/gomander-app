@@ -15,7 +15,7 @@ import (
 	_ "gomander/migrations"
 )
 
-func TestGormCommandRepository_GetCommand(t *testing.T) {
+func TestGormCommandRepository_Get(t *testing.T) {
 	t.Parallel()
 	t.Run("Should return command when it exists", func(t *testing.T) {
 		preloadedCommandModels := []*CommandModel{
@@ -40,7 +40,7 @@ func TestGormCommandRepository_GetCommand(t *testing.T) {
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
-		cmd, err := repo.GetCommand("cmd1")
+		cmd, err := repo.Get("cmd1")
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
@@ -58,7 +58,7 @@ func TestGormCommandRepository_GetCommand(t *testing.T) {
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
-		cmd, err := repo.GetCommand("nonexistent")
+		cmd, err := repo.Get("nonexistent")
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
@@ -73,7 +73,7 @@ func TestGormCommandRepository_GetCommand(t *testing.T) {
 	})
 }
 
-func TestGormCommandRepository_GetCommands(t *testing.T) {
+func TestGormCommandRepository_GetAll(t *testing.T) {
 	t.Run("Should return all commands for a project", func(t *testing.T) {
 		preloadedCommandModels := []*CommandModel{
 			{
@@ -115,7 +115,7 @@ func TestGormCommandRepository_GetCommands(t *testing.T) {
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
-		cmds, err := repo.GetCommands("proj1")
+		cmds, err := repo.GetAll("proj1")
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
@@ -132,7 +132,7 @@ func TestGormCommandRepository_GetCommands(t *testing.T) {
 	})
 }
 
-func TestGormCommandRepository_SaveCommand(t *testing.T) {
+func TestGormCommandRepository_Save(t *testing.T) {
 	t.Parallel()
 	t.Run("Should save a new command", func(t *testing.T) {
 		preloadedCommandModels := []*CommandModel{}
@@ -148,12 +148,12 @@ func TestGormCommandRepository_SaveCommand(t *testing.T) {
 			Position:         2,
 		}
 
-		err := repo.SaveCommand(newCommand)
+		err := repo.Create(newCommand)
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 
-		savedCommand, err := repo.GetCommand("cmd3")
+		savedCommand, err := repo.Get("cmd3")
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
@@ -168,7 +168,7 @@ func TestGormCommandRepository_SaveCommand(t *testing.T) {
 	})
 }
 
-func TestGormCommandRepository_EditCommand(t *testing.T) {
+func TestGormCommandRepository_Edit(t *testing.T) {
 	t.Parallel()
 	t.Run("Should edit an existing command", func(t *testing.T) {
 		preloadedCommandModels := []*CommandModel{
@@ -193,12 +193,12 @@ func TestGormCommandRepository_EditCommand(t *testing.T) {
 			Position:         0,
 		}
 
-		err := repo.EditCommand(editedCommand)
+		err := repo.Update(editedCommand)
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 
-		savedCommand, err := repo.GetCommand("cmd1")
+		savedCommand, err := repo.Get("cmd1")
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
@@ -213,7 +213,7 @@ func TestGormCommandRepository_EditCommand(t *testing.T) {
 	})
 }
 
-func TestGormCommandRepository_DeleteCommand(t *testing.T) {
+func TestGormCommandRepository_Delete(t *testing.T) {
 	t.Parallel()
 	t.Run("Should delete an existing command", func(t *testing.T) {
 		preloadedCommandModels := []*CommandModel{
@@ -229,12 +229,12 @@ func TestGormCommandRepository_DeleteCommand(t *testing.T) {
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
-		err := repo.DeleteCommand("cmd1")
+		err := repo.Delete("cmd1")
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 
-		deletedCommand, err := repo.GetCommand("cmd1")
+		deletedCommand, err := repo.Get("cmd1")
 
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
@@ -278,16 +278,16 @@ func TestGormCommandRepository_DeleteCommand(t *testing.T) {
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
-		err := repo.DeleteCommand("cmd2")
+		err := repo.Delete("cmd2")
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 
-		cmd1AfterDelete, err := repo.GetCommand("cmd1")
+		cmd1AfterDelete, err := repo.Get("cmd1")
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
-		cmd3AfterDelete, err := repo.GetCommand("cmd3")
+		cmd3AfterDelete, err := repo.Get("cmd3")
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}

@@ -6,22 +6,22 @@ import (
 )
 
 func (a *App) GetCurrentProject() (*domain.Project, error) {
-	return a.projectRepository.GetProjectById(a.openedProjectId)
+	return a.projectRepository.Get(a.openedProjectId)
 }
 
 func (a *App) GetAvailableProjects() ([]domain.Project, error) {
-	return a.projectRepository.GetAllProjects()
+	return a.projectRepository.GetAll()
 }
 
 func (a *App) OpenProject(projectConfigId string) error {
-	config, err := a.userConfigRepository.GetOrCreateConfig()
+	config, err := a.userConfigRepository.GetOrCreate()
 	if err != nil {
 		return err
 	}
 
 	config.LastOpenedProjectId = projectConfigId
 
-	err = a.userConfigRepository.SaveConfig(config)
+	err = a.userConfigRepository.Update(config)
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func (a *App) OpenProject(projectConfigId string) error {
 }
 
 func (a *App) CreateProject(project domain.Project) error {
-	err := a.projectRepository.CreateProject(project)
+	err := a.projectRepository.Create(project)
 
 	if err != nil {
 		return err
@@ -42,7 +42,7 @@ func (a *App) CreateProject(project domain.Project) error {
 }
 
 func (a *App) EditProject(project domain.Project) error {
-	err := a.projectRepository.UpdateProject(project)
+	err := a.projectRepository.Update(project)
 	if err != nil {
 		return err
 	}
@@ -53,14 +53,14 @@ func (a *App) EditProject(project domain.Project) error {
 }
 
 func (a *App) CloseProject() error {
-	config, err := a.userConfigRepository.GetOrCreateConfig()
+	config, err := a.userConfigRepository.GetOrCreate()
 	if err != nil {
 		return err
 	}
 
 	config.LastOpenedProjectId = ""
 
-	err = a.userConfigRepository.SaveConfig(config)
+	err = a.userConfigRepository.Update(config)
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func (a *App) CloseProject() error {
 }
 
 func (a *App) DeleteProject(projectConfigId string) error {
-	err := a.projectRepository.DeleteProject(projectConfigId)
+	err := a.projectRepository.Delete(projectConfigId)
 
 	if err != nil {
 		return err

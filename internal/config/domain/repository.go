@@ -1,6 +1,6 @@
 package domain
 
 type Repository interface {
-	GetOrCreateConfig() (*Config, error)
-	SaveConfig(config *Config) error
+	GetOrCreate() (*Config, error)
+	Update(config *Config) error
 }

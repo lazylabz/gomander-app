@@ -15,10 +15,10 @@ import (
 	_ "gomander/migrations"
 )
 
-func TestGormConfigRepository_GetOrCreateConfig(t *testing.T) {
+func TestGormConfigRepository_GetOrCreate(t *testing.T) {
 	t.Run("Should create config if not exists", func(t *testing.T) {
 		repo, tmpDbFilePath := arrange(nil, nil)
-		config, err := repo.GetOrCreateConfig()
+		config, err := repo.GetOrCreate()
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
@@ -40,7 +40,7 @@ func TestGormConfigRepository_GetOrCreateConfig(t *testing.T) {
 			{Id: "path2", Path: "/usr/local/bin"},
 		}
 		repo, tmpDbFilePath := arrange(preloadedConfig, preloadedPaths)
-		config, err := repo.GetOrCreateConfig()
+		config, err := repo.GetOrCreate()
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
@@ -57,7 +57,7 @@ func TestGormConfigRepository_GetOrCreateConfig(t *testing.T) {
 	})
 }
 
-func TestGormConfigRepository_SaveConfig(t *testing.T) {
+func TestGormConfigRepository_Update(t *testing.T) {
 	t.Run("Should save config and environment paths", func(t *testing.T) {
 		repo, tmpDbFilePath := arrange(nil, nil)
 		config := &domain.Config{
@@ -67,16 +67,16 @@ func TestGormConfigRepository_SaveConfig(t *testing.T) {
 				{Id: "path2", Path: "/sbin"},
 			},
 		}
-		_, err := repo.GetOrCreateConfig()
+		_, err := repo.GetOrCreate()
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 
-		err = repo.SaveConfig(config)
+		err = repo.Update(config)
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
-		got, err := repo.GetOrCreateConfig()
+		got, err := repo.GetOrCreate()
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}

@@ -22,7 +22,7 @@ func NewGormCommandRepository(db *gorm.DB, ctx context.Context) *GormCommandRepo
 	}
 }
 
-func (r GormCommandRepository) GetCommand(commandId string) (*domain.Command, error) {
+func (r GormCommandRepository) Get(commandId string) (*domain.Command, error) {
 	cmd, err := gorm.G[CommandModel](r.db).Where("id = ?", commandId).First(r.ctx)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -36,7 +36,7 @@ func (r GormCommandRepository) GetCommand(commandId string) (*domain.Command, er
 	return &command, nil
 }
 
-func (r GormCommandRepository) GetCommands(projectId string) ([]domain.Command, error) {
+func (r GormCommandRepository) GetAll(projectId string) ([]domain.Command, error) {
 	cmds, err := gorm.G[CommandModel](r.db).Where("project_id = ?", projectId).Order("position").Find(r.ctx)
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (r GormCommandRepository) GetCommands(projectId string) ([]domain.Command, 
 	return array.Map(cmds, ToDomainCommand), nil
 }
 
-func (r GormCommandRepository) SaveCommand(command *domain.Command) error {
+func (r GormCommandRepository) Create(command *domain.Command) error {
 	commandModel := ToCommandModel(command)
 
 	err := gorm.G[CommandModel](r.db).Create(r.ctx, &commandModel)
@@ -56,7 +56,7 @@ func (r GormCommandRepository) SaveCommand(command *domain.Command) error {
 	return nil
 }
 
-func (r GormCommandRepository) EditCommand(command *domain.Command) error {
+func (r GormCommandRepository) Update(command *domain.Command) error {
 	commandModel := ToCommandModel(command)
 
 	_, err := gorm.G[CommandModel](r.db).Where("id = ?", commandModel.Id).Updates(r.ctx, commandModel)
@@ -67,8 +67,8 @@ func (r GormCommandRepository) EditCommand(command *domain.Command) error {
 	return nil
 }
 
-func (r GormCommandRepository) DeleteCommand(commandId string) error {
-	originalCommand, err := r.GetCommand(commandId)
+func (r GormCommandRepository) Delete(commandId string) error {
+	originalCommand, err := r.Get(commandId)
 	if err != nil {
 		return err
 	}

@@ -1,9 +1,9 @@
 package domain
 
 type Repository interface {
-	GetCommandGroups(projectId string) ([]CommandGroup, error)
-	GetCommandGroupById(id string) (*CommandGroup, error)
-	CreateCommandGroup(commandGroup *CommandGroup) error
-	UpdateCommandGroup(commandGroup *CommandGroup) error
-	DeleteCommandGroup(commandGroupId string) error
+	Get(id string) (*CommandGroup, error)
+	GetAll(projectId string) ([]CommandGroup, error)
+	Create(commandGroup *CommandGroup) error
+	Update(commandGroup *CommandGroup) error
+	Delete(commandGroupId string) error
 }

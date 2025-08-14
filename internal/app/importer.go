@@ -34,9 +34,9 @@ type ProjectExportJSONv1 struct {
 }
 
 func (a *App) ExportProject(projectConfigId string) (err error) {
-	project, err := a.projectRepository.GetProjectById(projectConfigId)
-	commands, err := a.commandRepository.GetCommands(projectConfigId)
-	commandGroups, err := a.commandGroupRepository.GetCommandGroups(projectConfigId)
+	project, err := a.projectRepository.Get(projectConfigId)
+	commands, err := a.commandRepository.GetAll(projectConfigId)
+	commandGroups, err := a.commandGroupRepository.GetAll(projectConfigId)
 
 	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{Title: "Select a destination", CanCreateDirectories: true, DefaultFilename: project.Name + ".json"})
 	if err != nil {
@@ -143,14 +143,14 @@ func (a *App) ImportProject(projectJSON ProjectExportJSONv1, workingDirectory st
 	}
 
 	// Persist everything
-	err := a.projectRepository.CreateProject(project)
+	err := a.projectRepository.Create(project)
 	if err != nil {
 		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to import project: "+err.Error())
 		return err
 	}
 
 	for _, command := range commands {
-		err = a.commandRepository.SaveCommand(&command)
+		err = a.commandRepository.Create(&command)
 		if err != nil {
 			a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to import command: "+err.Error())
 			return err
@@ -158,7 +158,7 @@ func (a *App) ImportProject(projectJSON ProjectExportJSONv1, workingDirectory st
 	}
 
 	for _, group := range commandGroups {
-		err = a.commandGroupRepository.CreateCommandGroup(&group)
+		err = a.commandGroupRepository.Create(&group)
 		if err != nil {
 			a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to import command group: "+err.Error())
 			return err

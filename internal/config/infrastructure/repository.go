@@ -21,7 +21,7 @@ func NewGormConfigRepository(db *gorm.DB, ctx context.Context) *GormConfigReposi
 	}
 }
 
-func (g GormConfigRepository) GetOrCreateConfig() (*domain.Config, error) {
+func (g GormConfigRepository) GetOrCreate() (*domain.Config, error) {
 	var configModel ConfigModel
 
 	configModel, err := gorm.G[ConfigModel](g.db).First(g.ctx)
@@ -48,7 +48,7 @@ func (g GormConfigRepository) GetOrCreateConfig() (*domain.Config, error) {
 	return ToDomainConfig(&configModel, pathModels), nil
 }
 
-func (g GormConfigRepository) SaveConfig(config *domain.Config) error {
+func (g GormConfigRepository) Update(config *domain.Config) error {
 	configModel, pathModels := ToModelConfig(config)
 	if configModel == nil {
 		return errors.New("config cannot be nil")

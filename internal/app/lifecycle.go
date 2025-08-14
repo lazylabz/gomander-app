@@ -13,7 +13,7 @@ func (a *App) Startup(ctx context.Context) {
 
 	a.logger.Info("Loading configuration...")
 
-	config, err := a.userConfigRepository.GetOrCreateConfig()
+	config, err := a.userConfigRepository.GetOrCreate()
 	if err != nil {
 		panic(err)
 	}

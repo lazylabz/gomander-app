@@ -167,13 +167,13 @@ var TestGetCommandGroupsTestCases = []struct {
 	},
 }
 
-func TestGormCommandGroupRepository_GetCommandGroups(t *testing.T) {
+func TestGormCommandGroupRepository_GetAll(t *testing.T) {
 	t.Parallel()
 	for _, testCase := range TestGetCommandGroupsTestCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			repo, tempDbFilePath, _ := arrange(testCase.preloadedCommandModels, testCase.preloadedCommandGroupModels, testCase.preloadedCommandToCommandGroupModels)
 
-			result, err := repo.GetCommandGroups("test-project")
+			result, err := repo.GetAll("test-project")
 
 			if err != nil {
 				t.Fatalf("Failed to get command groups: %v", err)
@@ -191,13 +191,13 @@ func TestGormCommandGroupRepository_GetCommandGroups(t *testing.T) {
 	}
 }
 
-func TestGormCommandGroupRepository_GetCommandGroupById(t *testing.T) {
+func TestGormCommandGroupRepository_Get(t *testing.T) {
 	t.Run("Should return a command group by id", func(t *testing.T) {
 		testCase := TestGetCommandGroupsTestCases[0]
 
 		repo, tempDbFilePath, _ := arrange(testCase.preloadedCommandModels, testCase.preloadedCommandGroupModels, testCase.preloadedCommandToCommandGroupModels)
 
-		result, err := repo.GetCommandGroupById("1")
+		result, err := repo.Get("1")
 
 		if err != nil {
 			t.Fatalf("Failed to get command group by id: %v", err)
@@ -217,7 +217,7 @@ func TestGormCommandGroupRepository_GetCommandGroupById(t *testing.T) {
 
 		repo, tempDbFilePath, _ := arrange(testCase.preloadedCommandModels, testCase.preloadedCommandGroupModels, testCase.preloadedCommandToCommandGroupModels)
 
-		result, err := repo.GetCommandGroupById("3")
+		result, err := repo.Get("3")
 		if err != nil {
 			t.Fatalf("Failed to get command group by id: %v", err)
 		}
@@ -235,7 +235,7 @@ func TestGormCommandGroupRepository_GetCommandGroupById(t *testing.T) {
 	t.Run("Should return nil if command group does not exist", func(t *testing.T) {
 		repo, tempDbFilePath, _ := arrange(nil, nil, nil)
 
-		result, err := repo.GetCommandGroupById("non-existent-id")
+		result, err := repo.Get("non-existent-id")
 
 		if err != nil {
 			t.Fatalf("Failed to get command group by id: %v", err)
@@ -250,7 +250,7 @@ func TestGormCommandGroupRepository_GetCommandGroupById(t *testing.T) {
 	})
 }
 
-func TestGormCommandGroupRepository_CreateCommandGroup(t *testing.T) {
+func TestGormCommandGroupRepository_Create(t *testing.T) {
 	t.Run("Should create a new command group and its associations", func(t *testing.T) {
 		preloadedCommandModels := []commandinfrastructure.CommandModel{command2, command3}
 		repo, tempDbFilePath, _ := arrange(preloadedCommandModels, nil, nil)
@@ -266,12 +266,12 @@ func TestGormCommandGroupRepository_CreateCommandGroup(t *testing.T) {
 			},
 		}
 
-		err := repo.CreateCommandGroup(newGroup)
+		err := repo.Create(newGroup)
 		if err != nil {
 			t.Fatalf("Failed to create command group: %v", err)
 		}
 
-		result, err := repo.GetCommandGroupById("4")
+		result, err := repo.Get("4")
 		if err != nil {
 			t.Fatalf("Failed to get command group by id: %v", err)
 		}
@@ -288,7 +288,7 @@ func TestGormCommandGroupRepository_CreateCommandGroup(t *testing.T) {
 	})
 }
 
-func TestGormCommandGroupRepository_UpdateCommandGroup(t *testing.T) {
+func TestGormCommandGroupRepository_Update(t *testing.T) {
 	t.Run("Should update an existing command group and its associations", func(t *testing.T) {
 		preloadedCommandModels := []commandinfrastructure.CommandModel{command1, command2}
 		preloadedCommandGroupModels := []infrastructure.CommandGroupModel{group1Model}
@@ -307,12 +307,12 @@ func TestGormCommandGroupRepository_UpdateCommandGroup(t *testing.T) {
 			},
 		}
 
-		err := repo.UpdateCommandGroup(groupToUpdate)
+		err := repo.Update(groupToUpdate)
 		if err != nil {
 			t.Fatalf("Failed to update command group: %v", err)
 		}
 
-		result, err := repo.GetCommandGroupById(groupToUpdate.Id)
+		result, err := repo.Get(groupToUpdate.Id)
 		if err != nil {
 			t.Fatalf("Failed to get command group by id: %v", err)
 		}
@@ -329,7 +329,7 @@ func TestGormCommandGroupRepository_UpdateCommandGroup(t *testing.T) {
 	})
 }
 
-func TestGormCommandGroupRepository_DeleteCommandGroup(t *testing.T) {
+func TestGormCommandGroupRepository_Delete(t *testing.T) {
 	t.Run("Should delete an existing command group and its associations", func(t *testing.T) {
 		preloadedCommandModels := []commandinfrastructure.CommandModel{command1}
 		preloadedCommandGroupModels := []infrastructure.CommandGroupModel{group1Model}
@@ -337,12 +337,12 @@ func TestGormCommandGroupRepository_DeleteCommandGroup(t *testing.T) {
 
 		repo, tempDbFilePath, db := arrange(preloadedCommandModels, preloadedCommandGroupModels, preloadedCommandToCommandGroupModels)
 
-		err := repo.DeleteCommandGroup(group1Model.Id)
+		err := repo.Delete(group1Model.Id)
 		if err != nil {
 			t.Fatalf("Failed to delete command group: %v", err)
 		}
 
-		result, err := repo.GetCommandGroupById("1")
+		result, err := repo.Get("1")
 		if err != nil {
 			t.Fatalf("Failed to get command group by id: %v", err)
 		}
@@ -377,12 +377,12 @@ func TestGormCommandGroupRepository_DeleteCommandGroup(t *testing.T) {
 
 		repo, tempDbFilePath, _ := arrange(preloadedCommandModels, preloadedCommandGroupModels, preloadedCommandToCommandGroupModels)
 
-		err := repo.DeleteCommandGroup(group2Model.Id)
+		err := repo.Delete(group2Model.Id)
 		if err != nil {
 			t.Fatalf("Failed to delete command group: %v", err)
 		}
 
-		resultGroup1, err := repo.GetCommandGroupById(group1Model.Id)
+		resultGroup1, err := repo.Get(group1Model.Id)
 		if err != nil {
 			t.Fatalf("Failed to get command group by id: %v", err)
 		}
@@ -390,7 +390,7 @@ func TestGormCommandGroupRepository_DeleteCommandGroup(t *testing.T) {
 			t.Fatal("Expected command group 1, got nil")
 		}
 
-		resultGroup3, err := repo.GetCommandGroupById(group3Model.Id)
+		resultGroup3, err := repo.Get(group3Model.Id)
 		if err != nil {
 			t.Fatalf("Failed to get command group by id: %v", err)
 		}
