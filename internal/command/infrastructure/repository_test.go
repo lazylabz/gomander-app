@@ -2,6 +2,7 @@ package commandinfrastructure
 
 import (
 	"context"
+	"gomander/internal/testutils"
 	"os"
 	"path/filepath"
 	"testing"
@@ -15,29 +16,44 @@ import (
 	_ "gomander/migrations"
 )
 
+func commandDataToDomain(data testutils.CommandData) *domain.Command {
+	return &domain.Command{
+		Id:               data.Id,
+		ProjectId:        data.ProjectId,
+		Name:             data.Name,
+		Command:          data.Command,
+		WorkingDirectory: data.WorkingDirectory,
+		Position:         data.Position,
+	}
+}
+
+func commandDataToModel(data testutils.CommandData) *CommandModel {
+	return &CommandModel{
+		Id:               data.Id,
+		ProjectId:        data.ProjectId,
+		Name:             data.Name,
+		Command:          data.Command,
+		WorkingDirectory: data.WorkingDirectory,
+		Position:         data.Position,
+	}
+}
+
 func TestGormCommandRepository_Get(t *testing.T) {
 	t.Parallel()
 	t.Run("Should return command when it exists", func(t *testing.T) {
-		preloadedCommand := NewCommandModelBuilder().
+		cmdData := testutils.NewCommand().
 			WithId("cmd1").
 			WithProjectId("proj1").
 			WithName("Test Command").
 			WithCommand("echo 'Hello, World!'").
 			WithWorkingDirectory("/tmp").
 			WithPosition(0).
-			BuildPtr()
+			Data()
 		preloadedCommandModels := []*CommandModel{
-			preloadedCommand,
+			commandDataToModel(cmdData),
 		}
 
-		expectedCommand := domain.NewCommandBuilder().
-			WithId("cmd1").
-			WithProjectId("proj1").
-			WithName("Test Command").
-			WithCommand("echo 'Hello, World!'").
-			WithWorkingDirectory("/tmp").
-			WithPosition(0).
-			BuildPtr()
+		expectedCommand := commandDataToDomain(cmdData)
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
@@ -55,7 +71,7 @@ func TestGormCommandRepository_Get(t *testing.T) {
 		}
 	})
 	t.Run("Should return nil when it doesn't exists", func(t *testing.T) {
-		preloadedCommandModels := []*CommandModel{}
+		var preloadedCommandModels []*CommandModel
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
@@ -76,42 +92,31 @@ func TestGormCommandRepository_Get(t *testing.T) {
 
 func TestGormCommandRepository_GetAll(t *testing.T) {
 	t.Run("Should return all commands for a project", func(t *testing.T) {
+		cmd1 := testutils.NewCommand().
+			WithId("cmd1").
+			WithProjectId("proj1").
+			WithName("Test Command 1").
+			WithCommand("echo 'Hello, World!'").
+			WithWorkingDirectory("/tmp").
+			WithPosition(0).
+			Data()
+		cmd2 := testutils.NewCommand().
+			WithId("cmd2").
+			WithProjectId("proj1").
+			WithName("Test Command 2").
+			WithCommand("echo 'Goodbye, World!'").
+			WithWorkingDirectory("/tmp").
+			WithPosition(1).
+			Data()
+
 		preloadedCommandModels := []*CommandModel{
-			NewCommandModelBuilder().
-				WithId("cmd2").
-				WithProjectId("proj1").
-				WithName("Test Command 2").
-				WithCommand("echo 'Goodbye, World!'").
-				WithWorkingDirectory("/tmp").
-				WithPosition(1).
-				BuildPtr(),
-			NewCommandModelBuilder().
-				WithId("cmd1").
-				WithProjectId("proj1").
-				WithName("Test Command 1").
-				WithCommand("echo 'Hello, World!'").
-				WithWorkingDirectory("/tmp").
-				WithPosition(0).
-				BuildPtr(),
+			commandDataToModel(cmd2),
+			commandDataToModel(cmd1),
 		}
 
 		expectedCommands := []*domain.Command{
-			domain.NewCommandBuilder().
-				WithId("cmd1").
-				WithProjectId("proj1").
-				WithName("Test Command 1").
-				WithCommand("echo 'Hello, World!'").
-				WithWorkingDirectory("/tmp").
-				WithPosition(0).
-				BuildPtr(),
-			domain.NewCommandBuilder().
-				WithId("cmd2").
-				WithProjectId("proj1").
-				WithName("Test Command 2").
-				WithCommand("echo 'Goodbye, World!'").
-				WithWorkingDirectory("/tmp").
-				WithPosition(1).
-				BuildPtr(),
+			commandDataToDomain(cmd1),
+			commandDataToDomain(cmd2),
 		}
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
@@ -136,18 +141,19 @@ func TestGormCommandRepository_GetAll(t *testing.T) {
 func TestGormCommandRepository_Save(t *testing.T) {
 	t.Parallel()
 	t.Run("Should save a new command", func(t *testing.T) {
-		preloadedCommandModels := []*CommandModel{}
+		var preloadedCommandModels []*CommandModel
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
-		newCommand := domain.NewCommandBuilder().
+		cmdData := testutils.NewCommand().
 			WithId("cmd3").
 			WithProjectId("proj1").
 			WithName("New Command").
 			WithCommand("echo 'New Command'").
 			WithWorkingDirectory("/tmp").
 			WithPosition(2).
-			BuildPtr()
+			Data()
+		newCommand := commandDataToDomain(cmdData)
 
 		err := repo.Create(newCommand)
 		if err != nil {
@@ -172,29 +178,25 @@ func TestGormCommandRepository_Save(t *testing.T) {
 func TestGormCommandRepository_Edit(t *testing.T) {
 	t.Parallel()
 	t.Run("Should edit an existing command", func(t *testing.T) {
-		preloadedCommandModels := []*CommandModel{
-			NewCommandModelBuilder().
-				WithId("cmd1").
-				WithProjectId("proj1").
-				WithName("Old Command").
-				WithCommand("echo 'Old Command'").
-				WithWorkingDirectory("/tmp").
-				WithPosition(0).
-				BuildPtr(),
-		}
-
-		repo, tmpDbFilePath := arrange(preloadedCommandModels)
-
-		editedCommand := domain.NewCommandBuilder().
+		existingCommand := testutils.NewCommand().
 			WithId("cmd1").
 			WithProjectId("proj1").
+			WithName("Old Command").
+			WithCommand("echo 'Old Command'").
+			WithWorkingDirectory("/tmp").
+			WithPosition(0)
+
+		repo, tmpDbFilePath := arrange([]*CommandModel{
+			commandDataToModel(existingCommand.Data()),
+		})
+
+		editedCommand := existingCommand.
 			WithName("Edited Command").
 			WithCommand("echo 'Edited Command'").
-			WithWorkingDirectory("/tmp").
-			WithPosition(0).
-			BuildPtr()
+			Data()
+		domainEditedCommand := commandDataToDomain(editedCommand)
 
-		err := repo.Update(editedCommand)
+		err := repo.Update(domainEditedCommand)
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
@@ -204,7 +206,7 @@ func TestGormCommandRepository_Edit(t *testing.T) {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 
-		if !savedCommand.Equals(editedCommand) {
+		if !savedCommand.Equals(domainEditedCommand) {
 			t.Errorf("Expected command %v, got %v", editedCommand, savedCommand)
 		}
 
@@ -217,15 +219,16 @@ func TestGormCommandRepository_Edit(t *testing.T) {
 func TestGormCommandRepository_Delete(t *testing.T) {
 	t.Parallel()
 	t.Run("Should delete an existing command", func(t *testing.T) {
+		cmd := testutils.NewCommand().
+			WithId("cmd1").
+			WithProjectId("proj1").
+			WithName("Command to Delete").
+			WithCommand("echo 'Delete Me'").
+			WithWorkingDirectory("/tmp").
+			WithPosition(0).
+			Data()
 		preloadedCommandModels := []*CommandModel{
-			NewCommandModelBuilder().
-				WithId("cmd1").
-				WithProjectId("proj1").
-				WithName("Command to Delete").
-				WithCommand("echo 'Delete Me'").
-				WithWorkingDirectory("/tmp").
-				WithPosition(0).
-				BuildPtr(),
+			commandDataToModel(cmd),
 		}
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
@@ -250,32 +253,36 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 		}
 	})
 	t.Run("Should delete an existing command and adjust other commands positions", func(t *testing.T) {
-		cmd1 := NewCommandModelBuilder().
+		cmd1 := testutils.NewCommand().
 			WithId("cmd1").
 			WithProjectId("proj1").
 			WithName("Command to Delete").
 			WithCommand("echo 'Delete Me'").
 			WithWorkingDirectory("/tmp").
 			WithPosition(0).
-			BuildPtr()
-		cmd2 := NewCommandModelBuilder().
+			Data()
+		cmd2 := testutils.NewCommand().
 			WithId("cmd2").
 			WithProjectId("proj1").
 			WithName("Command 2").
 			WithCommand("echo 'Command 2'").
 			WithWorkingDirectory("/tmp").
 			WithPosition(1).
-			BuildPtr()
-		cmd3 := NewCommandModelBuilder().
+			Data()
+		cmd3 := testutils.NewCommand().
 			WithId("cmd3").
 			WithProjectId("proj1").
 			WithName("Command 3").
 			WithCommand("echo 'Command 3'").
 			WithWorkingDirectory("/tmp").
 			WithPosition(2).
-			BuildPtr()
+			Data()
 
-		preloadedCommandModels := []*CommandModel{cmd1, cmd2, cmd3}
+		preloadedCommandModels := []*CommandModel{
+			commandDataToModel(cmd1),
+			commandDataToModel(cmd2),
+			commandDataToModel(cmd3),
+		}
 
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
