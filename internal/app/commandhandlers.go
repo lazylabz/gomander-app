@@ -83,6 +83,7 @@ func (a *App) ReorderCommands(orderedIds []string) error {
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
+		return err
 	}
 	// Sort the existing commands based on the new order
 	sort.Slice(existingCommands, func(i, j int) bool {
