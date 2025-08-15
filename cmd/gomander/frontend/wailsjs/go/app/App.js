@@ -10,8 +10,16 @@ export function CloseProject() {
   return window['go']['app']['App']['CloseProject']();
 }
 
-export function CreateProject(arg1, arg2, arg3) {
-  return window['go']['app']['App']['CreateProject'](arg1, arg2, arg3);
+export function CreateCommandGroup(arg1) {
+  return window['go']['app']['App']['CreateCommandGroup'](arg1);
+}
+
+export function CreateProject(arg1) {
+  return window['go']['app']['App']['CreateProject'](arg1);
+}
+
+export function DeleteCommandGroup(arg1) {
+  return window['go']['app']['App']['DeleteCommandGroup'](arg1);
 }
 
 export function DeleteProject(arg1) {
@@ -58,12 +66,16 @@ export function GetUserConfig() {
   return window['go']['app']['App']['GetUserConfig']();
 }
 
-export function ImportProject(arg1) {
-  return window['go']['app']['App']['ImportProject'](arg1);
+export function ImportProject(arg1, arg2, arg3) {
+  return window['go']['app']['App']['ImportProject'](arg1, arg2, arg3);
 }
 
 export function IsThereANewRelease() {
   return window['go']['app']['App']['IsThereANewRelease']();
+}
+
+export function LoadDependencies(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
+  return window['go']['app']['App']['LoadDependencies'](arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }
 
 export function OpenProject(arg1) {
@@ -74,6 +86,14 @@ export function RemoveCommand(arg1) {
   return window['go']['app']['App']['RemoveCommand'](arg1);
 }
 
+export function RemoveCommandFromCommandGroups(arg1) {
+  return window['go']['app']['App']['RemoveCommandFromCommandGroups'](arg1);
+}
+
+export function ReorderCommandGroups(arg1) {
+  return window['go']['app']['App']['ReorderCommandGroups'](arg1);
+}
+
 export function ReorderCommands(arg1) {
   return window['go']['app']['App']['ReorderCommands'](arg1);
 }
@@ -82,14 +102,18 @@ export function RunCommand(arg1) {
   return window['go']['app']['App']['RunCommand'](arg1);
 }
 
-export function SaveCommandGroups(arg1) {
-  return window['go']['app']['App']['SaveCommandGroups'](arg1);
-}
-
 export function SaveUserConfig(arg1) {
   return window['go']['app']['App']['SaveUserConfig'](arg1);
 }
 
+export function Startup(arg1) {
+  return window['go']['app']['App']['Startup'](arg1);
+}
+
 export function StopCommand(arg1) {
   return window['go']['app']['App']['StopCommand'](arg1);
+}
+
+export function UpdateCommandGroup(arg1) {
+  return window['go']['app']['App']['UpdateCommandGroup'](arg1);
 }

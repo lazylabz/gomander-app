@@ -1,12 +1,12 @@
-import type { config, project } from "../../wailsjs/go/models.ts";
+import type { app,domain } from "../../wailsjs/go/models.ts";
 import { event } from "../../wailsjs/go/models.ts";
 
 // Types
-export type Command = project.Command;
-export type UserConfig = config.UserConfig;
-export type CommandGroup = project.CommandGroup;
-export type Project = project.Project;
-export type ProjectInfo = Pick<Project, "id" | "name" | "baseWorkingDirectory">;
+export type Command = domain.Command;
+export type UserConfig = domain.Config;
+export type CommandGroup = domain.CommandGroup;
+export type Project = domain.Project;
+export type ProjectExport = app.ProjectExportJSONv1;
 
 // Enums
 export enum Event {

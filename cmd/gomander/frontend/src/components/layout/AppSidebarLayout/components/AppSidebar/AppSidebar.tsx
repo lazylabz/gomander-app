@@ -38,7 +38,7 @@ import { ScreenRoutes } from "@/routes.ts";
 import { SettingsTab } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
-import { saveCommandGroups } from "@/useCases/commandGroup/saveCommandGroups.ts";
+import { reorderCommandGroups } from "@/useCases/commandGroup/reorderCommandGroups.ts";
 import { closeProject } from "@/useCases/project/closeProject.ts";
 
 export const AppSidebar = () => {
@@ -72,7 +72,7 @@ export const AppSidebar = () => {
       const oldIndex = commandGroups.findIndex((cg) => cg.id === active.id);
       const newIndex = commandGroups.findIndex((cg) => cg.id === over.id);
       const newCommandGroups = arrayMove(commandGroups, oldIndex, newIndex);
-      await saveCommandGroups(newCommandGroups);
+      await reorderCommandGroups(newCommandGroups.map((cg) => cg.id));
     }
   };
 
@@ -103,7 +103,7 @@ export const AppSidebar = () => {
       <Sidebar collapsible="icon">
         <SidebarHeader className="flex flex-row items-center justify-between p-2">
           <div className="flex items-center ml-2 gap-1">
-            <Avatar className="size-9 rounded-lg">
+            <Avatar className="size-9 rounded-lg mb-1">
               <AvatarImage src="/sidebar-logo.png" />
               <AvatarFallback className="text-xl font-extralight">
                 G.

@@ -1,49 +1,38 @@
 package app
 
 import (
-	"errors"
-
-	"github.com/wailsapp/wails/v2/pkg/runtime"
-
 	"gomander/internal/event"
-	"gomander/internal/project"
+	"gomander/internal/project/domain"
 )
 
-func (a *App) GetCurrentProject() *project.Project {
-	return a.selectedProject
+func (a *App) GetCurrentProject() (*domain.Project, error) {
+	return a.projectRepository.Get(a.openedProjectId)
 }
 
-func (a *App) GetAvailableProjects() ([]*project.Project, error) {
-	return project.GetAllProjectsAvailableInProjectsFolder()
+func (a *App) GetAvailableProjects() ([]domain.Project, error) {
+	return a.projectRepository.GetAll()
 }
 
-func (a *App) OpenProject(projectConfigId string) (*project.Project, error) {
-	p, err := project.LoadProject(projectConfigId)
+func (a *App) OpenProject(projectConfigId string) error {
+	config, err := a.userConfigRepository.GetOrCreate()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	a.userConfig.LastOpenedProjectId = p.Id
+	config.LastOpenedProjectId = projectConfigId
 
-	err = a.persistUserConfig()
+	err = a.userConfigRepository.Update(config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	a.selectedProject = p
+	a.openedProjectId = projectConfigId
 
-	return p, nil
+	return nil
 }
 
-func (a *App) CreateProject(id, name, baseWorkingDirectory string) error {
-	err := project.SaveProject(&project.Project{
-		Id:                   id,
-		Name:                 name,
-		BaseWorkingDirectory: baseWorkingDirectory,
-		Commands:             make(map[string]project.Command),
-		CommandGroups:        make([]project.CommandGroup, 0),
-		OrderedCommandIds:    make([]string, 0),
-	})
+func (a *App) CreateProject(project domain.Project) error {
+	err := a.projectRepository.Create(project)
 
 	if err != nil {
 		return err
@@ -52,25 +41,10 @@ func (a *App) CreateProject(id, name, baseWorkingDirectory string) error {
 	return nil
 }
 
-func (a *App) EditProject(dto EditProjectDTO) error {
-	isEditingSelectedProject := a.selectedProject != nil && a.selectedProject.Id == dto.Id
-
-	p, err := project.LoadProject(dto.Id)
+func (a *App) EditProject(project domain.Project) error {
+	err := a.projectRepository.Update(project)
 	if err != nil {
 		return err
-	}
-
-	p.Name = dto.Name
-	p.BaseWorkingDirectory = dto.BaseWorkingDirectory
-
-	err = project.SaveProject(p)
-
-	if err != nil {
-		return err
-	}
-
-	if isEditingSelectedProject {
-		a.selectedProject = p
 	}
 
 	a.eventEmitter.EmitEvent(event.SuccessNotification, "Project edited successfully")
@@ -79,85 +53,40 @@ func (a *App) EditProject(dto EditProjectDTO) error {
 }
 
 func (a *App) CloseProject() error {
-	if a.selectedProject == nil {
-		return nil
-	}
-
-	a.selectedProject = nil
-
-	a.userConfig.LastOpenedProjectId = ""
-
-	err := a.persistUserConfig()
+	config, err := a.userConfigRepository.GetOrCreate()
 	if err != nil {
 		return err
 	}
 
-	errs := a.commandRunner.StopAllRunningCommands()
-	if len(errs) > 0 {
-		return errors.New("error stopping running commands")
+	config.LastOpenedProjectId = ""
+
+	err = a.userConfigRepository.Update(config)
+	if err != nil {
+		return err
 	}
+
+	a.openedProjectId = ""
 
 	return nil
 }
 
 func (a *App) DeleteProject(projectConfigId string) error {
-	err := project.DeleteProject(projectConfigId)
+	commands, err := a.commandRepository.GetAll(projectConfigId)
+	if err != nil {
+		return err
+	}
+
+	for _, command := range commands {
+		err := a.RemoveCommand(command.Id)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = a.projectRepository.Delete(projectConfigId)
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func (a *App) ExportProject(projectConfigId string) error {
-	p, err := project.LoadProject(projectConfigId)
-	if err != nil {
-		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
-		return err
-	}
-	if p == nil {
-		return errors.New("project not found")
-	}
-
-	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{Title: "Select a destination", CanCreateDirectories: true, DefaultFilename: p.Name + ".json"})
-	if err != nil {
-		return err
-	}
-
-	if filePath == "" {
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Export cancelled")
-		return nil
-	}
-
-	err = project.ExportProject(p, filePath)
-	if err != nil {
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to export project: "+err.Error())
-		return err
-	}
-
-	a.eventEmitter.EmitEvent(event.SuccessNotification, "Project exported successfully")
-	return nil
-}
-
-func (a *App) ImportProject(p project.Project) error {
-	err := project.ImportProject(p)
-	if err != nil {
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to import project: "+err.Error())
-		return err
-	}
-
-	a.eventEmitter.EmitEvent(event.SuccessNotification, "Project imported successfully")
-	return nil
-}
-
-func (a *App) GetProjectToImport() (*project.Project, error) {
-	filePath, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{Title: "Select a project file", Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}}})
-	if err != nil {
-		return nil, err
-	}
-	if filePath == "" {
-		return nil, errors.New("import cancelled")
-	}
-
-	return project.LoadProjectFromPath(filePath)
 }

@@ -39,11 +39,11 @@ export const CreateProjectModal = ({
   };
 
   const onSubmit = async (values: FormSchemaType) => {
-    await dataService.createProject(
-      crypto.randomUUID(),
-      values.name,
-      values.baseWorkingDirectory,
-    );
+    await dataService.createProject({
+      id: crypto.randomUUID(),
+      name: values.name,
+      workingDirectory: values.baseWorkingDirectory,
+    });
 
     onSuccess();
     handleOpenChange(false);

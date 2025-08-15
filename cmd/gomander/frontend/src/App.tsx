@@ -5,8 +5,8 @@ import { Toaster } from "@/components/ui/sonner.tsx";
 import { EventListenersContainer } from "@/components/utility/EventListenersContainer.tsx";
 import { ThemeProvider } from "@/contexts/theme.tsx";
 import { VersionProvider } from "@/contexts/version.tsx";
-import { fetchProject } from "@/queries/fetchProject.ts";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
+import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
 import { ScreenRoutes } from "@/routes.ts";
 import { ProjectSelectionScreen } from "@/screens/ProjectSelectionScreen/ProjectSelectionScreen.tsx";
 import { SettingsContextProvider } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
@@ -16,7 +16,7 @@ import { LogsScreen } from "./screens/LogsScreen/LogsScreen.tsx";
 
 function App() {
   useEffect(() => {
-    fetchProject();
+    loadAllProjectData();
     fetchUserConfig();
   }, []);
 

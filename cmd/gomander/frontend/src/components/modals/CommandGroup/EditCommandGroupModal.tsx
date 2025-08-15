@@ -34,7 +34,7 @@ export const EditCommandGroupModal = ({
     resolver: zodResolver(formSchema),
     values: {
       name: commandGroup?.name || "",
-      commands: commandGroup?.commands || [],
+      commands: commandGroup?.commands.map((c) => c.id) || [],
     },
   });
 

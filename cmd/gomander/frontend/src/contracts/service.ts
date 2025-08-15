@@ -1,7 +1,9 @@
 import {
   AddCommand,
   CloseProject,
+  CreateCommandGroup,
   CreateProject,
+  DeleteCommandGroup,
   DeleteProject,
   EditCommand,
   EditProject,
@@ -17,14 +19,15 @@ import {
   IsThereANewRelease,
   OpenProject,
   RemoveCommand,
+  ReorderCommandGroups,
   ReorderCommands,
   RunCommand,
-  SaveCommandGroups,
   SaveUserConfig,
   StopCommand,
+  UpdateCommandGroup,
 } from "../../wailsjs/go/app/App";
-import type { project } from "../../wailsjs/go/models.ts";
-import { GetComputedPath } from "../../wailsjs/go/uihelpers/UiPathHelper";
+import type { domain } from "../../wailsjs/go/models.ts";
+import { GetComputedPath } from "../../wailsjs/go/path/UiPathHelper";
 import { BrowserOpenURL, EventsOff, EventsOn } from "../../wailsjs/runtime";
 
 export const dataService = {
@@ -32,13 +35,16 @@ export const dataService = {
   editCommand: EditCommand,
   reorderCommands: ReorderCommands,
   getAvailableProjects: GetAvailableProjects,
+  editCommandGroup: UpdateCommandGroup,
+  createCommandGroup: CreateCommandGroup,
+  deleteCommandGroup: DeleteCommandGroup,
+  reorderCommandGroups: ReorderCommandGroups,
   getCommandGroups: GetCommandGroups,
   getCommands: GetCommands,
-  getCurrentProject: GetCurrentProject as () => Promise<project.Project | null>,
+  getCurrentProject: GetCurrentProject as () => Promise<domain.Project | null>,
   getUserConfig: GetUserConfig,
   removeCommand: RemoveCommand,
   runCommand: RunCommand,
-  saveCommandGroups: SaveCommandGroups,
   saveUserConfig: SaveUserConfig,
   createProject: CreateProject,
   stopCommand: StopCommand,

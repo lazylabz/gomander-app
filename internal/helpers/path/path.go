@@ -1,4 +1,4 @@
-package helpers
+package path
 
 import "path/filepath"
 

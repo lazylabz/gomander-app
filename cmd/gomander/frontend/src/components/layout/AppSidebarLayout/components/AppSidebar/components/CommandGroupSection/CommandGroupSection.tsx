@@ -29,12 +29,11 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
-import type { CommandGroup } from "@/contracts/types.ts";
-import { isDefined } from "@/helpers/mapHelpers.ts";
+import type { Command, CommandGroup } from "@/contracts/types.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { deleteCommandGroup } from "@/useCases/commandGroup/deleteCommandGroup.ts";
-import { editCommandGroup } from "@/useCases/commandGroup/editCommandGroup.ts";
+import { reorderCommandGroupCommands } from "@/useCases/commandGroup/reoderCommandGroupCommands.ts";
 import { runCommandGroup } from "@/useCases/commandGroup/runCommandGroup.ts";
 import { stopCommandGroup } from "@/useCases/commandGroup/stopCommandGroup.ts";
 
@@ -43,7 +42,6 @@ export const CommandGroupSection = ({
 }: {
   commandGroup: CommandGroup;
 }) => {
-  const commands = useCommandStore((state) => state.commands);
   const commandsStatus = useCommandStore((state) => state.commandsStatus);
 
   const { startEditingCommandGroup } = useSidebarContext();
@@ -57,13 +55,13 @@ export const CommandGroupSection = ({
   };
 
   const numberOfCommandsRunning = commandGroup.commands.filter(
-    (commandId) => commandsStatus[commandId] === CommandStatus.RUNNING,
+    (command: Command) => commandsStatus[command.id] === CommandStatus.RUNNING,
   ).length;
 
   const someCommandIsRunning = numberOfCommandsRunning > 0;
 
   const someCommandIsIdle = commandGroup.commands.some(
-    (commandId) => commandsStatus[commandId] === CommandStatus.IDLE,
+    (command: Command) => commandsStatus[command.id] === CommandStatus.IDLE,
   );
 
   const run = (e: SyntheticEvent) => {
@@ -90,7 +88,7 @@ export const CommandGroupSection = ({
   const handleSaveReorderedCommandGroup = async (
     reorderedCommandGroup: CommandGroup,
   ) => {
-    await editCommandGroup(reorderedCommandGroup);
+    await reorderCommandGroupCommands(reorderedCommandGroup);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -98,10 +96,10 @@ export const CommandGroupSection = ({
 
     if (active.id && over?.id && active.id !== over.id) {
       const oldIndex = commandGroup.commands.findIndex(
-        (cmdId) => cmdId === active.id,
+        (cmd) => cmd.id === active.id,
       );
       const newIndex = commandGroup.commands.findIndex(
-        (cmdId) => cmdId === over.id,
+        (cmd) => cmd.id === over.id,
       );
       const newCommandsGroups = arrayMove(
         commandGroup.commands,
@@ -116,10 +114,6 @@ export const CommandGroupSection = ({
       await handleSaveReorderedCommandGroup(reorderedCommandGroup);
     }
   };
-
-  const groupCommands = commandGroup.commands
-    .map((commandId) => commands.find((command) => command.id === commandId))
-    .filter(isDefined);
 
   return (
     <Collapsible
@@ -197,7 +191,7 @@ export const CommandGroupSection = ({
                   strategy={verticalListSortingStrategy}
                   items={commandGroup.commands}
                 >
-                  {groupCommands.map((command) => (
+                  {commandGroup.commands.map((command) => (
                     <SidebarMenuItem key={command.id}>
                       <CommandMenuItem draggable command={command} />
                     </SidebarMenuItem>

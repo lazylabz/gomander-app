@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
+import { useProjectStore } from "@/store/projectStore.ts";
 import { createCommand } from "@/useCases/command/createCommand.ts";
 
 export const CreateCommandModal = ({
@@ -29,6 +30,8 @@ export const CreateCommandModal = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
+  const projectId = useProjectStore((state) => state.projectInfo?.id);
+
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -39,11 +42,17 @@ export const CreateCommandModal = ({
   });
 
   const onSubmit = async (values: FormSchemaType) => {
+    if (!projectId) {
+      return;
+    }
+
     await createCommand({
       id: crypto.randomUUID(),
+      projectId: projectId,
       name: values.name,
       command: values.command,
       workingDirectory: values.workingDirectory,
+      position: 0, // Will be set by the backend
     });
 
     setOpen(false);

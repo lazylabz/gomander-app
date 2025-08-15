@@ -1,19 +1,19 @@
 package app
 
 import (
-	"gomander/internal/config"
+	"gomander/internal/config/domain"
 	"gomander/internal/event"
 )
 
-func (a *App) GetUserConfig() *config.UserConfig {
-	return a.userConfig
+func (a *App) GetUserConfig() (*domain.Config, error) {
+	return a.userConfigRepository.GetOrCreate()
 }
 
-func (a *App) SaveUserConfig(newUserConfig config.UserConfig) error {
-	a.userConfig = &newUserConfig
-
-	err := a.persistUserConfig()
+func (a *App) SaveUserConfig(newUserConfig domain.Config) error {
+	err := a.userConfigRepository.Update(&newUserConfig)
 	if err != nil {
+		a.logger.Error("Failed to save user configuration: " + err.Error())
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to save user configuration")
 		return err
 	}
 

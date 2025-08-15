@@ -1,24 +1,34 @@
 package app
 
 import (
+	"sort"
+
+	"gomander/internal/command/domain"
+	domain2 "gomander/internal/config/domain"
 	"gomander/internal/event"
-	"gomander/internal/project"
+	"gomander/internal/helpers/array"
 )
 
-func (a *App) GetCommands() []project.Command {
-	return a.selectedProject.GetCommands()
+func (a *App) GetCommands() ([]domain.Command, error) {
+	return a.commandRepository.GetAll(a.openedProjectId)
 }
 
-func (a *App) AddCommand(newCommand project.Command) error {
-	err := a.selectedProject.AddCommand(newCommand)
+func (a *App) AddCommand(newCommand domain.Command) error {
+	allCommands, err := a.commandRepository.GetAll(a.openedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 		return err
 	}
 
-	err = a.persistSelectedProjectConfig()
+	newPosition := len(allCommands)
+
+	newCommand.Position = newPosition
+
+	err = a.commandRepository.Create(&newCommand)
 	if err != nil {
+		a.logger.Error(err.Error())
+		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 		return err
 	}
 
@@ -32,19 +42,14 @@ func (a *App) AddCommand(newCommand project.Command) error {
 }
 
 func (a *App) RemoveCommand(id string) error {
-	err := a.selectedProject.RemoveCommand(id)
+	err := a.commandRepository.Delete(id)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 		return err
 	}
 
-	a.selectedProject.RemoveCommandFromCommandGroups(id)
-
-	err = a.persistSelectedProjectConfig()
-	if err != nil {
-		return err
-	}
+	a.RemoveCommandFromCommandGroups(id)
 
 	a.logger.Info("Command removed: " + id)
 	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command removed")
@@ -56,16 +61,11 @@ func (a *App) RemoveCommand(id string) error {
 	return nil
 }
 
-func (a *App) EditCommand(newCommand project.Command) error {
-	err := a.selectedProject.EditCommand(newCommand)
+func (a *App) EditCommand(newCommand domain.Command) error {
+	err := a.commandRepository.Update(&newCommand)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
-		return err
-	}
-
-	err = a.persistSelectedProjectConfig()
-	if err != nil {
 		return err
 	}
 
@@ -79,16 +79,26 @@ func (a *App) EditCommand(newCommand project.Command) error {
 }
 
 func (a *App) ReorderCommands(orderedIds []string) error {
-	err := a.selectedProject.ReorderCommands(orderedIds)
+	existingCommands, err := a.commandRepository.GetAll(a.openedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 		return err
 	}
+	// Sort the existing commands based on the new order
+	sort.Slice(existingCommands, func(i, j int) bool {
+		return array.IndexOf(orderedIds, existingCommands[i].Id) < array.IndexOf(orderedIds, existingCommands[j].Id)
+	})
 
-	err = a.persistSelectedProjectConfig()
-	if err != nil {
-		return err
+	// Update the position of each command based on the new order
+	for i := range existingCommands {
+		existingCommands[i].Position = i
+		err := a.commandRepository.Update(&existingCommands[i])
+		if err != nil {
+			a.logger.Error(err.Error())
+			a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
+			return err
+		}
 	}
 
 	a.logger.Info("Commands reordered")
@@ -99,21 +109,36 @@ func (a *App) ReorderCommands(orderedIds []string) error {
 	return nil
 }
 
-func (a *App) RunCommand(id string) map[string]project.Command {
-	cmd, err := a.selectedProject.GetCommand(id)
+func (a *App) RunCommand(id string) error {
+	cmd, err := a.commandRepository.Get(id)
 
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
-		return nil
+		return err
 	}
 
-	err = a.commandRunner.RunCommand(*cmd, a.userConfig.EnvironmentPaths, a.selectedProject.BaseWorkingDirectory)
+	userConfig, err := a.userConfigRepository.GetOrCreate()
+	if err != nil {
+		a.logger.Error(err.Error())
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to get user config: "+err.Error())
+		return err
+	}
+
+	currentProject, err := a.projectRepository.Get(a.openedProjectId)
+	if err != nil {
+		a.logger.Error(err.Error())
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to get current project: "+err.Error())
+		return err
+	}
+
+	environmentPathsStrings := array.Map(userConfig.EnvironmentPaths, func(ep domain2.EnvironmentPath) string { return ep.Path })
+	err = a.commandRunner.RunCommand(*cmd, environmentPathsStrings, currentProject.WorkingDirectory)
 
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to run command: "+id+" - "+err.Error())
-		return nil
+		return err
 	}
 
 	a.logger.Info("Command executed: " + id)
@@ -122,7 +147,8 @@ func (a *App) RunCommand(id string) map[string]project.Command {
 }
 
 func (a *App) StopCommand(id string) {
-	_, err := a.selectedProject.GetCommand(id)
+	// Check if the command exists before trying to stop it
+	_, err := a.commandRepository.Get(id)
 
 	if err != nil {
 		a.logger.Error(err.Error())
