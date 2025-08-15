@@ -48,18 +48,9 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 
 		emitter.On("EmitEvent", event.ProcessStarted, "1").Return()
 		emitter.On("EmitEvent", event.ProcessFinished, "1").Return()
-		emitter.On("EmitEvent", event.NewLogEntry, map[string]string{
-			"id":   "1",
-			"line": "'a'",
-		}).Return()
-		emitter.On("EmitEvent", event.NewLogEntry, map[string]string{
-			"id":   "1",
-			"line": "'b'",
-		}).Return()
-		emitter.On("EmitEvent", event.NewLogEntry, map[string]string{
-			"id":   "1",
-			"line": "'c'",
-		}).Return()
+		mockEmitterLogEntry(emitter, "1", "a")
+		mockEmitterLogEntry(emitter, "1", "b")
+		mockEmitterLogEntry(emitter, "1", "c")
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
 
@@ -76,7 +67,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		time.Sleep(100 * time.Millisecond)
 
 		assert.Empty(t, r.runningCommands)
-
+		mock.AssertExpectationsForObjects(t, emitter)
 	})
 	t.Run("Should log error when executing an invalid command", func(t *testing.T) {
 		logger := new(MockLogger)
@@ -202,6 +193,20 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		assert.Empty(t, errs)
 		assert.Empty(t, r.runningCommands)
 	})
+}
+
+func mockEmitterLogEntry(emitter *MockEventEmitter, id string, line string) {
+	if runtime.GOOS == "windows" {
+		emitter.On("EmitEvent", event.NewLogEntry, map[string]string{
+			"id":   id,
+			"line": "'" + line + "'",
+		}).Return()
+	} else {
+		emitter.On("EmitEvent", event.NewLogEntry, map[string]string{
+			"id":   id,
+			"line": line,
+		}).Return()
+	}
 }
 
 func infiniteCmd() string {
