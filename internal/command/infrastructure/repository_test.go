@@ -40,6 +40,31 @@ func commandDataToModel(data testutils.CommandData) *CommandModel {
 	}
 }
 
+type testHelper struct {
+	t      *testing.T
+	repo   *GormCommandRepository
+	dbPath string
+}
+
+func newTestHelper(t *testing.T, preloaded []*CommandModel) *testHelper {
+	t.Helper() // IMPORTANT: This marks the function as a helper, so error traces will point to the test instead of here
+
+	repo, dbPath := arrange(preloaded)
+
+	helper := &testHelper{
+		t:      t,
+		repo:   repo,
+		dbPath: dbPath,
+	}
+
+	// Automatic cleanup when test finishes
+	t.Cleanup(func() {
+		require.NoError(t, os.Remove(helper.dbPath), "Failed to cleanup test database")
+	})
+
+	return helper
+}
+
 func TestGormCommandRepository_Get(t *testing.T) {
 	t.Parallel()
 	t.Run("Should return command when it exists", func(t *testing.T) {
@@ -57,12 +82,9 @@ func TestGormCommandRepository_Get(t *testing.T) {
 
 		expectedCommand := commandDataToDomain(cmdData)
 
-		repo, tmpDbFilePath := arrange(preloadedCommandModels)
-		defer func() {
-			require.NoError(t, os.Remove(tmpDbFilePath), "Failed to cleanup test database")
-		}()
+		h := newTestHelper(t, preloadedCommandModels)
 
-		cmd, err := repo.Get("cmd1")
+		cmd, err := h.repo.Get("cmd1")
 		require.NoError(t, err)
 
 		if assert.NotNil(t, cmd) {
@@ -72,12 +94,9 @@ func TestGormCommandRepository_Get(t *testing.T) {
 	t.Run("Should return nil when it doesn't exists", func(t *testing.T) {
 		var preloadedCommandModels []*CommandModel
 
-		repo, tmpDbFilePath := arrange(preloadedCommandModels)
-		defer func() {
-			require.NoError(t, os.Remove(tmpDbFilePath), "Failed to cleanup test database")
-		}()
+		h := newTestHelper(t, preloadedCommandModels)
 
-		cmd, err := repo.Get("nonexistent")
+		cmd, err := h.repo.Get("nonexistent")
 		require.NoError(t, err)
 
 		assert.Nil(t, cmd)
@@ -113,12 +132,9 @@ func TestGormCommandRepository_GetAll(t *testing.T) {
 			commandDataToDomain(cmd2),
 		}
 
-		repo, tmpDbFilePath := arrange(preloadedCommandModels)
-		defer func() {
-			require.NoError(t, os.Remove(tmpDbFilePath), "Failed to cleanup test database")
-		}()
+		h := newTestHelper(t, preloadedCommandModels)
 
-		cmds, err := repo.GetAll("proj1")
+		cmds, err := h.repo.GetAll("proj1")
 		require.NoError(t, err)
 
 		for i, cmd := range cmds {
@@ -132,10 +148,7 @@ func TestGormCommandRepository_Save(t *testing.T) {
 	t.Run("Should save a new command", func(t *testing.T) {
 		var preloadedCommandModels []*CommandModel
 
-		repo, tmpDbFilePath := arrange(preloadedCommandModels)
-		defer func() {
-			require.NoError(t, os.Remove(tmpDbFilePath), "Failed to cleanup test database")
-		}()
+		h := newTestHelper(t, preloadedCommandModels)
 
 		cmdData := testutils.NewCommand().
 			WithId("cmd3").
@@ -147,10 +160,10 @@ func TestGormCommandRepository_Save(t *testing.T) {
 			Data()
 		createdCommand := commandDataToDomain(cmdData)
 
-		err := repo.Create(createdCommand)
+		err := h.repo.Create(createdCommand)
 		require.NoError(t, err)
 
-		actual, err := repo.Get("cmd3")
+		actual, err := h.repo.Get("cmd3")
 		require.NoError(t, err)
 
 		if assert.NotNil(t, actual) {
@@ -169,14 +182,11 @@ func TestGormCommandRepository_Edit(t *testing.T) {
 			WithCommand("echo 'Old Command'").
 			WithWorkingDirectory("/tmp").
 			WithPosition(0)
-
 		preloadedCommandModels := []*CommandModel{
 			commandDataToModel(existingCommand.Data()),
 		}
-		repo, tmpDbFilePath := arrange(preloadedCommandModels)
-		defer func() {
-			require.NoError(t, os.Remove(tmpDbFilePath), "Failed to cleanup test database")
-		}()
+
+		h := newTestHelper(t, preloadedCommandModels)
 
 		editedCommand := existingCommand.
 			WithName("Edited Command").
@@ -184,10 +194,10 @@ func TestGormCommandRepository_Edit(t *testing.T) {
 			Data()
 		domainEditedCommand := commandDataToDomain(editedCommand)
 
-		err := repo.Update(domainEditedCommand)
+		err := h.repo.Update(domainEditedCommand)
 		require.NoError(t, err)
 
-		actual, err := repo.Get("cmd1")
+		actual, err := h.repo.Get("cmd1")
 		require.NoError(t, err)
 
 		if assert.NotNil(t, actual) {
@@ -211,15 +221,12 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 			commandDataToModel(cmd),
 		}
 
-		repo, tmpDbFilePath := arrange(preloadedCommandModels)
-		defer func() {
-			require.NoError(t, os.Remove(tmpDbFilePath), "Failed to cleanup test database")
-		}()
+		h := newTestHelper(t, preloadedCommandModels)
 
-		err := repo.Delete("cmd1")
+		err := h.repo.Delete("cmd1")
 		require.NoError(t, err)
 
-		deletedCommand, err := repo.Get("cmd1")
+		deletedCommand, err := h.repo.Get("cmd1")
 		require.NoError(t, err)
 
 		assert.Nil(t, deletedCommand)
@@ -256,18 +263,15 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 			commandDataToModel(cmd3),
 		}
 
-		repo, tmpDbFilePath := arrange(preloadedCommandModels)
-		defer func() {
-			require.NoError(t, os.Remove(tmpDbFilePath), "Failed to cleanup test database")
-		}()
+		h := newTestHelper(t, preloadedCommandModels)
 
-		err := repo.Delete("cmd2")
+		err := h.repo.Delete("cmd2")
 		require.NoError(t, err)
 
-		cmd1AfterDelete, err := repo.Get("cmd1")
+		cmd1AfterDelete, err := h.repo.Get("cmd1")
 		require.NoError(t, err)
 
-		cmd3AfterDelete, err := repo.Get("cmd3")
+		cmd3AfterDelete, err := h.repo.Get("cmd3")
 		require.NoError(t, err)
 
 		if assert.NotNil(t, cmd1AfterDelete) && assert.NotNil(t, cmd3AfterDelete) {
