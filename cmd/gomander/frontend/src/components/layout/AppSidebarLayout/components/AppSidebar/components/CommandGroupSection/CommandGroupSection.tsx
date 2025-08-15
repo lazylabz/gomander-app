@@ -33,7 +33,7 @@ import type { Command, CommandGroup } from "@/contracts/types.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { deleteCommandGroup } from "@/useCases/commandGroup/deleteCommandGroup.ts";
-import { editCommandGroup } from "@/useCases/commandGroup/editCommandGroup.ts";
+import { reorderCommandGroupCommands } from "@/useCases/commandGroup/reoderCommandGroupCommands.ts";
 import { runCommandGroup } from "@/useCases/commandGroup/runCommandGroup.ts";
 import { stopCommandGroup } from "@/useCases/commandGroup/stopCommandGroup.ts";
 
@@ -88,7 +88,7 @@ export const CommandGroupSection = ({
   const handleSaveReorderedCommandGroup = async (
     reorderedCommandGroup: CommandGroup,
   ) => {
-    await editCommandGroup(reorderedCommandGroup);
+    await reorderCommandGroupCommands(reorderedCommandGroup);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {

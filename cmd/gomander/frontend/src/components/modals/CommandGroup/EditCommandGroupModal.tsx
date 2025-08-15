@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
 import type { CommandGroup } from "@/contracts/types.ts";
+import { editCommandGroup } from "@/useCases/commandGroup/editCommandGroup.ts";
 
 export const EditCommandGroupModal = ({
   commandGroup,
@@ -37,18 +38,18 @@ export const EditCommandGroupModal = ({
     },
   });
 
-  const onSubmit = async (/*values: FormSchemaType*/) => {
-    // if (!commandGroup) {
-    //   return;
-    // }
-    //
-    // const editedCommandGroup = {
-    //   ...commandGroup,
-    //   name: values.name,
-    //   commands: values.commands,
-    // };
-    //
-    // await editCommandGroup(editedCommandGroup);
+  const onSubmit = async (values: FormSchemaType) => {
+    if (!commandGroup) {
+      return;
+    }
+
+    const editedCommandGroup = {
+      ...commandGroup,
+      name: values.name,
+      commands: values.commands,
+    };
+
+    await editCommandGroup(editedCommandGroup);
 
     setOpen(false);
     form.reset();
