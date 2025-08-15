@@ -16,14 +16,14 @@ export const stopCommandGroup = async (groupId: string) => {
   }
 
   const runningCommands = group.commands.filter(
-    (cmdId) => commandsStatus[cmdId] === CommandStatus.RUNNING,
+    (cmd) => commandsStatus[cmd.id] === CommandStatus.RUNNING,
   );
 
   console.log(groupId);
 
   await Promise.all(
-    runningCommands.map(async (cmdId) => {
-      await stopCommand(cmdId);
+    runningCommands.map(async (cmd) => {
+      await stopCommand(cmd.id);
     }),
   );
 };

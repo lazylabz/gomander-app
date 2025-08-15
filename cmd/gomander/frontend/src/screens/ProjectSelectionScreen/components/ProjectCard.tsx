@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu.tsx";
 import { dataService } from "@/contracts/service.ts";
 import type { Project } from "@/contracts/types.ts";
-import { fetchProject } from "@/queries/fetchProject.ts";
+import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
 import { exportProject } from "@/useCases/project/exportProject.ts";
 
 export const ProjectCard = ({
@@ -20,7 +20,7 @@ export const ProjectCard = ({
 }) => {
   const handleOpenProject = (projectId: string) => async () => {
     await dataService.openProject(projectId);
-    await fetchProject();
+    await loadAllProjectData();
   };
 
   return (
@@ -47,10 +47,6 @@ export const ProjectCard = ({
         onClick={handleOpenProject(project.id)}
       >
         <p className="font-semibold">{project.name}</p>
-        <div className="flex text-sm gap-4 text-muted-foreground">
-          <p>{Object.keys(project.commands).length} commands</p>
-          <p>{project.commandGroups.length} command groups</p>
-        </div>
       </div>
     </div>
   );

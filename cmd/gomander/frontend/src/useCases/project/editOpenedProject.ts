@@ -1,6 +1,6 @@
 import { dataService } from "@/contracts/service.ts";
-import type { ProjectInfo } from "@/contracts/types.ts";
+import type { Project } from "@/contracts/types.ts";
 
-export const editOpenedProject = async (projectInfo: ProjectInfo) => {
-  await dataService.editProject(projectInfo);
+export const editOpenedProject = async (project: Project) => {
+  await dataService.editProject(project);
 };

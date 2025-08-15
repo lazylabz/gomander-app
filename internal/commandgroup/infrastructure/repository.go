@@ -36,7 +36,7 @@ func (r GormCommandGroupRepository) GetAll(projectId string) ([]domain.CommandGr
 		return nil, err
 	}
 
-	var commandGroups []domain.CommandGroup
+	commandGroups := make([]domain.CommandGroup, 0)
 	for _, id := range ids {
 		cg, err := r.Get(id)
 		if err != nil {

@@ -7,7 +7,7 @@ import { useProjectStore } from "@/store/projectStore.ts";
 
 export const CommandComputedPath = () => {
   const projectBaseWorkingDirectory =
-    useProjectStore((state) => state.projectInfo?.baseWorkingDirectory) || "";
+    useProjectStore((state) => state.projectInfo?.workingDirectory) || "";
   const [computedPath, setComputedPath] = useState(
     projectBaseWorkingDirectory || "",
   );

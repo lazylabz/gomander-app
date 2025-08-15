@@ -61,10 +61,10 @@ export const SettingsContextProvider = ({
   const settingsForm = useForm<SettingsFormType>({
     resolver: zodResolver(settingsFormSchema),
     values: {
-      environmentPaths: userConfig.environmentPaths.map((p) => ({ value: p })),
+      environmentPaths: userConfig.environmentPaths,
       theme: rawTheme,
       name: projectInfo?.name || "",
-      baseWorkingDirectory: projectInfo?.baseWorkingDirectory || "",
+      baseWorkingDirectory: projectInfo?.workingDirectory || "",
     },
   });
 
@@ -90,7 +90,7 @@ export const SettingsContextProvider = ({
     if (hasUserChanges) {
       await saveUserConfig({
         lastOpenedProjectId: userConfig.lastOpenedProjectId,
-        environmentPaths: formData.environmentPaths.map((path) => path.value),
+        environmentPaths: formData.environmentPaths,
       });
     }
 
@@ -99,7 +99,7 @@ export const SettingsContextProvider = ({
       await editOpenedProject({
         ...projectInfo,
         name: formData.name,
-        baseWorkingDirectory: formData.baseWorkingDirectory,
+        workingDirectory: formData.baseWorkingDirectory,
       });
       await fetchProject();
     }

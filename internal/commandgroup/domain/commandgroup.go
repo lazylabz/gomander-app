@@ -5,9 +5,9 @@ import (
 )
 
 type CommandGroup struct {
-	Id        string
-	ProjectId string
-	Name      string
-	Commands  []domain.Command
-	Position  int
+	Id        string           `json:"id"`
+	ProjectId string           `json:"projectId"`
+	Name      string           `json:"name"`
+	Commands  []domain.Command `json:"commands"`
+	Position  int              `json:"position"`
 }

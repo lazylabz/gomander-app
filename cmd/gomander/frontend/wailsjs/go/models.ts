@@ -30,19 +30,19 @@ export namespace domain {
 	    position: number;
 	}
 	export interface CommandGroup {
-	    Id: string;
-	    ProjectId: string;
-	    Name: string;
-	    Commands: Command[];
-	    Position: number;
+	    id: string;
+	    projectId: string;
+	    name: string;
+	    commands: Command[];
+	    position: number;
 	}
 	export interface EnvironmentPath {
-	    Id: string;
-	    Path: string;
+	    id: string;
+	    path: string;
 	}
 	export interface Config {
-	    LastOpenedProjectId: string;
-	    EnvironmentPaths: EnvironmentPath[];
+	    lastOpenedProjectId: string;
+	    environmentPaths: EnvironmentPath[];
 	}
 	
 	export interface Project {

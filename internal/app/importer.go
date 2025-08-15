@@ -97,10 +97,10 @@ func (a *App) ExportProject(projectConfigId string) (err error) {
 	return
 }
 
-func (a *App) ImportProject(projectJSON ProjectExportJSONv1, workingDirectory string) error {
+func (a *App) ImportProject(projectJSON ProjectExportJSONv1, name, workingDirectory string) error {
 	project := projectdomain.Project{
 		Id:               uuid.New().String(),
-		Name:             projectJSON.Name,
+		Name:             name,
 		WorkingDirectory: workingDirectory,
 	}
 

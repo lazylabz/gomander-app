@@ -16,12 +16,12 @@ export const runCommandGroup = async (groupId: string) => {
   }
 
   const notRunningCommands = group.commands.filter(
-    (cmdId) => commandsStatus[cmdId] !== CommandStatus.RUNNING,
+    (cmd) => commandsStatus[cmd.id] !== CommandStatus.RUNNING,
   );
 
   await Promise.all(
-    notRunningCommands.map(async (cmdId) => {
-      await startCommand(cmdId);
+    notRunningCommands.map(async (cmd) => {
+      await startCommand(cmd.id);
     }),
   );
 };

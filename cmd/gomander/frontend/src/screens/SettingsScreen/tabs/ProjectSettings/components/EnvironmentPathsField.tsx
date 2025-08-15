@@ -20,7 +20,7 @@ export const EnvironmentPathsField = () => {
   });
 
   const addNewPath = () => {
-    append({ value: "" });
+    append({ id: crypto.randomUUID(), path: "" });
   };
 
   const removePath = (index: number) => () => {
@@ -37,7 +37,7 @@ export const EnvironmentPathsField = () => {
             >
               <FormField
                 control={control}
-                name={`environmentPaths.${index}.value` as const}
+                name={`environmentPaths.${index}.path` as const}
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormControl>

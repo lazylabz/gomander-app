@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
-import type { Project } from "@/contracts/types.ts";
+import type { ProjectExport } from "@/contracts/types.ts";
 import { importProject } from "@/useCases/project/importProject.ts";
 
 export const ImportProjectModal = ({
@@ -28,13 +28,13 @@ export const ImportProjectModal = ({
   open: boolean;
   onSuccess: () => Promise<void>;
   onClose: () => void;
-  project: Project | null;
+  project: ProjectExport | null;
 }) => {
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     values: {
       name: project?.name || "",
-      baseWorkingDirectory: project?.baseWorkingDirectory || "",
+      baseWorkingDirectory: "",
     },
   });
 
@@ -50,11 +50,7 @@ export const ImportProjectModal = ({
       return;
     }
 
-    await importProject({
-      ...project,
-      name: values.name,
-      baseWorkingDirectory: values.baseWorkingDirectory,
-    });
+    await importProject(project, values.name, values.baseWorkingDirectory);
 
     await onSuccess();
     handleOpenChange(false);

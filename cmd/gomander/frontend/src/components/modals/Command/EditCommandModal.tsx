@@ -47,7 +47,8 @@ export const EditCommandModal = ({
     }
 
     await editCommand({
-      id: command.id,
+      ...command,
+      // Editable fields
       name: values.name,
       command: values.command,
       workingDirectory: values.workingDirectory,

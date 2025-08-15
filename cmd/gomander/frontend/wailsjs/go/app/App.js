@@ -66,8 +66,8 @@ export function GetUserConfig() {
   return window['go']['app']['App']['GetUserConfig']();
 }
 
-export function ImportProject(arg1, arg2) {
-  return window['go']['app']['App']['ImportProject'](arg1, arg2);
+export function ImportProject(arg1, arg2, arg3) {
+  return window['go']['app']['App']['ImportProject'](arg1, arg2, arg3);
 }
 
 export function IsThereANewRelease() {
