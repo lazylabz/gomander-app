@@ -27,6 +27,7 @@ func ToModelConfig(config *domain.Config) (*ConfigModel, []EnvironmentPathModel)
 	}
 
 	model := &ConfigModel{
+		Id:                  1,
 		LastOpenedProjectId: config.LastOpenedProjectId,
 	}
 
