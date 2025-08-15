@@ -103,7 +103,7 @@ export const AppSidebar = () => {
       <Sidebar collapsible="icon">
         <SidebarHeader className="flex flex-row items-center justify-between p-2">
           <div className="flex items-center ml-2 gap-1">
-            <Avatar className="size-9 rounded-lg">
+            <Avatar className="size-9 rounded-lg mb-1">
               <AvatarImage src="/sidebar-logo.png" />
               <AvatarFallback className="text-xl font-extralight">
                 G.
