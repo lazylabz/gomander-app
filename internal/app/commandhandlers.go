@@ -114,21 +114,21 @@ func (a *App) RunCommand(id string) error {
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
-		return nil
+		return err
 	}
 
 	userConfig, err := a.userConfigRepository.GetOrCreate()
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to get user config: "+err.Error())
-		return nil
+		return err
 	}
 
 	currentProject, err := a.projectRepository.Get(a.openedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to get current project: "+err.Error())
-		return nil
+		return err
 	}
 
 	environmentPathsStrings := array.Map(userConfig.EnvironmentPaths, func(ep domain2.EnvironmentPath) string { return ep.Path })
@@ -137,7 +137,7 @@ func (a *App) RunCommand(id string) error {
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to run command: "+id+" - "+err.Error())
-		return nil
+		return err
 	}
 
 	a.logger.Info("Command executed: " + id)
