@@ -3,5 +3,6 @@ import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { fetchProject } from "@/queries/fetchProject.ts";
 
 export const loadAllProjectData = async () => {
-  await Promise.all([fetchProject(), fetchCommands(), fetchCommandGroups()]);
+  await Promise.all([fetchCommands(), fetchCommandGroups()]);
+  await fetchProject();
 };
