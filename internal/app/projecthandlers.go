@@ -71,8 +71,19 @@ func (a *App) CloseProject() error {
 }
 
 func (a *App) DeleteProject(projectConfigId string) error {
-	err := a.projectRepository.Delete(projectConfigId)
+	commands, err := a.commandRepository.GetAll(projectConfigId)
+	if err != nil {
+		return err
+	}
 
+	for _, command := range commands {
+		err := a.RemoveCommand(command.Id)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = a.projectRepository.Delete(projectConfigId)
 	if err != nil {
 		return err
 	}
