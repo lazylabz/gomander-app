@@ -8,13 +8,3 @@ type Command struct {
 	WorkingDirectory string `json:"workingDirectory"`
 	Position         int    `json:"position"`
 }
-
-func (c *Command) Equals(other *Command) bool {
-	if c == nil || other == nil {
-		return false
-	}
-	if c.Id != other.Id || c.ProjectId != other.ProjectId || c.Name != other.Name || c.Command != other.Command || c.WorkingDirectory != other.WorkingDirectory || c.Position != other.Position {
-		return false
-	}
-	return true
-}

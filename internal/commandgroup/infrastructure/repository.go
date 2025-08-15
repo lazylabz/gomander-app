@@ -7,7 +7,6 @@ import (
 	"gorm.io/gorm"
 
 	"gomander/internal/commandgroup/domain"
-	"gomander/internal/helpers/array"
 )
 
 type GormCommandGroupRepository struct {
@@ -27,26 +26,27 @@ func NewGormCommandGroupRepository(db *gorm.DB, ctx context.Context) *GormComman
 }
 
 func (r GormCommandGroupRepository) GetAll(projectId string) ([]domain.CommandGroup, error) {
-	var cgModels []CommandGroupModel
-	err := r.db.Where("project_id = ?", projectId).
+	var ids []string
+	err := r.db.Model(&CommandGroupModel{}).
+		Where("project_id = ?", projectId).
 		Order("position ASC").
-		Preload("Commands", func(db *gorm.DB) *gorm.DB {
-			return db.
-				Joins("JOIN command_group_command ON command_group_command.command_id = command.id").
-				Order("command_group_command.position")
-		}).
-		Find(&cgModels).Error
+		Pluck("id", &ids).Error
 
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
 		return nil, err
 	}
 
-	return array.Map(cgModels, func(cgModel CommandGroupModel) domain.CommandGroup {
-		return *ToDomainCommandGroup(cgModel)
-	}), err
+	var commandGroups []domain.CommandGroup
+	for _, id := range ids {
+		cg, err := r.Get(id)
+		if err != nil {
+			return nil, err
+		}
+		if cg != nil {
+			commandGroups = append(commandGroups, *cg)
+		}
+	}
+	return commandGroups, nil
 }
 
 func (r GormCommandGroupRepository) Get(id string) (*domain.CommandGroup, error) {
@@ -54,7 +54,7 @@ func (r GormCommandGroupRepository) Get(id string) (*domain.CommandGroup, error)
 	err := r.db.Where("id = ?", id).
 		Preload("Commands", func(db *gorm.DB) *gorm.DB {
 			return db.
-				Joins("JOIN command_group_command ON command_group_command.command_id = command.id").
+				Joins("JOIN command_group_command ON command_group_command.command_id = command.id AND command_group_command.command_group_id = ?", id).
 				Order("command_group_command.position")
 		}).
 		First(&cgModel).Error

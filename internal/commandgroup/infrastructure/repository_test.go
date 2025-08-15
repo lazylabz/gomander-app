@@ -4,10 +4,12 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/pressly/goose/v3"
+	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
@@ -15,400 +17,243 @@ import (
 	commandinfrastructure "gomander/internal/command/infrastructure"
 	"gomander/internal/commandgroup/domain"
 	"gomander/internal/commandgroup/infrastructure"
+	"gomander/internal/helpers/array"
+	"gomander/internal/testutils"
 
 	_ "gomander/migrations" // Import migrations to ensure they are executed
 )
 
-var (
-	command1 = commandinfrastructure.CommandModel{
-		Id:               "1",
-		ProjectId:        "test-project",
-		Name:             "Test Command",
-		Command:          "echo 'Hello, World!'",
-		WorkingDirectory: ".",
-		Position:         0,
-	}
-	command2 = commandinfrastructure.CommandModel{
-		Id:               "2",
-		ProjectId:        "test-project",
-		Name:             "Command A",
-		Command:          "echo 'A'",
-		WorkingDirectory: ".",
-		Position:         1,
-	}
-	command3 = commandinfrastructure.CommandModel{
-		Id:               "3",
-		ProjectId:        "test-project",
-		Name:             "Command B",
-		Command:          "echo 'B'",
-		WorkingDirectory: ".",
-		Position:         2,
-	}
-	group1Model = infrastructure.CommandGroupModel{
-		Id:        "1",
-		ProjectId: "test-project",
-		Name:      "Test Command Group 1",
-		Position:  0,
-	}
-	group2Model = infrastructure.CommandGroupModel{
-		Id:        "2",
-		ProjectId: "test-project",
-		Name:      "Test Command Group 2",
-		Position:  1,
-	}
-	group3Model = infrastructure.CommandGroupModel{
-		Id:        "3",
-		ProjectId: "test-project",
-		Name:      "Test Command Group 3",
-		Position:  2,
-	}
-	group1command1relation = infrastructure.CommandToCommandGroupModel{
-		CommandId:      "1",
-		CommandGroupId: "1",
-		Position:       0,
-	}
-	group2command2relation = infrastructure.CommandToCommandGroupModel{
-		CommandId:      "2",
-		CommandGroupId: "2",
-		Position:       1,
-	}
-	group2command3relation = infrastructure.CommandToCommandGroupModel{
-		CommandId:      "3",
-		CommandGroupId: "2",
-		Position:       0,
-	}
-	domainCommand1 = commanddomain.Command{
-		Id:               "1",
-		ProjectId:        "test-project",
-		Name:             "Test Command",
-		Command:          "echo 'Hello, World!'",
-		WorkingDirectory: ".",
-		Position:         0,
-	}
-	domainCommand2 = commanddomain.Command{
-		Id:               "2",
-		ProjectId:        "test-project",
-		Name:             "Command A",
-		Command:          "echo 'A'",
-		WorkingDirectory: ".",
-		Position:         1,
-	}
-	domainCommand3 = commanddomain.Command{
-		Id:               "3",
-		ProjectId:        "test-project",
-		Name:             "Command B",
-		Command:          "echo 'B'",
-		WorkingDirectory: ".",
-		Position:         2,
-	}
-	group1Domain = domain.CommandGroup{
-		Id:        "1",
-		ProjectId: "test-project",
-		Name:      "Test Command Group 1",
-		Position:  0,
-		Commands:  []commanddomain.Command{domainCommand1},
-	}
-	group2domain = domain.CommandGroup{
-		Id:        "2",
-		ProjectId: "test-project",
-		Name:      "Test Command Group 2",
-		Position:  1,
-		Commands:  []commanddomain.Command{domainCommand3, domainCommand2},
-	}
-	group3domain = domain.CommandGroup{
-		Id:        "3",
-		ProjectId: "test-project",
-		Name:      "Test Command Group 3",
-		Position:  2,
-		Commands:  []commanddomain.Command{},
-	}
-)
+type testHelper struct {
+	t      *testing.T
+	repo   *infrastructure.GormCommandGroupRepository
+	gormDb *gorm.DB
+	dbPath string
+}
 
-var TestGetCommandGroupsTestCases = []struct {
-	name                                 string
-	preloadedCommandModels               []commandinfrastructure.CommandModel
-	preloadedCommandGroupModels          []infrastructure.CommandGroupModel
-	preloadedCommandToCommandGroupModels []infrastructure.CommandToCommandGroupModel
-	expectedCommandGroups                []domain.CommandGroup
-}{
-	{
-		name: "Should return all command groups with their commands",
-		preloadedCommandModels: []commandinfrastructure.CommandModel{
-			command1,
-		},
-		preloadedCommandGroupModels: []infrastructure.CommandGroupModel{
-			group1Model,
-		},
-		preloadedCommandToCommandGroupModels: []infrastructure.CommandToCommandGroupModel{
-			group1command1relation,
-		},
-		expectedCommandGroups: []domain.CommandGroup{
-			group1Domain,
-		},
-	},
-	{
-		name: "Should return all command groups sorted by position with their commands sorted by position",
-		preloadedCommandModels: []commandinfrastructure.CommandModel{
-			command2,
-			command3,
-		},
-		preloadedCommandGroupModels: []infrastructure.CommandGroupModel{
-			group2Model,
-			group3Model,
-		},
-		preloadedCommandToCommandGroupModels: []infrastructure.CommandToCommandGroupModel{
-			group2command2relation,
-			group2command3relation,
-		},
-		expectedCommandGroups: []domain.CommandGroup{
-			group2domain,
-			group3domain,
-		},
-	},
+func newTestHelper(t *testing.T,
+	preloadedCommandModels []commandinfrastructure.CommandModel,
+	preloadedCommandGroupModels []infrastructure.CommandGroupModel,
+	preloadedCommandToCommandGroupModels []infrastructure.CommandToCommandGroupModel) *testHelper {
+	t.Helper() // IMPORTANT: This marks the function as a helper, so error traces will point to the test instead of here
+
+	repo, dbPath, gormDb := arrange(
+		preloadedCommandModels,
+		preloadedCommandGroupModels,
+		preloadedCommandToCommandGroupModels,
+	)
+
+	helper := &testHelper{
+		t:      t,
+		repo:   repo,
+		dbPath: dbPath,
+		gormDb: gormDb,
+	}
+
+	// Automatic cleanup when test finishes
+	t.Cleanup(func() {
+		assert.NoError(t, os.Remove(helper.dbPath), "Failed to cleanup test database")
+	})
+
+	return helper
 }
 
 func TestGormCommandGroupRepository_GetAll(t *testing.T) {
-	t.Parallel()
-	for _, testCase := range TestGetCommandGroupsTestCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			repo, tempDbFilePath, _ := arrange(testCase.preloadedCommandModels, testCase.preloadedCommandGroupModels, testCase.preloadedCommandToCommandGroupModels)
+	t.Run("Should return all command groups sorted by position with their commands sorted by position", func(t *testing.T) {
+		projectId := "project1"
 
-			result, err := repo.GetAll("test-project")
+		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
+		cmd2 := testutils.NewCommand().WithName("Command 2").WithProjectId(projectId).Data()
+		cmd3 := testutils.NewCommand().WithName("Command 3").WithProjectId(projectId).Data()
 
-			if err != nil {
-				t.Fatalf("Failed to get command groups: %v", err)
-			}
-			for i, group := range result {
-				if !group.Equals(&testCase.expectedCommandGroups[i]) {
-					t.Fatalf("Expected command group %v, got %v", testCase.expectedCommandGroups[i], group)
-				}
-			}
+		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3).Data()
+		cmdGroup2 := testutils.NewCommandGroup().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd1, cmd3, cmd2).Data()
 
-			if err := os.Remove(tempDbFilePath); err != nil {
-				t.Fatalf("Failed to remove temporary database file: %v", err)
-			}
-		})
-	}
+		groupModel, commandToCommandGroupModels, commandModels := commandGroupDataToModel(cmdGroup1)
+		groupModel2, commandToCommandGroupModels2, _ := commandGroupDataToModel(cmdGroup2)
+
+		helper := newTestHelper(
+			t,
+			commandModels,
+			[]infrastructure.CommandGroupModel{groupModel, groupModel2},
+			slices.Concat(commandToCommandGroupModels, commandToCommandGroupModels2),
+		)
+
+		result, err := helper.repo.GetAll(projectId)
+
+		expectedCommandGroups := []domain.CommandGroup{
+			commandGroupDataToDomain(cmdGroup1),
+			commandGroupDataToDomain(cmdGroup2),
+		}
+
+		assert.Nil(t, err)
+		for i, group := range result {
+			assert.Equal(t, expectedCommandGroups[i], group)
+		}
+	})
 }
 
 func TestGormCommandGroupRepository_Get(t *testing.T) {
-	t.Run("Should return a command group by id", func(t *testing.T) {
-		testCase := TestGetCommandGroupsTestCases[0]
-
-		repo, tempDbFilePath, _ := arrange(testCase.preloadedCommandModels, testCase.preloadedCommandGroupModels, testCase.preloadedCommandToCommandGroupModels)
-
-		result, err := repo.Get("1")
-
-		if err != nil {
-			t.Fatalf("Failed to get command group by id: %v", err)
-		}
-		if result == nil {
-			t.Fatal("Expected command group, got nil")
-		}
-		if !result.Equals(&testCase.expectedCommandGroups[0]) {
-			t.Fatalf("Expected command group %v, got %v", testCase.expectedCommandGroups[0], result)
-		}
-		if err := os.Remove(tempDbFilePath); err != nil {
-			t.Fatalf("Failed to remove temporary database file: %v", err)
-		}
-	})
 	t.Run("Should return a command group by id with sorted commands", func(t *testing.T) {
-		testCase := TestGetCommandGroupsTestCases[1]
+		projectId := "project1"
 
-		repo, tempDbFilePath, _ := arrange(testCase.preloadedCommandModels, testCase.preloadedCommandGroupModels, testCase.preloadedCommandToCommandGroupModels)
+		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
+		cmd2 := testutils.NewCommand().WithName("Command 2").WithProjectId(projectId).Data()
+		cmd3 := testutils.NewCommand().WithName("Command 3").WithProjectId(projectId).Data()
 
-		result, err := repo.Get("3")
-		if err != nil {
-			t.Fatalf("Failed to get command group by id: %v", err)
-		}
-		if result == nil {
-			t.Fatal("Expected command group, got nil")
-		}
-		if !testCase.expectedCommandGroups[1].Equals(result) {
-			t.Fatalf("Expected command group %v, got %v", testCase.expectedCommandGroups[1], result)
-		}
+		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3).Data()
+		cmdGroup2 := testutils.NewCommandGroup().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd1, cmd3, cmd2).Data()
 
-		if err := os.Remove(tempDbFilePath); err != nil {
-			t.Fatalf("Failed to remove temporary database file: %v", err)
-		}
+		groupModel, commandToCommandGroupModels, commandModels := commandGroupDataToModel(cmdGroup1)
+		groupModel2, commandToCommandGroupModels2, _ := commandGroupDataToModel(cmdGroup2)
+
+		helper := newTestHelper(
+			t,
+			commandModels,
+			[]infrastructure.CommandGroupModel{groupModel, groupModel2},
+			slices.Concat(commandToCommandGroupModels, commandToCommandGroupModels2),
+		)
+
+		result, err := helper.repo.Get(cmdGroup1.Id)
+		assert.Nil(t, err)
+
+		expectedCommandGroup := commandGroupDataToDomain(cmdGroup1)
+
+		assert.Equal(t, &expectedCommandGroup, result)
 	})
 	t.Run("Should return nil if command group does not exist", func(t *testing.T) {
-		repo, tempDbFilePath, _ := arrange(nil, nil, nil)
+		helper := newTestHelper(t, nil, nil, nil)
 
-		result, err := repo.Get("non-existent-id")
+		result, err := helper.repo.Get("non-existent-id")
 
-		if err != nil {
-			t.Fatalf("Failed to get command group by id: %v", err)
-		}
-		if result != nil {
-			t.Fatal("Expected nil command group, got non-nil")
-		}
-
-		if err := os.Remove(tempDbFilePath); err != nil {
-			t.Fatalf("Failed to remove temporary database file: %v", err)
-		}
+		assert.Nil(t, err)
+		assert.Nil(t, result)
 	})
 }
 
 func TestGormCommandGroupRepository_Create(t *testing.T) {
 	t.Run("Should create a new command group and its associations", func(t *testing.T) {
-		preloadedCommandModels := []commandinfrastructure.CommandModel{command2, command3}
-		repo, tempDbFilePath, _ := arrange(preloadedCommandModels, nil, nil)
+		projectId := "project1"
 
-		newGroup := &domain.CommandGroup{
-			Id:        "4",
-			ProjectId: "test-project",
-			Name:      "New Command Group",
-			Position:  0,
-			Commands: []commanddomain.Command{
-				domainCommand2,
-				domainCommand3,
-			},
-		}
+		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
+		cmd2 := testutils.NewCommand().WithName("Command 2").WithProjectId(projectId).Data()
+		cmd3 := testutils.NewCommand().WithName("Command 3").WithProjectId(projectId).Data()
 
-		err := repo.Create(newGroup)
-		if err != nil {
-			t.Fatalf("Failed to create command group: %v", err)
-		}
+		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3).Data()
 
-		result, err := repo.Get("4")
-		if err != nil {
-			t.Fatalf("Failed to get command group by id: %v", err)
-		}
-		if result == nil {
-			t.Fatal("Expected command group, got nil")
-		}
-		if !result.Equals(newGroup) {
-			t.Fatalf("Expected command group %v, got %v", newGroup, result)
-		}
+		_, _, commandModels := commandGroupDataToModel(cmdGroup1)
 
-		if err := os.Remove(tempDbFilePath); err != nil {
-			t.Fatalf("Failed to remove temporary database file: %v", err)
-		}
+		helper := newTestHelper(
+			t,
+			commandModels,
+			nil,
+			nil,
+		)
+
+		newGroup := commandGroupDataToDomain(cmdGroup1)
+
+		err := helper.repo.Create(&newGroup)
+		assert.Nil(t, err)
+
+		result, err := helper.repo.Get(newGroup.Id)
+		assert.Nil(t, err)
+		assert.Equal(t, &newGroup, result)
 	})
 }
 
 func TestGormCommandGroupRepository_Update(t *testing.T) {
 	t.Run("Should update an existing command group and its associations", func(t *testing.T) {
-		preloadedCommandModels := []commandinfrastructure.CommandModel{command1, command2}
-		preloadedCommandGroupModels := []infrastructure.CommandGroupModel{group1Model}
-		preloadedCommandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{group1command1relation}
+		projectId := "project1"
 
-		repo, tempDbFilePath, _ := arrange(preloadedCommandModels, preloadedCommandGroupModels, preloadedCommandToCommandGroupModels)
+		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
+		cmd2 := testutils.NewCommand().WithName("Command 2").WithProjectId(projectId).Data()
+		cmd3 := testutils.NewCommand().WithName("Command 3").WithProjectId(projectId).Data()
 
-		groupToUpdate := &domain.CommandGroup{
-			Id:        group1Model.Id,
-			ProjectId: group1Model.ProjectId,
-			Name:      "Updated Command Group",
-			Position:  group1Model.Position,
-			Commands: []commanddomain.Command{
-				domainCommand1, // Assuming command1 is already preloaded
-				domainCommand2,
-			},
-		}
+		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3)
 
-		err := repo.Update(groupToUpdate)
-		if err != nil {
-			t.Fatalf("Failed to update command group: %v", err)
-		}
+		groupModel, commandToCommandGroupModels, commandModels := commandGroupDataToModel(cmdGroup1.Data())
 
-		result, err := repo.Get(groupToUpdate.Id)
-		if err != nil {
-			t.Fatalf("Failed to get command group by id: %v", err)
-		}
-		if result == nil {
-			t.Fatal("Expected command group, got nil")
-		}
-		if !result.Equals(groupToUpdate) {
-			t.Fatalf("Expected command group %v, got %v", groupToUpdate, result)
-		}
+		helper := newTestHelper(
+			t,
+			commandModels,
+			[]infrastructure.CommandGroupModel{groupModel},
+			commandToCommandGroupModels,
+		)
 
-		if err := os.Remove(tempDbFilePath); err != nil {
-			t.Fatalf("Failed to remove temporary database file: %v", err)
-		}
+		updatedGroup := cmdGroup1.WithName("Updated Group 1").WithCommands(cmd1, cmd2, cmd3).Data()
+
+		groupToUpdate := commandGroupDataToDomain(updatedGroup)
+
+		err := helper.repo.Update(&groupToUpdate)
+		assert.Nil(t, err)
+
+		result, err := helper.repo.Get(groupToUpdate.Id)
+		assert.Nil(t, err)
+		assert.Equal(t, &groupToUpdate, result)
 	})
 }
 
 func TestGormCommandGroupRepository_Delete(t *testing.T) {
 	t.Run("Should delete an existing command group and its associations", func(t *testing.T) {
-		preloadedCommandModels := []commandinfrastructure.CommandModel{command1}
-		preloadedCommandGroupModels := []infrastructure.CommandGroupModel{group1Model}
-		preloadedCommandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{group1command1relation}
+		projectId := "project1"
 
-		repo, tempDbFilePath, db := arrange(preloadedCommandModels, preloadedCommandGroupModels, preloadedCommandToCommandGroupModels)
+		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
 
-		err := repo.Delete(group1Model.Id)
-		if err != nil {
-			t.Fatalf("Failed to delete command group: %v", err)
-		}
+		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1).Data()
 
-		result, err := repo.Get("1")
-		if err != nil {
-			t.Fatalf("Failed to get command group by id: %v", err)
-		}
-		if result != nil {
-			t.Fatal("Expected nil command group, got non-nil")
-		}
+		groupModel, commandToCommandGroupModels, commandModels := commandGroupDataToModel(cmdGroup1)
 
-		existingRelations, err := gorm.G[infrastructure.CommandToCommandGroupModel](db).Where("command_group_id = ?", group1Model.Id).Find(context.Background())
-		if err != nil {
-			t.Fatalf("Failed to check command group relations: %v", err)
-		}
-		if len(existingRelations) > 0 {
-			t.Fatal("Expected no command group relations, found some")
-		}
+		helper := newTestHelper(
+			t,
+			commandModels,
+			[]infrastructure.CommandGroupModel{groupModel},
+			commandToCommandGroupModels,
+		)
 
-		existingCommands, err := gorm.G[commandinfrastructure.CommandModel](db).Where("id = ?", command1.Id).Find(context.Background())
-		if err != nil {
-			t.Fatalf("Failed to check command existence: %v", err)
-		}
-		if len(existingCommands) == 0 {
-			t.Fatal("Expected command to still exist, it was deleted")
-		}
+		err := helper.repo.Delete(cmdGroup1.Id)
+		assert.Nil(t, err)
 
-		if err := os.Remove(tempDbFilePath); err != nil {
-			t.Fatalf("Failed to remove temporary database file: %v", err)
-		}
+		result, err := helper.repo.Get(cmdGroup1.Id)
+		assert.Nil(t, err)
+		assert.Nil(t, result)
+
+		existingRelations, err := gorm.G[infrastructure.CommandToCommandGroupModel](helper.gormDb).Where("command_group_id = ?", cmdGroup1.Id).Find(context.Background())
+		assert.Nil(t, err)
+		assert.Len(t, existingRelations, 0)
+
+		existingCommands, err := gorm.G[commandinfrastructure.CommandModel](helper.gormDb).Where("id = ?", cmd1.Id).Find(context.Background())
+		assert.Nil(t, err)
+		assert.Len(t, existingCommands, 1)
 	})
 	t.Run("Should delete an existing command groups and correctly update positions of other command groups", func(t *testing.T) {
-		preloadedCommandModels := []commandinfrastructure.CommandModel{}
-		preloadedCommandGroupModels := []infrastructure.CommandGroupModel{group1Model, group2Model, group3Model}
-		preloadedCommandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{}
+		projectId := "project1"
 
-		repo, tempDbFilePath, _ := arrange(preloadedCommandModels, preloadedCommandGroupModels, preloadedCommandToCommandGroupModels)
+		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).Data()
+		cmdGroup2 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(1).Data()
+		cmdGroup3 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(2).Data()
 
-		err := repo.Delete(group2Model.Id)
-		if err != nil {
-			t.Fatalf("Failed to delete command group: %v", err)
-		}
+		group1Model, _, _ := commandGroupDataToModel(cmdGroup1)
+		group2Model, _, _ := commandGroupDataToModel(cmdGroup2)
+		group3Model, _, _ := commandGroupDataToModel(cmdGroup3)
 
-		resultGroup1, err := repo.Get(group1Model.Id)
-		if err != nil {
-			t.Fatalf("Failed to get command group by id: %v", err)
-		}
-		if resultGroup1 == nil {
-			t.Fatal("Expected command group 1, got nil")
-		}
+		helper := newTestHelper(
+			t,
+			nil,
+			[]infrastructure.CommandGroupModel{group1Model, group2Model, group3Model},
+			nil,
+		)
 
-		resultGroup3, err := repo.Get(group3Model.Id)
-		if err != nil {
-			t.Fatalf("Failed to get command group by id: %v", err)
-		}
-		if resultGroup3 == nil {
-			t.Fatal("Expected command group 3, got nil")
-		}
+		err := helper.repo.Delete(group2Model.Id)
+		assert.Nil(t, err)
+
+		resultGroup1, err := helper.repo.Get(group1Model.Id)
+		assert.Nil(t, err)
+
+		resultGroup3, err := helper.repo.Get(group3Model.Id)
+		assert.Nil(t, err)
 
 		// Check if the positions of the remaining command groups are updated correctly
-		if resultGroup1.Position != group1Model.Position {
-			t.Fatalf("Expected command group 1 position to be %d, got %d", group1Model.Position, resultGroup1.Position)
-		}
-		if resultGroup3.Position != group3Model.Position-1 {
-			t.Fatalf("Expected command group 3 position to be %d, got %d", group3Model.Position-1, resultGroup3.Position)
-		}
-
-		if err := os.Remove(tempDbFilePath); err != nil {
-			t.Fatalf("Failed to remove temporary database file: %v", err)
-		}
+		assert.Equal(t, resultGroup1.Position, group1Model.Position)
+		assert.Equal(t, resultGroup3.Position, group3Model.Position-1)
 	})
 }
 
@@ -472,4 +317,57 @@ func arrange(
 	)
 
 	return
+}
+
+func commandDataToModel(data testutils.CommandData) commandinfrastructure.CommandModel {
+	return commandinfrastructure.CommandModel{
+		Id:               data.Id,
+		ProjectId:        data.ProjectId,
+		Name:             data.Name,
+		Command:          data.Command,
+		WorkingDirectory: data.WorkingDirectory,
+		Position:         data.Position,
+	}
+}
+
+func commandDataToDomain(data testutils.CommandData) commanddomain.Command {
+	return commanddomain.Command{
+		Id:               data.Id,
+		ProjectId:        data.ProjectId,
+		Name:             data.Name,
+		Command:          data.Command,
+		WorkingDirectory: data.WorkingDirectory,
+		Position:         data.Position,
+	}
+}
+
+func commandGroupDataToModel(data testutils.CommandGroupData) (infrastructure.CommandGroupModel, []infrastructure.CommandToCommandGroupModel, []commandinfrastructure.CommandModel) {
+	groupModel := infrastructure.CommandGroupModel{
+		Id:        data.Id,
+		ProjectId: data.ProjectId,
+		Name:      data.Name,
+		Position:  data.Position,
+	}
+
+	commandRelations := make([]infrastructure.CommandToCommandGroupModel, len(data.Commands))
+	commandModels := make([]commandinfrastructure.CommandModel, len(data.Commands))
+	for i, cmd := range data.Commands {
+		commandModels[i] = commandDataToModel(cmd)
+		commandRelations[i] = infrastructure.CommandToCommandGroupModel{
+			CommandId:      cmd.Id,
+			CommandGroupId: data.Id,
+			Position:       i,
+		}
+	}
+	return groupModel, commandRelations, commandModels
+}
+
+func commandGroupDataToDomain(data testutils.CommandGroupData) domain.CommandGroup {
+	return domain.CommandGroup{
+		Id:        data.Id,
+		ProjectId: data.ProjectId,
+		Name:      data.Name,
+		Position:  data.Position,
+		Commands:  array.Map(data.Commands, commandDataToDomain),
+	}
 }
