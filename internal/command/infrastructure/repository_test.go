@@ -8,10 +8,10 @@ import (
 
 	"gomander/internal/testutils"
 
+	"github.com/glebarez/sqlite"
 	"github.com/google/uuid"
 	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
 	"gomander/internal/command/domain"

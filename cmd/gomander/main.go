@@ -6,9 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/glebarez/sqlite"
 	"github.com/pressly/goose/v3"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
 	gormlogger "gorm.io/gorm/logger"
