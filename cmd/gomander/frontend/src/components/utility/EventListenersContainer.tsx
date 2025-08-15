@@ -49,6 +49,7 @@ export const EventListenersContainer = () => {
       (data: EventData[Event.ERROR_NOTIFICATION]) => {
         toast.error("Error", {
           description: data,
+          position: "top-right",
         });
       },
     );
@@ -56,7 +57,9 @@ export const EventListenersContainer = () => {
     eventService.eventsOn(
       Event.SUCCESS_NOTIFICATION,
       (data: EventData[Event.SUCCESS_NOTIFICATION]) => {
-        toast.success(data);
+        toast.success(data, {
+          position: "top-right",
+        });
       },
     );
 
