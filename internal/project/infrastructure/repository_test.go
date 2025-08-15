@@ -2,12 +2,9 @@ package infrastructure
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/glebarez/sqlite"
-	"github.com/google/uuid"
 	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -17,24 +14,22 @@ import (
 )
 
 type testHelper struct {
-	t      *testing.T
-	repo   *GormProjectRepository
-	dbPath string
+	t    *testing.T
+	repo *GormProjectRepository
 }
 
 func newTestHelper(t *testing.T, preloadedProjects []*ProjectModel) *testHelper {
 	t.Helper()
 
-	repo, dbPath := arrange(preloadedProjects)
+	repo := arrange(preloadedProjects)
 
 	helper := &testHelper{
-		t:      t,
-		repo:   repo,
-		dbPath: dbPath,
+		t:    t,
+		repo: repo,
 	}
 
 	t.Cleanup(func() {
-		assert.NoError(t, os.Remove(helper.dbPath), "Failed to cleanup test database")
+		assert.NoError(t, repo.db.Exec("DELETE FROM project").Error, "Failed to cleanup test database")
 	})
 
 	return helper
@@ -125,12 +120,10 @@ func TestGormProjectRepository_Delete(t *testing.T) {
 	})
 }
 
-func arrange(preloadedProjects []*ProjectModel) (repo *GormProjectRepository, tmpDbFilePath string) {
+func arrange(preloadedProjects []*ProjectModel) (repo *GormProjectRepository) {
 	ctx := context.Background()
-	tmp := os.TempDir()
-	id := uuid.New().String()
-	tmpDbFilePath = filepath.Join(tmp, id+".db")
-	gormDb, err := gorm.Open(sqlite.Open(tmpDbFilePath), &gorm.Config{})
+
+	gormDb, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}

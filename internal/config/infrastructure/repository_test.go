@@ -2,12 +2,9 @@ package infrastructure
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/glebarez/sqlite"
-	"github.com/google/uuid"
 	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -17,29 +14,26 @@ import (
 )
 
 type testHelper struct {
-	t      *testing.T
-	repo   *GormConfigRepository
-	dbPath string
+	t    *testing.T
+	repo *GormConfigRepository
 }
 
 func newTestHelper(t *testing.T,
 	preloadedConfig *ConfigModel, preloadedPaths []*EnvironmentPathModel) *testHelper {
 	t.Helper() // IMPORTANT: This marks the function as a helper, so error traces will point to the test instead of here
 
-	repo, dbPath := arrange(
+	repo := arrange(
 		preloadedConfig,
 		preloadedPaths,
 	)
 
 	helper := &testHelper{
-		t:      t,
-		repo:   repo,
-		dbPath: dbPath,
+		t:    t,
+		repo: repo,
 	}
 
-	// Automatic cleanup when test finishes
 	t.Cleanup(func() {
-		assert.NoError(t, os.Remove(helper.dbPath), "Failed to cleanup test database")
+		assert.NoError(t, repo.db.Exec("DELETE FROM user_config").Error, "Failed to cleanup test database")
 	})
 
 	return helper
@@ -104,12 +98,10 @@ func TestGormConfigRepository_Update(t *testing.T) {
 	})
 }
 
-func arrange(preloadedConfig *ConfigModel, preloadedPaths []*EnvironmentPathModel) (repo *GormConfigRepository, tmpDbFilePath string) {
+func arrange(preloadedConfig *ConfigModel, preloadedPaths []*EnvironmentPathModel) (repo *GormConfigRepository) {
 	ctx := context.Background()
-	tmp := os.TempDir()
-	id := uuid.New().String()
-	tmpDbFilePath = filepath.Join(tmp, id+".db")
-	gormDb, err := gorm.Open(sqlite.Open(tmpDbFilePath), &gorm.Config{})
+
+	gormDb, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}

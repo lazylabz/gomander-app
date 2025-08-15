@@ -2,14 +2,11 @@ package infrastructure
 
 import (
 	"context"
-	"os"
-	"path/filepath"
+	"github.com/glebarez/sqlite"
 	"testing"
 
 	"gomander/internal/testutils"
 
-	"github.com/glebarez/sqlite"
-	"github.com/google/uuid"
 	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -41,26 +38,19 @@ func commandDataToModel(data testutils.CommandData) *CommandModel {
 }
 
 type testHelper struct {
-	t      *testing.T
-	repo   *GormCommandRepository
-	dbPath string
+	t    *testing.T
+	repo *GormCommandRepository
 }
 
 func newTestHelper(t *testing.T, preloaded []*CommandModel) *testHelper {
 	t.Helper() // IMPORTANT: This marks the function as a helper, so error traces will point to the test instead of here
 
-	repo, dbPath := arrange(preloaded)
+	repo := arrange(preloaded)
 
 	helper := &testHelper{
-		t:      t,
-		repo:   repo,
-		dbPath: dbPath,
+		t:    t,
+		repo: repo,
 	}
-
-	// Automatic cleanup when test finishes
-	t.Cleanup(func() {
-		assert.NoError(t, os.Remove(helper.dbPath), "Failed to cleanup test database")
-	})
 
 	return helper
 }
@@ -241,15 +231,10 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 	})
 }
 
-func arrange(preloadedCommandModels []*CommandModel) (repo *GormCommandRepository, tmpDbFilePath string) {
+func arrange(preloadedCommandModels []*CommandModel) (repo *GormCommandRepository) {
 	// Initialize the database
 	ctx := context.Background()
-
-	tmp := os.TempDir()
-	id := uuid.New().String()
-	tmpDbFilePath = filepath.Join(tmp, id+".db")
-
-	gormDb, err := gorm.Open(sqlite.Open(tmpDbFilePath), &gorm.Config{})
+	gormDb, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
