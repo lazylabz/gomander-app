@@ -9,6 +9,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/pressly/goose/v3"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
@@ -58,17 +60,14 @@ func TestGormCommandRepository_Get(t *testing.T) {
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
 		cmd, err := repo.Get("cmd1")
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
+		require.NoError(t, err)
+
+		if assert.NotNil(t, cmd) {
+			assert.Equal(t, expectedCommand, cmd)
 		}
 
-		if !cmd.Equals(expectedCommand) {
-			t.Errorf("Expected command %v, got %v", expectedCommand, cmd)
-		}
-
-		if err := os.Remove(tmpDbFilePath); err != nil {
-			t.Fatalf("Failed to remove temporary database file: %v", err)
-		}
+		err = os.Remove(tmpDbFilePath)
+		require.NoError(t, err, "Failed to remove temporary database file")
 	})
 	t.Run("Should return nil when it doesn't exists", func(t *testing.T) {
 		var preloadedCommandModels []*CommandModel
@@ -76,17 +75,12 @@ func TestGormCommandRepository_Get(t *testing.T) {
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
 		cmd, err := repo.Get("nonexistent")
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
+		require.NoError(t, err)
 
-		if cmd != nil {
-			t.Errorf("Expected nil command, got %v", cmd)
-		}
+		assert.Nil(t, cmd)
 
-		if err := os.Remove(tmpDbFilePath); err != nil {
-			t.Fatalf("Failed to remove temporary database file: %v", err)
-		}
+		err = os.Remove(tmpDbFilePath)
+		require.NoError(t, err, "Failed to remove temporary database file")
 	})
 }
 
@@ -122,19 +116,14 @@ func TestGormCommandRepository_GetAll(t *testing.T) {
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
 		cmds, err := repo.GetAll("proj1")
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
+		require.NoError(t, err)
 
 		for i, cmd := range cmds {
-			if !cmd.Equals(expectedCommands[i]) {
-				t.Errorf("Expected command %v, got %v", expectedCommands[i], cmd)
-			}
+			assert.Equal(t, expectedCommands[i], &cmd)
 		}
 
-		if err := os.Remove(tmpDbFilePath); err != nil {
-			t.Fatalf("Failed to remove temporary database file: %v", err)
-		}
+		err = os.Remove(tmpDbFilePath)
+		require.NoError(t, err, "Failed to remove temporary database file")
 	})
 }
 
@@ -153,25 +142,20 @@ func TestGormCommandRepository_Save(t *testing.T) {
 			WithWorkingDirectory("/tmp").
 			WithPosition(2).
 			Data()
-		newCommand := commandDataToDomain(cmdData)
+		createdCommand := commandDataToDomain(cmdData)
 
-		err := repo.Create(newCommand)
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
+		err := repo.Create(createdCommand)
+		require.NoError(t, err)
+
+		actual, err := repo.Get("cmd3")
+		require.NoError(t, err)
+
+		if assert.NotNil(t, actual) {
+			assert.Equal(t, createdCommand, actual)
 		}
 
-		savedCommand, err := repo.Get("cmd3")
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
-
-		if !savedCommand.Equals(newCommand) {
-			t.Errorf("Expected command %v, got %v", newCommand, savedCommand)
-		}
-
-		if err := os.Remove(tmpDbFilePath); err != nil {
-			t.Fatalf("Failed to remove temporary database file: %v", err)
-		}
+		err = os.Remove(tmpDbFilePath)
+		require.NoError(t, err, "Failed to remove temporary database file")
 	})
 }
 
@@ -197,22 +181,17 @@ func TestGormCommandRepository_Edit(t *testing.T) {
 		domainEditedCommand := commandDataToDomain(editedCommand)
 
 		err := repo.Update(domainEditedCommand)
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
+		require.NoError(t, err)
+
+		actual, err := repo.Get("cmd1")
+		require.NoError(t, err)
+
+		if assert.NotNil(t, actual) {
+			assert.Equal(t, domainEditedCommand, actual)
 		}
 
-		savedCommand, err := repo.Get("cmd1")
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
-
-		if !savedCommand.Equals(domainEditedCommand) {
-			t.Errorf("Expected command %v, got %v", editedCommand, savedCommand)
-		}
-
-		if err := os.Remove(tmpDbFilePath); err != nil {
-			t.Fatalf("Failed to remove temporary database file: %v", err)
-		}
+		err = os.Remove(tmpDbFilePath)
+		require.NoError(t, err, "Failed to remove temporary database file")
 	})
 }
 
@@ -234,23 +213,15 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
 		err := repo.Delete("cmd1")
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
+		require.NoError(t, err)
 
 		deletedCommand, err := repo.Get("cmd1")
+		require.NoError(t, err)
 
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
+		assert.Nil(t, deletedCommand)
 
-		if deletedCommand != nil {
-			t.Errorf("Expected nil command after deletion, got %v", deletedCommand)
-		}
-
-		if err := os.Remove(tmpDbFilePath); err != nil {
-			t.Fatalf("Failed to remove temporary database file: %v", err)
-		}
+		err = os.Remove(tmpDbFilePath)
+		require.NoError(t, err, "Failed to remove temporary database file")
 	})
 	t.Run("Should delete an existing command and adjust other commands positions", func(t *testing.T) {
 		cmd1 := testutils.NewCommand().
@@ -287,29 +258,21 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 		repo, tmpDbFilePath := arrange(preloadedCommandModels)
 
 		err := repo.Delete("cmd2")
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
+		require.NoError(t, err)
 
 		cmd1AfterDelete, err := repo.Get("cmd1")
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
+		require.NoError(t, err)
+
 		cmd3AfterDelete, err := repo.Get("cmd3")
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
+		require.NoError(t, err)
+
+		if assert.NotNil(t, cmd1AfterDelete) && assert.NotNil(t, cmd3AfterDelete) {
+			assert.Equal(t, cmd1.Position, cmd1AfterDelete.Position, "Expected cmd1 position to remain unchanged")
+			assert.Equal(t, cmd3.Position-1, cmd3AfterDelete.Position, "Expected cmd3 position to be adjusted after deletion of cmd2")
 		}
 
-		if cmd1AfterDelete.Position != cmd1.Position {
-			t.Errorf("Expected command cmd1 position to remain %d, got %d", cmd1.Position, cmd1AfterDelete.Position)
-		}
-		if cmd3AfterDelete.Position != cmd3.Position-1 {
-			t.Errorf("Expected command cmd3 position to be adjusted to %d, got %d", cmd3.Position-1, cmd3AfterDelete.Position)
-		}
-
-		if err := os.Remove(tmpDbFilePath); err != nil {
-			t.Fatalf("Failed to remove temporary database file: %v", err)
-		}
+		err = os.Remove(tmpDbFilePath)
+		require.NoError(t, err, "Failed to remove temporary database file")
 	})
 }
 
