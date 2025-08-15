@@ -54,7 +54,7 @@ func (g GormConfigRepository) Update(config *domain.Config) error {
 		return errors.New("config cannot be nil")
 	}
 
-	_, err := gorm.G[ConfigModel](g.db).Where("id = ?", 1).Updates(g.ctx, *configModel)
+	_, err := gorm.G[ConfigModel](g.db).Where("id = ?", 1).Select("*").Updates(g.ctx, *configModel)
 	if err != nil {
 		return err
 	}

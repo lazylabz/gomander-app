@@ -59,7 +59,7 @@ func (r GormCommandRepository) Create(command *domain.Command) error {
 func (r GormCommandRepository) Update(command *domain.Command) error {
 	commandModel := ToCommandModel(command)
 
-	_, err := gorm.G[CommandModel](r.db).Where("id = ?", commandModel.Id).Updates(r.ctx, commandModel)
+	_, err := gorm.G[CommandModel](r.db).Where("id = ?", commandModel.Id).Select("*").Updates(r.ctx, commandModel)
 	if err != nil {
 		return err
 	}

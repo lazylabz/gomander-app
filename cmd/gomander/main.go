@@ -11,6 +11,8 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
+	gormlogger "gorm.io/gorm/logger"
+
 	commmandinfrastructure "gomander/internal/command/infrastructure"
 	commandgroupinfrastructure "gomander/internal/commandgroup/infrastructure"
 	configinfrastructure "gomander/internal/config/infrastructure"
@@ -73,7 +75,11 @@ func main() {
 }
 
 func configDB(ctx context.Context) *gorm.DB {
-	gormDb, err := gorm.Open(sqlite.Open(getDbFile()), &gorm.Config{})
+	gormDb, err := gorm.Open(sqlite.Open(getDbFile()), &gorm.Config{
+		// Uncomment when debugging
+		// Logger: gormlogger.Default.LogMode(gormlogger.Info),
+		Logger: gormlogger.Default.LogMode(gormlogger.Error),
+	})
 	if err != nil {
 		panic(err)
 	}

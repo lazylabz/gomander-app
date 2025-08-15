@@ -108,7 +108,7 @@ func (r GormCommandGroupRepository) Update(commandGroup *domain.CommandGroup) er
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		// Update the command group data
-		_, err := gorm.G[CommandGroupModel](tx).Where("id = ?", commandGroupModel.Id).Updates(r.ctx, commandGroupModel)
+		_, err := gorm.G[CommandGroupModel](tx).Where("id = ?", commandGroupModel.Id).Select("*").Updates(r.ctx, commandGroupModel)
 		if err != nil {
 			return err
 		}

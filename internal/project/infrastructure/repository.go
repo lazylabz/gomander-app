@@ -55,7 +55,7 @@ func (r GormProjectRepository) Create(project domain.Project) error {
 
 func (r GormProjectRepository) Update(project domain.Project) error {
 	projectModel := ToProjectModel(project)
-	_, err := gorm.G[ProjectModel](r.db).Where("id = ?", project.Id).Updates(r.ctx, projectModel)
+	_, err := gorm.G[ProjectModel](r.db).Where("id = ?", project.Id).Select("*").Updates(r.ctx, projectModel)
 	if err != nil {
 		return err
 	}
