@@ -1,13 +1,14 @@
 package runner
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	commanddomain "gomander/internal/command/domain"
 	"gomander/internal/event"
 	"runtime"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 type MockLogger struct {
