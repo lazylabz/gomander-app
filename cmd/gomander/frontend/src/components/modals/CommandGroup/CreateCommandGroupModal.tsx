@@ -18,6 +18,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
+import { useProjectStore } from "@/store/projectStore.ts";
+import { createCommandGroup } from "@/useCases/commandGroup/createCommandGroup.ts";
 
 export const CreateCommandGroupModal = ({
   open,
@@ -26,6 +28,8 @@ export const CreateCommandGroupModal = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
+  const projectId = useProjectStore((state) => state.projectInfo?.id);
+
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -34,12 +38,18 @@ export const CreateCommandGroupModal = ({
     },
   });
 
-  const onSubmit = async (/*values: FormSchemaType*/) => {
-    // await createCommandGroup({
-    //   id: crypto.randomUUID(),
-    //   name: values.name,
-    //   commands: values.commands,
-    // });
+  const onSubmit = async (values: FormSchemaType) => {
+    if (!projectId) {
+      return;
+    }
+
+    await createCommandGroup({
+      id: crypto.randomUUID(),
+      projectId: projectId,
+      name: values.name,
+      commands: values.commands,
+      position: 0, // Will be set by the backend
+    });
 
     setOpen(false);
     form.reset();
