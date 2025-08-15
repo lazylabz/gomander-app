@@ -8,12 +8,37 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/pressly/goose/v3"
+	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
 	"gomander/internal/project/domain"
 	_ "gomander/migrations"
 )
+
+type testHelper struct {
+	t      *testing.T
+	repo   *GormProjectRepository
+	dbPath string
+}
+
+func newTestHelper(t *testing.T, preloadedProjects []*ProjectModel) *testHelper {
+	t.Helper()
+
+	repo, dbPath := arrange(preloadedProjects)
+
+	helper := &testHelper{
+		t:      t,
+		repo:   repo,
+		dbPath: dbPath,
+	}
+
+	t.Cleanup(func() {
+		assert.NoError(t, os.Remove(helper.dbPath), "Failed to cleanup test database")
+	})
+
+	return helper
+}
 
 func TestGormProjectRepository_GetAll(t *testing.T) {
 	t.Run("Should return all projects", func(t *testing.T) {
@@ -25,20 +50,13 @@ func TestGormProjectRepository_GetAll(t *testing.T) {
 			{Id: "p1", Name: "Project 1", WorkingDirectory: "/tmp/1"},
 			{Id: "p2", Name: "Project 2", WorkingDirectory: "/tmp/2"},
 		}
-		repo, tmpDbFilePath := arrange(preloadedProjects)
-		projects, err := repo.GetAll()
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
-		if len(projects) != 2 {
-			t.Errorf("Expected 2 projects, got %d", len(projects))
-		}
+		h := newTestHelper(t, preloadedProjects)
+		projects, err := h.repo.GetAll()
+		assert.NoError(t, err)
+		assert.Len(t, projects, 2)
 		for i, project := range projects {
-			if !project.Equals(&expectedProjects[i]) {
-				t.Errorf("Expected project %v, got %v", expectedProjects[i], project)
-			}
+			assert.True(t, project.Equals(&expectedProjects[i]), "Expected project %v, got %v", expectedProjects[i], project)
 		}
-		_ = os.Remove(tmpDbFilePath)
 	})
 }
 
@@ -48,45 +66,31 @@ func TestGormProjectRepository_Get(t *testing.T) {
 			{Id: "p1", Name: "Project 1", WorkingDirectory: "/tmp/1"},
 		}
 		expectedProject := domain.Project{Id: "p1", Name: "Project 1", WorkingDirectory: "/tmp/1"}
-		repo, tmpDbFilePath := arrange(preloadedProjects)
-		project, err := repo.Get("p1")
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
-		if project == nil || project.Id != "p1" {
-			t.Errorf("Expected project with id p1, got %v", project)
-		}
-		if !project.Equals(&expectedProject) {
-			t.Errorf("Expected project %v, got %v", expectedProject, project)
-		}
-		_ = os.Remove(tmpDbFilePath)
+		h := newTestHelper(t, preloadedProjects)
+		project, err := h.repo.Get("p1")
+		assert.NoError(t, err)
+		assert.NotNil(t, project)
+		assert.Equal(t, "p1", project.Id)
+		assert.True(t, project.Equals(&expectedProject))
 	})
 	t.Run("Should return nil when project does not exist", func(t *testing.T) {
-		repo, tmpDbFilePath := arrange(nil)
-		project, err := repo.Get("nonexistent")
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
-		if project != nil {
-			t.Errorf("Expected nil, got %v", project)
-		}
-		_ = os.Remove(tmpDbFilePath)
+		h := newTestHelper(t, nil)
+		project, err := h.repo.Get("nonexistent")
+		assert.NoError(t, err)
+		assert.Nil(t, project)
 	})
 }
 
 func TestGormProjectRepository_Create(t *testing.T) {
 	t.Run("Should create a new project", func(t *testing.T) {
-		repo, tmpDbFilePath := arrange(nil)
+		h := newTestHelper(t, nil)
 		newProject := domain.Project{Id: "p3", Name: "Project 3", WorkingDirectory: "/tmp/3"}
-		err := repo.Create(newProject)
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
-		project, err := repo.Get("p3")
-		if err != nil || project == nil || project.Id != "p3" {
-			t.Errorf("Expected project with id p3, got %v (err: %v)", project, err)
-		}
-		_ = os.Remove(tmpDbFilePath)
+		err := h.repo.Create(newProject)
+		assert.NoError(t, err)
+		project, err := h.repo.Get("p3")
+		assert.NoError(t, err)
+		assert.NotNil(t, project)
+		assert.Equal(t, "p3", project.Id)
 	})
 }
 
@@ -95,17 +99,15 @@ func TestGormProjectRepository_Update(t *testing.T) {
 		preloadedProjects := []*ProjectModel{
 			{Id: "p1", Name: "Old Name", WorkingDirectory: "/tmp/old"},
 		}
-		repo, tmpDbFilePath := arrange(preloadedProjects)
+		h := newTestHelper(t, preloadedProjects)
 		updated := domain.Project{Id: "p1", Name: "New Name", WorkingDirectory: "/tmp/new"}
-		err := repo.Update(updated)
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
-		project, _ := repo.Get("p1")
-		if project == nil || project.Name != "New Name" || project.WorkingDirectory != "/tmp/new" {
-			t.Errorf("Expected updated project, got %v", project)
-		}
-		_ = os.Remove(tmpDbFilePath)
+		err := h.repo.Update(updated)
+		assert.NoError(t, err)
+		project, err := h.repo.Get("p1")
+		assert.NoError(t, err)
+		assert.NotNil(t, project)
+		assert.Equal(t, "New Name", project.Name)
+		assert.Equal(t, "/tmp/new", project.WorkingDirectory)
 	})
 }
 
@@ -114,16 +116,12 @@ func TestGormProjectRepository_Delete(t *testing.T) {
 		preloadedProjects := []*ProjectModel{
 			{Id: "p1", Name: "To Delete", WorkingDirectory: "/tmp/del"},
 		}
-		repo, tmpDbFilePath := arrange(preloadedProjects)
-		err := repo.Delete("p1")
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
-		project, _ := repo.Get("p1")
-		if project != nil {
-			t.Errorf("Expected nil after delete, got %v", project)
-		}
-		_ = os.Remove(tmpDbFilePath)
+		h := newTestHelper(t, preloadedProjects)
+		err := h.repo.Delete("p1")
+		assert.NoError(t, err)
+		project, err := h.repo.Get("p1")
+		assert.NoError(t, err)
+		assert.Nil(t, project)
 	})
 }
 
