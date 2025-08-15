@@ -1,4 +1,4 @@
-package commandinfrastructure
+package infrastructure
 
 type CommandModel struct {
 	Id               string `gorm:"primaryKey;column:id"`

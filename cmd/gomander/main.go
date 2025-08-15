@@ -11,7 +11,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	"gomander/internal/command/infrastructure"
+	commmandinfrastructure "gomander/internal/command/infrastructure"
 	commandgroupinfrastructure "gomander/internal/commandgroup/infrastructure"
 	configinfrastructure "gomander/internal/config/infrastructure"
 	logger "gomander/internal/logger"
@@ -121,7 +121,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	r := runner.NewDefaulRunner(l, ee)
 
 	// Initialize repos
-	comandRepo := commandinfrastructure.NewGormCommandRepository(gormDb, ctx)
+	comandRepo := commmandinfrastructure.NewGormCommandRepository(gormDb, ctx)
 	comandGroupRepo := commandgroupinfrastructure.NewGormCommandGroupRepository(gormDb, ctx)
 	projectRepo := projectinfrastructure.NewGormProjectRepository(gormDb, ctx)
 	configRepo := configinfrastructure.NewGormConfigRepository(gormDb, ctx)

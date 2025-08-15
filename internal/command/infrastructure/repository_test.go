@@ -1,11 +1,12 @@
-package commandinfrastructure
+package infrastructure
 
 import (
 	"context"
-	"gomander/internal/testutils"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"gomander/internal/testutils"
 
 	"github.com/google/uuid"
 	"github.com/pressly/goose/v3"
