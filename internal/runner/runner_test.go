@@ -196,6 +196,8 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		assert.NotEmpty(t, r.runningCommands)
 
 		errs := r.StopAllRunningCommands()
+
+		time.Sleep(100 * time.Millisecond)
 		assert.Empty(t, errs)
 		assert.Empty(t, r.runningCommands)
 	})
