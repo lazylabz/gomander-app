@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/pressly/goose/v3"
+	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
@@ -15,23 +16,43 @@ import (
 	_ "gomander/migrations"
 )
 
+type testHelper struct {
+	t      *testing.T
+	repo   *GormConfigRepository
+	dbPath string
+}
+
+func newTestHelper(t *testing.T,
+	preloadedConfig *ConfigModel, preloadedPaths []*EnvironmentPathModel) *testHelper {
+	t.Helper() // IMPORTANT: This marks the function as a helper, so error traces will point to the test instead of here
+
+	repo, dbPath := arrange(
+		preloadedConfig,
+		preloadedPaths,
+	)
+
+	helper := &testHelper{
+		t:      t,
+		repo:   repo,
+		dbPath: dbPath,
+	}
+
+	// Automatic cleanup when test finishes
+	t.Cleanup(func() {
+		assert.NoError(t, os.Remove(helper.dbPath), "Failed to cleanup test database")
+	})
+
+	return helper
+}
+
 func TestGormConfigRepository_GetOrCreate(t *testing.T) {
 	t.Run("Should create config if not exists", func(t *testing.T) {
-		repo, tmpDbFilePath := arrange(nil, nil)
-		config, err := repo.GetOrCreate()
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
-		if config == nil {
-			t.Fatal("Expected config, got nil")
-		}
-		if config.LastOpenedProjectId != "" {
-			t.Errorf("Expected empty LastOpenedProjectId, got %s", config.LastOpenedProjectId)
-		}
-		if len(config.EnvironmentPaths) != 0 {
-			t.Errorf("Expected 0 environment paths, got %d", len(config.EnvironmentPaths))
-		}
-		_ = os.Remove(tmpDbFilePath)
+		helper := newTestHelper(t, nil, nil)
+		config, err := helper.repo.GetOrCreate()
+		assert.NoError(t, err)
+		assert.NotNil(t, config)
+		assert.Equal(t, "", config.LastOpenedProjectId)
+		assert.Empty(t, config.EnvironmentPaths)
 	})
 	t.Run("Should return existing config with environment paths", func(t *testing.T) {
 		preloadedConfig := &ConfigModel{Id: 1, LastOpenedProjectId: "proj-123"}
@@ -39,54 +60,47 @@ func TestGormConfigRepository_GetOrCreate(t *testing.T) {
 			{Id: "path1", Path: "/usr/bin"},
 			{Id: "path2", Path: "/usr/local/bin"},
 		}
-		repo, tmpDbFilePath := arrange(preloadedConfig, preloadedPaths)
-		config, err := repo.GetOrCreate()
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
-		if config == nil {
-			t.Fatal("Expected config, got nil")
-		}
-		if config.LastOpenedProjectId != "proj-123" {
-			t.Errorf("Expected LastOpenedProjectId 'proj-123', got %s", config.LastOpenedProjectId)
-		}
-		if len(config.EnvironmentPaths) != 2 {
-			t.Errorf("Expected 2 environment paths, got %d", len(config.EnvironmentPaths))
-		}
-		_ = os.Remove(tmpDbFilePath)
+		helper := newTestHelper(t, preloadedConfig, preloadedPaths)
+		config, err := helper.repo.GetOrCreate()
+		assert.NoError(t, err)
+		assert.Equal(t, &domain.Config{
+			LastOpenedProjectId: "proj-123",
+			EnvironmentPaths: []domain.EnvironmentPath{
+				{Id: "path1", Path: "/usr/bin"},
+				{Id: "path2", Path: "/usr/local/bin"},
+			}}, config)
 	})
 }
 
 func TestGormConfigRepository_Update(t *testing.T) {
 	t.Run("Should save config and environment paths", func(t *testing.T) {
-		repo, tmpDbFilePath := arrange(nil, nil)
-		config := &domain.Config{
-			LastOpenedProjectId: "proj-999",
-			EnvironmentPaths: []domain.EnvironmentPath{
-				{Id: "path1", Path: "/bin"},
-				{Id: "path2", Path: "/sbin"},
-			},
-		}
-		_, err := repo.GetOrCreate()
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
+		preloadedConfig := &ConfigModel{Id: 1, LastOpenedProjectId: "proj-123"}
+		preloadedPaths := []*EnvironmentPathModel{
+			{Id: "path1", Path: "/usr/bin"},
+			{Id: "path2", Path: "/usr/local/bin"},
 		}
 
-		err = repo.Update(config)
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
+		helper := newTestHelper(t, preloadedConfig, preloadedPaths)
+
+		newConfig := &domain.Config{
+			LastOpenedProjectId: "proj-999",
+			EnvironmentPaths: []domain.EnvironmentPath{
+				{Id: "path1", Path: "/bin2"},
+				{Id: "path2", Path: "/usr/local/bin2"},
+			},
 		}
-		got, err := repo.GetOrCreate()
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
-		if got.LastOpenedProjectId != "proj-999" {
-			t.Errorf("Expected LastOpenedProjectId 'proj-999', got %s", got.LastOpenedProjectId)
-		}
-		if len(got.EnvironmentPaths) != 2 {
-			t.Errorf("Expected 2 environment paths, got %d", len(got.EnvironmentPaths))
-		}
-		_ = os.Remove(tmpDbFilePath)
+
+		err := helper.repo.Update(newConfig)
+		assert.NoError(t, err)
+
+		got, err := helper.repo.GetOrCreate()
+		assert.NoError(t, err)
+		assert.Equal(t, &domain.Config{
+			LastOpenedProjectId: "proj-999",
+			EnvironmentPaths: []domain.EnvironmentPath{
+				{Id: "path1", Path: "/bin2"},
+				{Id: "path2", Path: "/usr/local/bin2"},
+			}}, got)
 	})
 }
 
