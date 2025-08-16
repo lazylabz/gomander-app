@@ -71,7 +71,7 @@ export const EditCommandGroupModal = ({
               <Group />
               <DialogTitle>Edit command group</DialogTitle>
             </DialogHeader>
-            <div className="space-y-6 my-4">
+            <div className="space-y-6 mt-4 mb-2">
               <CommandGroupNameField />
               <NewCommandGroupCommandsField />
             </div>

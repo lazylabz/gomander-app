@@ -32,6 +32,9 @@ import type { Command } from "@/contracts/types.ts";
 import { isDefined } from "@/helpers/mapHelpers.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 
+const AVAILABLE_COMMANDS = "available-commands";
+const ADDED_COMMANDS = "added-commands";
+
 const DraggableCommandItem = ({
   command,
   rightComponent,
@@ -70,32 +73,35 @@ const DraggableCommandItem = ({
 };
 
 const DroppableContainer = ({
-  id,
-  title,
+  variant,
   children,
   className,
 }: {
-  id: string;
-  title: string;
+  variant: typeof AVAILABLE_COMMANDS | typeof ADDED_COMMANDS;
   children: React.ReactNode;
   className?: string;
 }) => {
-  const { setNodeRef } = useDroppable({ id });
+  const { setNodeRef } = useDroppable({ id: variant });
 
   return (
     <div className={className}>
-      <h4 className="font-medium text-sm mb-2 text-muted-foreground">
-        {title}
-      </h4>
+      {variant === AVAILABLE_COMMANDS && (
+        <h4 className="font-medium text-sm mb-2">Available Commands</h4>
+      )}
+      {variant === ADDED_COMMANDS && (
+        <FormLabel className="font-medium text-sm mb-2">
+          Group Commands
+        </FormLabel>
+      )}
       <div
         ref={setNodeRef}
         className="h-80 max-h-[calc(100vh-400px)] p-3 border rounded-lg overflow-y-auto overflow-x-hidden"
       >
         <div className="space-y-2">{children}</div>
         {React.Children.count(children) === 0 && (
-          <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-            {id === AVAILABLE_COMMANDS
-              ? "All commands are added"
+          <div className="flex items-center justify-center h-full text-muted-foreground text-sm text-center">
+            {variant === AVAILABLE_COMMANDS
+              ? "No more commands available"
               : "Drag commands here"}
           </div>
         )}
@@ -103,9 +109,6 @@ const DroppableContainer = ({
     </div>
   );
 };
-
-const AVAILABLE_COMMANDS = "available-commands";
-const ADDED_COMMANDS = "added-commands";
 
 export const NewCommandGroupCommandsField = () => {
   const allCommands = useCommandStore((state) => state.commands);
@@ -229,14 +232,6 @@ export const NewCommandGroupCommandsField = () => {
       name="commands"
       render={() => (
         <FormItem>
-          <div className="flex flex-col gap-1 mb-4">
-            <FormLabel>Commands</FormLabel>
-            <FormDescription className="text-xs">
-              Drag commands from left to right to add them, and reorder them as
-              needed
-            </FormDescription>
-          </div>
-
           <DndContext
             sensors={sensors}
             collisionDetection={closestCorners}
@@ -249,8 +244,7 @@ export const NewCommandGroupCommandsField = () => {
                 strategy={verticalListSortingStrategy}
               >
                 <DroppableContainer
-                  id={AVAILABLE_COMMANDS}
-                  title="Available Commands"
+                  variant={AVAILABLE_COMMANDS}
                   className="flex-1"
                 >
                   {availableCommands.map((command) => (
@@ -275,11 +269,7 @@ export const NewCommandGroupCommandsField = () => {
                 items={addedCommands.map((cmd) => cmd.id)}
                 strategy={verticalListSortingStrategy}
               >
-                <DroppableContainer
-                  id={ADDED_COMMANDS}
-                  title="Added Commands"
-                  className="flex-1"
-                >
+                <DroppableContainer variant={ADDED_COMMANDS} className="flex-1">
                   {addedCommands.map((command) => (
                     <DraggableCommandItem
                       key={command.id}
@@ -299,6 +289,10 @@ export const NewCommandGroupCommandsField = () => {
               </SortableContext>
             </div>
           </DndContext>
+          <FormDescription className="text-xs">
+            Drag commands from left to right to add them, and reorder them as
+            needed
+          </FormDescription>
 
           <FormMessage />
         </FormItem>
