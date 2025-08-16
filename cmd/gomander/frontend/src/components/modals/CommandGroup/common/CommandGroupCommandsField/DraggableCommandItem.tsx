@@ -30,9 +30,9 @@ export const DraggableCommandItem = ({
     <div
       ref={setNodeRef}
       style={style}
-      className="group flex items-center p-1.5 pl-3 bg-card hover:bg-accent border rounded"
+      className="group flex items-center pl-3 pr-1 bg-card hover:bg-accent border rounded"
     >
-      <div {...attributes} {...listeners} className="flex-1 cursor-grab">
+      <div {...attributes} {...listeners} className="flex-1 cursor-grab py-2">
         <span className="text-sm">{command.name}</span>
       </div>
 
