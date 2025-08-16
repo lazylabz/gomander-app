@@ -76,12 +76,12 @@ func (a *App) ReorderCommandGroups(newOrderedIds []string) error {
 	return nil
 }
 
-func (a *App) RemoveCommandFromCommandGroups(id string) {
+func (a *App) RemoveCommandFromCommandGroups(id string) error {
 	commandGroups, err := a.commandGroupRepository.GetAll(a.openedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
-		return
+		return err
 	}
 
 	for _, commandGroup := range commandGroups {
@@ -98,18 +98,20 @@ func (a *App) RemoveCommandFromCommandGroups(id string) {
 				if err != nil {
 					a.logger.Error(err.Error())
 					a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
-					return
+					return err
 				}
 			} else {
 				err := a.commandGroupRepository.Update(&commandGroup)
 				if err != nil {
 					a.logger.Error(err.Error())
 					a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
-					return
+					return err
 				}
 			}
 		}
 	}
 
 	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
+
+	return nil
 }

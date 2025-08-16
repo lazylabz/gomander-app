@@ -42,8 +42,14 @@ func (a *App) AddCommand(newCommand domain.Command) error {
 }
 
 func (a *App) RemoveCommand(id string) error {
-	a.RemoveCommandFromCommandGroups(id)
-	err := a.commandRepository.Delete(id)
+	err := a.RemoveCommandFromCommandGroups(id)
+	if err != nil {
+		a.logger.Error(err.Error())
+		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
+		return err
+	}
+
+	err = a.commandRepository.Delete(id)
 	if err != nil {
 		a.logger.Error(err.Error())
 		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
