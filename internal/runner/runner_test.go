@@ -56,7 +56,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
 
-		err := r.RunCommand(commanddomain.Command{
+		err := r.RunCommand(&commanddomain.Command{
 			Id:               "1",
 			ProjectId:        "1",
 			Name:             "Test",
@@ -86,7 +86,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger.On("Error", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
 
-		err := r.RunCommand(commanddomain.Command{
+		err := r.RunCommand(&commanddomain.Command{
 			Id:               "1",
 			ProjectId:        "1",
 			Name:             "Test",
@@ -117,7 +117,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger.On("Debug", mock.Anything).Return()
 		logger.On("Error", mock.Anything).Return()
 
-		err := r.RunCommand(commanddomain.Command{
+		err := r.RunCommand(&commanddomain.Command{
 			Id:               "1",
 			ProjectId:        "1",
 			Name:             "Test",
@@ -165,7 +165,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		logger.On("Debug", mock.Anything).Return()
 		logger.On("Error", mock.Anything).Return()
 
-		err := r.RunCommand(commanddomain.Command{
+		err := r.RunCommand(&commanddomain.Command{
 			Id:               "1",
 			ProjectId:        "1",
 			Name:             "Test",
@@ -175,7 +175,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		err = r.RunCommand(commanddomain.Command{
+		err = r.RunCommand(&commanddomain.Command{
 			Id:               "2",
 			ProjectId:        "1",
 			Name:             "Test",
