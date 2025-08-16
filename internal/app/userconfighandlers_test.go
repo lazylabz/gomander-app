@@ -74,6 +74,7 @@ func TestApp_SaveUserConfig(t *testing.T) {
 		assert.NoError(t, err)
 
 		mockRepository.AssertCalled(t, "Update", &newUserConfig)
+		mock.AssertExpectationsForObjects(t, mockRepository, mockEventEmitter, mockLogger)
 	})
 	t.Run("Should fail to save user configuration", func(t *testing.T) {
 		mockRepository := new(MockUserConfigRepository)
@@ -108,5 +109,6 @@ func TestApp_SaveUserConfig(t *testing.T) {
 		assert.Error(t, err)
 
 		mockRepository.AssertCalled(t, "Update", &newUserConfig)
+		mock.AssertExpectationsForObjects(t, mockRepository, mockEventEmitter, mockLogger)
 	})
 }
