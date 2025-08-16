@@ -61,7 +61,7 @@ const DraggableCommandItem = ({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center p-1.5 pl-3 bg-card border rounded hover:bg-accent transition-colors"
+      className="group flex items-center p-1.5 pl-3 bg-card hover:bg-accent border rounded"
     >
       <div {...attributes} {...listeners} className="flex-1 cursor-grab">
         <span className="text-sm">{command.name}</span>
@@ -254,7 +254,7 @@ export const NewCommandGroupCommandsField = () => {
                       rightComponent={
                         <button
                           type="button"
-                          className="cursor-pointer flex items-center justify-center p-2 rounded bg-neutral-100 text-neutral-900 shadow-xs hover:bg-neutral-100/80 dark:bg-neutral-800 dark:text-neutral-50 dark:hover:bg-neutral-800/80 transition-colors"
+                          className="cursor-pointer flex items-center justify-center p-2 rounded text-neutral-900 shadow-xs dark:text-neutral-50 bg-accent group-hover:bg-neutral-200 hover:bg-neutral-300/80 dark:group-hover:bg-card/60 dark:hover:bg-card"
                           onClick={() => addCommand(command.id)}
                         >
                           <ChevronRight className="size-4" />
@@ -277,7 +277,7 @@ export const NewCommandGroupCommandsField = () => {
                       rightComponent={
                         <button
                           type="button"
-                          className="cursor-pointer flex items-center justify-center p-2 rounded bg-neutral-100 text-neutral-900 shadow-xs hover:bg-neutral-100/80 dark:bg-neutral-800 dark:text-neutral-50 dark:hover:bg-neutral-800/80 transition-colors"
+                          className="cursor-pointer flex items-center justify-center p-2 rounded text-neutral-900 shadow-xs dark:text-neutral-50 bg-accent group-hover:bg-neutral-200 hover:bg-neutral-300/80 dark:group-hover:bg-card/60 dark:hover:bg-card"
                           onClick={() => removeCommand(command.id)}
                         >
                           <X className="size-4" />
