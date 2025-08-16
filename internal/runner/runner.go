@@ -171,3 +171,7 @@ func (c *DefaultRunner) sendStreamLine(commandId string, line string) {
 		"line": line,
 	})
 }
+
+func (c *DefaultRunner) GetRunningCommands() map[string]*exec.Cmd {
+	return c.runningCommands
+}

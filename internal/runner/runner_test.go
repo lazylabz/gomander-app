@@ -1,11 +1,13 @@
-package runner
+package runner_test
 
 import (
-	commanddomain "gomander/internal/command/domain"
-	"gomander/internal/event"
 	"runtime"
 	"testing"
 	"time"
+
+	commanddomain "gomander/internal/command/domain"
+	"gomander/internal/event"
+	"gomander/internal/runner"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -44,7 +46,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
-		r := NewDefaulRunner(logger, emitter)
+		r := runner.NewDefaulRunner(logger, emitter)
 
 		emitter.On("EmitEvent", event.ProcessStarted, "1").Return()
 		emitter.On("EmitEvent", event.ProcessFinished, "1").Return()
@@ -66,14 +68,14 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 
 		time.Sleep(100 * time.Millisecond)
 
-		assert.Empty(t, r.runningCommands)
+		assert.Empty(t, r.GetRunningCommands())
 		mock.AssertExpectationsForObjects(t, emitter)
 	})
 	t.Run("Should log error when executing an invalid command", func(t *testing.T) {
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
-		r := NewDefaulRunner(logger, emitter)
+		r := runner.NewDefaulRunner(logger, emitter)
 
 		emitter.On("EmitEvent", event.ProcessStarted, "1").Return()
 		emitter.On("EmitEvent", event.ProcessFinished, "1").Return()
@@ -96,7 +98,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 
 		time.Sleep(100 * time.Millisecond)
 
-		assert.Empty(t, r.runningCommands)
+		assert.Empty(t, r.GetRunningCommands())
 
 	})
 }
@@ -106,7 +108,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
-		r := NewDefaulRunner(logger, emitter)
+		r := runner.NewDefaulRunner(logger, emitter)
 
 		emitter.On("EmitEvent", event.ProcessStarted, "1").Return()
 		emitter.On("EmitEvent", event.ProcessFinished, "1").Return()
@@ -127,19 +129,19 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 
 		time.Sleep(100 * time.Millisecond)
 
-		assert.NotEmpty(t, r.runningCommands)
+		assert.NotEmpty(t, r.GetRunningCommands())
 
 		err = r.StopRunningCommand("1")
 		assert.NoError(t, err)
 
 		time.Sleep(100 * time.Millisecond)
-		assert.Empty(t, r.runningCommands)
+		assert.Empty(t, r.GetRunningCommands())
 	})
 	t.Run("Should return error when stopping non-existing command", func(t *testing.T) {
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
-		r := NewDefaulRunner(logger, emitter)
+		r := runner.NewDefaulRunner(logger, emitter)
 
 		err := r.StopRunningCommand("non-existing-command")
 		assert.Error(t, err)
@@ -152,7 +154,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
-		r := NewDefaulRunner(logger, emitter)
+		r := runner.NewDefaulRunner(logger, emitter)
 
 		emitter.On("EmitEvent", event.ProcessStarted, "1").Return()
 		emitter.On("EmitEvent", event.ProcessStarted, "2").Return()
@@ -185,13 +187,13 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 
 		time.Sleep(100 * time.Millisecond)
 
-		assert.NotEmpty(t, r.runningCommands)
+		assert.NotEmpty(t, r.GetRunningCommands())
 
 		errs := r.StopAllRunningCommands()
 
 		time.Sleep(100 * time.Millisecond)
 		assert.Empty(t, errs)
-		assert.Empty(t, r.runningCommands)
+		assert.Empty(t, r.GetRunningCommands())
 	})
 }
 
