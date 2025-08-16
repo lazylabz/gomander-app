@@ -127,6 +127,10 @@ body,
   }
 }
 
+button {
+  @apply cursor-pointer;
+}
+
 /* Scrollbar styles */
 * {
   scrollbar-width: thin;
