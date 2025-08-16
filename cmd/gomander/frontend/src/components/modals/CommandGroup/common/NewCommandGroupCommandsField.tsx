@@ -289,7 +289,7 @@ export const NewCommandGroupCommandsField = () => {
               </SortableContext>
             </div>
           </DndContext>
-          <FormDescription className="text-xs">
+          <FormDescription className="text-xs mt-1">
             Drag commands from left to right to add them, and reorder them as
             needed
           </FormDescription>
