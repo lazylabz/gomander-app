@@ -138,7 +138,7 @@ func (a *App) RunCommand(id string) error {
 	}
 
 	environmentPathsStrings := array.Map(userConfig.EnvironmentPaths, func(ep domain2.EnvironmentPath) string { return ep.Path })
-	err = a.commandRunner.RunCommand(*cmd, environmentPathsStrings, currentProject.WorkingDirectory)
+	err = a.commandRunner.RunCommand(cmd, environmentPathsStrings, currentProject.WorkingDirectory)
 
 	if err != nil {
 		a.logger.Error(err.Error())
