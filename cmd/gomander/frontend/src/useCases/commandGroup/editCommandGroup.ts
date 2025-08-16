@@ -25,7 +25,7 @@ export const editCommandGroup = async (args: EditCommandGroupParams) => {
     projectId: args.projectId,
     name: args.name,
     commands: groupCommands,
-    position: 0, // Will be set by the backend
+    position: args.position,
   };
 
   await dataService.editCommandGroup(commandGroup);
