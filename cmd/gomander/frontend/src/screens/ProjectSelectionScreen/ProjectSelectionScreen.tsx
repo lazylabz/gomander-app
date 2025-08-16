@@ -88,7 +88,11 @@ export const ProjectSelectionScreen = () => {
         onClose={cancelDeleteProject}
       />
       <div className="w-full h-full flex flex-col items-center justify-center gap-10">
-        <h1 className="text-3xl">Open project </h1>
+        <h1 className="text-3xl">
+          {availableProjects.length > 0
+            ? "Open project"
+            : "Welcome to Gomander!"}
+        </h1>
         {availableProjects.length > 0 && (
           <div className="flex flex-col items-center justify-center gap-2">
             {availableProjects.map((p) => (
@@ -100,10 +104,10 @@ export const ProjectSelectionScreen = () => {
             ))}
           </div>
         )}
+        {availableProjects.length === 0 && (
+          <p>You don't have projects yet. Create or import one.</p>
+        )}
         <div className="flex flex-col items-center justify-center gap-2">
-          {availableProjects.length === 0 && (
-            <p>You don't have projects yet. Create or import one.</p>
-          )}
           <div className="flex flex-row items-center gap-2 justify-center">
             <Button onClick={openCreateProjectModal} variant="ghost">
               <Plus /> Create a new project
