@@ -69,6 +69,8 @@ export const ProjectSelectionScreen = () => {
     }
   }, [navigate, project]);
 
+  const hasProjects = availableProjects.length > 0;
+
   return (
     <>
       <CreateProjectModal
@@ -89,11 +91,9 @@ export const ProjectSelectionScreen = () => {
       />
       <div className="w-full h-full flex flex-col items-center justify-center gap-10">
         <h1 className="text-3xl">
-          {availableProjects.length > 0
-            ? "Open project"
-            : "Welcome to Gomander!"}
+          {hasProjects ? "Open project" : "Welcome to Gomander!"}
         </h1>
-        {availableProjects.length > 0 && (
+        {hasProjects && (
           <div className="flex flex-col items-center justify-center gap-2">
             {availableProjects.map((p) => (
               <ProjectCard
@@ -104,7 +104,7 @@ export const ProjectSelectionScreen = () => {
             ))}
           </div>
         )}
-        {availableProjects.length === 0 && (
+        {!hasProjects && (
           <p>You don't have projects yet. Create or import one.</p>
         )}
         <div className="flex flex-col items-center justify-center gap-2">
