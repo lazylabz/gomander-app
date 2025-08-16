@@ -107,17 +107,14 @@ export const ProjectSelectionScreen = () => {
         {!hasProjects && (
           <p>You don't have projects yet. Create or import one.</p>
         )}
-        <div className="flex flex-col items-center justify-center gap-2">
-          <div className="flex flex-row items-center gap-2 justify-center">
-            <Button onClick={openCreateProjectModal} variant="ghost">
-              <Plus /> Create a new project
-            </Button>
-            <Button onClick={handleImportProject} variant="ghost">
-              <Import /> Import an existing project
-            </Button>
-          </div>
+        <div className="flex flex-row items-center gap-2 justify-center">
+          <Button onClick={openCreateProjectModal} variant="ghost">
+            <Plus /> Create a new project
+          </Button>
+          <Button onClick={handleImportProject} variant="ghost">
+            <Import /> Import an existing project
+          </Button>
         </div>
-        <div></div>
       </div>
     </>
   );
