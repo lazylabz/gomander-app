@@ -50,10 +50,12 @@ func (a *App) IsThereANewRelease() (release string, err error) {
 	return
 }
 
-func getLatestRelease() (release *semver.Version, err error) {
-	latestReleaseUrl := fmt.Sprintf("https://github.com/%s/releases.atom", RepoOwnerAndName)
+// LatestReleaseUrl is public so it can be overridden in tests
+var LatestReleaseUrl = fmt.Sprintf("https://github.com/%s/releases.atom", RepoOwnerAndName)
 
-	res, err := http.Get(latestReleaseUrl)
+func getLatestRelease() (release *semver.Version, err error) {
+
+	res, err := http.Get(LatestReleaseUrl)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch latest release: " + err.Error())
 	}

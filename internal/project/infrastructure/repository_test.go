@@ -49,9 +49,7 @@ func TestGormProjectRepository_GetAll(t *testing.T) {
 		projects, err := h.repo.GetAll()
 		assert.NoError(t, err)
 		assert.Len(t, projects, 2)
-		for i, project := range projects {
-			assert.True(t, project.Equals(&expectedProjects[i]), "Expected project %v, got %v", expectedProjects[i], project)
-		}
+		assert.Equal(t, expectedProjects, projects)
 	})
 }
 
@@ -66,7 +64,7 @@ func TestGormProjectRepository_Get(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, project)
 		assert.Equal(t, "p1", project.Id)
-		assert.True(t, project.Equals(&expectedProject))
+		assert.Equal(t, project, &expectedProject)
 	})
 	t.Run("Should return nil when project does not exist", func(t *testing.T) {
 		h := newTestHelper(t, nil)

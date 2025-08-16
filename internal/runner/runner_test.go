@@ -1,11 +1,13 @@
-package runner
+package runner_test
 
 import (
-	commanddomain "gomander/internal/command/domain"
-	"gomander/internal/event"
 	"runtime"
 	"testing"
 	"time"
+
+	commanddomain "gomander/internal/command/domain"
+	"gomander/internal/event"
+	"gomander/internal/runner"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -44,7 +46,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
-		r := NewDefaulRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter)
 
 		emitter.On("EmitEvent", event.ProcessStarted, "1").Return()
 		emitter.On("EmitEvent", event.ProcessFinished, "1").Return()
@@ -54,7 +56,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
 
-		err := r.RunCommand(commanddomain.Command{
+		err := r.RunCommand(&commanddomain.Command{
 			Id:               "1",
 			ProjectId:        "1",
 			Name:             "Test",
@@ -66,14 +68,14 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 
 		time.Sleep(100 * time.Millisecond)
 
-		assert.Empty(t, r.runningCommands)
-		mock.AssertExpectationsForObjects(t, emitter)
+		assert.Empty(t, r.GetRunningCommands())
+		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
 	t.Run("Should log error when executing an invalid command", func(t *testing.T) {
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
-		r := NewDefaulRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter)
 
 		emitter.On("EmitEvent", event.ProcessStarted, "1").Return()
 		emitter.On("EmitEvent", event.ProcessFinished, "1").Return()
@@ -84,7 +86,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger.On("Error", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
 
-		err := r.RunCommand(commanddomain.Command{
+		err := r.RunCommand(&commanddomain.Command{
 			Id:               "1",
 			ProjectId:        "1",
 			Name:             "Test",
@@ -96,8 +98,8 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 
 		time.Sleep(100 * time.Millisecond)
 
-		assert.Empty(t, r.runningCommands)
-
+		assert.Empty(t, r.GetRunningCommands())
+		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
 }
 
@@ -106,16 +108,17 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
-		r := NewDefaulRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter)
 
 		emitter.On("EmitEvent", event.ProcessStarted, "1").Return()
 		emitter.On("EmitEvent", event.ProcessFinished, "1").Return()
 		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
-		logger.On("Error", mock.Anything).Return()
+		// Depends on OS
+		logger.On("Error", mock.Anything).Maybe().Return()
 
-		err := r.RunCommand(commanddomain.Command{
+		err := r.RunCommand(&commanddomain.Command{
 			Id:               "1",
 			ProjectId:        "1",
 			Name:             "Test",
@@ -127,19 +130,20 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 
 		time.Sleep(100 * time.Millisecond)
 
-		assert.NotEmpty(t, r.runningCommands)
+		assert.NotEmpty(t, r.GetRunningCommands())
 
 		err = r.StopRunningCommand("1")
 		assert.NoError(t, err)
 
 		time.Sleep(100 * time.Millisecond)
-		assert.Empty(t, r.runningCommands)
+		assert.Empty(t, r.GetRunningCommands())
+		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
 	t.Run("Should return error when stopping non-existing command", func(t *testing.T) {
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
-		r := NewDefaulRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter)
 
 		err := r.StopRunningCommand("non-existing-command")
 		assert.Error(t, err)
@@ -152,7 +156,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
-		r := NewDefaulRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter)
 
 		emitter.On("EmitEvent", event.ProcessStarted, "1").Return()
 		emitter.On("EmitEvent", event.ProcessStarted, "2").Return()
@@ -161,9 +165,10 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
-		logger.On("Error", mock.Anything).Return()
+		// Depends on OS
+		logger.On("Error", mock.Anything).Maybe().Return()
 
-		err := r.RunCommand(commanddomain.Command{
+		err := r.RunCommand(&commanddomain.Command{
 			Id:               "1",
 			ProjectId:        "1",
 			Name:             "Test",
@@ -173,7 +178,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		err = r.RunCommand(commanddomain.Command{
+		err = r.RunCommand(&commanddomain.Command{
 			Id:               "2",
 			ProjectId:        "1",
 			Name:             "Test",
@@ -185,13 +190,13 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 
 		time.Sleep(100 * time.Millisecond)
 
-		assert.NotEmpty(t, r.runningCommands)
+		assert.NotEmpty(t, r.GetRunningCommands())
 
 		errs := r.StopAllRunningCommands()
 
 		time.Sleep(100 * time.Millisecond)
 		assert.Empty(t, errs)
-		assert.Empty(t, r.runningCommands)
+		assert.Empty(t, r.GetRunningCommands())
 	})
 }
 

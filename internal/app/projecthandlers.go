@@ -14,6 +14,11 @@ func (a *App) GetAvailableProjects() ([]domain.Project, error) {
 }
 
 func (a *App) OpenProject(projectConfigId string) error {
+	_, err := a.projectRepository.Get(projectConfigId)
+	if err != nil {
+		return err
+	}
+
 	config, err := a.userConfigRepository.GetOrCreate()
 	if err != nil {
 		return err

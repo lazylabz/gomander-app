@@ -1,4 +1,4 @@
-package app
+package app_test
 
 import (
 	"errors"
@@ -7,58 +7,19 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"gomander/internal/app"
 	"gomander/internal/config/domain"
 	"gomander/internal/event"
 )
 
-type MockRepository struct {
-	mock.Mock
-}
-
-func (m *MockRepository) GetOrCreate() (*domain.Config, error) {
-	args := m.Called()
-	return args.Get(0).(*domain.Config), args.Error(1)
-}
-
-func (m *MockRepository) Update(config *domain.Config) error {
-	args := m.Called(config)
-	return args.Error(0)
-}
-
-type MockLogger struct {
-	mock.Mock
-}
-
-func (m *MockLogger) Info(message string) {
-	m.Called(message)
-	return
-}
-
-func (m *MockLogger) Debug(message string) {
-	m.Called(message)
-	return
-}
-
-func (m *MockLogger) Error(message string) {
-	m.Called(message)
-	return
-}
-
-type MockEventEmitter struct {
-	mock.Mock
-}
-
-func (m *MockEventEmitter) EmitEvent(event event.Event, payload interface{}) {
-	m.Called(event, payload)
-	return
-}
-
 func TestApp_GetUserConfig(t *testing.T) {
-	mockRepository := new(MockRepository)
+	mockRepository := new(MockUserConfigRepository)
 
-	a := &App{
-		userConfigRepository: mockRepository,
-	}
+	a := app.NewApp()
+
+	a.LoadDependencies(app.Dependencies{
+		ConfigRepository: mockRepository,
+	})
 
 	expectedResult := domain.Config{
 		LastOpenedProjectId: "test-project-id",
@@ -80,15 +41,17 @@ func TestApp_GetUserConfig(t *testing.T) {
 func TestApp_SaveUserConfig(t *testing.T) {
 	t.Parallel()
 	t.Run("Should save user configuration successfully", func(t *testing.T) {
-		mockRepository := new(MockRepository)
+		mockRepository := new(MockUserConfigRepository)
 		mockEventEmitter := new(MockEventEmitter)
 		mockLogger := new(MockLogger)
 
-		a := &App{
-			userConfigRepository: mockRepository,
-			eventEmitter:         mockEventEmitter,
-			logger:               mockLogger,
-		}
+		a := app.NewApp()
+
+		a.LoadDependencies(app.Dependencies{
+			ConfigRepository: mockRepository,
+			EventEmitter:     mockEventEmitter,
+			Logger:           mockLogger,
+		})
 
 		newUserConfig := domain.Config{
 			LastOpenedProjectId: "new-project-id",
@@ -111,17 +74,20 @@ func TestApp_SaveUserConfig(t *testing.T) {
 		assert.NoError(t, err)
 
 		mockRepository.AssertCalled(t, "Update", &newUserConfig)
+		mock.AssertExpectationsForObjects(t, mockRepository, mockEventEmitter, mockLogger)
 	})
 	t.Run("Should fail to save user configuration", func(t *testing.T) {
-		mockRepository := new(MockRepository)
+		mockRepository := new(MockUserConfigRepository)
 		mockEventEmitter := new(MockEventEmitter)
 		mockLogger := new(MockLogger)
 
-		a := &App{
-			userConfigRepository: mockRepository,
-			eventEmitter:         mockEventEmitter,
-			logger:               mockLogger,
-		}
+		a := app.NewApp()
+
+		a.LoadDependencies(app.Dependencies{
+			ConfigRepository: mockRepository,
+			EventEmitter:     mockEventEmitter,
+			Logger:           mockLogger,
+		})
 
 		newUserConfig := domain.Config{
 			LastOpenedProjectId: "new-project-id",
@@ -143,5 +109,6 @@ func TestApp_SaveUserConfig(t *testing.T) {
 		assert.Error(t, err)
 
 		mockRepository.AssertCalled(t, "Update", &newUserConfig)
+		mock.AssertExpectationsForObjects(t, mockRepository, mockEventEmitter, mockLogger)
 	})
 }
