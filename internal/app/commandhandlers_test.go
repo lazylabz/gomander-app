@@ -52,15 +52,17 @@ func TestApp_GetCommands(t *testing.T) {
 	t.Run("Should return the commands provided by the repository", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			ConfigRepository:  mockConfigRepository,
+			ProjectRepository: mockProjectRepository,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		command1Data := testutils.
 			NewCommand().
@@ -93,6 +95,7 @@ func TestApp_AddCommand(t *testing.T) {
 	t.Run("Should add the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
 
@@ -101,11 +104,12 @@ func TestApp_AddCommand(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			ConfigRepository:  mockConfigRepository,
+			ProjectRepository: mockProjectRepository,
 			Logger:            mockLogger,
 			EventEmitter:      mockEventEmitter,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		existingCommandData := testutils.
 			NewCommand().
@@ -141,6 +145,7 @@ func TestApp_AddCommand(t *testing.T) {
 	t.Run("Should return an error if fails to get all commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
 
@@ -149,11 +154,12 @@ func TestApp_AddCommand(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			ConfigRepository:  mockConfigRepository,
+			ProjectRepository: mockProjectRepository,
 			Logger:            mockLogger,
 			EventEmitter:      mockEventEmitter,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		newCommandData := testutils.
 			NewCommand().
@@ -177,6 +183,7 @@ func TestApp_AddCommand(t *testing.T) {
 	t.Run("Should return an error if fails to create commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
 
@@ -185,11 +192,12 @@ func TestApp_AddCommand(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			ConfigRepository:  mockConfigRepository,
+			ProjectRepository: mockProjectRepository,
 			Logger:            mockLogger,
 			EventEmitter:      mockEventEmitter,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		existingCommandData := testutils.
 			NewCommand().
@@ -228,6 +236,7 @@ func TestApp_RemoveCommand(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
 
@@ -239,9 +248,10 @@ func TestApp_RemoveCommand(t *testing.T) {
 			ConfigRepository:       mockConfigRepository,
 			Logger:                 mockLogger,
 			EventEmitter:           mockEventEmitter,
+			ProjectRepository:      mockProjectRepository,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandId := "command1"
 
@@ -267,6 +277,7 @@ func TestApp_RemoveCommand(t *testing.T) {
 	t.Run("Should return an error if fails to remove the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
 
@@ -275,11 +286,12 @@ func TestApp_RemoveCommand(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			ConfigRepository:  mockConfigRepository,
+			ProjectRepository: mockProjectRepository,
 			Logger:            mockLogger,
 			EventEmitter:      mockEventEmitter,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandId := "command1"
 
@@ -301,6 +313,7 @@ func TestApp_RemoveCommand(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
 
@@ -312,9 +325,10 @@ func TestApp_RemoveCommand(t *testing.T) {
 			ConfigRepository:       mockConfigRepository,
 			Logger:                 mockLogger,
 			EventEmitter:           mockEventEmitter,
+			ProjectRepository:      mockProjectRepository,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandId := "command1"
 
@@ -340,6 +354,7 @@ func TestApp_EditCommand(t *testing.T) {
 	t.Run("Should edit the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
 
@@ -348,11 +363,12 @@ func TestApp_EditCommand(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			ConfigRepository:  mockConfigRepository,
+			ProjectRepository: mockProjectRepository,
 			Logger:            mockLogger,
 			EventEmitter:      mockEventEmitter,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandData := testutils.
 			NewCommand().
@@ -379,6 +395,7 @@ func TestApp_EditCommand(t *testing.T) {
 	t.Run("Should return an error if fails to edit the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
 
@@ -387,11 +404,12 @@ func TestApp_EditCommand(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			ConfigRepository:  mockConfigRepository,
+			ProjectRepository: mockProjectRepository,
 			Logger:            mockLogger,
 			EventEmitter:      mockEventEmitter,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandData := testutils.
 			NewCommand().
@@ -420,6 +438,7 @@ func TestApp_ReorderCommands(t *testing.T) {
 	t.Run("Should reorder commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
 
@@ -428,11 +447,12 @@ func TestApp_ReorderCommands(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			ConfigRepository:  mockConfigRepository,
+			ProjectRepository: mockProjectRepository,
 			Logger:            mockLogger,
 			EventEmitter:      mockEventEmitter,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		cmd1 := testutils.NewCommand().WithProjectId(projectId).WithPosition(0)
 		cmd2 := testutils.NewCommand().WithProjectId(projectId).WithPosition(1)
@@ -471,6 +491,7 @@ func TestApp_ReorderCommands(t *testing.T) {
 	t.Run("Should return an error if fails to retrieve commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
 
@@ -479,11 +500,12 @@ func TestApp_ReorderCommands(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			ConfigRepository:  mockConfigRepository,
+			ProjectRepository: mockProjectRepository,
 			Logger:            mockLogger,
 			EventEmitter:      mockEventEmitter,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		mockCommandRepository.On("GetAll", projectId).Return(
 			make([]commanddomain.Command, 0),
@@ -504,6 +526,7 @@ func TestApp_ReorderCommands(t *testing.T) {
 	t.Run("Should return an error if fails to update commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
 
@@ -512,11 +535,12 @@ func TestApp_ReorderCommands(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			ConfigRepository:  mockConfigRepository,
+			ProjectRepository: mockProjectRepository,
 			Logger:            mockLogger,
 			EventEmitter:      mockEventEmitter,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		cmd1 := testutils.NewCommand().WithProjectId(projectId).WithPosition(0)
 		cmd2 := testutils.NewCommand().WithProjectId(projectId).WithPosition(1)
@@ -586,9 +610,6 @@ func TestApp_RunCommand(t *testing.T) {
 
 		mockConfigRepository.On("Update", mock.Anything).Return(nil)
 
-		err := a.OpenProject(projectId)
-		assert.NoError(t, err)
-
 		cmdData := testutils.
 			NewCommand().
 			WithProjectId(projectId).
@@ -608,6 +629,9 @@ func TestApp_RunCommand(t *testing.T) {
 		mockLogger.On("Info", mock.Anything).Return()
 
 		mockRunner.On("RunCommand", &cmd, []string{"/1"}, project.WorkingDirectory).Return(nil)
+
+		err := a.OpenProject(projectId)
+		assert.NoError(t, err)
 
 		err = a.RunCommand(cmd.Id)
 		assert.NoError(t, err)
@@ -649,6 +673,7 @@ func TestApp_RunCommand(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve the user config", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
 
@@ -656,6 +681,7 @@ func TestApp_RunCommand(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			ConfigRepository:  mockConfigRepository,
+			ProjectRepository: mockProjectRepository,
 			Logger:            mockLogger,
 			EventEmitter:      mockEventEmitter,
 		})
@@ -696,7 +722,7 @@ func TestApp_RunCommand(t *testing.T) {
 		})
 
 		projectId := "project1"
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		cmdData := testutils.NewCommand().WithProjectId(projectId).Data()
 		cmd := commandDataToDomain(cmdData)
@@ -752,9 +778,6 @@ func TestApp_RunCommand(t *testing.T) {
 
 		mockConfigRepository.On("Update", mock.Anything).Return(nil)
 
-		err := a.OpenProject(projectId)
-		assert.NoError(t, err)
-
 		cmdData := testutils.
 			NewCommand().
 			WithProjectId(projectId).
@@ -775,6 +798,9 @@ func TestApp_RunCommand(t *testing.T) {
 		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 
 		mockRunner.On("RunCommand", &cmd, []string{"/1"}, project.WorkingDirectory).Return(errors.New("failed to run command"))
+
+		err := a.OpenProject(projectId)
+		assert.NoError(t, err)
 
 		err = a.RunCommand(cmd.Id)
 		assert.Error(t, err)

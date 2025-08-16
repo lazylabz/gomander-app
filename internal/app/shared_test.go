@@ -61,13 +61,17 @@ func (m *MockUserConfigRepository) Update(config *domain.Config) error {
 	return args.Error(0)
 }
 
-func openProjectHelper(t *testing.T, mockConfigRepository *MockUserConfigRepository, a *app.App, projectId string) {
+func openProjectHelper(t *testing.T, mockConfigRepository *MockUserConfigRepository, mockProjectRepository *MockProjectRepository, a *app.App, projectId string) {
 	t.Helper()
+	mockProjectRepository.On("Get", projectId).Return(&projectdomain.Project{
+		Id:   projectId,
+		Name: "Test Project",
+	}, nil).Once()
 	mockConfigRepository.On("GetOrCreate").Return(&domain.Config{
 		LastOpenedProjectId: "",
 		EnvironmentPaths:    make([]domain.EnvironmentPath, 0),
-	}, nil)
-	mockConfigRepository.On("Update", mock.Anything).Return(nil)
+	}, nil).Once()
+	mockConfigRepository.On("Update", mock.Anything).Once().Return(nil)
 
 	err := a.OpenProject(projectId)
 	assert.NoError(t, err)

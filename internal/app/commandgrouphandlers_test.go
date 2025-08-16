@@ -17,15 +17,17 @@ func TestApp_GetCommandGroups(t *testing.T) {
 	t.Run("Should return the command groups provided by the command group repository", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -52,6 +54,7 @@ func TestApp_CreateCommandGroup(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockEventEmitter := new(MockEventEmitter)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 
 		projectId := "project1"
 
@@ -61,9 +64,10 @@ func TestApp_CreateCommandGroup(t *testing.T) {
 			CommandGroupRepository: mockCommandGroupRepository,
 			EventEmitter:           mockEventEmitter,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		otherCommandGroupData := testutils.
 			NewCommandGroup().
@@ -100,6 +104,7 @@ func TestApp_CreateCommandGroup(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve existing command groups", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 
 		projectId := "project1"
 
@@ -107,9 +112,10 @@ func TestApp_CreateCommandGroup(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -130,6 +136,7 @@ func TestApp_CreateCommandGroup(t *testing.T) {
 	t.Run("Should return an error if failing to save the command group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 
 		projectId := "project1"
 
@@ -137,9 +144,10 @@ func TestApp_CreateCommandGroup(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -165,6 +173,7 @@ func TestApp_UpdateCommandGroup(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockEventEmitter := new(MockEventEmitter)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 
 		projectId := "project1"
 
@@ -173,9 +182,10 @@ func TestApp_UpdateCommandGroup(t *testing.T) {
 			CommandGroupRepository: mockCommandGroupRepository,
 			EventEmitter:           mockEventEmitter,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -198,6 +208,7 @@ func TestApp_UpdateCommandGroup(t *testing.T) {
 	t.Run("Should return an error if failing to update the command group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 
 		projectId := "project1"
 
@@ -205,9 +216,10 @@ func TestApp_UpdateCommandGroup(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -230,6 +242,7 @@ func TestApp_DeleteCommandGroup(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockEventEmitter := new(MockEventEmitter)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 
 		projectId := "project1"
 
@@ -238,9 +251,10 @@ func TestApp_DeleteCommandGroup(t *testing.T) {
 			CommandGroupRepository: mockCommandGroupRepository,
 			EventEmitter:           mockEventEmitter,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -263,6 +277,7 @@ func TestApp_DeleteCommandGroup(t *testing.T) {
 	t.Run("Should return an error if failing to delete the command group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 
 		projectId := "project1"
 
@@ -270,9 +285,10 @@ func TestApp_DeleteCommandGroup(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -296,6 +312,7 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 	t.Run("Should reorder command groups based on the provided IDs", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
@@ -304,10 +321,11 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 			EventEmitter:           mockEventEmitter,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandGroupData1 := testutils.
 			NewCommandGroup().
@@ -345,6 +363,7 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve existing command groups", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 
 		projectId := "project1"
 
@@ -352,9 +371,10 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		newOrder := []string{"group1", "group2"}
 
@@ -365,6 +385,7 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 	t.Run("Should return an error if failing to update a command group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 
 		projectId := "project1"
 
@@ -372,9 +393,10 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandGroupData1 := testutils.
 			NewCommandGroup().
@@ -403,6 +425,7 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 	t.Run("Should remove command from command groups", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
@@ -411,10 +434,11 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 			EventEmitter:           mockEventEmitter,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandData := testutils.
 			NewCommand().
@@ -458,6 +482,7 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 	t.Run("Should remove remove a command group if it becomes empty", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
@@ -466,10 +491,11 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 			EventEmitter:           mockEventEmitter,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandData := testutils.
 			NewCommand().
@@ -512,6 +538,7 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve command groups", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
 
@@ -521,11 +548,12 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 			Logger:                 mockLogger,
 			EventEmitter:           mockEventEmitter,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandData := testutils.
 			NewCommand().
@@ -548,6 +576,7 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 	t.Run("Should return an error if failing to update command groups", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockEventEmitter := new(MockEventEmitter)
 		mockLogger := new(MockLogger)
 
@@ -557,11 +586,12 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 			EventEmitter:           mockEventEmitter,
 			Logger:                 mockLogger,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandData := testutils.
 			NewCommand().
@@ -606,6 +636,7 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 	t.Run("Should return an error if failing to delete a command group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
+		mockProjectRepository := new(MockProjectRepository)
 		mockEventEmitter := new(MockEventEmitter)
 		mockLogger := new(MockLogger)
 
@@ -615,11 +646,12 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
 			EventEmitter:           mockEventEmitter,
 			Logger:                 mockLogger,
 		})
 
-		openProjectHelper(t, mockConfigRepository, a, projectId)
+		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandData := testutils.
 			NewCommand().
