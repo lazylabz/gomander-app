@@ -26,6 +26,8 @@ type App struct {
 	commandGroupRepository commandgroupdomain.Repository
 	projectRepository      projectdomain.Repository
 	userConfigRepository   configdomain.Repository
+
+	fsFacade FsFacade
 }
 
 type Dependencies struct {
@@ -36,6 +38,7 @@ type Dependencies struct {
 	CommandGroupRepository commandgroupdomain.Repository
 	ProjectRepository      projectdomain.Repository
 	ConfigRepository       configdomain.Repository
+	FsFacade               FsFacade
 }
 
 func (a *App) LoadDependencies(d Dependencies) {
@@ -47,6 +50,9 @@ func (a *App) LoadDependencies(d Dependencies) {
 	a.commandGroupRepository = d.CommandGroupRepository
 	a.projectRepository = d.ProjectRepository
 	a.userConfigRepository = d.ConfigRepository
+	a.fsFacade = d.FsFacade
+
+	a.ctx = context.Background()
 }
 
 // NewApp creates a new App application struct

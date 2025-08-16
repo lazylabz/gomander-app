@@ -123,7 +123,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	// Initialize deps
 	l := logger.NewDefaultLogger(ctx)
 	ee := event.NewDefaultEventEmitter(ctx)
-	r := runner.NewDefaulRunner(l, ee)
+	r := runner.NewDefaultRunner(l, ee)
 
 	// Initialize repos
 	comandRepo := commmandinfrastructure.NewGormCommandRepository(gormDb, ctx)
@@ -140,5 +140,6 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 		CommandGroupRepository: comandGroupRepo,
 		ProjectRepository:      projectRepo,
 		ConfigRepository:       configRepo,
+		FsFacade:               internalapp.DefaultFsFacade{},
 	})
 }
