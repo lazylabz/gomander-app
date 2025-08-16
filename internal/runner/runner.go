@@ -31,12 +31,12 @@ type DefaultRunner struct {
 }
 
 type Runner interface {
-	RunCommand(command domain.Command, environmentPaths []string, baseWorkingDirectory string) error
+	RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string) error
 	StopRunningCommand(id string) error
 	StopAllRunningCommands() []error
 }
 
-func NewDefaulRunner(logger logger.Logger, emitter event.EventEmitter) *DefaultRunner {
+func NewDefaultRunner(logger logger.Logger, emitter event.EventEmitter) *DefaultRunner {
 	return &DefaultRunner{
 		runningCommands: make(map[string]*exec.Cmd),
 		eventEmitter:    emitter,
@@ -45,7 +45,7 @@ func NewDefaulRunner(logger logger.Logger, emitter event.EventEmitter) *DefaultR
 }
 
 // RunCommand executes a command and streams its output.
-func (c *DefaultRunner) RunCommand(command domain.Command, environmentPaths []string, baseWorkingDirectory string) error {
+func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string) error {
 	// Get the project object based on the project string and OS
 	cmd := platform.GetCommand(command.Command)
 
@@ -159,7 +159,7 @@ func (c *DefaultRunner) streamOutput(commandId string, pipeReader io.ReadCloser)
 	}
 }
 
-func (c *DefaultRunner) sendStreamErrorWhileStartingCommand(command domain.Command, err error) {
+func (c *DefaultRunner) sendStreamErrorWhileStartingCommand(command *domain.Command, err error) {
 	c.sendStreamLine(command.Id, err.Error())
 	c.logger.Error(err.Error())
 	c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
