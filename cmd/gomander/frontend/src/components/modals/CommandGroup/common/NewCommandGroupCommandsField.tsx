@@ -15,6 +15,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { ChevronRight, X } from "lucide-react";
 import { useMemo } from "react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -31,7 +32,13 @@ import type { Command } from "@/contracts/types.ts";
 import { isDefined } from "@/helpers/mapHelpers.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 
-const DraggableCommandItem = ({ command }: { command: Command }) => {
+const DraggableCommandItem = ({
+  command,
+  rightComponent,
+}: {
+  command: Command;
+  rightComponent?: React.ReactNode;
+}) => {
   const {
     attributes,
     listeners,
@@ -51,11 +58,13 @@ const DraggableCommandItem = ({ command }: { command: Command }) => {
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      className="flex items-center gap-2 p-3 bg-card border rounded cursor-grab active:cursor-grabbing hover:bg-accent transition-colors"
+      className="flex items-center p-1.5 pl-3 bg-card border rounded hover:bg-accent transition-colors"
     >
-      <span className="text-sm">{command.name}</span>
+      <div {...attributes} {...listeners} className="flex-1 cursor-grab">
+        <span className="text-sm">{command.name}</span>
+      </div>
+
+      {rightComponent}
     </div>
   );
 };
@@ -80,7 +89,7 @@ const DroppableContainer = ({
       </h4>
       <div
         ref={setNodeRef}
-        className="h-[calc(100%-2rem)] max-h-80 p-3 border rounded-lg overflow-y-auto overflow-x-hidden"
+        className="h-80 max-h-[calc(100vh-400px)] p-3 border rounded-lg overflow-y-auto overflow-x-hidden"
       >
         <div className="space-y-2">{children}</div>
         {React.Children.count(children) === 0 && (
@@ -228,7 +237,7 @@ export const NewCommandGroupCommandsField = () => {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
-            <div className="flex gap-6">
+            <div className="flex gap-6 select-none">
               <SortableContext
                 items={availableCommands.map((cmd) => cmd.id)}
                 strategy={verticalListSortingStrategy}
@@ -239,7 +248,19 @@ export const NewCommandGroupCommandsField = () => {
                   className="flex-1"
                 >
                   {availableCommands.map((command) => (
-                    <DraggableCommandItem key={command.id} command={command} />
+                    <DraggableCommandItem
+                      key={command.id}
+                      command={command}
+                      rightComponent={
+                        <button
+                          type="button"
+                          className="cursor-pointer flex items-center justify-center p-2 rounded bg-neutral-100 text-neutral-900 shadow-xs hover:bg-neutral-100/80 dark:bg-neutral-800 dark:text-neutral-50 dark:hover:bg-neutral-800/80 transition-colors"
+                          onClick={() => {}}
+                        >
+                          <ChevronRight className="size-4" />
+                        </button>
+                      }
+                    />
                   ))}
                 </DroppableContainer>
               </SortableContext>
@@ -254,7 +275,19 @@ export const NewCommandGroupCommandsField = () => {
                   className="flex-1"
                 >
                   {addedCommands.map((command) => (
-                    <DraggableCommandItem key={command.id} command={command} />
+                    <DraggableCommandItem
+                      key={command.id}
+                      command={command}
+                      rightComponent={
+                        <button
+                          type="button"
+                          className="cursor-pointer flex items-center justify-center p-2 rounded bg-neutral-100 text-neutral-900 shadow-xs hover:bg-neutral-100/80 dark:bg-neutral-800 dark:text-neutral-50 dark:hover:bg-neutral-800/80 transition-colors"
+                          onClick={() => {}}
+                        >
+                          <X className="size-4" />
+                        </button>
+                      }
+                    />
                   ))}
                 </DroppableContainer>
               </SortableContext>
