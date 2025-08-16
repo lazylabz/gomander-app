@@ -34,8 +34,9 @@ type ProjectExportJSONv1 struct {
 
 func (a *App) ExportProject(projectConfigId string) (err error) {
 	project, err := a.projectRepository.Get(projectConfigId)
-	commands, err := a.commandRepository.GetAll(projectConfigId)
-	commandGroups, err := a.commandGroupRepository.GetAll(projectConfigId)
+	if err != nil {
+		return err
+	}
 
 	filePath, err := a.runtimeFacade.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{Title: "Select a destination", CanCreateDirectories: true, DefaultFilename: project.Name + ".json"})
 	if err != nil {
@@ -44,6 +45,15 @@ func (a *App) ExportProject(projectConfigId string) (err error) {
 
 	if filePath == "" {
 		return nil
+	}
+
+	commands, err := a.commandRepository.GetAll(projectConfigId)
+	if err != nil {
+		return err
+	}
+	commandGroups, err := a.commandGroupRepository.GetAll(projectConfigId)
+	if err != nil {
+		return err
 	}
 
 	exportData := ProjectExportJSONv1{
