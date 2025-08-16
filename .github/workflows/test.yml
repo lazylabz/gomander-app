@@ -32,6 +32,11 @@ jobs:
     - name: Verify dependencies
       run: go mod verify
 
+    - name: Create dummy frontend/dist directory
+      run: |
+        mkdir -p cmd/gomander/frontend/dist
+        echo "dummy" > cmd/gomander/frontend/dist/.dummy
+
     - name: Run tests
       run: go test -v ./...
       # Uncomment the next line to enable coverage reporting
