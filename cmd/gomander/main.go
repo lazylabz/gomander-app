@@ -141,5 +141,6 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 		ProjectRepository:      projectRepo,
 		ConfigRepository:       configRepo,
 		FsFacade:               internalapp.DefaultFsFacade{},
+		RuntimeFacade:          internalapp.DefaultRuntimeFacade{},
 	})
 }

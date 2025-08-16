@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/json"
-	"os"
 
 	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -33,27 +32,12 @@ type ProjectExportJSONv1 struct {
 	CommandGroups []CommandGroupJSONv1 `json:"commandGroups"`
 }
 
-type FsFacade interface {
-	WriteFile(path string, data []byte, perm os.FileMode) error
-	ReadFile(path string) ([]byte, error)
-}
-
-type DefaultFsFacade struct{}
-
-func (d DefaultFsFacade) WriteFile(path string, data []byte, perm os.FileMode) error {
-	return os.WriteFile(path, data, perm)
-}
-
-func (d DefaultFsFacade) ReadFile(path string) ([]byte, error) {
-	return os.ReadFile(path)
-}
-
 func (a *App) ExportProject(projectConfigId string) (err error) {
 	project, err := a.projectRepository.Get(projectConfigId)
 	commands, err := a.commandRepository.GetAll(projectConfigId)
 	commandGroups, err := a.commandGroupRepository.GetAll(projectConfigId)
 
-	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{Title: "Select a destination", CanCreateDirectories: true, DefaultFilename: project.Name + ".json"})
+	filePath, err := a.runtimeFacade.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{Title: "Select a destination", CanCreateDirectories: true, DefaultFilename: project.Name + ".json"})
 	if err != nil {
 		return err
 	}
@@ -178,7 +162,7 @@ func (a *App) ImportProject(projectJSON ProjectExportJSONv1, name, workingDirect
 }
 
 func (a *App) GetProjectToImport() (projectJSON *ProjectExportJSONv1, err error) {
-	filePath, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
+	filePath, err := a.runtimeFacade.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
 		Title:   "Select a project file",
 		Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}},
 	})

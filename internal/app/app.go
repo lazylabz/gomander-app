@@ -27,7 +27,8 @@ type App struct {
 	projectRepository      projectdomain.Repository
 	userConfigRepository   configdomain.Repository
 
-	fsFacade FsFacade
+	fsFacade      FsFacade
+	runtimeFacade RuntimeFacade
 }
 
 type Dependencies struct {
@@ -39,6 +40,7 @@ type Dependencies struct {
 	ProjectRepository      projectdomain.Repository
 	ConfigRepository       configdomain.Repository
 	FsFacade               FsFacade
+	RuntimeFacade          RuntimeFacade
 }
 
 func (a *App) LoadDependencies(d Dependencies) {
@@ -51,6 +53,7 @@ func (a *App) LoadDependencies(d Dependencies) {
 	a.projectRepository = d.ProjectRepository
 	a.userConfigRepository = d.ConfigRepository
 	a.fsFacade = d.FsFacade
+	a.runtimeFacade = d.RuntimeFacade
 
 	a.ctx = context.Background()
 }
