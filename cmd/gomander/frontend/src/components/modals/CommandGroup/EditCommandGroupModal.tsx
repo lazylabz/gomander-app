@@ -2,12 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Group } from "lucide-react";
 import { useForm } from "react-hook-form";
 
+import { CommandGroupCommandsField } from "@/components/modals/CommandGroup/common/CommandGroupCommandsField/CommandGroupCommandsField.tsx";
 import { CommandGroupNameField } from "@/components/modals/CommandGroup/common/CommandGroupNameField.tsx";
 import {
   formSchema,
   type FormSchemaType,
 } from "@/components/modals/CommandGroup/common/formSchema.ts";
-import { NewCommandGroupCommandsField } from "@/components/modals/CommandGroup/common/NewCommandGroupCommandsField.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import {
   Dialog,
@@ -73,7 +73,7 @@ export const EditCommandGroupModal = ({
             </DialogHeader>
             <div className="space-y-6 mt-4 mb-2">
               <CommandGroupNameField />
-              <NewCommandGroupCommandsField />
+              <CommandGroupCommandsField />
             </div>
             <DialogFooter>
               <DialogClose asChild>
