@@ -5,7 +5,7 @@ export const formSchema = z.object({
     message: "Command group name is required",
   }),
   commands: z.array(z.string()).min(1, {
-    message: "You have to select at least one item.",
+    message: "You must add at least one command to the group",
   }),
 });
 export type FormSchemaType = z.infer<typeof formSchema>;

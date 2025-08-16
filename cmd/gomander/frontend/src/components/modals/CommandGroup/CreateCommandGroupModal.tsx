@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Group } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { CommandGroupCommandsField } from "@/components/modals/CommandGroup/common/CommandGroupCommandsField.tsx";
+import { CommandGroupCommandsField } from "@/components/modals/CommandGroup/common/CommandGroupCommandsField/CommandGroupCommandsField.tsx";
 import { CommandGroupNameField } from "@/components/modals/CommandGroup/common/CommandGroupNameField.tsx";
 import {
   formSchema,
@@ -64,14 +64,14 @@ export const CreateCommandGroupModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[628px]">
+      <DialogContent className="sm:max-w-[628px] lg:max-w-3xl">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
             <DialogHeader className="flex flex-row items-center gap-2">
               <Group />
               <DialogTitle>Create new command group</DialogTitle>
             </DialogHeader>
-            <div className="space-y-6 my-4">
+            <div className="space-y-6 mt-4 mb-2">
               <CommandGroupNameField />
               <CommandGroupCommandsField />
             </div>
