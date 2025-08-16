@@ -150,6 +150,16 @@ export const NewCommandGroupCommandsField = () => {
     return null;
   };
 
+  const addCommand = (commandId: string) => {
+    const newSelected = [...selectedCommandIds, commandId];
+    form.setValue("commands", newSelected);
+  };
+
+  const removeCommand = (commandId: string) => {
+    const newSelected = selectedCommandIds.filter((id) => id !== commandId);
+    form.setValue("commands", newSelected);
+  };
+
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
 
@@ -175,16 +185,12 @@ export const NewCommandGroupCommandsField = () => {
       activeContainer === AVAILABLE_COMMANDS &&
       overContainer === ADDED_COMMANDS
     ) {
-      // Add command to the selected commands list
-      const newSelected = [...selectedCommandIds, commandId];
-      form.setValue("commands", newSelected);
+      addCommand(commandId);
     } else if (
       activeContainer === ADDED_COMMANDS &&
       overContainer === AVAILABLE_COMMANDS
     ) {
-      // Remove command from the selected commands list
-      const newSelected = selectedCommandIds.filter((id) => id !== commandId);
-      form.setValue("commands", newSelected);
+      removeCommand(commandId);
     }
   };
 
@@ -255,7 +261,7 @@ export const NewCommandGroupCommandsField = () => {
                         <button
                           type="button"
                           className="cursor-pointer flex items-center justify-center p-2 rounded bg-neutral-100 text-neutral-900 shadow-xs hover:bg-neutral-100/80 dark:bg-neutral-800 dark:text-neutral-50 dark:hover:bg-neutral-800/80 transition-colors"
-                          onClick={() => {}}
+                          onClick={() => addCommand(command.id)}
                         >
                           <ChevronRight className="size-4" />
                         </button>
@@ -282,7 +288,7 @@ export const NewCommandGroupCommandsField = () => {
                         <button
                           type="button"
                           className="cursor-pointer flex items-center justify-center p-2 rounded bg-neutral-100 text-neutral-900 shadow-xs hover:bg-neutral-100/80 dark:bg-neutral-800 dark:text-neutral-50 dark:hover:bg-neutral-800/80 transition-colors"
-                          onClick={() => {}}
+                          onClick={() => removeCommand(command.id)}
                         >
                           <X className="size-4" />
                         </button>
