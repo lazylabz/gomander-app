@@ -33,6 +33,21 @@ type ProjectExportJSONv1 struct {
 	CommandGroups []CommandGroupJSONv1 `json:"commandGroups"`
 }
 
+type FsFacade interface {
+	WriteFile(path string, data []byte, perm os.FileMode) error
+	ReadFile(path string) ([]byte, error)
+}
+
+type DefaultFsFacade struct{}
+
+func (d DefaultFsFacade) WriteFile(path string, data []byte, perm os.FileMode) error {
+	return os.WriteFile(path, data, perm)
+}
+
+func (d DefaultFsFacade) ReadFile(path string) ([]byte, error) {
+	return os.ReadFile(path)
+}
+
 func (a *App) ExportProject(projectConfigId string) (err error) {
 	project, err := a.projectRepository.Get(projectConfigId)
 	commands, err := a.commandRepository.GetAll(projectConfigId)
@@ -72,29 +87,21 @@ func (a *App) ExportProject(projectConfigId string) (err error) {
 		})
 	}
 
-	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to open file for writing: "+err.Error())
-		return err
-	}
-
-	defer func(file *os.File) {
-		closeErr := file.Close()
-		if err != nil && closeErr != nil {
-			err = closeErr
-		}
-	}(file)
-
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", "  ")
-	err = encoder.Encode(exportData)
+	jsonData, err := json.MarshalIndent(exportData, "", "  ")
 	if err != nil {
 		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to encode project data: "+err.Error())
 		return err
 	}
-	a.eventEmitter.EmitEvent(event.SuccessNotification, "Project exported successfully to "+filePath)
 
-	return
+	// Write directly to file
+	err = a.fsFacade.WriteFile(filePath, jsonData, 0644)
+	if err != nil {
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to write file: "+err.Error())
+		return err
+	}
+
+	a.eventEmitter.EmitEvent(event.SuccessNotification, "Project exported successfully to "+filePath)
+	return nil
 }
 
 func (a *App) ImportProject(projectJSON ProjectExportJSONv1, name, workingDirectory string) error {
@@ -171,26 +178,27 @@ func (a *App) ImportProject(projectJSON ProjectExportJSONv1, name, workingDirect
 }
 
 func (a *App) GetProjectToImport() (projectJSON *ProjectExportJSONv1, err error) {
-	filePath, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{Title: "Select a project file", Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}}})
+	filePath, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
+		Title:   "Select a project file",
+		Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}},
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	file, err := os.Open(filePath)
+	if filePath == "" {
+		return nil, nil // User canceled
+	}
+
+	// Read entire file into memory
+	fileData, err := a.fsFacade.ReadFile(filePath)
 	if err != nil {
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to open file: "+err.Error())
+		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to read file: "+err.Error())
 		return nil, err
 	}
 
-	defer func(file *os.File) {
-		closeErr := file.Close()
-		if err != nil && closeErr != nil {
-			err = closeErr
-		}
-	}(file)
-
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&projectJSON)
+	// Unmarshal JSON data
+	err = json.Unmarshal(fileData, &projectJSON)
 	if err != nil {
 		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to decode project data: "+err.Error())
 		return nil, err
