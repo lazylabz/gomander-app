@@ -28,22 +28,25 @@ type App struct {
 	userConfigRepository   configdomain.Repository
 }
 
-func (a *App) LoadDependencies(l logger.Logger,
-	ee event.EventEmitter,
-	r runner.Runner,
-	commandRepository commanddomain.Repository,
-	commandGroupRepository commandgroupdomain.Repository,
-	projectRepository projectdomain.Repository,
-	configRepository configdomain.Repository,
-) {
-	a.logger = l
-	a.eventEmitter = ee
-	a.commandRunner = r
+type Dependencies struct {
+	Logger                 logger.Logger
+	EventEmitter           event.EventEmitter
+	Runner                 runner.Runner
+	CommandRepository      commanddomain.Repository
+	CommandGroupRepository commandgroupdomain.Repository
+	ProjectRepository      projectdomain.Repository
+	ConfigRepository       configdomain.Repository
+}
 
-	a.commandRepository = commandRepository
-	a.commandGroupRepository = commandGroupRepository
-	a.projectRepository = projectRepository
-	a.userConfigRepository = configRepository
+func (a *App) LoadDependencies(d Dependencies) {
+	a.logger = d.Logger
+	a.eventEmitter = d.EventEmitter
+	a.commandRunner = d.Runner
+
+	a.commandRepository = d.CommandRepository
+	a.commandGroupRepository = d.CommandGroupRepository
+	a.projectRepository = d.ProjectRepository
+	a.userConfigRepository = d.ConfigRepository
 }
 
 // NewApp creates a new App application struct

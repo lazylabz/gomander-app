@@ -132,5 +132,13 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	configRepo := configinfrastructure.NewGormConfigRepository(gormDb, ctx)
 
 	// Initialize event emitter
-	app.LoadDependencies(l, ee, r, comandRepo, comandGroupRepo, projectRepo, configRepo)
+	app.LoadDependencies(internalapp.Dependencies{
+		Logger:                 l,
+		EventEmitter:           ee,
+		Runner:                 r,
+		CommandRepository:      comandRepo,
+		CommandGroupRepository: comandGroupRepo,
+		ProjectRepository:      projectRepo,
+		ConfigRepository:       configRepo,
+	})
 }
