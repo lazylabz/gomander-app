@@ -4,7 +4,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { ChevronDown, Settings } from "lucide-react";
+import { ArrowUpDown, ChevronDown, Settings } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -33,7 +33,13 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar.tsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip.tsx";
 import type { Command, CommandGroup } from "@/contracts/types.ts";
+import { cn } from "@/lib/utils";
 import { ScreenRoutes } from "@/routes.ts";
 import { SettingsTab } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
@@ -43,6 +49,9 @@ import { closeProject } from "@/useCases/project/closeProject.ts";
 
 export const AppSidebar = () => {
   const commandGroups = useCommandGroupStore((state) => state.commandGroups);
+  const setCommandGroups = useCommandGroupStore(
+    (state) => state.setCommandGroups,
+  );
   const project = useProjectStore((state) => state.projectInfo);
 
   const navigate = useNavigate();
@@ -52,6 +61,8 @@ export const AppSidebar = () => {
     useState<CommandGroup | null>(null);
 
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
+
+  const [isReorderingGroups, setIsReorderingGroups] = useState(false);
 
   const closeEditCommandModal = () => {
     setEditingCommand(null);
@@ -66,13 +77,19 @@ export const AppSidebar = () => {
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
+    const ogGroups = [...commandGroups];
     const { active, over } = event;
 
     if (active.id && over?.id && active.id !== over.id) {
-      const oldIndex = commandGroups.findIndex((cg) => cg.id === active.id);
-      const newIndex = commandGroups.findIndex((cg) => cg.id === over.id);
-      const newCommandGroups = arrayMove(commandGroups, oldIndex, newIndex);
-      await reorderCommandGroups(newCommandGroups.map((cg) => cg.id));
+      const oldIndex = ogGroups.findIndex((cg) => cg.id === active.id);
+      const newIndex = ogGroups.findIndex((cg) => cg.id === over.id);
+      const newCommandGroups = arrayMove(ogGroups, oldIndex, newIndex);
+      setCommandGroups(newCommandGroups);
+      try {
+        await reorderCommandGroups(newCommandGroups.map((cg) => cg.id));
+      } catch {
+        setCommandGroups(ogGroups);
+      }
     }
   };
 
@@ -81,12 +98,17 @@ export const AppSidebar = () => {
     navigate(ScreenRoutes.ProjectSelection);
   };
 
+  const toggleReorderingMode = () => {
+    setIsReorderingGroups((prev) => !prev);
+  };
+
   return (
     <sidebarContext.Provider
       value={{
         startEditingCommand: (command: Command) => setEditingCommand(command),
         startEditingCommandGroup: (commandGroup: CommandGroup) =>
           setEditingCommandGroup(commandGroup),
+        isReorderingGroups,
       }}
     >
       <EditCommandModal
@@ -130,9 +152,27 @@ export const AppSidebar = () => {
         </SidebarHeader>
         <SidebarContent className="gap-0">
           <AllCommandsSection />
-          <h3 className="text-sm pl-4 mt-4 mb-1 text-muted-foreground">
-            Command groups
-          </h3>
+          <div className="flex items-center pl-4 pr-2 mt-4 mb-1 gap-2">
+            <h3 className="text-sm text-muted-foreground">Command groups</h3>
+            <Tooltip delayDuration={1000}>
+              <TooltipContent>
+                {isReorderingGroups ? "Apply reordering" : "Start reordering"}
+              </TooltipContent>
+              <TooltipTrigger>
+                <button
+                  onClick={toggleReorderingMode}
+                  className={cn(
+                    "p-1 rounded hover:bg-sidebar-accent transition-colors border border-transparent",
+                    isReorderingGroups
+                      ? "text-primary bg-sidebar-accent border-muted-foreground"
+                      : "text-muted-foreground hover:text-primary",
+                  )}
+                >
+                  <ArrowUpDown size={14} />
+                </button>
+              </TooltipTrigger>
+            </Tooltip>
+          </div>
           <DndContext onDragEnd={handleDragEnd}>
             <SortableContext
               items={commandGroups.map((cg) => cg.id)}

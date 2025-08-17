@@ -99,11 +99,16 @@ export const CommandMenuItem = ({
         <SidebarMenuButton asChild className={className}>
           <div
             onClick={onCommandSectionClick}
-            className="flex flex-row justify-between items-center w-full"
+            className="flex flex-row justify-between items-center w-full select-none"
             ref={setNodeRef}
             style={style}
           >
-            <div className="flex items-center gap-1 w-full text-sm text-sidebar-foreground">
+            <div
+              className={cn(
+                "flex items-center gap-1 w-full text-sm text-sidebar-foreground",
+                !draggable && "pl-2",
+              )}
+            >
               {draggable && (
                 <div
                   {...attributes}
@@ -113,7 +118,7 @@ export const CommandMenuItem = ({
                   <GripVertical size={14} className="text-muted-foreground" />
                 </div>
               )}
-              {command.name}
+              <span className="cursor-default">{command.name}</span>
             </div>
             {isIdle && (
               <Play
