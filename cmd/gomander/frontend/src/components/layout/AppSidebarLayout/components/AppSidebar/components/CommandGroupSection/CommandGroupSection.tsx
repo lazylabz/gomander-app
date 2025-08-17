@@ -1,21 +1,10 @@
-import { DndContext, type DragEndEvent } from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Folder, FolderOpen, GripVertical, Play, Square } from "lucide-react";
-import type { SyntheticEvent } from "react";
+import { Folder, FolderOpen, Play, Square } from "lucide-react";
+import { type SyntheticEvent, useState } from "react";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
 import { useSidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible.tsx";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -30,10 +19,10 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
 import type { Command, CommandGroup } from "@/contracts/types.ts";
+import { cn } from "@/lib/utils.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { deleteCommandGroup } from "@/useCases/commandGroup/deleteCommandGroup.ts";
-import { reorderCommandGroupCommands } from "@/useCases/commandGroup/reoderCommandGroupCommands.ts";
 import { runCommandGroup } from "@/useCases/commandGroup/runCommandGroup.ts";
 import { stopCommandGroup } from "@/useCases/commandGroup/stopCommandGroup.ts";
 
@@ -44,10 +33,13 @@ export const CommandGroupSection = ({
 }) => {
   const commandsStatus = useCommandStore((state) => state.commandsStatus);
 
-  const { startEditingCommandGroup } = useSidebarContext();
+  const { startEditingCommandGroup, isReorderingGroups } = useSidebarContext();
+
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = internalIsOpen && !isReorderingGroups;
 
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: commandGroup.id });
+    useSortable({ id: commandGroup.id, disabled: !isReorderingGroups });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -67,6 +59,8 @@ export const CommandGroupSection = ({
   const run = (e: SyntheticEvent) => {
     // Prevent the folder from collapsing when clicking the play button
     e.stopPropagation();
+
+    if (isReorderingGroups) return;
     runCommandGroup(commandGroup.id);
   };
 
@@ -74,84 +68,48 @@ export const CommandGroupSection = ({
     // Prevent the folder from collapsing when clicking the stop button
     e.stopPropagation();
 
+    if (isReorderingGroups) return;
     stopCommandGroup(commandGroup.id);
   };
 
   const handleDelete = async () => {
+    if (isReorderingGroups) return;
     await deleteCommandGroup(commandGroup.id);
   };
 
   const handleEdit = () => {
+    if (isReorderingGroups) return;
     startEditingCommandGroup(commandGroup);
   };
 
-  const handleSaveReorderedCommandGroup = async (
-    reorderedCommandGroup: CommandGroup,
-  ) => {
-    await reorderCommandGroupCommands(reorderedCommandGroup);
-  };
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (active.id && over?.id && active.id !== over.id) {
-      const oldIndex = commandGroup.commands.findIndex(
-        (cmd) => cmd.id === active.id,
-      );
-      const newIndex = commandGroup.commands.findIndex(
-        (cmd) => cmd.id === over.id,
-      );
-      const newCommandsGroups = arrayMove(
-        commandGroup.commands,
-        oldIndex,
-        newIndex,
-      );
-      const reorderedCommandGroup = {
-        ...commandGroup,
-        commands: newCommandsGroups,
-      };
-
-      await handleSaveReorderedCommandGroup(reorderedCommandGroup);
-    }
-  };
-
   return (
-    <Collapsible
+    <SidebarGroup
+      className="py-0"
       key={commandGroup.id}
-      className="group/collapsible"
       style={style}
       ref={setNodeRef}
     >
-      <SidebarGroup className="py-0">
-        <ContextMenu>
-          <ContextMenuTrigger>
-            <SidebarGroupLabel
-              asChild
-              className="group/label text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm"
+      <ContextMenu>
+        <ContextMenuTrigger disabled={isReorderingGroups}>
+          <SidebarGroupLabel
+            asChild
+            className={cn(
+              "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm border-2 border-transparent",
+              isReorderingGroups && "border-dashed border-muted-foreground/30",
+            )}
+          >
+            <button
+              className="group flex items-center gap-2 p-2 w-full justify-between"
+              style={{ cursor: isReorderingGroups ? "grabbing" : "pointer" }}
+              onClick={() => setInternalIsOpen(!internalIsOpen)}
+              disabled={isReorderingGroups}
+              {...(isReorderingGroups ? { ...attributes, ...listeners } : {})}
             >
-              <CollapsibleTrigger className="group flex items-center gap-2 p-2 w-full justify-between">
-                <div className="flex items-center gap-2">
-                  <div
-                    {...attributes}
-                    {...listeners}
-                    className="cursor-grab active:cursor-grabbing rounded hover:bg-sidebar-accent/50 group-data-[state=open]:hidden transition-transform"
-                  >
-                    <GripVertical size={14} className="text-muted-foreground" />
-                  </div>
-                  <GripVertical
-                    size={14}
-                    className="hidden group-data-[state=open]:block text-muted-foreground/50 cursor-not-allowed"
-                  />
-                  <FolderOpen
-                    size={16}
-                    className="hidden group-data-[state=open]:block"
-                  />
-                  <Folder
-                    size={16}
-                    className="block group-data-[state=open]:hidden"
-                  />
-                  <p>{commandGroup.name}</p>
-                </div>
+              <div className="flex items-center gap-2">
+                {isOpen ? <FolderOpen size={16} /> : <Folder size={16} />}
+                <p>{commandGroup.name}</p>
+              </div>
+              {!isReorderingGroups && (
                 <div className="flex gap-2 items-center">
                   {someCommandIsRunning && (
                     <span>
@@ -175,33 +133,26 @@ export const CommandGroupSection = ({
                     </div>
                   )}
                 </div>
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-          </ContextMenuTrigger>
-          <ContextMenuContent>
-            <ContextMenuItem onClick={handleEdit}>Edit</ContextMenuItem>
-            <ContextMenuItem onClick={handleDelete}>Delete</ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
-        <CollapsibleContent className="pl-4">
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <DndContext onDragEnd={handleDragEnd}>
-                <SortableContext
-                  strategy={verticalListSortingStrategy}
-                  items={commandGroup.commands}
-                >
-                  {commandGroup.commands.map((command) => (
-                    <SidebarMenuItem key={command.id}>
-                      <CommandMenuItem draggable command={command} />
-                    </SidebarMenuItem>
-                  ))}
-                </SortableContext>
-              </DndContext>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </CollapsibleContent>
-      </SidebarGroup>
-    </Collapsible>
+              )}
+            </button>
+          </SidebarGroupLabel>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem onClick={handleEdit}>Edit</ContextMenuItem>
+          <ContextMenuItem onClick={handleDelete}>Delete</ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+      {isOpen && (
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {commandGroup.commands.map((command) => (
+              <SidebarMenuItem key={command.id}>
+                <CommandMenuItem command={command} />
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      )}
+    </SidebarGroup>
   );
 };
