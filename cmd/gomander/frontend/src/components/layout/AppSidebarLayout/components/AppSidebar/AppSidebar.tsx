@@ -76,20 +76,14 @@ export const AppSidebar = () => {
     navigate(ScreenRoutes.Settings, { state: { tab } });
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const ogGroups = [...commandGroups];
+  const handleCommandGroupDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (active.id && over?.id && active.id !== over.id) {
-      const oldIndex = ogGroups.findIndex((cg) => cg.id === active.id);
-      const newIndex = ogGroups.findIndex((cg) => cg.id === over.id);
-      const newCommandGroups = arrayMove(ogGroups, oldIndex, newIndex);
+      const oldIndex = commandGroups.findIndex((cg) => cg.id === active.id);
+      const newIndex = commandGroups.findIndex((cg) => cg.id === over.id);
+      const newCommandGroups = arrayMove(commandGroups, oldIndex, newIndex);
       setCommandGroups(newCommandGroups);
-      try {
-        await reorderCommandGroups(newCommandGroups.map((cg) => cg.id));
-      } catch {
-        setCommandGroups(ogGroups);
-      }
     }
   };
 
@@ -99,7 +93,12 @@ export const AppSidebar = () => {
   };
 
   const toggleReorderingMode = () => {
-    setIsReorderingGroups((prev) => !prev);
+    setIsReorderingGroups((wasReordering) => {
+      if (wasReordering) {
+        reorderCommandGroups(commandGroups.map((cg) => cg.id));
+      }
+      return !wasReordering;
+    });
   };
 
   return (
@@ -173,7 +172,7 @@ export const AppSidebar = () => {
               </TooltipTrigger>
             </Tooltip>
           </div>
-          <DndContext onDragEnd={handleDragEnd}>
+          <DndContext onDragEnd={handleCommandGroupDragEnd}>
             <SortableContext
               items={commandGroups.map((cg) => cg.id)}
               strategy={verticalListSortingStrategy}
