@@ -344,19 +344,20 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
+		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
-			ProjectRepository: mockProjectRepository,
-			CommandRepository: mockCommandRepository,
-			ConfigRepository:  mockUserConfigRepository,
-			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
+			ProjectRepository:      mockProjectRepository,
+			CommandRepository:      mockCommandRepository,
+			ConfigRepository:       mockUserConfigRepository,
+			Logger:                 mockLogger,
+			EventEmitter:           mockEventEmitter,
+			CommandGroupRepository: mockCommandGroupRepository,
 		})
 
 		projectId := "1"
-		mockProjectRepository.On("Get", projectId).Return(&projectdomain.Project{Id: projectId}, nil)
-		mockUserConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: projectId}, nil)
+		mockCommandGroupRepository.On("GetAll", mock.Anything).Return([]commandgroupdomain.CommandGroup{}, nil)
 
 		cmd1 := commandDataToDomain(testutils.NewCommand().WithProjectId(projectId).Data())
 		cmd2 := commandDataToDomain(testutils.NewCommand().WithProjectId(projectId).Data())
@@ -370,9 +371,19 @@ func TestApp_DeleteProject(t *testing.T) {
 
 		mockLogger.On("Error", mock.Anything).Return()
 		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return(nil)
+		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil).Return(nil)
 
 		err := a.DeleteProject(projectId)
 		assert.Error(t, err)
+
+		mock.AssertExpectationsForObjects(t,
+			mockProjectRepository,
+			mockCommandRepository,
+			mockUserConfigRepository,
+			mockLogger,
+			mockEventEmitter,
+			mockCommandGroupRepository,
+		)
 	})
 	t.Run("Should return an error if deleting the project fails", func(t *testing.T) {
 		mockProjectRepository := new(MockProjectRepository)

@@ -280,33 +280,40 @@ func TestApp_RemoveCommand(t *testing.T) {
 		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
+		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
-			CommandRepository: mockCommandRepository,
-			ConfigRepository:  mockConfigRepository,
-			ProjectRepository: mockProjectRepository,
-			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
+			CommandRepository:      mockCommandRepository,
+			ConfigRepository:       mockConfigRepository,
+			ProjectRepository:      mockProjectRepository,
+			Logger:                 mockLogger,
+			EventEmitter:           mockEventEmitter,
+			CommandGroupRepository: mockCommandGroupRepository,
 		})
 
 		openProjectHelper(t, mockConfigRepository, mockProjectRepository, a, projectId)
 
 		commandId := "command1"
 
+		mockCommandGroupRepository.On("GetAll", projectId).Return([]domain.CommandGroup{}, nil)
 		mockCommandRepository.On("Delete", commandId).Return(errors.New("failed to delete command"))
 
 		mockLogger.On("Error", mock.Anything).Return()
 		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
+		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil).Return()
 
 		err := a.RemoveCommand(commandId)
 		assert.Error(t, err)
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
+			mockConfigRepository,
+			mockProjectRepository,
 			mockLogger,
 			mockEventEmitter,
+			mockCommandGroupRepository,
 		)
 	})
 	t.Run("Should return an error if fails to remove the command from a command group (e.g. fails to retrieve command groups)", func(t *testing.T) {
@@ -333,7 +340,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 		commandId := "command1"
 
 		mockCommandGroupRepository.On("GetAll", projectId).Return(make([]domain.CommandGroup, 0), errors.New("failed to get command groups"))
-		mockCommandRepository.On("Delete", commandId).Return(nil)
 
 		mockLogger.On("Error", mock.Anything).Return()
 		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()

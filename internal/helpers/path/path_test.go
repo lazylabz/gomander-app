@@ -2,6 +2,7 @@ package path_test
 
 import (
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,13 @@ func TestGetComputedPath(t *testing.T) {
 	})
 
 	t.Run("returns path if absolute", func(t *testing.T) {
-		abs := "/etc/config"
+		var abs string
+
+		if runtime.GOOS == "windows" {
+			abs = `C:\Program Files`
+		} else {
+			abs = "/etc/config"
+		}
 		assert.Equal(t, abs, path.GetComputedPath(base, abs))
 	})
 
