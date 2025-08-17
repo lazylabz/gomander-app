@@ -19,6 +19,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
 import type { Command, CommandGroup } from "@/contracts/types.ts";
+import { cn } from "@/lib/utils.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { deleteCommandGroup } from "@/useCases/commandGroup/deleteCommandGroup.ts";
@@ -92,7 +93,10 @@ export const CommandGroupSection = ({
         <ContextMenuTrigger disabled={isReorderingGroups}>
           <SidebarGroupLabel
             asChild
-            className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm"
+            className={cn(
+              "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm border-2 border-transparent",
+              isReorderingGroups && "border-dashed border-muted-foreground/30",
+            )}
           >
             <button
               className="group flex items-center gap-2 p-2 w-full justify-between"

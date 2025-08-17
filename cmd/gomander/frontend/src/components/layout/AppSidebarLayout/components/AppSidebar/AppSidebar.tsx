@@ -149,9 +149,9 @@ export const AppSidebar = () => {
           </div>
           <CreateMenu />
         </SidebarHeader>
-        <SidebarContent className="gap-0">
+        <SidebarContent className="gap-1">
           <AllCommandsSection />
-          <div className="flex items-center pl-4 pr-2 mt-4 mb-1 gap-2">
+          <div className="flex items-center pl-4 pr-2 mt-2 mb-1 gap-2">
             <h3 className="text-sm text-muted-foreground">Command groups</h3>
             <Tooltip delayDuration={1000}>
               <TooltipContent>
