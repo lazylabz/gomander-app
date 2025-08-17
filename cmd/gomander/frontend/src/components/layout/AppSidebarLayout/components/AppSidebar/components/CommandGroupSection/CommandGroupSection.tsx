@@ -100,7 +100,7 @@ export const CommandGroupSection = ({
           >
             <button
               className="group flex items-center gap-2 p-2 w-full justify-between"
-              style={{ cursor: isReorderingGroups ? "grabbing" : "pointer" }}
+              style={{ cursor: isReorderingGroups ? "grab" : "pointer" }}
               onClick={() => setInternalIsOpen(!internalIsOpen)}
               disabled={isReorderingGroups}
               {...(isReorderingGroups ? { ...attributes, ...listeners } : {})}
