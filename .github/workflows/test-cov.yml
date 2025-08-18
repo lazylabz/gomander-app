@@ -1,6 +1,8 @@
 name: Tests + Upload Coverage
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
 
