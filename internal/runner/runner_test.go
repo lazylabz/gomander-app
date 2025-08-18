@@ -34,6 +34,7 @@ type MockEventEmitter struct {
 }
 
 func (m *MockEventEmitter) EmitEvent(event event.Event, payload interface{}) {
+	println("Emitting event:", event, "with payload:", payload) // Debugging output
 	m.Called(event, payload)
 }
 
@@ -206,7 +207,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 	})
 }
 
-var MAX_RETRIES = 100
+var MAX_RETRIES = 50
 var RETRY_DELAY = 100 * time.Millisecond
 
 func waitFor(condition func() bool) {
