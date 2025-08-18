@@ -37,6 +37,11 @@ func (m *MockEventEmitter) EmitEvent(event event.Event, payload interface{}) {
 	m.Called(event, payload)
 }
 
+const (
+	DefaultTimeout         = 1 * time.Second       // seconds
+	DefaultPollingInterval = 20 * time.Millisecond // milliseconds
+)
+
 func TestDefaultRunner_RunCommand(t *testing.T) {
 	t.Run("Should run command with success and emit events for each line", func(t *testing.T) {
 		logger := new(MockLogger)
@@ -62,11 +67,11 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		waitFor(func() bool {
-			return len(r.GetRunningCommands()) == 0
-		})
-		assert.Empty(t, r.GetRunningCommands())
-		mock.AssertExpectationsForObjects(t, emitter, logger)
+		assert.EventuallyWithT(t, func(collect *assert.CollectT) {
+			assert.Empty(t, r.GetRunningCommands())
+			mock.AssertExpectationsForObjects(t, emitter, logger)
+		}, DefaultTimeout, DefaultPollingInterval)
+
 	})
 	t.Run("Should log error when executing an invalid command", func(t *testing.T) {
 		logger := new(MockLogger)
@@ -93,11 +98,10 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		waitFor(func() bool {
-			return len(r.GetRunningCommands()) == 0
-		})
-		assert.Empty(t, r.GetRunningCommands())
-		mock.AssertExpectationsForObjects(t, emitter, logger)
+		assert.EventuallyWithT(t, func(collect *assert.CollectT) {
+			assert.Empty(t, r.GetRunningCommands())
+			mock.AssertExpectationsForObjects(t, emitter, logger)
+		}, DefaultTimeout, DefaultPollingInterval)
 	})
 }
 
@@ -126,20 +130,17 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		waitFor(func() bool {
-			return len(r.GetRunningCommands()) > 0
-		})
-
-		assert.NotEmpty(t, r.GetRunningCommands())
+		assert.EventuallyWithT(t, func(collect *assert.CollectT) {
+			assert.NotEmpty(t, r.GetRunningCommands())
+		}, DefaultTimeout, DefaultPollingInterval)
 
 		err = r.StopRunningCommand("1")
 		assert.NoError(t, err)
 
-		waitFor(func() bool {
-			return len(r.GetRunningCommands()) == 0
-		})
-		assert.Empty(t, r.GetRunningCommands())
-		mock.AssertExpectationsForObjects(t, emitter, logger)
+		assert.EventuallyWithT(t, func(collect *assert.CollectT) {
+			assert.Empty(t, r.GetRunningCommands())
+			mock.AssertExpectationsForObjects(t, emitter, logger)
+		}, DefaultTimeout, DefaultPollingInterval)
 	})
 	t.Run("Should return error when stopping non-existing command", func(t *testing.T) {
 		logger := new(MockLogger)
@@ -190,32 +191,18 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		waitFor(func() bool {
-			return len(r.GetRunningCommands()) > 0
-		})
+		assert.EventuallyWithT(t, func(collect *assert.CollectT) {
 
-		assert.NotEmpty(t, r.GetRunningCommands())
+			assert.NotEmpty(t, r.GetRunningCommands())
+		}, DefaultTimeout, DefaultPollingInterval)
 
 		errs := r.StopAllRunningCommands()
 
-		waitFor(func() bool {
-			return len(r.GetRunningCommands()) == 0
-		})
-		assert.Empty(t, errs)
-		assert.Empty(t, r.GetRunningCommands())
+		assert.EventuallyWithT(t, func(collect *assert.CollectT) {
+			assert.Empty(t, errs)
+			assert.Empty(t, r.GetRunningCommands())
+		}, DefaultTimeout, DefaultPollingInterval)
 	})
-}
-
-var MAX_RETRIES = 20
-var RETRY_DELAY = 50 * time.Millisecond
-
-func waitFor(condition func() bool) {
-	for i := 0; i < MAX_RETRIES; i++ {
-		time.Sleep(RETRY_DELAY)
-		if condition() {
-			return
-		}
-	}
 }
 
 func mockEmitterLogEntry(emitter *MockEventEmitter, id string, line string) {
