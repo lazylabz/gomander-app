@@ -122,8 +122,8 @@ func getDbFile() string {
 
 func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	// Initialize deps
-	l := logger.NewDefaultLogger(ctx)
-	ee := event.NewDefaultEventEmitter(ctx)
+	l := logger.NewDefaultLogger(ctx, facade.DefaultRuntimeFacade{})
+	ee := event.NewDefaultEventEmitter(ctx, facade.DefaultRuntimeFacade{})
 	r := runner.NewDefaultRunner(l, ee)
 
 	// Initialize repos

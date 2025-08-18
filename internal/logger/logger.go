@@ -3,7 +3,7 @@ package logger
 import (
 	"context"
 
-	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"gomander/internal/facade"
 )
 
 type Logger interface {
@@ -13,23 +13,25 @@ type Logger interface {
 }
 
 type DefaultLogger struct {
-	ctx context.Context
+	ctx     context.Context
+	runtime facade.RuntimeFacade
 }
 
-func NewDefaultLogger(ctx context.Context) *DefaultLogger {
+func NewDefaultLogger(ctx context.Context, runtime facade.RuntimeFacade) *DefaultLogger {
 	return &DefaultLogger{
-		ctx: ctx,
+		ctx:     ctx,
+		runtime: runtime,
 	}
 }
 
 func (l *DefaultLogger) Info(message string) {
-	runtime.LogInfo(l.ctx, message)
+	l.runtime.LogInfo(l.ctx, message)
 }
 
 func (l *DefaultLogger) Debug(message string) {
-	runtime.LogDebug(l.ctx, message)
+	l.runtime.LogDebug(l.ctx, message)
 }
 
 func (l *DefaultLogger) Error(message string) {
-	runtime.LogError(l.ctx, message)
+	l.runtime.LogError(l.ctx, message)
 }

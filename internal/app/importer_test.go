@@ -1,7 +1,6 @@
 package app_test
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"os"
@@ -9,7 +8,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"gomander/internal/app"
 	"gomander/internal/command/domain"
@@ -18,21 +16,8 @@ import (
 	"gomander/internal/helpers/array"
 	projectdomain "gomander/internal/project/domain"
 	"gomander/internal/testutils"
+	"gomander/internal/testutils/mocks"
 )
-
-type MockRuntimeFacade struct {
-	mock.Mock
-}
-
-func (m *MockRuntimeFacade) SaveFileDialog(ctx context.Context, dialogOptions runtime.SaveDialogOptions) (string, error) {
-	args := m.Called(ctx, dialogOptions)
-	return args.String(0), args.Error(1)
-}
-
-func (m *MockRuntimeFacade) OpenFileDialog(ctx context.Context, dialogOptions runtime.OpenDialogOptions) (string, error) {
-	args := m.Called(ctx, dialogOptions)
-	return args.String(0), args.Error(1)
-}
 
 type MockFsFacade struct {
 	mock.Mock
@@ -61,7 +46,7 @@ func TestApp_ExportProject(t *testing.T) {
 		mockEventEmitter := new(MockEventEmitter)
 
 		mockFsFacade := new(MockFsFacade)
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 
 		project := projectdomain.Project{
 			Id:   projectId,
@@ -135,7 +120,7 @@ func TestApp_ExportProject(t *testing.T) {
 	t.Run("Should return error if there is a problem opening the destination file", func(t *testing.T) {
 		a := app.NewApp()
 
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
 
@@ -158,7 +143,7 @@ func TestApp_ExportProject(t *testing.T) {
 	t.Run("Should return nil if the user cancels the save dialog", func(t *testing.T) {
 		a := app.NewApp()
 
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
 
@@ -180,7 +165,7 @@ func TestApp_ExportProject(t *testing.T) {
 	t.Run("Should return error if there is a problem reading the project data", func(t *testing.T) {
 		a := app.NewApp()
 
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
 
@@ -201,7 +186,7 @@ func TestApp_ExportProject(t *testing.T) {
 	t.Run("Should return error if there is a problem reading the commands ", func(t *testing.T) {
 		a := app.NewApp()
 
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(MockCommandRepository)
@@ -226,7 +211,7 @@ func TestApp_ExportProject(t *testing.T) {
 	t.Run("Should return error if there is a problem reading the command groups", func(t *testing.T) {
 		a := app.NewApp()
 
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(MockCommandRepository)
@@ -263,7 +248,7 @@ func TestApp_ExportProject(t *testing.T) {
 		mockEventEmitter := new(MockEventEmitter)
 
 		mockFsFacade := new(MockFsFacade)
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 
 		project := projectdomain.Project{
 			Id:   projectId,
@@ -349,7 +334,7 @@ func TestApp_ImportProject(t *testing.T) {
 		mockEventEmitter := new(MockEventEmitter)
 
 		mockFsFacade := new(MockFsFacade)
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 
 		cmd1Data := testutils.
 			NewCommand().
@@ -480,7 +465,7 @@ func TestApp_ImportProject(t *testing.T) {
 		mockEventEmitter := new(MockEventEmitter)
 
 		mockFsFacade := new(MockFsFacade)
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 
 		projectJSON := app.ProjectExportJSONv1{
 			Version: 1,
@@ -529,7 +514,7 @@ func TestApp_ImportProject(t *testing.T) {
 		mockEventEmitter := new(MockEventEmitter)
 
 		mockFsFacade := new(MockFsFacade)
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 
 		projectJSON := app.ProjectExportJSONv1{
 			Version: 1,
@@ -579,7 +564,7 @@ func TestApp_ImportProject(t *testing.T) {
 		mockEventEmitter := new(MockEventEmitter)
 
 		mockFsFacade := new(MockFsFacade)
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 
 		projectJSON := app.ProjectExportJSONv1{
 			Version: 1,
@@ -626,7 +611,7 @@ func TestApp_GetProjectToImport(t *testing.T) {
 	t.Run("Should return project import", func(t *testing.T) {
 		a := app.NewApp()
 
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
 
 		a.LoadDependencies(app.Dependencies{
@@ -656,7 +641,7 @@ func TestApp_GetProjectToImport(t *testing.T) {
 	t.Run("Should return error if there is a problem opening the file dialog", func(t *testing.T) {
 		a := app.NewApp()
 
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
 
 		a.LoadDependencies(app.Dependencies{
@@ -675,7 +660,7 @@ func TestApp_GetProjectToImport(t *testing.T) {
 	t.Run("Should return nil if the user cancels the file dialog", func(t *testing.T) {
 		a := app.NewApp()
 
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
 
 		a.LoadDependencies(app.Dependencies{
@@ -694,7 +679,7 @@ func TestApp_GetProjectToImport(t *testing.T) {
 	t.Run("Should return error if there is a problem reading the file", func(t *testing.T) {
 		a := app.NewApp()
 
-		mockRuntimeFacade := new(MockRuntimeFacade)
+		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
 		mockEventer := new(MockEventEmitter)
 
