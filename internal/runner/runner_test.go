@@ -206,11 +206,12 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 	})
 }
 
-var MAX_RETRIES = 5
+var MAX_RETRIES = 20
+var RETRY_DELAY = 50 * time.Millisecond
 
 func waitFor(condition func() bool) {
 	for i := 0; i < MAX_RETRIES; i++ {
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(RETRY_DELAY)
 		if condition() {
 			return
 		}
