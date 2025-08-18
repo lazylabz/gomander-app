@@ -34,7 +34,7 @@ jobs:
         echo "dummy" > cmd/gomander/frontend/dist/.dummy
 
     - name: Run tests
-      run: go test -v -coverprofile=coverage.txt ./...
+      run: go test -count=1 -v -coverprofile=coverage.txt ./...
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5
