@@ -1,12 +1,8 @@
 package app_test
 
 import (
-	"testing"
-
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"gomander/internal/app"
 	commanddomain "gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	"gomander/internal/config/domain"
@@ -59,22 +55,6 @@ func (m *MockUserConfigRepository) GetOrCreate() (*domain.Config, error) {
 func (m *MockUserConfigRepository) Update(config *domain.Config) error {
 	args := m.Called(config)
 	return args.Error(0)
-}
-
-func openProjectHelper(t *testing.T, mockConfigRepository *MockUserConfigRepository, mockProjectRepository *MockProjectRepository, a *app.App, projectId string) {
-	t.Helper()
-	mockProjectRepository.On("Get", projectId).Return(&projectdomain.Project{
-		Id:   projectId,
-		Name: "Test Project",
-	}, nil).Once()
-	mockConfigRepository.On("GetOrCreate").Return(&domain.Config{
-		LastOpenedProjectId: "",
-		EnvironmentPaths:    make([]domain.EnvironmentPath, 0),
-	}, nil).Once()
-	mockConfigRepository.On("Update", mock.Anything).Once().Return(nil)
-
-	err := a.OpenProject(projectId)
-	assert.NoError(t, err)
 }
 
 type MockCommandGroupRepository struct {
