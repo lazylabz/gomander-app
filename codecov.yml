@@ -1,0 +1,4 @@
+ignore:
+  - "**/testutils/*.go"
+  - "**/migrations/*.go"
+  - "cmd/gomander/main.go"
