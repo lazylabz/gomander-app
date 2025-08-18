@@ -143,6 +143,6 @@ func arrange(preloadedProjects []*ProjectModel) (repo *GormProjectRepository) {
 			panic(err)
 		}
 	}
-	repo = &GormProjectRepository{db: gormDb, ctx: ctx}
+	repo = NewGormProjectRepository(gormDb, ctx)
 	return
 }

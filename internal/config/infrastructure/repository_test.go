@@ -129,6 +129,6 @@ func arrange(preloadedConfig *ConfigModel, preloadedPaths []*EnvironmentPathMode
 			panic(err)
 		}
 	}
-	repo = &GormConfigRepository{db: gormDb, ctx: ctx}
+	repo = NewGormConfigRepository(gormDb, ctx)
 	return
 }
