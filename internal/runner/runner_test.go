@@ -1,6 +1,7 @@
 package runner_test
 
 import (
+	"fmt"
 	"runtime"
 	"testing"
 	"time"
@@ -34,7 +35,7 @@ type MockEventEmitter struct {
 }
 
 func (m *MockEventEmitter) EmitEvent(event event.Event, payload interface{}) {
-	println("Emitting event:", event, "with payload:", payload) // Debugging output
+	println("Emitting event:", event, "with payload:", fmt.Sprintf("%v", payload))
 	m.Called(event, payload)
 }
 
