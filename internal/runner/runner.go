@@ -165,6 +165,8 @@ func isExpectedError(err error) bool {
 func (c *DefaultRunner) streamOutput(commandId string, pipeReader io.ReadCloser) {
 	scanner := bufio.NewScanner(pipeReader)
 
+	defer pipeReader.Close()
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		c.logger.Debug(line)
