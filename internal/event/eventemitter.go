@@ -3,7 +3,7 @@ package event
 import (
 	"context"
 
-	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"gomander/internal/facade"
 )
 
 type EventEmitter interface {
@@ -11,15 +11,17 @@ type EventEmitter interface {
 }
 
 type DefaultEventEmitter struct {
-	ctx context.Context
+	ctx     context.Context
+	runtime facade.RuntimeFacade
 }
 
-func NewDefaultEventEmitter(ctx context.Context) *DefaultEventEmitter {
+func NewDefaultEventEmitter(ctx context.Context, runtime facade.RuntimeFacade) *DefaultEventEmitter {
 	return &DefaultEventEmitter{
-		ctx: ctx,
+		ctx:     ctx,
+		runtime: runtime,
 	}
 }
 
 func (e *DefaultEventEmitter) EmitEvent(event Event, payload interface{}) {
-	runtime.EventsEmit(e.ctx, string(event), payload)
+	e.runtime.EventsEmit(e.ctx, string(event), payload)
 }

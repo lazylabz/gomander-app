@@ -15,6 +15,7 @@ import (
 	commmandinfrastructure "gomander/internal/command/infrastructure"
 	commandgroupinfrastructure "gomander/internal/commandgroup/infrastructure"
 	configinfrastructure "gomander/internal/config/infrastructure"
+	"gomander/internal/facade"
 	logger "gomander/internal/logger"
 	projectinfrastructure "gomander/internal/project/infrastructure"
 	"gomander/internal/runner"
@@ -121,8 +122,8 @@ func getDbFile() string {
 
 func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	// Initialize deps
-	l := logger.NewDefaultLogger(ctx)
-	ee := event.NewDefaultEventEmitter(ctx)
+	l := logger.NewDefaultLogger(ctx, facade.DefaultRuntimeFacade{})
+	ee := event.NewDefaultEventEmitter(ctx, facade.DefaultRuntimeFacade{})
 	r := runner.NewDefaultRunner(l, ee)
 
 	// Initialize repos
@@ -140,7 +141,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 		CommandGroupRepository: comandGroupRepo,
 		ProjectRepository:      projectRepo,
 		ConfigRepository:       configRepo,
-		FsFacade:               internalapp.DefaultFsFacade{},
-		RuntimeFacade:          internalapp.DefaultRuntimeFacade{},
+		FsFacade:               facade.DefaultFsFacade{},
+		RuntimeFacade:          facade.DefaultRuntimeFacade{},
 	})
 }
