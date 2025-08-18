@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"sync"
 
 	"gomander/internal/command/domain"
 	"gomander/internal/event"
@@ -79,14 +80,27 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	// Save the project in the runningCommands map
 	c.runningCommands[command.Id] = cmd
 
+	var wg sync.WaitGroup
+
 	// Stream stdout
-	go c.streamOutput(command.Id, stdout)
+	go func() {
+		wg.Add(1)
+		defer wg.Done()
+		c.streamOutput(command.Id, stdout)
+	}()
+
 	// Stream stderr
-	go c.streamOutput(command.Id, stderr)
+	go func() {
+		wg.Add(1)
+		defer wg.Done()
+		c.streamOutput(command.Id, stderr)
+	}()
 
 	// Wait in background until the command finishes, because it ends naturally or because it is stopped.
 	go func() {
 		err := cmd.Wait()
+		wg.Wait() // Wait for both stdout and stderr to finish
+
 		// Notify the event emitter that the command has finished and remove it from the runningCommands map
 		defer func() {
 			delete(c.runningCommands, command.Id)

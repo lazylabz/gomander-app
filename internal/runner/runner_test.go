@@ -68,11 +68,10 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
-			if !mock.AssertExpectationsForObjects(t, emitter, logger) {
-				return false
-			}
 			return assert.Empty(t, r.GetRunningCommands())
 		}, DefaultTimeout, DefaultPollingInterval)
+
+		mock.AssertExpectationsForObjects(t, emitter, logger)
 
 	})
 	t.Run("Should log error when executing an invalid command", func(t *testing.T) {
@@ -101,11 +100,10 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
-			if !mock.AssertExpectationsForObjects(t, emitter, logger) {
-				return false
-			}
 			return assert.Empty(t, r.GetRunningCommands())
 		}, DefaultTimeout, DefaultPollingInterval)
+
+		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
 }
 
@@ -142,9 +140,10 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
-			return assert.Empty(t, r.GetRunningCommands()) &&
-				mock.AssertExpectationsForObjects(t, emitter, logger)
+			return assert.Empty(t, r.GetRunningCommands())
 		}, DefaultTimeout, DefaultPollingInterval)
+
+		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
 	t.Run("Should return error when stopping non-existing command", func(t *testing.T) {
 		logger := new(MockLogger)
@@ -202,12 +201,11 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		errs := r.StopAllRunningCommands()
 
 		assert.Eventually(t, func() bool {
-			if !mock.AssertExpectationsForObjects(t, emitter, logger) {
-				return false
-			}
 			return assert.Empty(t, errs) &&
 				assert.Empty(t, r.GetRunningCommands())
 		}, DefaultTimeout, DefaultPollingInterval)
+
+		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
 }
 
