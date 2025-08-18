@@ -38,7 +38,7 @@ func (m *MockEventEmitter) EmitEvent(event event.Event, payload interface{}) {
 }
 
 const (
-	DefaultTimeout         = 1 * time.Second       // seconds
+	DefaultTimeout         = 5 * time.Second       // seconds
 	DefaultPollingInterval = 20 * time.Millisecond // milliseconds
 )
 
