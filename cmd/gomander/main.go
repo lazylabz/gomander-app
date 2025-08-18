@@ -15,6 +15,7 @@ import (
 	commmandinfrastructure "gomander/internal/command/infrastructure"
 	commandgroupinfrastructure "gomander/internal/commandgroup/infrastructure"
 	configinfrastructure "gomander/internal/config/infrastructure"
+	"gomander/internal/facade"
 	logger "gomander/internal/logger"
 	projectinfrastructure "gomander/internal/project/infrastructure"
 	"gomander/internal/runner"
@@ -140,7 +141,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 		CommandGroupRepository: comandGroupRepo,
 		ProjectRepository:      projectRepo,
 		ConfigRepository:       configRepo,
-		FsFacade:               internalapp.DefaultFsFacade{},
-		RuntimeFacade:          internalapp.DefaultRuntimeFacade{},
+		FsFacade:               facade.DefaultFsFacade{},
+		RuntimeFacade:          facade.DefaultRuntimeFacade{},
 	})
 }

@@ -1,5 +1,5 @@
 ignore:
   - "**/testutils/*.go"
   - "**/migrations/*.go"
-  - "**/*facade.go"
+  - "**/facade/*.go"
   - "cmd/gomander/main.go"

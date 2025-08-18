@@ -7,6 +7,7 @@ import (
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	configdomain "gomander/internal/config/domain"
 	"gomander/internal/event"
+	"gomander/internal/facade"
 	"gomander/internal/logger"
 	projectdomain "gomander/internal/project/domain"
 	"gomander/internal/runner"
@@ -27,8 +28,8 @@ type App struct {
 	projectRepository      projectdomain.Repository
 	userConfigRepository   configdomain.Repository
 
-	fsFacade      FsFacade
-	runtimeFacade RuntimeFacade
+	fsFacade      facade.FsFacade
+	runtimeFacade facade.RuntimeFacade
 }
 
 type Dependencies struct {
@@ -39,8 +40,8 @@ type Dependencies struct {
 	CommandGroupRepository commandgroupdomain.Repository
 	ProjectRepository      projectdomain.Repository
 	ConfigRepository       configdomain.Repository
-	FsFacade               FsFacade
-	RuntimeFacade          RuntimeFacade
+	FsFacade               facade.FsFacade
+	RuntimeFacade          facade.RuntimeFacade
 }
 
 func (a *App) LoadDependencies(d Dependencies) {
