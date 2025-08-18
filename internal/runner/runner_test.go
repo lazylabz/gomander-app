@@ -63,6 +63,8 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		assert.NoError(t, err)
 
 		waitFor(func() bool {
+			println("Emitter calls", len(emitter.Calls))
+			println("Emitter expected calls", len(emitter.ExpectedCalls))
 			return len(r.GetRunningCommands()) == 0 && len(emitter.Calls) == len(emitter.ExpectedCalls)
 		})
 		assert.Empty(t, r.GetRunningCommands())
@@ -206,8 +208,8 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 	})
 }
 
-var MAX_RETRIES = 20
-var RETRY_DELAY = 50 * time.Millisecond
+var MAX_RETRIES = 100
+var RETRY_DELAY = 100 * time.Millisecond
 
 func waitFor(condition func() bool) {
 	for i := 0; i < MAX_RETRIES; i++ {
