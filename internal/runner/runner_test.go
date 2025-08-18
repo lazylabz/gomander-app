@@ -19,17 +19,14 @@ type MockLogger struct {
 
 func (m *MockLogger) Info(message string) {
 	m.Called(message)
-	return
 }
 
 func (m *MockLogger) Debug(message string) {
 	m.Called(message)
-	return
 }
 
 func (m *MockLogger) Error(message string) {
 	m.Called(message)
-	return
 }
 
 type MockEventEmitter struct {
@@ -38,7 +35,6 @@ type MockEventEmitter struct {
 
 func (m *MockEventEmitter) EmitEvent(event event.Event, payload interface{}) {
 	m.Called(event, payload)
-	return
 }
 
 func TestDefaultRunner_RunCommand(t *testing.T) {
@@ -66,8 +62,9 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		time.Sleep(100 * time.Millisecond)
-
+		waitFor(func() bool {
+			return len(r.GetRunningCommands()) == 0
+		})
 		assert.Empty(t, r.GetRunningCommands())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
@@ -96,8 +93,9 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		time.Sleep(100 * time.Millisecond)
-
+		waitFor(func() bool {
+			return len(r.GetRunningCommands()) == 0
+		})
 		assert.Empty(t, r.GetRunningCommands())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
@@ -128,14 +126,18 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		time.Sleep(100 * time.Millisecond)
+		waitFor(func() bool {
+			return len(r.GetRunningCommands()) > 0
+		})
 
 		assert.NotEmpty(t, r.GetRunningCommands())
 
 		err = r.StopRunningCommand("1")
 		assert.NoError(t, err)
 
-		time.Sleep(100 * time.Millisecond)
+		waitFor(func() bool {
+			return len(r.GetRunningCommands()) == 0
+		})
 		assert.Empty(t, r.GetRunningCommands())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
@@ -188,16 +190,31 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		time.Sleep(100 * time.Millisecond)
+		waitFor(func() bool {
+			return len(r.GetRunningCommands()) > 0
+		})
 
 		assert.NotEmpty(t, r.GetRunningCommands())
 
 		errs := r.StopAllRunningCommands()
 
-		time.Sleep(100 * time.Millisecond)
+		waitFor(func() bool {
+			return len(r.GetRunningCommands()) == 0
+		})
 		assert.Empty(t, errs)
 		assert.Empty(t, r.GetRunningCommands())
 	})
+}
+
+var MAX_RETRIES = 5
+
+func waitFor(condition func() bool) {
+	for i := 0; i < MAX_RETRIES; i++ {
+		time.Sleep(100 * time.Millisecond)
+		if condition() {
+			return
+		}
+	}
 }
 
 func mockEmitterLogEntry(emitter *MockEventEmitter, id string, line string) {
