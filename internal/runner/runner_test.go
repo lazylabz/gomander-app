@@ -68,8 +68,10 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
-			return assert.Empty(t, r.GetRunningCommands()) &&
-				mock.AssertExpectationsForObjects(t, emitter, logger)
+			if !mock.AssertExpectationsForObjects(t, emitter, logger) {
+				return false
+			}
+			return assert.Empty(t, r.GetRunningCommands())
 		}, DefaultTimeout, DefaultPollingInterval)
 
 	})
@@ -99,8 +101,10 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
-			return assert.Empty(t, r.GetRunningCommands()) &&
-				mock.AssertExpectationsForObjects(t, emitter, logger)
+			if !mock.AssertExpectationsForObjects(t, emitter, logger) {
+				return false
+			}
+			return assert.Empty(t, r.GetRunningCommands())
 		}, DefaultTimeout, DefaultPollingInterval)
 	})
 }
@@ -198,6 +202,9 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		errs := r.StopAllRunningCommands()
 
 		assert.Eventually(t, func() bool {
+			if !mock.AssertExpectationsForObjects(t, emitter, logger) {
+				return false
+			}
 			return assert.Empty(t, errs) &&
 				assert.Empty(t, r.GetRunningCommands())
 		}, DefaultTimeout, DefaultPollingInterval)
