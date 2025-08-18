@@ -31,7 +31,7 @@ func (a *App) OpenProject(projectConfigId string) error {
 		return err
 	}
 
-	a.openedProjectId = projectConfigId
+	a.SetOpenProjectId(projectConfigId)
 
 	return nil
 }
@@ -70,7 +70,7 @@ func (a *App) CloseProject() error {
 		return err
 	}
 
-	a.openedProjectId = ""
+	a.SetOpenProjectId("")
 
 	return nil
 }
@@ -94,4 +94,8 @@ func (a *App) DeleteProject(projectConfigId string) error {
 	}
 
 	return nil
+}
+
+func (a *App) SetOpenProjectId(projectId string) {
+	a.openedProjectId = projectId
 }

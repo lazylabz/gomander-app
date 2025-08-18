@@ -18,7 +18,7 @@ func (a *App) Startup(ctx context.Context) {
 		panic(err)
 	}
 
-	a.openedProjectId = config.LastOpenedProjectId
+	a.SetOpenProjectId(config.LastOpenedProjectId)
 
 	a.logger.Info("Configuration loaded successfully")
 }
