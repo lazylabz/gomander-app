@@ -67,9 +67,9 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		assert.EventuallyWithT(t, func(collect *assert.CollectT) {
-			assert.Empty(t, r.GetRunningCommands())
-			mock.AssertExpectationsForObjects(t, emitter, logger)
+		assert.Eventually(t, func() bool {
+			return assert.Empty(t, r.GetRunningCommands()) &&
+				mock.AssertExpectationsForObjects(t, emitter, logger)
 		}, DefaultTimeout, DefaultPollingInterval)
 
 	})
@@ -98,9 +98,9 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		assert.EventuallyWithT(t, func(collect *assert.CollectT) {
-			assert.Empty(t, r.GetRunningCommands())
-			mock.AssertExpectationsForObjects(t, emitter, logger)
+		assert.Eventually(t, func() bool {
+			return assert.Empty(t, r.GetRunningCommands()) &&
+				mock.AssertExpectationsForObjects(t, emitter, logger)
 		}, DefaultTimeout, DefaultPollingInterval)
 	})
 }
@@ -130,16 +130,16 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		assert.EventuallyWithT(t, func(collect *assert.CollectT) {
-			assert.NotEmpty(t, r.GetRunningCommands())
+		assert.Eventually(t, func() bool {
+			return assert.NotEmpty(t, r.GetRunningCommands())
 		}, DefaultTimeout, DefaultPollingInterval)
 
 		err = r.StopRunningCommand("1")
 		assert.NoError(t, err)
 
-		assert.EventuallyWithT(t, func(collect *assert.CollectT) {
-			assert.Empty(t, r.GetRunningCommands())
-			mock.AssertExpectationsForObjects(t, emitter, logger)
+		assert.Eventually(t, func() bool {
+			return assert.Empty(t, r.GetRunningCommands()) &&
+				mock.AssertExpectationsForObjects(t, emitter, logger)
 		}, DefaultTimeout, DefaultPollingInterval)
 	})
 	t.Run("Should return error when stopping non-existing command", func(t *testing.T) {
@@ -191,16 +191,15 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		assert.EventuallyWithT(t, func(collect *assert.CollectT) {
-
-			assert.NotEmpty(t, r.GetRunningCommands())
+		assert.Eventually(t, func() bool {
+			return assert.NotEmpty(t, r.GetRunningCommands())
 		}, DefaultTimeout, DefaultPollingInterval)
 
 		errs := r.StopAllRunningCommands()
 
-		assert.EventuallyWithT(t, func(collect *assert.CollectT) {
-			assert.Empty(t, errs)
-			assert.Empty(t, r.GetRunningCommands())
+		assert.Eventually(t, func() bool {
+			return assert.Empty(t, errs) &&
+				assert.Empty(t, r.GetRunningCommands())
 		}, DefaultTimeout, DefaultPollingInterval)
 	})
 }
