@@ -63,7 +63,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		assert.NoError(t, err)
 
 		waitFor(func() bool {
-			return len(r.GetRunningCommands()) == 0
+			return len(r.GetRunningCommands()) == 0 && len(emitter.Calls) == len(emitter.ExpectedCalls)
 		})
 		assert.Empty(t, r.GetRunningCommands())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
@@ -94,7 +94,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		assert.NoError(t, err)
 
 		waitFor(func() bool {
-			return len(r.GetRunningCommands()) == 0
+			return len(r.GetRunningCommands()) == 0 && len(emitter.Calls) == len(emitter.ExpectedCalls)
 		})
 		assert.Empty(t, r.GetRunningCommands())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
@@ -136,7 +136,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		assert.NoError(t, err)
 
 		waitFor(func() bool {
-			return len(r.GetRunningCommands()) == 0
+			return len(r.GetRunningCommands()) == 0 && len(emitter.Calls) == len(emitter.ExpectedCalls)
 		})
 		assert.Empty(t, r.GetRunningCommands())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
