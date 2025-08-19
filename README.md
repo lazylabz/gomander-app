@@ -1,5 +1,7 @@
 # Gomander - A simple GUI to launch and monitor commands
 
+[![codecov](https://codecov.io/gh/lazylabz/gomander-app/branch/main/graph/badge.svg?token=D4LYOARMC5)](https://codecov.io/gh/lazylabz/gomander-app)
+
 ## About
 
 Gomander is a simple GUI that allows you to easily launch, monitor, and organize commands. It is designed for users who need to launch and monitor multiple commands at the same time.
