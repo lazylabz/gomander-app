@@ -55,9 +55,9 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 
 		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
 		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
-		mockEmitterLogEntry(emitter, commandId, "line1")
-		mockEmitterLogEntry(emitter, commandId, "line2")
-		mockEmitterLogEntry(emitter, commandId, "line3")
+		mockEmitterLogEntry(emitter, commandId, "a")
+		mockEmitterLogEntry(emitter, commandId, "b")
+		mockEmitterLogEntry(emitter, commandId, "c")
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
 
@@ -65,7 +65,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 			Id:               commandId,
 			ProjectId:        commandId,
 			Name:             "Test",
-			Command:          "echo \"line1\" && echo \"line2\" && echo \"line3\"",
+			Command:          "echo 'a'&& echo 'b'&& echo 'c'",
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
 		}, []string{"/test"}, "/test")
