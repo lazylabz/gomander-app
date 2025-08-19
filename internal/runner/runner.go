@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"sync"
 
 	"gomander/internal/command/domain"
 	"gomander/internal/event"
@@ -23,8 +24,13 @@ var ExpectedTerminationLogs = []string{
 	"wait: no child processes",
 }
 
+type RunningCommand struct {
+	cmd *exec.Cmd
+	wg  *sync.WaitGroup
+}
+
 type DefaultRunner struct {
-	runningCommands map[string]*exec.Cmd
+	runningCommands map[string]RunningCommand
 	eventEmitter    event.EventEmitter
 	logger          logger.Logger
 }
@@ -37,7 +43,7 @@ type Runner interface {
 
 func NewDefaultRunner(logger logger.Logger, emitter event.EventEmitter) *DefaultRunner {
 	return &DefaultRunner{
-		runningCommands: make(map[string]*exec.Cmd),
+		runningCommands: make(map[string]RunningCommand),
 		eventEmitter:    emitter,
 		logger:          logger,
 	}
@@ -76,7 +82,9 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	c.eventEmitter.EmitEvent(event.ProcessStarted, command.Id)
 
 	// Save the project in the runningCommands map
-	c.runningCommands[command.Id] = cmd
+	c.runningCommands[command.Id] = RunningCommand{
+		cmd: cmd,
+	}
 
 	// Stream stdout
 	go c.streamOutput(command.Id, stdout)
@@ -112,7 +120,7 @@ func (c *DefaultRunner) StopRunningCommand(id string) error {
 		return errors.New("No running command with id: " + id)
 	}
 
-	return StopProcessGracefully(runningCommand)
+	return StopProcessGracefully(runningCommand.cmd)
 }
 
 func (c *DefaultRunner) StopAllRunningCommands() []error {
@@ -123,7 +131,7 @@ func (c *DefaultRunner) StopAllRunningCommands() []error {
 	commandsToStop := make([]*exec.Cmd, 0, len(c.runningCommands))
 
 	for _, cmd := range c.runningCommands {
-		commandsToStop = append(commandsToStop, cmd)
+		commandsToStop = append(commandsToStop, cmd.cmd)
 	}
 
 	for _, cmd := range commandsToStop {
@@ -171,6 +179,6 @@ func (c *DefaultRunner) sendStreamLine(commandId string, line string) {
 	})
 }
 
-func (c *DefaultRunner) GetRunningCommands() map[string]*exec.Cmd {
+func (c *DefaultRunner) GetRunningCommands() map[string]RunningCommand {
 	return c.runningCommands
 }
