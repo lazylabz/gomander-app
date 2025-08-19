@@ -11,7 +11,6 @@ import (
 	"gomander/internal/event"
 	"gomander/internal/helpers/path"
 	"gomander/internal/logger"
-	"gomander/internal/platform"
 )
 
 var ExpectedTerminationLogs = []string{
@@ -47,15 +46,15 @@ func NewDefaultRunner(logger logger.Logger, emitter event.EventEmitter) *Default
 // RunCommand executes a command and streams its output.
 func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string) error {
 	// Get the project object based on the project string and OS
-	cmd := platform.GetCommand(command.Command)
+	cmd := GetCommand(command.Command)
 
 	// Enable color output and set terminal type
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
 	cmd.Dir = path.GetComputedPath(baseWorkingDirectory, command.WorkingDirectory)
 
 	// Set project attributes based on OS
-	platform.SetProcAttributes(cmd)
-	platform.SetProcEnv(cmd, environmentPaths)
+	SetProcAttributes(cmd)
+	SetProcEnv(cmd, environmentPaths)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -113,7 +112,7 @@ func (c *DefaultRunner) StopRunningCommand(id string) error {
 		return errors.New("No running command with id: " + id)
 	}
 
-	return platform.StopProcessGracefully(runningCommand)
+	return StopProcessGracefully(runningCommand)
 }
 
 func (c *DefaultRunner) StopAllRunningCommands() []error {
@@ -128,7 +127,7 @@ func (c *DefaultRunner) StopAllRunningCommands() []error {
 	}
 
 	for _, cmd := range commandsToStop {
-		err := platform.StopProcessGracefully(cmd)
+		err := StopProcessGracefully(cmd)
 
 		if err != nil {
 			errs = append(errs, err)
