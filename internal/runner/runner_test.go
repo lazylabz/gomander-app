@@ -38,33 +38,33 @@ func (m *MockEventEmitter) EmitEvent(event event.Event, payload interface{}) {
 }
 
 func TestDefaultRunner_RunCommand(t *testing.T) {
+	commandId := "1"
+
 	t.Run("Should run command with success and emit events for each line", func(t *testing.T) {
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
-		emitter.On("EmitEvent", event.ProcessStarted, "1").Return()
-		emitter.On("EmitEvent", event.ProcessFinished, "1").Return()
-		mockEmitterLogEntry(emitter, "1", "a")
-		mockEmitterLogEntry(emitter, "1", "b")
-		mockEmitterLogEntry(emitter, "1", "c")
+		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
+		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
+		mockEmitterLogEntry(emitter, commandId, "line1")
+		mockEmitterLogEntry(emitter, commandId, "line2")
+		mockEmitterLogEntry(emitter, commandId, "line3")
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
 
 		err := r.RunCommand(&commanddomain.Command{
-			Id:               "1",
-			ProjectId:        "1",
+			Id:               commandId,
+			ProjectId:        commandId,
 			Name:             "Test",
-			Command:          "echo 'a'&& echo 'b'&& echo 'c'",
+			Command:          "echo \"line1\" && echo \"line2\" && echo \"line3\"",
 			WorkingDirectory: "/",
 			Position:         0,
-		}, []string{}, "")
-		assert.NoError(t, err)
+		}, []string{"/test"}, "/test")
+		r.WaitForCommand(commandId)
 
-		waitFor(func() bool {
-			return len(r.GetRunningCommands()) == 0
-		})
+		assert.NoError(t, err)
 		assert.Empty(t, r.GetRunningCommands())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
@@ -74,8 +74,8 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
-		emitter.On("EmitEvent", event.ProcessStarted, "1").Return()
-		emitter.On("EmitEvent", event.ProcessFinished, "1").Return()
+		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
+		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
 		// Not an amazing matcher, but different OSes will have different error messages
 		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
 
@@ -84,18 +84,16 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger.On("Debug", mock.Anything).Return()
 
 		err := r.RunCommand(&commanddomain.Command{
-			Id:               "1",
-			ProjectId:        "1",
+			Id:               commandId,
+			ProjectId:        commandId,
 			Name:             "Test",
 			Command:          "definitely-not-a-real-command-12345",
 			WorkingDirectory: "/",
 			Position:         0,
 		}, []string{}, "")
-		assert.NoError(t, err)
+		r.WaitForCommand(commandId)
 
-		waitFor(func() bool {
-			return len(r.GetRunningCommands()) == 0
-		})
+		assert.NoError(t, err)
 		assert.Empty(t, r.GetRunningCommands())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
@@ -108,8 +106,10 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
-		emitter.On("EmitEvent", event.ProcessStarted, "1").Return()
-		emitter.On("EmitEvent", event.ProcessFinished, "1").Return()
+		commandId := "1"
+
+		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
+		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
 		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
@@ -117,8 +117,8 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger.On("Error", mock.Anything).Maybe().Return()
 
 		err := r.RunCommand(&commanddomain.Command{
-			Id:               "1",
-			ProjectId:        "1",
+			Id:               commandId,
+			ProjectId:        commandId,
 			Name:             "Test",
 			Command:          infiniteCmd(),
 			WorkingDirectory: "/",
@@ -126,18 +126,14 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		waitFor(func() bool {
-			return len(r.GetRunningCommands()) > 0
-		})
+		assert.Eventually(t, func() bool {
+			return assert.NotEmpty(t, r.GetRunningCommands())
+		}, 1*time.Second, 20*time.Millisecond)
 
-		assert.NotEmpty(t, r.GetRunningCommands())
+		err = r.StopRunningCommand(commandId)
+		r.WaitForCommand(commandId)
 
-		err = r.StopRunningCommand("1")
 		assert.NoError(t, err)
-
-		waitFor(func() bool {
-			return len(r.GetRunningCommands()) == 0
-		})
 		assert.Empty(t, r.GetRunningCommands())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
@@ -160,19 +156,24 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
-		emitter.On("EmitEvent", event.ProcessStarted, "1").Return()
-		emitter.On("EmitEvent", event.ProcessStarted, "2").Return()
-		emitter.On("EmitEvent", event.ProcessFinished, "1").Return()
-		emitter.On("EmitEvent", event.ProcessFinished, "2").Return()
+		cmd1Id := "1"
+		cmd2Id := "2"
+
+		emitter.On("EmitEvent", event.ProcessStarted, cmd1Id).Return()
+		emitter.On("EmitEvent", event.ProcessStarted, cmd2Id).Return()
+		emitter.On("EmitEvent", event.ProcessFinished, cmd1Id).Return()
+		emitter.On("EmitEvent", event.ProcessFinished, cmd2Id).Return()
+
 		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
+
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
 		// Depends on OS
 		logger.On("Error", mock.Anything).Maybe().Return()
 
 		err := r.RunCommand(&commanddomain.Command{
-			Id:               "1",
-			ProjectId:        "1",
+			Id:               cmd1Id,
+			ProjectId:        cmd1Id,
 			Name:             "Test",
 			Command:          infiniteCmd(),
 			WorkingDirectory: "/",
@@ -181,8 +182,8 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		assert.NoError(t, err)
 
 		err = r.RunCommand(&commanddomain.Command{
-			Id:               "2",
-			ProjectId:        "1",
+			Id:               cmd2Id,
+			ProjectId:        cmd1Id,
 			Name:             "Test",
 			Command:          infiniteCmd(),
 			WorkingDirectory: "/",
@@ -190,32 +191,18 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		}, []string{}, "")
 		assert.NoError(t, err)
 
-		waitFor(func() bool {
-			return len(r.GetRunningCommands()) > 0
-		})
-
-		assert.NotEmpty(t, r.GetRunningCommands())
+		assert.Eventually(t, func() bool {
+			return assert.NotEmpty(t, r.GetRunningCommands())
+		}, 1*time.Second, 20*time.Millisecond)
 
 		errs := r.StopAllRunningCommands()
 
-		waitFor(func() bool {
-			return len(r.GetRunningCommands()) == 0
-		})
+		r.WaitForCommand(cmd1Id)
+		r.WaitForCommand(cmd2Id)
+
 		assert.Empty(t, errs)
 		assert.Empty(t, r.GetRunningCommands())
 	})
-}
-
-var MAX_RETRIES = 20
-var RETRY_DELAY = 50 * time.Millisecond
-
-func waitFor(condition func() bool) {
-	for i := 0; i < MAX_RETRIES; i++ {
-		time.Sleep(RETRY_DELAY)
-		if condition() {
-			return
-		}
-	}
 }
 
 func mockEmitterLogEntry(emitter *MockEventEmitter, id string, line string) {

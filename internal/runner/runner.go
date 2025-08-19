@@ -33,6 +33,7 @@ type DefaultRunner struct {
 	runningCommands map[string]RunningCommand
 	eventEmitter    event.EventEmitter
 	logger          logger.Logger
+	mutex           sync.Mutex
 }
 
 type Runner interface {
@@ -74,6 +75,12 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 		return err
 	}
 
+	var wg sync.WaitGroup
+	runningCommand := RunningCommand{
+		cmd: cmd,
+		wg:  &wg,
+	}
+
 	if err := cmd.Start(); err != nil {
 		c.sendStreamErrorWhileStartingCommand(command, err)
 		return err
@@ -82,21 +89,33 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	c.eventEmitter.EmitEvent(event.ProcessStarted, command.Id)
 
 	// Save the project in the runningCommands map
-	c.runningCommands[command.Id] = RunningCommand{
-		cmd: cmd,
-	}
+	c.mutex.Lock()
+	c.runningCommands[command.Id] = runningCommand
+	c.mutex.Unlock()
+
+	// Add to WaitGroup before starting goroutines to avoid race conditions
+	wg.Add(3) // stdout, stderr, and wait goroutines
 
 	// Stream stdout
-	go c.streamOutput(command.Id, stdout)
+	go func() {
+		defer wg.Done()
+		c.streamOutput(command.Id, stdout)
+	}()
 	// Stream stderr
-	go c.streamOutput(command.Id, stderr)
+	go func() {
+		defer wg.Done()
+		c.streamOutput(command.Id, stderr)
+	}()
 
 	// Wait in background until the command finishes, because it ends naturally or because it is stopped.
 	go func() {
+		defer wg.Done()
 		err := cmd.Wait()
 		// Notify the event emitter that the command has finished and remove it from the runningCommands map
 		defer func() {
+			c.mutex.Lock()
 			delete(c.runningCommands, command.Id)
+			c.mutex.Unlock()
 			c.logger.Info("Command execution ended: " + command.Id)
 			c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
 		}()
@@ -158,6 +177,8 @@ func isExpectedError(err error) bool {
 func (c *DefaultRunner) streamOutput(commandId string, pipeReader io.ReadCloser) {
 	scanner := bufio.NewScanner(pipeReader)
 
+	defer pipeReader.Close()
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		c.logger.Debug(line)
@@ -181,4 +202,12 @@ func (c *DefaultRunner) sendStreamLine(commandId string, line string) {
 
 func (c *DefaultRunner) GetRunningCommands() map[string]RunningCommand {
 	return c.runningCommands
+}
+
+func (c *DefaultRunner) WaitForCommand(commandId string) {
+	if runningCommand, exists := c.runningCommands[commandId]; exists {
+		runningCommand.wg.Wait()
+	} else {
+		return
+	}
 }
