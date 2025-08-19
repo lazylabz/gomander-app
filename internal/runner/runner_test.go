@@ -111,6 +111,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
 		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
 		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
+
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
 		// Depends on OS
@@ -129,6 +130,8 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		assert.Eventually(t, func() bool {
 			return assert.NotEmpty(t, r.GetRunningCommands())
 		}, 1*time.Second, 20*time.Millisecond)
+
+		time.Sleep(500 * time.Millisecond) // Give some time for the command to start and some logs to be emitted
 
 		err = r.StopRunningCommand(commandId)
 		r.WaitForCommand(commandId)
@@ -194,6 +197,8 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		assert.Eventually(t, func() bool {
 			return assert.NotEmpty(t, r.GetRunningCommands())
 		}, 1*time.Second, 20*time.Millisecond)
+
+		time.Sleep(500 * time.Millisecond) // Give some time for the command to start and some logs to be emitted
 
 		errs := r.StopAllRunningCommands()
 
