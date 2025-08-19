@@ -37,6 +37,13 @@ func (m *MockEventEmitter) EmitEvent(event event.Event, payload interface{}) {
 	m.Called(event, payload)
 }
 
+func validWorkingDirectory() string {
+	if runtime.GOOS == "windows" {
+		return "C:\\"
+	}
+	return "/"
+}
+
 func TestDefaultRunner_RunCommand(t *testing.T) {
 	commandId := "1"
 
@@ -59,7 +66,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 			ProjectId:        commandId,
 			Name:             "Test",
 			Command:          "echo \"line1\" && echo \"line2\" && echo \"line3\"",
-			WorkingDirectory: "/",
+			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
 		}, []string{"/test"}, "/test")
 		r.WaitForCommand(commandId)
@@ -88,7 +95,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 			ProjectId:        commandId,
 			Name:             "Test",
 			Command:          "definitely-not-a-real-command-12345",
-			WorkingDirectory: "/",
+			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
 		}, []string{}, "")
 		r.WaitForCommand(commandId)
@@ -122,7 +129,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 			ProjectId:        commandId,
 			Name:             "Test",
 			Command:          infiniteCmd(),
-			WorkingDirectory: "/",
+			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
 		}, []string{}, "")
 		assert.NoError(t, err)
@@ -179,7 +186,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 			ProjectId:        cmd1Id,
 			Name:             "Test",
 			Command:          infiniteCmd(),
-			WorkingDirectory: "/",
+			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
 		}, []string{}, "")
 		assert.NoError(t, err)
@@ -189,7 +196,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 			ProjectId:        cmd1Id,
 			Name:             "Test",
 			Command:          infiniteCmd(),
-			WorkingDirectory: "/",
+			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
 		}, []string{}, "")
 		assert.NoError(t, err)
