@@ -1,6 +1,6 @@
 //go:build !windows
 
-package platform
+package runner
 
 import (
 	"os"

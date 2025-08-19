@@ -6,12 +6,12 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"sync"
 
 	"gomander/internal/command/domain"
 	"gomander/internal/event"
 	"gomander/internal/helpers/path"
 	"gomander/internal/logger"
-	"gomander/internal/platform"
 )
 
 var ExpectedTerminationLogs = []string{
@@ -24,10 +24,16 @@ var ExpectedTerminationLogs = []string{
 	"wait: no child processes",
 }
 
+type RunningCommand struct {
+	cmd *exec.Cmd
+	wg  *sync.WaitGroup
+}
+
 type DefaultRunner struct {
-	runningCommands map[string]*exec.Cmd
+	runningCommands map[string]RunningCommand
 	eventEmitter    event.EventEmitter
 	logger          logger.Logger
+	mutex           sync.Mutex
 }
 
 type Runner interface {
@@ -38,7 +44,7 @@ type Runner interface {
 
 func NewDefaultRunner(logger logger.Logger, emitter event.EventEmitter) *DefaultRunner {
 	return &DefaultRunner{
-		runningCommands: make(map[string]*exec.Cmd),
+		runningCommands: make(map[string]RunningCommand),
 		eventEmitter:    emitter,
 		logger:          logger,
 	}
@@ -47,15 +53,15 @@ func NewDefaultRunner(logger logger.Logger, emitter event.EventEmitter) *Default
 // RunCommand executes a command and streams its output.
 func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string) error {
 	// Get the project object based on the project string and OS
-	cmd := platform.GetCommand(command.Command)
+	cmd := GetCommand(command.Command)
 
 	// Enable color output and set terminal type
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
 	cmd.Dir = path.GetComputedPath(baseWorkingDirectory, command.WorkingDirectory)
 
 	// Set project attributes based on OS
-	platform.SetProcAttributes(cmd)
-	platform.SetProcEnv(cmd, environmentPaths)
+	SetProcAttributes(cmd)
+	SetProcEnv(cmd, environmentPaths)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -69,6 +75,12 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 		return err
 	}
 
+	var wg sync.WaitGroup
+	runningCommand := RunningCommand{
+		cmd: cmd,
+		wg:  &wg,
+	}
+
 	if err := cmd.Start(); err != nil {
 		c.sendStreamErrorWhileStartingCommand(command, err)
 		return err
@@ -77,19 +89,33 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	c.eventEmitter.EmitEvent(event.ProcessStarted, command.Id)
 
 	// Save the project in the runningCommands map
-	c.runningCommands[command.Id] = cmd
+	c.mutex.Lock()
+	c.runningCommands[command.Id] = runningCommand
+	c.mutex.Unlock()
+
+	// Add to WaitGroup before starting goroutines to avoid race conditions
+	wg.Add(3) // stdout, stderr, and wait goroutines
 
 	// Stream stdout
-	go c.streamOutput(command.Id, stdout)
+	go func() {
+		defer wg.Done()
+		c.streamOutput(command.Id, stdout)
+	}()
 	// Stream stderr
-	go c.streamOutput(command.Id, stderr)
+	go func() {
+		defer wg.Done()
+		c.streamOutput(command.Id, stderr)
+	}()
 
 	// Wait in background until the command finishes, because it ends naturally or because it is stopped.
 	go func() {
+		defer wg.Done()
 		err := cmd.Wait()
 		// Notify the event emitter that the command has finished and remove it from the runningCommands map
 		defer func() {
+			c.mutex.Lock()
 			delete(c.runningCommands, command.Id)
+			c.mutex.Unlock()
 			c.logger.Info("Command execution ended: " + command.Id)
 			c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
 		}()
@@ -113,7 +139,7 @@ func (c *DefaultRunner) StopRunningCommand(id string) error {
 		return errors.New("No running command with id: " + id)
 	}
 
-	return platform.StopProcessGracefully(runningCommand)
+	return StopProcessGracefully(runningCommand.cmd)
 }
 
 func (c *DefaultRunner) StopAllRunningCommands() []error {
@@ -124,11 +150,11 @@ func (c *DefaultRunner) StopAllRunningCommands() []error {
 	commandsToStop := make([]*exec.Cmd, 0, len(c.runningCommands))
 
 	for _, cmd := range c.runningCommands {
-		commandsToStop = append(commandsToStop, cmd)
+		commandsToStop = append(commandsToStop, cmd.cmd)
 	}
 
 	for _, cmd := range commandsToStop {
-		err := platform.StopProcessGracefully(cmd)
+		err := StopProcessGracefully(cmd)
 
 		if err != nil {
 			errs = append(errs, err)
@@ -151,6 +177,8 @@ func isExpectedError(err error) bool {
 func (c *DefaultRunner) streamOutput(commandId string, pipeReader io.ReadCloser) {
 	scanner := bufio.NewScanner(pipeReader)
 
+	defer pipeReader.Close()
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		c.logger.Debug(line)
@@ -172,6 +200,14 @@ func (c *DefaultRunner) sendStreamLine(commandId string, line string) {
 	})
 }
 
-func (c *DefaultRunner) GetRunningCommands() map[string]*exec.Cmd {
+func (c *DefaultRunner) GetRunningCommands() map[string]RunningCommand {
 	return c.runningCommands
+}
+
+func (c *DefaultRunner) WaitForCommand(commandId string) {
+	if runningCommand, exists := c.runningCommands[commandId]; exists {
+		runningCommand.wg.Wait()
+	} else {
+		return
+	}
 }

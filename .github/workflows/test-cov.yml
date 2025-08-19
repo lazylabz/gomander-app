@@ -8,7 +8,11 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v4
@@ -30,7 +34,7 @@ jobs:
         echo "dummy" > cmd/gomander/frontend/dist/.dummy
 
     - name: Run tests
-      run: go test -v -coverprofile=coverage.txt ./...
+      run: go test -v -coverprofile coverage.txt ./...
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5
