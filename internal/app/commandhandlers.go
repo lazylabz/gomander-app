@@ -50,10 +50,6 @@ func (a *App) RemoveCommand(id string) error {
 
 	a.logger.Info("Command removed: " + id)
 
-	// Update the commands and command groups in the frontend
-	a.eventEmitter.EmitEvent(event.GetCommands, nil)
-	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
-
 	return nil
 }
 

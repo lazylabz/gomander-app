@@ -69,6 +69,8 @@ export const CommandMenuItem = ({
         "Failed to delete command: " +
           (e instanceof Error ? e.message : "Unknown error"),
       );
+    } finally {
+      fetchCommands();
     }
     setActiveCommandId(null); // Reset active command after deletion
   };
