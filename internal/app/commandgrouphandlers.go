@@ -43,8 +43,6 @@ func (a *App) DeleteCommandGroup(commandGroupId string) error {
 		return err
 	}
 
-	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
-
 	return nil
 }
 

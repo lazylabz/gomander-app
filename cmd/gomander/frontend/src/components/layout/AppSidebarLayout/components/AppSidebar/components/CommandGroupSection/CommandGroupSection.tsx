@@ -2,6 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Folder, FolderOpen, Play, Square } from "lucide-react";
 import { type SyntheticEvent, useState } from "react";
+import { toast } from "sonner";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
 import { useSidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
@@ -19,7 +20,9 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
 import type { Command, CommandGroup } from "@/contracts/types.ts";
+import { parseError } from "@/helpers/errorHelpers.ts";
 import { cn } from "@/lib/utils.ts";
+import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { deleteCommandGroup } from "@/useCases/commandGroup/deleteCommandGroup.ts";
@@ -74,7 +77,14 @@ export const CommandGroupSection = ({
 
   const handleDelete = async () => {
     if (isReorderingGroups) return;
-    await deleteCommandGroup(commandGroup.id);
+    try {
+      await deleteCommandGroup(commandGroup.id);
+      toast.success("Command group deleted successfully");
+    } catch (e) {
+      toast.error("Failed to delete command group: " + parseError(e));
+    } finally {
+      fetchCommandGroups();
+    }
   };
 
   const handleEdit = () => {
