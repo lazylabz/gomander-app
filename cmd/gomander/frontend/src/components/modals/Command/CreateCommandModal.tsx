@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
+import { parseError } from "@/helpers/errorHelpers.ts";
 import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { createCommand } from "@/useCases/command/createCommand.ts";
@@ -62,10 +63,7 @@ export const CreateCommandModal = ({
       setOpen(false);
       form.reset();
     } catch (e) {
-      toast.error(
-        "Failed to create command: " +
-          (e instanceof Error ? e.message : "Unknown error"),
-      );
+      toast.error("Failed to create command: " + parseError(e));
     } finally {
       fetchCommands();
     }

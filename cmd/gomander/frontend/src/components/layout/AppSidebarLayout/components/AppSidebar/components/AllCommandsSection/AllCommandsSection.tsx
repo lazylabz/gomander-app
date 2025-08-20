@@ -28,6 +28,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
+import { parseError } from "@/helpers/errorHelpers.ts";
 import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { reorderCommands } from "@/useCases/command/reorderCommands.ts";
@@ -45,10 +46,7 @@ export const AllCommandsSection = () => {
     try {
       await reorderCommands(newOrder);
     } catch (e) {
-      toast.error(
-        "Failed to reorder commands: " +
-          (e instanceof Error ? e.message : "Unknown error"),
-      );
+      toast.error("Failed to reorder commands: " + parseError(e));
     } finally {
       fetchCommands();
     }

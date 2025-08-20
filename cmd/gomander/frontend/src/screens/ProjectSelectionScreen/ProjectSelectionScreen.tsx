@@ -9,6 +9,7 @@ import { ImportProjectModal } from "@/components/modals/Project/ImportProjectMod
 import { Button } from "@/components/ui/button.tsx";
 import { dataService } from "@/contracts/service.ts";
 import type { ProjectExport } from "@/contracts/types.ts";
+import { parseError } from "@/helpers/errorHelpers.ts";
 import { ScreenRoutes } from "@/routes.ts";
 import { ProjectCard } from "@/screens/ProjectSelectionScreen/components/ProjectCard.tsx";
 import { useGetAvailableProjects } from "@/screens/ProjectSelectionScreen/hooks/useGetAvailableProjects.ts";
@@ -54,10 +55,7 @@ export const ProjectSelectionScreen = () => {
       const projectToImport = await dataService.getProjectToImport();
       setProjectBeingImported(projectToImport);
     } catch (e) {
-      toast.error(
-        "Failed to select project: " +
-          (e instanceof Error ? e.message : "Unknown error"),
-      );
+      toast.error("Failed to select project: " + parseError(e));
     }
   };
 
