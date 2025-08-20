@@ -91,14 +91,12 @@ func TestApp_AddCommand(t *testing.T) {
 	t.Run("Should add the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -122,7 +120,6 @@ func TestApp_AddCommand(t *testing.T) {
 		mockCommandRepository.On("Create", &expectedCommandCall).Return(nil)
 
 		mockLogger.On("Info", mock.Anything).Return(nil)
-		mockEventEmitter.On("EmitEvent", event.GetCommands, nil).Return(nil)
 
 		err := a.AddCommand(parameterCommand)
 		assert.NoError(t, err)
@@ -130,21 +127,18 @@ func TestApp_AddCommand(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if fails to get all commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -164,21 +158,18 @@ func TestApp_AddCommand(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if fails to create commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -209,7 +200,6 @@ func TestApp_AddCommand(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 }
@@ -220,7 +210,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 		a := app.NewApp()
@@ -228,7 +217,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 			CommandRepository:      mockCommandRepository,
 			CommandGroupRepository: mockCommandGroupRepository,
 			Logger:                 mockLogger,
-			EventEmitter:           mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -240,9 +228,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 
 		mockLogger.On("Info", "Command removed: "+commandId).Return(nil)
 
-		mockEventEmitter.On("EmitEvent", event.GetCommands, nil).Return(nil)
-		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil).Return(nil)
-
 		err := a.RemoveCommand(commandId)
 		assert.NoError(t, err)
 
@@ -250,14 +235,12 @@ func TestApp_RemoveCommand(t *testing.T) {
 			mockCommandGroupRepository,
 			mockCommandRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if fails to remove the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
 		projectId := "project1"
@@ -265,7 +248,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository:      mockCommandRepository,
 			Logger:                 mockLogger,
-			EventEmitter:           mockEventEmitter,
 			CommandGroupRepository: mockCommandGroupRepository,
 		})
 
@@ -277,7 +259,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 		mockCommandRepository.On("Delete", commandId).Return(errors.New("failed to delete command"))
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil).Return()
 
 		err := a.RemoveCommand(commandId)
 		assert.Error(t, err)
@@ -285,7 +266,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockLogger,
-			mockEventEmitter,
 			mockCommandGroupRepository,
 		)
 	})
@@ -294,7 +274,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 		a := app.NewApp()
@@ -302,7 +281,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 			CommandRepository:      mockCommandRepository,
 			CommandGroupRepository: mockCommandGroupRepository,
 			Logger:                 mockLogger,
-			EventEmitter:           mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -320,7 +298,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 			mockCommandGroupRepository,
 			mockCommandRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 }
@@ -330,14 +307,12 @@ func TestApp_EditCommand(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -352,7 +327,6 @@ func TestApp_EditCommand(t *testing.T) {
 		mockCommandRepository.On("Update", &commandToEdit).Return(nil)
 
 		mockLogger.On("Info", "Command edited: "+commandToEdit.Id).Return(nil)
-		mockEventEmitter.On("EmitEvent", event.GetCommands, nil).Return(nil)
 
 		err := a.EditCommand(commandToEdit)
 		assert.NoError(t, err)
@@ -360,21 +334,18 @@ func TestApp_EditCommand(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if fails to edit the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -396,7 +367,6 @@ func TestApp_EditCommand(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 }
@@ -406,14 +376,12 @@ func TestApp_ReorderCommands(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -441,7 +409,6 @@ func TestApp_ReorderCommands(t *testing.T) {
 		mockCommandRepository.On("Update", &cm3WithUpdatedPosition).Return(nil)
 
 		mockLogger.On("Info", "Commands reordered").Return(nil)
-		mockEventEmitter.On("EmitEvent", event.GetCommands, nil).Return(nil)
 
 		err := a.ReorderCommands(orderedIds)
 		assert.NoError(t, err)
@@ -449,21 +416,18 @@ func TestApp_ReorderCommands(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if fails to retrieve commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -480,21 +444,18 @@ func TestApp_ReorderCommands(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if fails to update commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -529,7 +490,6 @@ func TestApp_ReorderCommands(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 }
@@ -602,13 +562,11 @@ func TestApp_RunCommand(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
 		})
 		cmdId := "command1"
 
@@ -622,21 +580,18 @@ func TestApp_RunCommand(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if failing to retrieve the user config", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			ConfigRepository:  mockConfigRepository,
 			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
 		})
 
 		cmdData := testutils.NewCommand().Data()
@@ -654,7 +609,6 @@ func TestApp_RunCommand(t *testing.T) {
 			mockCommandRepository,
 			mockConfigRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if failing to retrieve the project", func(t *testing.T) {
@@ -662,7 +616,6 @@ func TestApp_RunCommand(t *testing.T) {
 		mockConfigRepository := new(MockUserConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
@@ -670,7 +623,6 @@ func TestApp_RunCommand(t *testing.T) {
 			ConfigRepository:  mockConfigRepository,
 			ProjectRepository: mockProjectRepository,
 			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
 		})
 
 		projectId := "project1"
@@ -693,7 +645,6 @@ func TestApp_RunCommand(t *testing.T) {
 			mockConfigRepository,
 			mockProjectRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if failing to run the command", func(t *testing.T) {
@@ -702,7 +653,6 @@ func TestApp_RunCommand(t *testing.T) {
 		mockProjectRepository := new(MockProjectRepository)
 		mockRunner := new(MockRunner)
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 		a := app.NewApp()
@@ -712,7 +662,6 @@ func TestApp_RunCommand(t *testing.T) {
 			ProjectRepository: mockProjectRepository,
 			Runner:            mockRunner,
 			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
 		})
 
 		envPath := configdomain.EnvironmentPath{
@@ -760,7 +709,6 @@ func TestApp_RunCommand(t *testing.T) {
 			mockConfigRepository,
 			mockProjectRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 }
@@ -803,13 +751,11 @@ func TestApp_StopCommand(t *testing.T) {
 	t.Run("Should return error if the command does not exist", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
 		})
 
 		commandId := "non-existing-command"
@@ -823,20 +769,17 @@ func TestApp_StopCommand(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return error if fails to stop the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 		mockRunner := new(MockRunner)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
 			Logger:            mockLogger,
-			EventEmitter:      mockEventEmitter,
 			Runner:            mockRunner,
 		})
 
@@ -854,7 +797,6 @@ func TestApp_StopCommand(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockLogger,
-			mockEventEmitter,
 			mockRunner,
 		)
 	})

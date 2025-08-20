@@ -108,7 +108,5 @@ func (a *App) RemoveCommandFromCommandGroups(id string) error {
 		}
 	}
 
-	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
-
 	return nil
 }
