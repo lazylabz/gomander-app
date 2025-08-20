@@ -22,6 +22,10 @@ export const EventListenersContainer = () => {
       fetchCommandGroups();
     });
 
+    eventService.eventsOn(Event.GET_USER_CONFIG, () => {
+      fetchUserConfig();
+    });
+
     eventService.eventsOn(
       Event.NEW_LOG_ENTRY,
       (data: EventData[Event.NEW_LOG_ENTRY]) => {
@@ -41,10 +45,6 @@ export const EventListenersContainer = () => {
       (data: EventData[Event.PROCESS_STARTED]) =>
         updateCommandStatus(data, CommandStatus.RUNNING),
     );
-
-    eventService.eventsOn(Event.GET_USER_CONFIG, () => {
-      fetchUserConfig();
-    });
 
     // Clean listeners on all events
     return () =>
