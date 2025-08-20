@@ -3,7 +3,6 @@ import { Fragment, useEffect } from "react";
 import { eventService } from "@/contracts/service.ts";
 import { Event, type EventData } from "@/contracts/types.ts";
 import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
-import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
@@ -14,10 +13,6 @@ export const EventListenersContainer = () => {
 
   // Register events listeners
   useEffect(() => {
-    eventService.eventsOn(Event.GET_COMMANDS, () => {
-      fetchCommands();
-    });
-
     eventService.eventsOn(Event.GET_COMMAND_GROUPS, () => {
       fetchCommandGroups();
     });
