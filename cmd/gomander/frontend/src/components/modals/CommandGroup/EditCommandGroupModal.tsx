@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Group } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { CommandGroupCommandsField } from "@/components/modals/CommandGroup/common/CommandGroupCommandsField/CommandGroupCommandsField.tsx";
 import { CommandGroupNameField } from "@/components/modals/CommandGroup/common/CommandGroupNameField.tsx";
@@ -49,10 +50,18 @@ export const EditCommandGroupModal = ({
       commands: values.commands,
     };
 
-    await editCommandGroup(editedCommandGroup);
+    try {
+      await editCommandGroup(editedCommandGroup);
 
-    setOpen(false);
-    form.reset();
+      setOpen(false);
+      form.reset();
+      toast.success("Command group updated successfully");
+    } catch (e) {
+      toast.error(
+        "Failed to edit the command group: " +
+          (e instanceof Error ? e.message : "Unknown error"),
+      );
+    }
   };
 
   const onOpenChange = (open: boolean) => {

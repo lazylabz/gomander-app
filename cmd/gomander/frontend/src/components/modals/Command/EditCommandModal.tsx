@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Terminal } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { CommandCommandField } from "@/components/modals/Command/common/CommandCommandField.tsx";
 import { CommandComputedPath } from "@/components/modals/Command/common/CommandComputedPath.tsx";
@@ -46,15 +47,24 @@ export const EditCommandModal = ({
       return;
     }
 
-    await editCommand({
-      ...command,
-      // Editable fields
-      name: values.name,
-      command: values.command,
-      workingDirectory: values.workingDirectory,
-    });
+    try {
+      await editCommand({
+        ...command,
+        // Editable fields
+        name: values.name,
+        command: values.command,
+        workingDirectory: values.workingDirectory,
+      });
 
-    setOpen(false);
+      toast.success("Command updated successfully");
+
+      setOpen(false);
+    } catch (e: unknown) {
+      toast.error(
+        "Failed to update command: " +
+          (e instanceof Error ? e.message : "Unknown error"),
+      );
+    }
   };
 
   const onOpenChange = (open: boolean) => {

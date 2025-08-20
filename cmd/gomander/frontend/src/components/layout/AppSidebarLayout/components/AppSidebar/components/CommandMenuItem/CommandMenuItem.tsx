@@ -1,6 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Play, Square } from "lucide-react";
+import { toast } from "sonner";
 
 import { useSidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import {
@@ -51,7 +52,16 @@ export const CommandMenuItem = ({
   };
 
   const handleDeleteCommand = async () => {
-    await deleteCommand(command.id);
+    try {
+      await deleteCommand(command.id);
+      setActiveCommandId(null); // Reset active command after deletion
+      toast.success("Command deleted successfully");
+    } catch (e) {
+      toast.error(
+        "Failed to delete command: " +
+          (e instanceof Error ? e.message : "Unknown error"),
+      );
+    }
     setActiveCommandId(null); // Reset active command after deletion
   };
 

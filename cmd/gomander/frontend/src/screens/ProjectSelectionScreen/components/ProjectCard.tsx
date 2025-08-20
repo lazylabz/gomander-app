@@ -1,4 +1,5 @@
 import { EllipsisVertical } from "lucide-react";
+import { toast } from "sonner";
 
 import {
   DropdownMenu,
@@ -23,6 +24,18 @@ export const ProjectCard = ({
     await loadAllProjectData();
   };
 
+  const handleExportProject = async () => {
+    try {
+      await exportProject(project.id);
+      toast.success("Project exported successfully!");
+    } catch (e) {
+      toast.error(
+        "Failed to export the project: " +
+          (e instanceof Error ? e.message : "Unknown error"),
+      );
+    }
+  };
+
   return (
     <div className="relative px-4 py-2 border border-neutral-100 dark:border-neutral-900 rounded-xl shadow-none hover:shadow-md shadow-neutral-100 dark:shadow-neutral-800 transition-all w-80">
       <DropdownMenu>
@@ -38,7 +51,7 @@ export const ProjectCard = ({
           </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer"
-            onClick={() => exportProject(project.id)}
+            onClick={handleExportProject}
           >
             Export
           </DropdownMenuItem>

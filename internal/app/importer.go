@@ -94,7 +94,6 @@ func (a *App) ExportProject(projectConfigId string) (err error) {
 		return err
 	}
 
-	a.eventEmitter.EmitEvent(event.SuccessNotification, "Project exported successfully to "+filePath)
 	return nil
 }
 
@@ -165,8 +164,6 @@ func (a *App) ImportProject(projectJSON ProjectExportJSONv1, name, workingDirect
 			return err
 		}
 	}
-
-	a.eventEmitter.EmitEvent(event.SuccessNotification, "Project imported successfully")
 
 	return nil
 }

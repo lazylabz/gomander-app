@@ -33,7 +33,6 @@ func (a *App) AddCommand(newCommand domain.Command) error {
 	}
 
 	a.logger.Info("Command added: " + newCommand.Id)
-	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command added")
 
 	// Update the commands map in the frontend
 	a.eventEmitter.EmitEvent(event.GetCommands, nil)
@@ -57,7 +56,6 @@ func (a *App) RemoveCommand(id string) error {
 	}
 
 	a.logger.Info("Command removed: " + id)
-	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command removed")
 
 	// Update the commands and command groups in the frontend
 	a.eventEmitter.EmitEvent(event.GetCommands, nil)
@@ -75,7 +73,6 @@ func (a *App) EditCommand(newCommand domain.Command) error {
 	}
 
 	a.logger.Info("Command edited: " + newCommand.Id)
-	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command edited")
 
 	// Update the commands map in the frontend
 	a.eventEmitter.EmitEvent(event.GetCommands, nil)

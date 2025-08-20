@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createContext, useContext } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router";
+import { toast } from "sonner";
 
 import { useTheme } from "@/contexts/theme.tsx";
 import { fetchProject } from "@/queries/fetchProject.ts";
@@ -89,20 +90,37 @@ export const SettingsContextProvider = ({
 
     // Save user settings
     if (hasUserChanges) {
-      await saveUserConfig({
-        lastOpenedProjectId: userConfig.lastOpenedProjectId,
-        environmentPaths: formData.environmentPaths,
-      });
+      try {
+        await saveUserConfig({
+          lastOpenedProjectId: userConfig.lastOpenedProjectId,
+          environmentPaths: formData.environmentPaths,
+        });
+        toast.success("User settings saved successfully");
+      } catch (e) {
+        throw new Error(
+          "Failed to save user settings: " +
+            (e instanceof Error ? e.message : "Unknown error"),
+        );
+      }
       await fetchUserConfig();
     }
 
     // Save project settings
     if (hasProjectChanges) {
-      await editOpenedProject({
-        ...projectInfo,
-        name: formData.name,
-        workingDirectory: formData.baseWorkingDirectory,
-      });
+      try {
+        await editOpenedProject({
+          ...projectInfo,
+          name: formData.name,
+          workingDirectory: formData.baseWorkingDirectory,
+        });
+        toast.success("Project settings saved successfully");
+      } catch (e) {
+        throw new Error(
+          "Failed to save project settings: " +
+            (e instanceof Error ? e.message : "Unknown error"),
+        );
+      }
+
       await fetchProject();
     }
 

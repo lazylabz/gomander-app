@@ -18,7 +18,6 @@ func (a *App) SaveUserConfig(newUserConfig domain.Config) error {
 	}
 
 	a.logger.Info("User configuration saved successfully")
-	a.eventEmitter.EmitEvent(event.SuccessNotification, "User configuration saved successfully")
 	a.eventEmitter.EmitEvent(event.GetUserConfig, nil)
 
 	return nil

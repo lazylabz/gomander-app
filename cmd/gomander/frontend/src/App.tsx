@@ -24,7 +24,7 @@ function App() {
     <VersionProvider>
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
         <EventListenersContainer />
-        <Toaster richColors />
+        <Toaster richColors position="top-right" />
         <Routes>
           <Route
             path={ScreenRoutes.ProjectSelection}

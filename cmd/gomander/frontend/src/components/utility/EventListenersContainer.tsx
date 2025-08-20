@@ -40,16 +40,7 @@ export const EventListenersContainer = () => {
         });
       },
     );
-
-    eventService.eventsOn(
-      Event.SUCCESS_NOTIFICATION,
-      (data: EventData[Event.SUCCESS_NOTIFICATION]) => {
-        toast.success(data, {
-          position: "top-right",
-        });
-      },
-    );
-
+    
     eventService.eventsOn(
       Event.PROCESS_FINISHED,
       (data: EventData[Event.PROCESS_FINISHED]) =>

@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Terminal } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { CommandCommandField } from "@/components/modals/Command/common/CommandCommandField.tsx";
 import { CommandComputedPath } from "@/components/modals/Command/common/CommandComputedPath.tsx";
@@ -46,17 +47,25 @@ export const CreateCommandModal = ({
       return;
     }
 
-    await createCommand({
-      id: crypto.randomUUID(),
-      projectId: projectId,
-      name: values.name,
-      command: values.command,
-      workingDirectory: values.workingDirectory,
-      position: 0, // Will be set by the backend
-    });
+    try {
+      await createCommand({
+        id: crypto.randomUUID(),
+        projectId: projectId,
+        name: values.name,
+        command: values.command,
+        workingDirectory: values.workingDirectory,
+        position: 0, // Will be set by the backend
+      });
+      toast.success("Command created successfully");
 
-    setOpen(false);
-    form.reset();
+      setOpen(false);
+      form.reset();
+    } catch (e) {
+      toast.error(
+        "Failed to create command: " +
+          (e instanceof Error ? e.message : "Unknown error"),
+      );
+    }
   };
 
   const onOpenChange = (open: boolean) => {
