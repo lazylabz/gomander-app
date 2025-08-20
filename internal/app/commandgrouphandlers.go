@@ -5,7 +5,6 @@ import (
 
 	commanddomain "gomander/internal/command/domain"
 	"gomander/internal/commandgroup/domain"
-	"gomander/internal/event"
 	"gomander/internal/helpers/array"
 )
 
@@ -64,8 +63,6 @@ func (a *App) ReorderCommandGroups(newOrderedIds []string) error {
 			return err
 		}
 	}
-
-	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
 
 	return nil
 }
