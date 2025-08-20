@@ -71,12 +71,10 @@ func TestApp_OnBeforeClose(t *testing.T) {
 
 		mockCommandRunner := new(MockRunner)
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		a.LoadDependencies(app.Dependencies{
-			Runner:       mockCommandRunner,
-			Logger:       mockLogger,
-			EventEmitter: mockEventEmitter,
+			Runner: mockCommandRunner,
+			Logger: mockLogger,
 		})
 
 		mockCommandRunner.On("StopAllRunningCommands").Return([]error{})
@@ -84,19 +82,17 @@ func TestApp_OnBeforeClose(t *testing.T) {
 		prevent := a.OnBeforeClose(context.Background())
 
 		assert.False(t, prevent)
-		mock.AssertExpectationsForObjects(t, mockCommandRunner, mockLogger, mockEventEmitter)
+		mock.AssertExpectationsForObjects(t, mockCommandRunner, mockLogger)
 	})
 	t.Run("Should prevent closing if there are errors stopping commands", func(t *testing.T) {
 		a := app.NewApp()
 
 		mockCommandRunner := new(MockRunner)
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		a.LoadDependencies(app.Dependencies{
-			Runner:       mockCommandRunner,
-			Logger:       mockLogger,
-			EventEmitter: mockEventEmitter,
+			Runner: mockCommandRunner,
+			Logger: mockLogger,
 		})
 
 		errs := []error{assert.AnError}
@@ -108,6 +104,6 @@ func TestApp_OnBeforeClose(t *testing.T) {
 
 		assert.True(t, prevent)
 
-		mock.AssertExpectationsForObjects(t, mockCommandRunner, mockLogger, mockEventEmitter)
+		mock.AssertExpectationsForObjects(t, mockCommandRunner, mockLogger)
 	})
 }
