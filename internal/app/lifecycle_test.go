@@ -9,7 +9,6 @@ import (
 
 	"gomander/internal/app"
 	"gomander/internal/config/domain"
-	"gomander/internal/event"
 	domain2 "gomander/internal/project/domain"
 )
 
@@ -104,7 +103,6 @@ func TestApp_OnBeforeClose(t *testing.T) {
 		mockCommandRunner.On("StopAllRunningCommands").Return(errs)
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 
 		prevent := a.OnBeforeClose(context.Background())
 

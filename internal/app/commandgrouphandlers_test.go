@@ -506,7 +506,6 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 
 		mockCommandGroupRepository.On("GetAll", projectId).Return(make([]domain.CommandGroup, 0), errors.New("failed to get command groups"))
 		mockLogger.On("Error", mock.Anything)
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything)
 
 		err := a.RemoveCommandFromCommandGroups(commandData.Id)
 		assert.Error(t, err)
@@ -561,7 +560,6 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 
 		mockCommandGroupRepository.On("Update", &expectedCommandGroup1Call).Return(nil).Once()
 		mockCommandGroupRepository.On("Update", &expectedCommandGroup2Call).Return(errors.New("failed to update command group")).Once()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything)
 		mockLogger.On("Error", mock.Anything)
 
 		err := a.RemoveCommandFromCommandGroups(commandData.Id)
@@ -616,7 +614,6 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 
 		mockCommandGroupRepository.On("Update", &expectedCommandGroup1Call).Return(nil).Once()
 		mockCommandGroupRepository.On("Delete", commandGroup2Data.Data().Id).Return(errors.New("failed to delete command group")).Once()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything)
 		mockLogger.On("Error", mock.Anything)
 
 		err := a.RemoveCommandFromCommandGroups(commandData.Id)

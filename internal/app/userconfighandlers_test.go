@@ -67,7 +67,6 @@ func TestApp_SaveUserConfig(t *testing.T) {
 
 		mockLogger.On("Info", mock.Anything).Return(nil)
 
-		mockEventEmitter.On("EmitEvent", event.SuccessNotification, mock.Anything).Return(nil)
 		mockEventEmitter.On("EmitEvent", event.GetUserConfig, nil).Return(nil)
 
 		err := a.SaveUserConfig(newUserConfig)
@@ -102,8 +101,6 @@ func TestApp_SaveUserConfig(t *testing.T) {
 		mockRepository.On("Update", &newUserConfig).Return(errors.New("failed to save user configuration"))
 
 		mockLogger.On("Error", mock.Anything).Return(nil)
-
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return(nil)
 
 		err := a.SaveUserConfig(newUserConfig)
 		assert.Error(t, err)
