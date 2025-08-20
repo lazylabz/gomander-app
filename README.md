@@ -49,4 +49,4 @@ Pre-requisites:
 
 #### From Mac OS system
 
-Execute `build.sh`
+Execute `make all` to build the application for all platforms or `make help` to see available options.
