@@ -1,5 +1,4 @@
 import { Fragment, useEffect } from "react";
-import { toast } from "sonner";
 
 import { eventService } from "@/contracts/service.ts";
 import { Event, type EventData } from "@/contracts/types.ts";
@@ -31,16 +30,6 @@ export const EventListenersContainer = () => {
       },
     );
 
-    eventService.eventsOn(
-      Event.ERROR_NOTIFICATION,
-      (data: EventData[Event.ERROR_NOTIFICATION]) => {
-        toast.error("Error", {
-          description: data,
-          position: "top-right",
-        });
-      },
-    );
-    
     eventService.eventsOn(
       Event.PROCESS_FINISHED,
       (data: EventData[Event.PROCESS_FINISHED]) =>

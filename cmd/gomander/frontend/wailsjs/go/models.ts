@@ -71,7 +71,6 @@ export namespace event {
 	    PROCESS_FINISHED = "process_finished",
 	    PROCESS_STARTED = "process_started",
 	    NEW_LOG_ENTRY = "new_log_entry",
-	    ERROR_NOTIFICATION = "error_notification",
 	    GET_USER_CONFIG = "get_user_config",
 	    GET_COMMAND_GROUPS = "get_command_groups",
 	}

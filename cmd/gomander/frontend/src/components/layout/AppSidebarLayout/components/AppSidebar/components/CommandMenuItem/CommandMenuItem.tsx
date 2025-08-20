@@ -48,7 +48,14 @@ export const CommandMenuItem = ({
 
   const handleRunCommand = async () => {
     setActiveCommandId(command.id);
-    await startCommand(command.id);
+    try {
+      await startCommand(command.id);
+    } catch (e) {
+      toast.error(
+        "Failed to run command: " +
+          (e instanceof Error ? e.message : "Unknown error"),
+      );
+    }
   };
 
   const handleDeleteCommand = async () => {
@@ -79,7 +86,14 @@ export const CommandMenuItem = ({
   };
 
   const handleStopCommand = async () => {
-    await stopCommand(command.id);
+    try {
+      await stopCommand(command.id);
+    } catch (e) {
+      toast.error(
+        "Failed to stop command: " +
+          (e instanceof Error ? e.message : "Unknown error"),
+      );
+    }
     setActiveCommandId(command.id);
   };
 

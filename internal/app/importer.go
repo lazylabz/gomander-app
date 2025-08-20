@@ -8,7 +8,6 @@ import (
 
 	"gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
-	"gomander/internal/event"
 	"gomander/internal/helpers/array"
 	projectdomain "gomander/internal/project/domain"
 )
@@ -83,14 +82,12 @@ func (a *App) ExportProject(projectConfigId string) (err error) {
 
 	jsonData, err := json.MarshalIndent(exportData, "", "  ")
 	if err != nil {
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to encode project data: "+err.Error())
 		return err
 	}
 
 	// Write directly to file
 	err = a.fsFacade.WriteFile(filePath, jsonData, 0644)
 	if err != nil {
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to write file: "+err.Error())
 		return err
 	}
 
@@ -145,14 +142,12 @@ func (a *App) ImportProject(projectJSON ProjectExportJSONv1, name, workingDirect
 	// Persist everything
 	err := a.projectRepository.Create(project)
 	if err != nil {
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to import project: "+err.Error())
 		return err
 	}
 
 	for _, command := range commands {
 		err = a.commandRepository.Create(&command)
 		if err != nil {
-			a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to import command: "+err.Error())
 			return err
 		}
 	}
@@ -160,7 +155,6 @@ func (a *App) ImportProject(projectJSON ProjectExportJSONv1, name, workingDirect
 	for _, group := range commandGroups {
 		err = a.commandGroupRepository.Create(&group)
 		if err != nil {
-			a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to import command group: "+err.Error())
 			return err
 		}
 	}
@@ -184,14 +178,12 @@ func (a *App) GetProjectToImport() (projectJSON *ProjectExportJSONv1, err error)
 	// Read entire file into memory
 	fileData, err := a.fsFacade.ReadFile(filePath)
 	if err != nil {
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to read file: "+err.Error())
 		return nil, err
 	}
 
 	// Unmarshal JSON data
 	err = json.Unmarshal(fileData, &projectJSON)
 	if err != nil {
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to decode project data: "+err.Error())
 		return nil, err
 	}
 

@@ -80,7 +80,6 @@ func (a *App) RemoveCommandFromCommandGroups(id string) error {
 	commandGroups, err := a.commandGroupRepository.GetAll(a.openedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 		return err
 	}
 
@@ -97,14 +96,12 @@ func (a *App) RemoveCommandFromCommandGroups(id string) error {
 				err := a.commandGroupRepository.Delete(commandGroup.Id)
 				if err != nil {
 					a.logger.Error(err.Error())
-					a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 					return err
 				}
 			} else {
 				err := a.commandGroupRepository.Update(&commandGroup)
 				if err != nil {
 					a.logger.Error(err.Error())
-					a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 					return err
 				}
 			}
