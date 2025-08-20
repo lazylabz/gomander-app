@@ -18,17 +18,14 @@ type MockLogger struct {
 
 func (m *MockLogger) Info(message string) {
 	m.Called(message)
-	return
 }
 
 func (m *MockLogger) Debug(message string) {
 	m.Called(message)
-	return
 }
 
 func (m *MockLogger) Error(message string) {
 	m.Called(message)
-	return
 }
 
 type MockEventEmitter struct {
@@ -37,7 +34,6 @@ type MockEventEmitter struct {
 
 func (m *MockEventEmitter) EmitEvent(event event.Event, payload interface{}) {
 	m.Called(event, payload)
-	return
 }
 
 type MockUserConfigRepository struct {
