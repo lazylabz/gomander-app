@@ -14,6 +14,7 @@ import { SidebarMenuButton } from "@/components/ui/sidebar.tsx";
 import { useTheme } from "@/contexts/theme.tsx";
 import type { Command } from "@/contracts/types.ts";
 import { cn } from "@/lib/utils.ts";
+import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
@@ -71,6 +72,7 @@ export const CommandMenuItem = ({
       );
     } finally {
       fetchCommands();
+      fetchCommandGroups();
     }
     setActiveCommandId(null); // Reset active command after deletion
   };
