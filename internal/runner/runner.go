@@ -130,7 +130,7 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 		// Wait for all pipes to finish
 		scanWg.Wait()
 
-		// If the command is still running, wait for it to finish
+		// If the command is still running (StopRunningCommand has not been called, this is a self-ended command), wait for it to finish
 		if cmd.ProcessState == nil {
 			err := cmd.Wait()
 			if err != nil {
