@@ -32,9 +32,6 @@ func (a *App) AddCommand(newCommand domain.Command) error {
 
 	a.logger.Info("Command added: " + newCommand.Id)
 
-	// Update the commands map in the frontend
-	a.eventEmitter.EmitEvent(event.GetCommands, nil)
-
 	return nil
 }
 

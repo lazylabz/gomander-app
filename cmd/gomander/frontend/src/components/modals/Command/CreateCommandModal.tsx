@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
+import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { createCommand } from "@/useCases/command/createCommand.ts";
 
@@ -65,6 +66,8 @@ export const CreateCommandModal = ({
         "Failed to create command: " +
           (e instanceof Error ? e.message : "Unknown error"),
       );
+    } finally {
+      fetchCommands();
     }
   };
 

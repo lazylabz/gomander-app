@@ -14,6 +14,7 @@ import { SidebarMenuButton } from "@/components/ui/sidebar.tsx";
 import { useTheme } from "@/contexts/theme.tsx";
 import type { Command } from "@/contracts/types.ts";
 import { cn } from "@/lib/utils.ts";
+import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { deleteCommand } from "@/useCases/command/deleteCommand.ts";
@@ -77,7 +78,17 @@ export const CommandMenuItem = ({
   };
 
   const handleDuplicateCommand = async () => {
-    await duplicateCommand(command);
+    try {
+      await duplicateCommand(command);
+      toast.success("Command duplicated successfully");
+    } catch (e) {
+      toast.error(
+        "Failed to duplicate command: " +
+          (e instanceof Error ? e.message : "Unknown error"),
+      );
+    } finally {
+      fetchCommands();
+    }
     setActiveCommandId(null); // Reset active command after duplication
   };
 
