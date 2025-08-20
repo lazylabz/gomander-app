@@ -27,8 +27,6 @@ func (a *App) CreateCommandGroup(commandGroup *domain.CommandGroup) error {
 		return err
 	}
 
-	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
-
 	return nil
 }
 
