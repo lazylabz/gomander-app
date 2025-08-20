@@ -88,9 +88,6 @@ func (a *App) ReorderCommands(orderedIds []string) error {
 
 	a.logger.Info("Commands reordered")
 
-	// Update the commands map in the frontend
-	a.eventEmitter.EmitEvent(event.GetCommands, nil)
-
 	return nil
 }
 

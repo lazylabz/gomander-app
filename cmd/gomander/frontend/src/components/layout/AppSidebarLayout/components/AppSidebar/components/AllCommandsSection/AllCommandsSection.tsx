@@ -28,6 +28,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
+import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { reorderCommands } from "@/useCases/command/reorderCommands.ts";
 
@@ -48,6 +49,8 @@ export const AllCommandsSection = () => {
         "Failed to reorder commands: " +
           (e instanceof Error ? e.message : "Unknown error"),
       );
+    } finally {
+      fetchCommands();
     }
   };
 
