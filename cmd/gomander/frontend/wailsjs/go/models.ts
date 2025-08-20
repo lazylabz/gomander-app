@@ -70,7 +70,6 @@ export namespace event {
 	    PROCESS_FINISHED = "process_finished",
 	    PROCESS_STARTED = "process_started",
 	    NEW_LOG_ENTRY = "new_log_entry",
-	    GET_USER_CONFIG = "get_user_config",
 	}
 
 }

@@ -2,7 +2,6 @@ import { Fragment, useEffect } from "react";
 
 import { eventService } from "@/contracts/service.ts";
 import { Event, type EventData } from "@/contracts/types.ts";
-import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
@@ -12,10 +11,6 @@ export const EventListenersContainer = () => {
 
   // Register events listeners
   useEffect(() => {
-    eventService.eventsOn(Event.GET_USER_CONFIG, () => {
-      fetchUserConfig();
-    });
-
     eventService.eventsOn(
       Event.NEW_LOG_ENTRY,
       (data: EventData[Event.NEW_LOG_ENTRY]) => {
