@@ -11,8 +11,7 @@ import { CommandStatus } from "@/types/CommandStatus.ts";
 import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
 
 export const EventListenersContainer = () => {
-  const commandsLogs = useCommandStore((state) => state.commandsLogs);
-  const setCommandsLogs = useCommandStore((state) => state.setCommandsLogs);
+  const addLog = useCommandStore((state) => state.addLog);
 
   // Register events listeners
   useEffect(() => {
@@ -28,19 +27,7 @@ export const EventListenersContainer = () => {
       Event.NEW_LOG_ENTRY,
       (data: EventData[Event.NEW_LOG_ENTRY]) => {
         const { id, line } = data;
-
-        const newLogs = { ...commandsLogs };
-
-        if (!newLogs[id]) {
-          newLogs[id] = [];
-        }
-        newLogs[id].push(line);
-
-        if (newLogs[id].length > 100) {
-          newLogs[id] = newLogs[id].slice(-100); // Keep only the last 100 lines
-        }
-
-        setCommandsLogs(newLogs);
+        addLog(id, line);
       },
     );
 
