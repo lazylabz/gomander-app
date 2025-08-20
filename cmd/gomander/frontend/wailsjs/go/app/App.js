@@ -74,8 +74,8 @@ export function IsThereANewRelease() {
   return window['go']['app']['App']['IsThereANewRelease']();
 }
 
-export function LoadDependencies(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
-  return window['go']['app']['App']['LoadDependencies'](arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+export function LoadDependencies(arg1) {
+  return window['go']['app']['App']['LoadDependencies'](arg1);
 }
 
 export function OpenProject(arg1) {
@@ -104,6 +104,10 @@ export function RunCommand(arg1) {
 
 export function SaveUserConfig(arg1) {
   return window['go']['app']['App']['SaveUserConfig'](arg1);
+}
+
+export function SetOpenProjectId(arg1) {
+  return window['go']['app']['App']['SetOpenProjectId'](arg1);
 }
 
 export function Startup(arg1) {

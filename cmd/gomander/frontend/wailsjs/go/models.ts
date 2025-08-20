@@ -10,6 +10,17 @@ export namespace app {
 	    command: string;
 	    workingDirectory: string;
 	}
+	export interface Dependencies {
+	    Logger: any;
+	    EventEmitter: any;
+	    Runner: any;
+	    CommandRepository: any;
+	    CommandGroupRepository: any;
+	    ProjectRepository: any;
+	    ConfigRepository: any;
+	    FsFacade: any;
+	    RuntimeFacade: any;
+	}
 	export interface ProjectExportJSONv1 {
 	    version: number;
 	    name: string;

@@ -96,13 +96,19 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	// Add to WaitGroup before starting goroutines to avoid race conditions
 	wg.Add(3) // stdout, stderr, and wait goroutines
 
+	var scanWg sync.WaitGroup
+
+	scanWg.Add(2) // For stdout and stderr streaming
+
 	// Stream stdout
 	go func() {
+		defer scanWg.Done()
 		defer wg.Done()
 		c.streamOutput(command.Id, stdout)
 	}()
 	// Stream stderr
 	go func() {
+		defer scanWg.Done()
 		defer wg.Done()
 		c.streamOutput(command.Id, stderr)
 	}()
@@ -110,7 +116,7 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	// Wait in background until the command finishes, because it ends naturally or because it is stopped.
 	go func() {
 		defer wg.Done()
-		err := cmd.Wait()
+
 		// Notify the event emitter that the command has finished and remove it from the runningCommands map
 		defer func() {
 			c.mutex.Lock()
@@ -120,11 +126,18 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 			c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
 		}()
 
-		if err != nil {
-			c.sendStreamLine(command.Id, err.Error())
+		// Wait for all pipes to finish
+		scanWg.Wait()
 
-			if !isExpectedError(err) {
-				c.logger.Error("[ERROR - Waiting for project]: " + err.Error())
+		// If the command is still running, wait for it to finish
+		if cmd.ProcessState == nil {
+			err := cmd.Wait()
+			if err != nil {
+				c.sendStreamLine(command.Id, err.Error())
+
+				if !isExpectedError(err) {
+					c.logger.Error("[ERROR - Waiting for project]: " + err.Error())
+				}
 			}
 		}
 	}()
@@ -176,8 +189,7 @@ func isExpectedError(err error) bool {
 
 func (c *DefaultRunner) streamOutput(commandId string, pipeReader io.ReadCloser) {
 	scanner := bufio.NewScanner(pipeReader)
-
-	defer pipeReader.Close()
+	scanner.Buffer(make([]byte, 1024), 1024*1024) // Set buffer size to 1MB
 
 	for scanner.Scan() {
 		line := scanner.Text()
