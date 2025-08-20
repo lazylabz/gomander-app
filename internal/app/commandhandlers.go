@@ -62,9 +62,6 @@ func (a *App) EditCommand(newCommand domain.Command) error {
 
 	a.logger.Info("Command edited: " + newCommand.Id)
 
-	// Update the commands map in the frontend
-	a.eventEmitter.EmitEvent(event.GetCommands, nil)
-
 	return nil
 }
 

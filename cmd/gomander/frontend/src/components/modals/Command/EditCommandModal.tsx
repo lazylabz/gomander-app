@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
 import type { Command } from "@/contracts/types.ts";
+import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { editCommand } from "@/useCases/command/editCommand.ts";
 
 export const EditCommandModal = ({
@@ -64,6 +65,8 @@ export const EditCommandModal = ({
         "Failed to update command: " +
           (e instanceof Error ? e.message : "Unknown error"),
       );
+    } finally {
+      fetchCommands();
     }
   };
 
