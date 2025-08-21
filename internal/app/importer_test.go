@@ -42,8 +42,6 @@ func TestApp_ExportProject(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
-		mockEventEmitter := new(MockEventEmitter)
-
 		mockFsFacade := new(MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 
@@ -70,7 +68,6 @@ func TestApp_ExportProject(t *testing.T) {
 			ProjectRepository:      mockProjectRepository,
 			CommandRepository:      mockCommandRepository,
 			CommandGroupRepository: mockCommandGroupRepository,
-			EventEmitter:           mockEventEmitter,
 			FsFacade:               mockFsFacade,
 			RuntimeFacade:          mockRuntimeFacade,
 		})
@@ -111,7 +108,6 @@ func TestApp_ExportProject(t *testing.T) {
 			mockProjectRepository,
 			mockCommandRepository,
 			mockCommandGroupRepository,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return error if there is a problem opening the destination file", func(t *testing.T) {
@@ -242,8 +238,6 @@ func TestApp_ExportProject(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
-		mockEventEmitter := new(MockEventEmitter)
-
 		mockFsFacade := new(MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 
@@ -270,7 +264,6 @@ func TestApp_ExportProject(t *testing.T) {
 			ProjectRepository:      mockProjectRepository,
 			CommandRepository:      mockCommandRepository,
 			CommandGroupRepository: mockCommandGroupRepository,
-			EventEmitter:           mockEventEmitter,
 			FsFacade:               mockFsFacade,
 			RuntimeFacade:          mockRuntimeFacade,
 		})
@@ -311,7 +304,6 @@ func TestApp_ExportProject(t *testing.T) {
 			mockProjectRepository,
 			mockCommandRepository,
 			mockCommandGroupRepository,
-			mockEventEmitter,
 		)
 	})
 }
@@ -325,8 +317,6 @@ func TestApp_ImportProject(t *testing.T) {
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-
-		mockEventEmitter := new(MockEventEmitter)
 
 		mockFsFacade := new(MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -391,7 +381,6 @@ func TestApp_ImportProject(t *testing.T) {
 			ProjectRepository:      mockProjectRepository,
 			CommandRepository:      mockCommandRepository,
 			CommandGroupRepository: mockCommandGroupRepository,
-			EventEmitter:           mockEventEmitter,
 			FsFacade:               mockFsFacade,
 			RuntimeFacade:          mockRuntimeFacade,
 		})
@@ -443,7 +432,6 @@ func TestApp_ImportProject(t *testing.T) {
 			mockProjectRepository,
 			mockCommandRepository,
 			mockCommandGroupRepository,
-			mockEventEmitter,
 			mockFsFacade,
 			mockRuntimeFacade,
 		)
@@ -454,8 +442,6 @@ func TestApp_ImportProject(t *testing.T) {
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-
-		mockEventEmitter := new(MockEventEmitter)
 
 		mockFsFacade := new(MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -476,7 +462,6 @@ func TestApp_ImportProject(t *testing.T) {
 			ProjectRepository:      mockProjectRepository,
 			CommandRepository:      mockCommandRepository,
 			CommandGroupRepository: mockCommandGroupRepository,
-			EventEmitter:           mockEventEmitter,
 			FsFacade:               mockFsFacade,
 			RuntimeFacade:          mockRuntimeFacade,
 		})
@@ -491,7 +476,6 @@ func TestApp_ImportProject(t *testing.T) {
 			mockProjectRepository,
 			mockCommandRepository,
 			mockCommandGroupRepository,
-			mockEventEmitter,
 			mockFsFacade,
 			mockRuntimeFacade,
 		)
@@ -502,8 +486,6 @@ func TestApp_ImportProject(t *testing.T) {
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-
-		mockEventEmitter := new(MockEventEmitter)
 
 		mockFsFacade := new(MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -524,7 +506,6 @@ func TestApp_ImportProject(t *testing.T) {
 			ProjectRepository:      mockProjectRepository,
 			CommandRepository:      mockCommandRepository,
 			CommandGroupRepository: mockCommandGroupRepository,
-			EventEmitter:           mockEventEmitter,
 			FsFacade:               mockFsFacade,
 			RuntimeFacade:          mockRuntimeFacade,
 		})
@@ -540,7 +521,6 @@ func TestApp_ImportProject(t *testing.T) {
 			mockProjectRepository,
 			mockCommandRepository,
 			mockCommandGroupRepository,
-			mockEventEmitter,
 			mockFsFacade,
 			mockRuntimeFacade,
 		)
@@ -551,8 +531,6 @@ func TestApp_ImportProject(t *testing.T) {
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-
-		mockEventEmitter := new(MockEventEmitter)
 
 		mockFsFacade := new(MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -573,7 +551,6 @@ func TestApp_ImportProject(t *testing.T) {
 			ProjectRepository:      mockProjectRepository,
 			CommandRepository:      mockCommandRepository,
 			CommandGroupRepository: mockCommandGroupRepository,
-			EventEmitter:           mockEventEmitter,
 			FsFacade:               mockFsFacade,
 			RuntimeFacade:          mockRuntimeFacade,
 		})
@@ -590,7 +567,6 @@ func TestApp_ImportProject(t *testing.T) {
 			mockProjectRepository,
 			mockCommandRepository,
 			mockCommandGroupRepository,
-			mockEventEmitter,
 			mockFsFacade,
 			mockRuntimeFacade,
 		)
@@ -671,12 +647,10 @@ func TestApp_GetProjectToImport(t *testing.T) {
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
-		mockEventer := new(MockEventEmitter)
 
 		a.LoadDependencies(app.Dependencies{
 			RuntimeFacade: mockRuntimeFacade,
 			FsFacade:      mockFsFacade,
-			EventEmitter:  mockEventer,
 		})
 
 		mockRuntimeFacade.On("OpenFileDialog", mock.Anything, mock.Anything).Return("/path/to/project.json", nil)

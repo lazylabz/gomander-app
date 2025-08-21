@@ -67,12 +67,9 @@ export namespace domain {
 export namespace event {
 	
 	export enum Event {
-	    GET_COMMANDS = "get_commands",
 	    PROCESS_FINISHED = "process_finished",
 	    PROCESS_STARTED = "process_started",
 	    NEW_LOG_ENTRY = "new_log_entry",
-	    GET_USER_CONFIG = "get_user_config",
-	    GET_COMMAND_GROUPS = "get_command_groups",
 	}
 
 }

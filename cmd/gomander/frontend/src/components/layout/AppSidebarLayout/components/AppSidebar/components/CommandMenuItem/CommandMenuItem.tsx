@@ -13,7 +13,10 @@ import {
 import { SidebarMenuButton } from "@/components/ui/sidebar.tsx";
 import { useTheme } from "@/contexts/theme.tsx";
 import type { Command } from "@/contracts/types.ts";
+import { parseError } from "@/helpers/errorHelpers.ts";
 import { cn } from "@/lib/utils.ts";
+import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
+import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { deleteCommand } from "@/useCases/command/deleteCommand.ts";
@@ -51,10 +54,7 @@ export const CommandMenuItem = ({
     try {
       await startCommand(command.id);
     } catch (e) {
-      toast.error(
-        "Failed to run command: " +
-          (e instanceof Error ? e.message : "Unknown error"),
-      );
+      toast.error("Failed to run command: " + parseError(e));
     }
   };
 
@@ -64,10 +64,10 @@ export const CommandMenuItem = ({
       setActiveCommandId(null); // Reset active command after deletion
       toast.success("Command deleted successfully");
     } catch (e) {
-      toast.error(
-        "Failed to delete command: " +
-          (e instanceof Error ? e.message : "Unknown error"),
-      );
+      toast.error("Failed to delete command: " + parseError(e));
+    } finally {
+      fetchCommands();
+      fetchCommandGroups();
     }
     setActiveCommandId(null); // Reset active command after deletion
   };
@@ -77,7 +77,14 @@ export const CommandMenuItem = ({
   };
 
   const handleDuplicateCommand = async () => {
-    await duplicateCommand(command);
+    try {
+      await duplicateCommand(command);
+      toast.success("Command duplicated successfully");
+    } catch (e) {
+      toast.error("Failed to duplicate command: " + parseError(e));
+    } finally {
+      fetchCommands();
+    }
     setActiveCommandId(null); // Reset active command after duplication
   };
 
@@ -89,10 +96,7 @@ export const CommandMenuItem = ({
     try {
       await stopCommand(command.id);
     } catch (e) {
-      toast.error(
-        "Failed to stop command: " +
-          (e instanceof Error ? e.message : "Unknown error"),
-      );
+      toast.error("Failed to stop command: " + parseError(e));
     }
     setActiveCommandId(command.id);
   };

@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu.tsx";
 import { dataService } from "@/contracts/service.ts";
 import type { Project } from "@/contracts/types.ts";
+import { parseError } from "@/helpers/errorHelpers.ts";
 import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
 import { exportProject } from "@/useCases/project/exportProject.ts";
 
@@ -29,10 +30,7 @@ export const ProjectCard = ({
       await exportProject(project.id);
       toast.success("Project exported successfully!");
     } catch (e) {
-      toast.error(
-        "Failed to export the project: " +
-          (e instanceof Error ? e.message : "Unknown error"),
-      );
+      toast.error("Failed to export the project: " + parseError(e));
     }
   };
 

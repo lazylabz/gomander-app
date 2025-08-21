@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/dialog.tsx";
 import { Form } from "@/components/ui/form.tsx";
 import type { CommandGroup } from "@/contracts/types.ts";
+import { parseError } from "@/helpers/errorHelpers.ts";
+import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { editCommandGroup } from "@/useCases/commandGroup/editCommandGroup.ts";
 
 export const EditCommandGroupModal = ({
@@ -57,10 +59,9 @@ export const EditCommandGroupModal = ({
       form.reset();
       toast.success("Command group updated successfully");
     } catch (e) {
-      toast.error(
-        "Failed to edit the command group: " +
-          (e instanceof Error ? e.message : "Unknown error"),
-      );
+      toast.error("Failed to edit the command group: " + parseError(e));
+    } finally {
+      fetchCommandGroups();
     }
   };
 

@@ -7,6 +7,7 @@ import {
 import { ArrowUpDown, ChevronDown, Settings } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 import { AllCommandsSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/AllCommandsSection/AllCommandsSection.tsx";
 import { CommandGroupSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandGroupSection/CommandGroupSection.tsx";
@@ -39,7 +40,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip.tsx";
 import type { Command, CommandGroup } from "@/contracts/types.ts";
+import { parseError } from "@/helpers/errorHelpers.ts";
 import { cn } from "@/lib/utils";
+import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { ScreenRoutes } from "@/routes.ts";
 import { SettingsTab } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
@@ -92,10 +95,22 @@ export const AppSidebar = () => {
     navigate(ScreenRoutes.ProjectSelection);
   };
 
+  const handleSaveCommandGroupsOrder = async () => {
+    const reorderedCommandGroupIds = commandGroups.map((cg) => cg.id);
+    try {
+      await reorderCommandGroups(reorderedCommandGroupIds);
+      toast.success("Reordered command groups successfully");
+    } catch (e) {
+      toast.error("Failed to reorder command groups: " + parseError(e));
+    } finally {
+      fetchCommandGroups();
+    }
+  };
+
   const toggleReorderingMode = () => {
     setIsReorderingGroups((wasReordering) => {
       if (wasReordering) {
-        reorderCommandGroups(commandGroups.map((cg) => cg.id));
+        handleSaveCommandGroupsOrder();
       }
       return !wasReordering;
     });

@@ -11,7 +11,6 @@ import (
 	commanddomain "gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	"gomander/internal/config/domain"
-	"gomander/internal/event"
 	projectdomain "gomander/internal/project/domain"
 	"gomander/internal/testutils"
 )
@@ -198,11 +197,9 @@ func TestApp_CreateProject(t *testing.T) {
 func TestApp_EditProject(t *testing.T) {
 	t.Run("Should edit a project successfully", func(t *testing.T) {
 		mockProjectRepository := new(MockProjectRepository)
-		mockEventEmitter := new(MockEventEmitter)
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			ProjectRepository: mockProjectRepository,
-			EventEmitter:      mockEventEmitter,
 		})
 
 		project := projectdomain.Project{Id: "1", Name: "A", WorkingDirectory: "/a"}
@@ -275,7 +272,6 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
-		mockEventEmitter := new(MockEventEmitter)
 		mockLogger := new(MockLogger)
 
 		a := app.NewApp()
@@ -284,7 +280,6 @@ func TestApp_DeleteProject(t *testing.T) {
 			CommandRepository:      mockCommandRepository,
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockUserConfigRepository,
-			EventEmitter:           mockEventEmitter,
 			Logger:                 mockLogger,
 		})
 
@@ -307,8 +302,6 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockCommandRepository.On("Delete", cmd1.Id).Return(nil)
 		mockCommandRepository.On("Delete", cmd2.Id).Return(nil)
 		mockProjectRepository.On("Delete", projectId).Return(nil)
-		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil).Return(nil)
-		mockEventEmitter.On("EmitEvent", event.GetCommands, nil).Return(nil)
 		mockLogger.On("Info", mock.Anything).Return()
 
 		mockCommandGroupRepository.On("GetAll", projectId).Return([]commandgroupdomain.CommandGroup{}, nil)
@@ -341,7 +334,6 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
 		a := app.NewApp()
@@ -350,7 +342,6 @@ func TestApp_DeleteProject(t *testing.T) {
 			CommandRepository:      mockCommandRepository,
 			ConfigRepository:       mockUserConfigRepository,
 			Logger:                 mockLogger,
-			EventEmitter:           mockEventEmitter,
 			CommandGroupRepository: mockCommandGroupRepository,
 		})
 
@@ -368,7 +359,6 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockCommandRepository.On("Delete", cmd1.Id).Return(errors.New("fail"))
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil).Return(nil)
 
 		err := a.DeleteProject(projectId)
 		assert.Error(t, err)
@@ -378,7 +368,6 @@ func TestApp_DeleteProject(t *testing.T) {
 			mockCommandRepository,
 			mockUserConfigRepository,
 			mockLogger,
-			mockEventEmitter,
 			mockCommandGroupRepository,
 		)
 	})
@@ -387,7 +376,6 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
-		mockEventEmitter := new(MockEventEmitter)
 		mockLogger := new(MockLogger)
 
 		a := app.NewApp()
@@ -396,7 +384,6 @@ func TestApp_DeleteProject(t *testing.T) {
 			CommandRepository:      mockCommandRepository,
 			CommandGroupRepository: mockCommandGroupRepository,
 			ConfigRepository:       mockUserConfigRepository,
-			EventEmitter:           mockEventEmitter,
 			Logger:                 mockLogger,
 		})
 
@@ -419,8 +406,6 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockCommandRepository.On("Delete", cmd1.Id).Return(nil)
 		mockCommandRepository.On("Delete", cmd2.Id).Return(nil)
 		mockProjectRepository.On("Delete", projectId).Return(errors.New("some error occurred"))
-		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil).Return(nil)
-		mockEventEmitter.On("EmitEvent", event.GetCommands, nil).Return(nil)
 		mockLogger.On("Info", mock.Anything).Return()
 
 		mockCommandGroupRepository.On("GetAll", projectId).Return([]commandgroupdomain.CommandGroup{}, nil)

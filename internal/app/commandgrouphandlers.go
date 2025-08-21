@@ -5,7 +5,6 @@ import (
 
 	commanddomain "gomander/internal/command/domain"
 	"gomander/internal/commandgroup/domain"
-	"gomander/internal/event"
 	"gomander/internal/helpers/array"
 )
 
@@ -27,8 +26,6 @@ func (a *App) CreateCommandGroup(commandGroup *domain.CommandGroup) error {
 		return err
 	}
 
-	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
-
 	return nil
 }
 
@@ -37,8 +34,6 @@ func (a *App) UpdateCommandGroup(commandGroup *domain.CommandGroup) error {
 		return err
 	}
 
-	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
-
 	return nil
 }
 
@@ -46,8 +41,6 @@ func (a *App) DeleteCommandGroup(commandGroupId string) error {
 	if err := a.commandGroupRepository.Delete(commandGroupId); err != nil {
 		return err
 	}
-
-	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
 
 	return nil
 }
@@ -70,8 +63,6 @@ func (a *App) ReorderCommandGroups(newOrderedIds []string) error {
 			return err
 		}
 	}
-
-	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
 
 	return nil
 }
@@ -107,8 +98,6 @@ func (a *App) RemoveCommandFromCommandGroups(id string) error {
 			}
 		}
 	}
-
-	a.eventEmitter.EmitEvent(event.GetCommandGroups, nil)
 
 	return nil
 }

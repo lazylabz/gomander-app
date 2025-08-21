@@ -9,7 +9,6 @@ import (
 
 	"gomander/internal/app"
 	"gomander/internal/commandgroup/domain"
-	"gomander/internal/event"
 	"gomander/internal/testutils"
 )
 
@@ -48,7 +47,6 @@ func TestApp_GetCommandGroups(t *testing.T) {
 func TestApp_CreateCommandGroup(t *testing.T) {
 	t.Run("Should create a command group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 
@@ -56,7 +54,6 @@ func TestApp_CreateCommandGroup(t *testing.T) {
 
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
-			EventEmitter:           mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -83,14 +80,11 @@ func TestApp_CreateCommandGroup(t *testing.T) {
 		mockCommandGroupRepository.On("GetAll", projectId).Return([]domain.CommandGroup{otherCommandGroup}, nil)
 		mockCommandGroupRepository.On("Create", &expectedCommandGroupCall).Return(nil)
 
-		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil)
-
 		err := a.CreateCommandGroup(&paramCommandGroup)
 		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if failing to retrieve existing command groups", func(t *testing.T) {
@@ -155,14 +149,12 @@ func TestApp_CreateCommandGroup(t *testing.T) {
 func TestApp_UpdateCommandGroup(t *testing.T) {
 	t.Run("Should update a command group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
-			EventEmitter:           mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -175,14 +167,12 @@ func TestApp_UpdateCommandGroup(t *testing.T) {
 		paramCommandGroup := commandGroupDataToDomain(commandGroupData)
 
 		mockCommandGroupRepository.On("Update", &paramCommandGroup).Return(nil)
-		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil)
 
 		err := a.UpdateCommandGroup(&paramCommandGroup)
 		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if failing to update the command group", func(t *testing.T) {
@@ -216,14 +206,12 @@ func TestApp_UpdateCommandGroup(t *testing.T) {
 func TestApp_DeleteCommandGroup(t *testing.T) {
 	t.Run("Should delete a command group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
-			EventEmitter:           mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -236,14 +224,12 @@ func TestApp_DeleteCommandGroup(t *testing.T) {
 		paramCommandGroup := commandGroupDataToDomain(commandGroupData)
 
 		mockCommandGroupRepository.On("Delete", paramCommandGroup.Id).Return(nil)
-		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil)
 
 		err := a.DeleteCommandGroup(paramCommandGroup.Id)
 		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if failing to delete the command group", func(t *testing.T) {
@@ -279,14 +265,12 @@ func TestApp_DeleteCommandGroup(t *testing.T) {
 func TestApp_ReorderCommandGroups(t *testing.T) {
 	t.Run("Should reorder command groups based on the provided IDs", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
-			EventEmitter:           mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -306,8 +290,6 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 
 		newOrder := []string{commandGroupData2.Data().Id, commandGroupData1.Data().Id}
 
-		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil)
-
 		mockCommandGroupRepository.On("GetAll", projectId).Return(commandGroups, nil)
 
 		expectedCommandGroup2Call := commandGroupDataToDomain(commandGroupData2.WithPosition(0).Data())
@@ -321,7 +303,6 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if failing to retrieve existing command groups", func(t *testing.T) {
@@ -380,14 +361,12 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 	t.Run("Should remove command from command groups", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
-			EventEmitter:           mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -415,8 +394,6 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 				commandGroupDataToDomain(commandGroup2Data.Data()),
 			}, nil)
 
-		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil)
-
 		expectedCommandGroup1Call := commandGroupDataToDomain(commandGroupData.WithCommands(commandData2).Data())
 		expectedCommandGroup2Call := commandGroupDataToDomain(commandGroup2Data.WithCommands(commandData2).Data())
 
@@ -428,19 +405,16 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should remove remove a command group if it becomes empty", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
-			EventEmitter:           mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -468,8 +442,6 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 				commandGroupDataToDomain(commandGroup2Data.Data()),
 			}, nil)
 
-		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil)
-
 		expectedCommandGroup1Call := commandGroupDataToDomain(commandGroupData.WithCommands(commandData2).Data())
 
 		mockCommandGroupRepository.On("Update", &expectedCommandGroup1Call).Return(nil).Once()
@@ -480,13 +452,11 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if failing to retrieve command groups", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockLogger := new(MockLogger)
-		mockEventEmitter := new(MockEventEmitter)
 
 		projectId := "project1"
 
@@ -494,7 +464,6 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 			Logger:                 mockLogger,
-			EventEmitter:           mockEventEmitter,
 		})
 
 		a.SetOpenProjectId(projectId)
@@ -513,12 +482,10 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if failing to update command groups", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockEventEmitter := new(MockEventEmitter)
 		mockLogger := new(MockLogger)
 
 		projectId := "project1"
@@ -526,7 +493,6 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
-			EventEmitter:           mockEventEmitter,
 			Logger:                 mockLogger,
 		})
 
@@ -568,12 +534,10 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 	t.Run("Should return an error if failing to delete a command group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockEventEmitter := new(MockEventEmitter)
 		mockLogger := new(MockLogger)
 
 		projectId := "project1"
@@ -581,7 +545,6 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
-			EventEmitter:           mockEventEmitter,
 			Logger:                 mockLogger,
 		})
 
@@ -622,7 +585,6 @@ func TestApp_RemoveCommandFromCommandGroups(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
 			mockLogger,
-			mockEventEmitter,
 		)
 	})
 }

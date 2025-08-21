@@ -9,7 +9,6 @@ import (
 
 	"gomander/internal/app"
 	"gomander/internal/config/domain"
-	"gomander/internal/event"
 )
 
 func TestApp_GetUserConfig(t *testing.T) {
@@ -42,14 +41,12 @@ func TestApp_SaveUserConfig(t *testing.T) {
 	t.Parallel()
 	t.Run("Should save user configuration successfully", func(t *testing.T) {
 		mockRepository := new(MockUserConfigRepository)
-		mockEventEmitter := new(MockEventEmitter)
 		mockLogger := new(MockLogger)
 
 		a := app.NewApp()
 
 		a.LoadDependencies(app.Dependencies{
 			ConfigRepository: mockRepository,
-			EventEmitter:     mockEventEmitter,
 			Logger:           mockLogger,
 		})
 
@@ -67,24 +64,20 @@ func TestApp_SaveUserConfig(t *testing.T) {
 
 		mockLogger.On("Info", mock.Anything).Return(nil)
 
-		mockEventEmitter.On("EmitEvent", event.GetUserConfig, nil).Return(nil)
-
 		err := a.SaveUserConfig(newUserConfig)
 		assert.NoError(t, err)
 
 		mockRepository.AssertCalled(t, "Update", &newUserConfig)
-		mock.AssertExpectationsForObjects(t, mockRepository, mockEventEmitter, mockLogger)
+		mock.AssertExpectationsForObjects(t, mockRepository, mockLogger)
 	})
 	t.Run("Should fail to save user configuration", func(t *testing.T) {
 		mockRepository := new(MockUserConfigRepository)
-		mockEventEmitter := new(MockEventEmitter)
 		mockLogger := new(MockLogger)
 
 		a := app.NewApp()
 
 		a.LoadDependencies(app.Dependencies{
 			ConfigRepository: mockRepository,
-			EventEmitter:     mockEventEmitter,
 			Logger:           mockLogger,
 		})
 
@@ -106,6 +99,6 @@ func TestApp_SaveUserConfig(t *testing.T) {
 		assert.Error(t, err)
 
 		mockRepository.AssertCalled(t, "Update", &newUserConfig)
-		mock.AssertExpectationsForObjects(t, mockRepository, mockEventEmitter, mockLogger)
+		mock.AssertExpectationsForObjects(t, mockRepository, mockLogger)
 	})
 }

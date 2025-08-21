@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { useTheme } from "@/contexts/theme.tsx";
+import { parseError } from "@/helpers/errorHelpers.ts";
 import { fetchProject } from "@/queries/fetchProject.ts";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
@@ -97,10 +98,7 @@ export const SettingsContextProvider = ({
         });
         toast.success("User settings saved successfully");
       } catch (e) {
-        throw new Error(
-          "Failed to save user settings: " +
-            (e instanceof Error ? e.message : "Unknown error"),
-        );
+        throw new Error("Failed to save user settings: " + parseError(e));
       }
       await fetchUserConfig();
     }
@@ -115,10 +113,7 @@ export const SettingsContextProvider = ({
         });
         toast.success("Project settings saved successfully");
       } catch (e) {
-        throw new Error(
-          "Failed to save project settings: " +
-            (e instanceof Error ? e.message : "Unknown error"),
-        );
+        throw new Error("Failed to save project settings: " + parseError(e));
       }
 
       await fetchProject();

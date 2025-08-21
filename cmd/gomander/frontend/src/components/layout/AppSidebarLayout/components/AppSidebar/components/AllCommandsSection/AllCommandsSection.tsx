@@ -28,11 +28,15 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
+import type { Command } from "@/contracts/types.ts";
+import { parseError } from "@/helpers/errorHelpers.ts";
+import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { reorderCommands } from "@/useCases/command/reorderCommands.ts";
 
 export const AllCommandsSection = () => {
   const commands = useCommandStore((state) => state.commands);
+  const setCommands = useCommandStore((state) => state.setCommands);
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -40,14 +44,15 @@ export const AllCommandsSection = () => {
     setModalOpen(true);
   };
 
-  const handleSaveReorderedCommands = async (newOrder: string[]) => {
+  const handleSaveReorderedCommands = async (reorderedCommands: Command[]) => {
+    const newOrder = reorderedCommands.map((command) => command.id);
+    setCommands(reorderedCommands);
     try {
       await reorderCommands(newOrder);
     } catch (e) {
-      toast.error(
-        "Failed to reorder commands: " +
-          (e instanceof Error ? e.message : "Unknown error"),
-      );
+      toast.error("Failed to reorder commands: " + parseError(e));
+    } finally {
+      fetchCommands();
     }
   };
 
@@ -59,16 +64,23 @@ export const AllCommandsSection = () => {
       return;
     }
 
-    const commandsIds = commands.map((command) => command.id);
     // 1. Find old and new indexes of the dragged command
-    const oldIndex = commandsIds.indexOf(active.id.toString());
-    const newIndex = commandsIds.indexOf(over.id.toString());
+    const oldIndex = commands.findIndex(
+      (command) => command.id === active.id.toString(),
+    );
+    const newIndex = commands.findIndex(
+      (command) => command.id === over.id.toString(),
+    );
+    if (oldIndex === -1 || newIndex === -1) {
+      toast.error("Invalid drag operation: command not found");
+      return;
+    }
 
     // 2. Reorder the commands array
-    const newOrder = arrayMove(commandsIds, oldIndex, newIndex);
+    const reorderedCommands = arrayMove(commands, oldIndex, newIndex);
 
     // 3. Persist the new order
-    await handleSaveReorderedCommands(newOrder);
+    await handleSaveReorderedCommands(reorderedCommands);
   };
 
   return (
