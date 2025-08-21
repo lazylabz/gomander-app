@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { BaseWorkingDirectoryField } from "@/components/modals/Project/common/BaseWorkingDirectoryField.tsx";
 import {
@@ -50,10 +51,18 @@ export const ImportProjectModal = ({
       return;
     }
 
-    await importProject(project, values.name, values.baseWorkingDirectory);
+    try {
+      await importProject(project, values.name, values.baseWorkingDirectory);
 
-    await onSuccess();
-    handleOpenChange(false);
+      await onSuccess();
+      handleOpenChange(false);
+      toast.success("Project imported successfully");
+    } catch (e) {
+      toast.error(
+        "Failed to import the project: " +
+          (e instanceof Error ? e.message : "Unknown error"),
+      );
+    }
   };
 
   return (

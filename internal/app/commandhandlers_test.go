@@ -122,7 +122,6 @@ func TestApp_AddCommand(t *testing.T) {
 		mockCommandRepository.On("Create", &expectedCommandCall).Return(nil)
 
 		mockLogger.On("Info", mock.Anything).Return(nil)
-		mockEventEmitter.On("EmitEvent", event.SuccessNotification, mock.Anything).Return(nil)
 		mockEventEmitter.On("EmitEvent", event.GetCommands, nil).Return(nil)
 
 		err := a.AddCommand(parameterCommand)
@@ -158,7 +157,6 @@ func TestApp_AddCommand(t *testing.T) {
 
 		mockCommandRepository.On("GetAll", projectId).Return(make([]commanddomain.Command, 0), errors.New("failed to get commands"))
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 
 		err := a.AddCommand(parameterCommand)
 		assert.Error(t, err)
@@ -204,7 +202,6 @@ func TestApp_AddCommand(t *testing.T) {
 		mockCommandRepository.On("Create", &expectedCommandCall).Return(errors.New("failed to create command"))
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 
 		err := a.AddCommand(parameterCommand)
 		assert.Error(t, err)
@@ -243,7 +240,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 
 		mockLogger.On("Info", "Command removed: "+commandId).Return(nil)
 
-		mockEventEmitter.On("EmitEvent", event.SuccessNotification, "Command removed").Return(nil)
 		mockEventEmitter.On("EmitEvent", event.GetCommands, nil).Return(nil)
 		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil).Return(nil)
 
@@ -281,7 +277,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 		mockCommandRepository.On("Delete", commandId).Return(errors.New("failed to delete command"))
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil).Return()
 
 		err := a.RemoveCommand(commandId)
@@ -317,7 +312,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 		mockCommandGroupRepository.On("GetAll", projectId).Return(make([]domain.CommandGroup, 0), errors.New("failed to get command groups"))
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 
 		err := a.RemoveCommand(commandId)
 		assert.Error(t, err)
@@ -358,7 +352,6 @@ func TestApp_EditCommand(t *testing.T) {
 		mockCommandRepository.On("Update", &commandToEdit).Return(nil)
 
 		mockLogger.On("Info", "Command edited: "+commandToEdit.Id).Return(nil)
-		mockEventEmitter.On("EmitEvent", event.SuccessNotification, "Command edited").Return(nil)
 		mockEventEmitter.On("EmitEvent", event.GetCommands, nil).Return(nil)
 
 		err := a.EditCommand(commandToEdit)
@@ -396,7 +389,6 @@ func TestApp_EditCommand(t *testing.T) {
 		mockCommandRepository.On("Update", &commandToEdit).Return(errors.New("failed to update command"))
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 
 		err := a.EditCommand(commandToEdit)
 		assert.Error(t, err)
@@ -481,7 +473,6 @@ func TestApp_ReorderCommands(t *testing.T) {
 			errors.New("failed to get commands"))
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 
 		err := a.ReorderCommands([]string{})
 		assert.Error(t, err)
@@ -531,7 +522,6 @@ func TestApp_ReorderCommands(t *testing.T) {
 		mockCommandRepository.On("Update", &cm3WithUpdatedPosition).Return(nil)
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 
 		err := a.ReorderCommands(orderedIds)
 		assert.Error(t, err)
@@ -625,7 +615,6 @@ func TestApp_RunCommand(t *testing.T) {
 		mockCommandRepository.On("Get", cmdId).Return(nil, errors.New("command not found"))
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 
 		err := a.RunCommand(cmdId)
 		assert.Error(t, err)
@@ -657,7 +646,6 @@ func TestApp_RunCommand(t *testing.T) {
 		mockConfigRepository.On("GetOrCreate").Return(nil, errors.New("failed to get user config"))
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 
 		err := a.RunCommand(cmd.Id)
 		assert.Error(t, err)
@@ -696,7 +684,6 @@ func TestApp_RunCommand(t *testing.T) {
 		mockProjectRepository.On("Get", projectId).Return(nil, errors.New("failed to get project"))
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 
 		err := a.RunCommand(cmd.Id)
 		assert.Error(t, err)
@@ -759,7 +746,6 @@ func TestApp_RunCommand(t *testing.T) {
 		mockProjectRepository.On("Get", cmd.ProjectId).Return(&project, nil)
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 
 		mockRunner.On("RunCommand", &cmd, []string{"/1"}, project.WorkingDirectory).Return(errors.New("failed to run command"))
 
@@ -831,7 +817,6 @@ func TestApp_StopCommand(t *testing.T) {
 		mockCommandRepository.On("Get", commandId).Return(nil, errors.New("command not found"))
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 
 		a.StopCommand(commandId)
 
@@ -861,7 +846,6 @@ func TestApp_StopCommand(t *testing.T) {
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return()
 
 		mockRunner.On("StopRunningCommand", cmd.Id).Return(errors.New("failed to stop command"))
 

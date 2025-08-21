@@ -2,8 +2,6 @@ package app
 
 import (
 	"context"
-
-	"gomander/internal/event"
 )
 
 // Startup is called when the app starts. The context is saved
@@ -29,7 +27,6 @@ func (a *App) OnBeforeClose(_ context.Context) (prevent bool) {
 	if len(errs) > 0 {
 		for _, err := range errs {
 			a.logger.Error(err.Error())
-			a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 		}
 		return true // Prevent the application from closing
 	}

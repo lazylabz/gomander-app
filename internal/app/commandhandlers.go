@@ -17,7 +17,6 @@ func (a *App) AddCommand(newCommand domain.Command) error {
 	allCommands, err := a.commandRepository.GetAll(a.openedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 		return err
 	}
 
@@ -28,12 +27,10 @@ func (a *App) AddCommand(newCommand domain.Command) error {
 	err = a.commandRepository.Create(&newCommand)
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 		return err
 	}
 
 	a.logger.Info("Command added: " + newCommand.Id)
-	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command added")
 
 	// Update the commands map in the frontend
 	a.eventEmitter.EmitEvent(event.GetCommands, nil)
@@ -45,19 +42,16 @@ func (a *App) RemoveCommand(id string) error {
 	err := a.RemoveCommandFromCommandGroups(id)
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 		return err
 	}
 
 	err = a.commandRepository.Delete(id)
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 		return err
 	}
 
 	a.logger.Info("Command removed: " + id)
-	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command removed")
 
 	// Update the commands and command groups in the frontend
 	a.eventEmitter.EmitEvent(event.GetCommands, nil)
@@ -70,12 +64,10 @@ func (a *App) EditCommand(newCommand domain.Command) error {
 	err := a.commandRepository.Update(&newCommand)
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 		return err
 	}
 
 	a.logger.Info("Command edited: " + newCommand.Id)
-	a.eventEmitter.EmitEvent(event.SuccessNotification, "Command edited")
 
 	// Update the commands map in the frontend
 	a.eventEmitter.EmitEvent(event.GetCommands, nil)
@@ -87,7 +79,6 @@ func (a *App) ReorderCommands(orderedIds []string) error {
 	existingCommands, err := a.commandRepository.GetAll(a.openedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 		return err
 	}
 	// Sort the existing commands based on the new order
@@ -101,7 +92,6 @@ func (a *App) ReorderCommands(orderedIds []string) error {
 		err := a.commandRepository.Update(&existingCommands[i])
 		if err != nil {
 			a.logger.Error(err.Error())
-			a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 			return err
 		}
 	}
@@ -119,21 +109,18 @@ func (a *App) RunCommand(id string) error {
 
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 		return err
 	}
 
 	userConfig, err := a.userConfigRepository.GetOrCreate()
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to get user config: "+err.Error())
 		return err
 	}
 
 	currentProject, err := a.projectRepository.Get(a.openedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to get current project: "+err.Error())
 		return err
 	}
 
@@ -142,7 +129,6 @@ func (a *App) RunCommand(id string) error {
 
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to run command: "+id+" - "+err.Error())
 		return err
 	}
 
@@ -157,7 +143,6 @@ func (a *App) StopCommand(id string) {
 
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, err.Error())
 		return
 	}
 
@@ -165,7 +150,6 @@ func (a *App) StopCommand(id string) {
 
 	if err != nil {
 		a.logger.Error(err.Error())
-		a.eventEmitter.EmitEvent(event.ErrorNotification, "Failed to stop command gracefully: "+id+" - "+err.Error())
 		return
 	}
 

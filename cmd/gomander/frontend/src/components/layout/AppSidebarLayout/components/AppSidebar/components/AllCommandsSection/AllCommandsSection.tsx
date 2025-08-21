@@ -6,6 +6,7 @@ import {
 } from "@dnd-kit/sortable";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
 import { CreateCommandModal } from "@/components/modals/Command/CreateCommandModal.tsx";
@@ -40,7 +41,14 @@ export const AllCommandsSection = () => {
   };
 
   const handleSaveReorderedCommands = async (newOrder: string[]) => {
-    await reorderCommands(newOrder);
+    try {
+      await reorderCommands(newOrder);
+    } catch (e) {
+      toast.error(
+        "Failed to reorder commands: " +
+          (e instanceof Error ? e.message : "Unknown error"),
+      );
+    }
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {

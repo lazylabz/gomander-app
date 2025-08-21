@@ -12,7 +12,6 @@ import (
 	"gomander/internal/app"
 	"gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
-	"gomander/internal/event"
 	"gomander/internal/helpers/array"
 	projectdomain "gomander/internal/project/domain"
 	"gomander/internal/testutils"
@@ -104,8 +103,6 @@ func TestApp_ExportProject(t *testing.T) {
 		expectedBytes, err := json.MarshalIndent(expectedExportJSON, "", "  ")
 
 		mockFsFacade.On("WriteFile", "/somedir/file.json", expectedBytes, os.FileMode(0644)).Return(nil)
-
-		mockEventEmitter.On("EmitEvent", event.SuccessNotification, mock.Anything).Return(nil)
 
 		err = a.ExportProject(projectId)
 		assert.NoError(t, err)
@@ -307,8 +304,6 @@ func TestApp_ExportProject(t *testing.T) {
 
 		mockFsFacade.On("WriteFile", "/somedir/file.json", expectedBytes, os.FileMode(0644)).Return(errors.New("problem writing file"))
 
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return(nil)
-
 		err = a.ExportProject(projectId)
 		assert.Error(t, err)
 
@@ -419,8 +414,6 @@ func TestApp_ImportProject(t *testing.T) {
 			capturedCommandGroups = append(capturedCommandGroups, args.Get(0).(*commandgroupdomain.CommandGroup))
 		}).Return(nil)
 
-		mockEventEmitter.On("EmitEvent", event.SuccessNotification, mock.Anything).Return(nil)
-
 		err := a.ImportProject(projectJSON, newName, newWorkingDirectory)
 		assert.NoError(t, err)
 
@@ -489,7 +482,6 @@ func TestApp_ImportProject(t *testing.T) {
 		})
 
 		mockProjectRepository.On("Create", mock.Anything).Return(assert.AnError).Once()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return(nil)
 
 		err := a.ImportProject(projectJSON, "Imported Project", "/imported/project/dir")
 		assert.Error(t, err)
@@ -539,7 +531,6 @@ func TestApp_ImportProject(t *testing.T) {
 
 		mockProjectRepository.On("Create", mock.Anything).Return(nil)
 		mockCommandRepository.On("Create", mock.Anything).Return(assert.AnError)
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return(nil)
 
 		err := a.ImportProject(projectJSON, "Imported Project", "/imported/project/dir")
 		assert.Error(t, err)
@@ -590,7 +581,6 @@ func TestApp_ImportProject(t *testing.T) {
 		mockProjectRepository.On("Create", mock.Anything).Return(nil)
 		mockCommandRepository.On("Create", mock.Anything).Return(nil)
 		mockCommandGroupRepository.On("Create", mock.Anything).Return(assert.AnError)
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return(nil)
 
 		err := a.ImportProject(projectJSON, "Imported Project", "/imported/project/dir")
 		assert.Error(t, err)
@@ -691,7 +681,6 @@ func TestApp_GetProjectToImport(t *testing.T) {
 
 		mockRuntimeFacade.On("OpenFileDialog", mock.Anything, mock.Anything).Return("/path/to/project.json", nil)
 		mockFsFacade.On("ReadFile", "/path/to/project.json").Return([]byte{}, assert.AnError)
-		mockEventer.On("EmitEvent", event.ErrorNotification, mock.Anything).Return(nil)
 
 		toImport, err := a.GetProjectToImport()
 		assert.Error(t, err)

@@ -207,7 +207,6 @@ func TestApp_EditProject(t *testing.T) {
 
 		project := projectdomain.Project{Id: "1", Name: "A", WorkingDirectory: "/a"}
 		mockProjectRepository.On("Update", project).Return(nil)
-		mockEventEmitter.On("EmitEvent", event.SuccessNotification, mock.Anything).Return(nil)
 		assert.NoError(t, a.EditProject(project))
 	})
 	t.Run("Should return an error if project update fails", func(t *testing.T) {
@@ -308,7 +307,6 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockCommandRepository.On("Delete", cmd1.Id).Return(nil)
 		mockCommandRepository.On("Delete", cmd2.Id).Return(nil)
 		mockProjectRepository.On("Delete", projectId).Return(nil)
-		mockEventEmitter.On("EmitEvent", event.SuccessNotification, mock.Anything).Return(nil)
 		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil).Return(nil)
 		mockEventEmitter.On("EmitEvent", event.GetCommands, nil).Return(nil)
 		mockLogger.On("Info", mock.Anything).Return()
@@ -370,7 +368,6 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockCommandRepository.On("Delete", cmd1.Id).Return(errors.New("fail"))
 
 		mockLogger.On("Error", mock.Anything).Return()
-		mockEventEmitter.On("EmitEvent", event.ErrorNotification, mock.Anything).Return(nil)
 		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil).Return(nil)
 
 		err := a.DeleteProject(projectId)
@@ -422,7 +419,6 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockCommandRepository.On("Delete", cmd1.Id).Return(nil)
 		mockCommandRepository.On("Delete", cmd2.Id).Return(nil)
 		mockProjectRepository.On("Delete", projectId).Return(errors.New("some error occurred"))
-		mockEventEmitter.On("EmitEvent", event.SuccessNotification, mock.Anything).Return(nil)
 		mockEventEmitter.On("EmitEvent", event.GetCommandGroups, nil).Return(nil)
 		mockEventEmitter.On("EmitEvent", event.GetCommands, nil).Return(nil)
 		mockLogger.On("Info", mock.Anything).Return()

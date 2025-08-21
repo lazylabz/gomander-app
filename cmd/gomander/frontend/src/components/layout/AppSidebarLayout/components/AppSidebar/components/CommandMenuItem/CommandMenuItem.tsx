@@ -1,6 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Play, Square } from "lucide-react";
+import { toast } from "sonner";
 
 import { useSidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import {
@@ -47,11 +48,27 @@ export const CommandMenuItem = ({
 
   const handleRunCommand = async () => {
     setActiveCommandId(command.id);
-    await startCommand(command.id);
+    try {
+      await startCommand(command.id);
+    } catch (e) {
+      toast.error(
+        "Failed to run command: " +
+          (e instanceof Error ? e.message : "Unknown error"),
+      );
+    }
   };
 
   const handleDeleteCommand = async () => {
-    await deleteCommand(command.id);
+    try {
+      await deleteCommand(command.id);
+      setActiveCommandId(null); // Reset active command after deletion
+      toast.success("Command deleted successfully");
+    } catch (e) {
+      toast.error(
+        "Failed to delete command: " +
+          (e instanceof Error ? e.message : "Unknown error"),
+      );
+    }
     setActiveCommandId(null); // Reset active command after deletion
   };
 
@@ -69,7 +86,14 @@ export const CommandMenuItem = ({
   };
 
   const handleStopCommand = async () => {
-    await stopCommand(command.id);
+    try {
+      await stopCommand(command.id);
+    } catch (e) {
+      toast.error(
+        "Failed to stop command: " +
+          (e instanceof Error ? e.message : "Unknown error"),
+      );
+    }
     setActiveCommandId(command.id);
   };
 

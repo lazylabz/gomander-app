@@ -1,7 +1,6 @@
 package app
 
 import (
-	"gomander/internal/event"
 	"gomander/internal/project/domain"
 )
 
@@ -51,8 +50,6 @@ func (a *App) EditProject(project domain.Project) error {
 	if err != nil {
 		return err
 	}
-
-	a.eventEmitter.EmitEvent(event.SuccessNotification, "Project edited successfully")
 
 	return nil
 }
