@@ -58,6 +58,9 @@ func main() {
 			// Register deps
 			registerDeps(gormDb, ctx, app)
 
+			// Register event handlers
+			app.RegisterHandlers()
+
 			// Start app
 			app.Startup(ctx)
 		},

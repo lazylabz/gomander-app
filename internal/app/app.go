@@ -78,8 +78,6 @@ func (a *App) LoadDependencies(d Dependencies) {
 func (a *App) RegisterHandlers() {
 	// Register event handlers
 	a.eventBus.RegisterHandler(a.cleanCommandGroupsOnCommandDeletedHandler)
-
-	a.ctx = context.Background()
 }
 
 // NewApp creates a new App application struct
