@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"gomander/internal/commandgroup/domain"
+	"gomander/internal/helpers/array"
 )
 
 type GormCommandGroupRepository struct {
@@ -184,4 +185,63 @@ func (r GormCommandGroupRepository) Delete(commandGroupId string) error {
 	}
 
 	return nil
+}
+
+func (r GormCommandGroupRepository) RemoveCommandFromCommandGroups(commandId string) error {
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		// Find all command group associations for the command
+		relations, err := gorm.G[CommandToCommandGroupModel](tx).
+			Where("command_id = ?", commandId).
+			Find(r.ctx)
+
+		println("Found relations:", len(relations))
+
+		if err != nil {
+			return err
+		}
+
+		// Update positions of command groups after the removed command
+		for _, relation := range relations {
+			_, err = gorm.G[CommandToCommandGroupModel](tx).
+				Where("command_group_id = ? AND position > ?", relation.CommandGroupId, relation.Position).
+				Update(r.ctx, "position", gorm.Expr("position - 1"))
+			if err != nil {
+				return err
+			}
+		}
+
+		// Delete the command from all command groups
+		num, err := gorm.G[CommandToCommandGroupModel](tx).
+			Where("command_id = ?", commandId).
+			Delete(r.ctx)
+
+		println("Deleted relations:", num)
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r GormCommandGroupRepository) GetEmptyCommandGroups() ([]domain.CommandGroup, error) {
+	commandGroups, err := gorm.G[CommandGroupModel](r.db).
+		Where("id NOT IN (SELECT DISTINCT command_group_id FROM command_group_command)").
+		Order("position").
+		Find(r.ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return array.Map(commandGroups, func(cmdGroupModel CommandGroupModel) domain.CommandGroup {
+		return *ToDomainCommandGroup(cmdGroupModel)
+	}), nil
 }

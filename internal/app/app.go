@@ -4,9 +4,11 @@ import (
 	"context"
 
 	commanddomain "gomander/internal/command/domain"
+	"gomander/internal/commandgroup/application/handlers"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	configdomain "gomander/internal/config/domain"
 	"gomander/internal/event"
+	"gomander/internal/eventbus"
 	"gomander/internal/facade"
 	"gomander/internal/logger"
 	projectdomain "gomander/internal/project/domain"
@@ -30,18 +32,28 @@ type App struct {
 
 	fsFacade      facade.FsFacade
 	runtimeFacade facade.RuntimeFacade
+
+	eventBus eventbus.EventBus
+
+	cleanCommandGroupsOnCommandDeletedHandler handlers.CleanCommandGroupsOnCommandDeleted
 }
 
 type Dependencies struct {
-	Logger                 logger.Logger
-	EventEmitter           event.EventEmitter
-	Runner                 runner.Runner
+	Logger       logger.Logger
+	EventEmitter event.EventEmitter
+	Runner       runner.Runner
+
 	CommandRepository      commanddomain.Repository
 	CommandGroupRepository commandgroupdomain.Repository
 	ProjectRepository      projectdomain.Repository
 	ConfigRepository       configdomain.Repository
-	FsFacade               facade.FsFacade
-	RuntimeFacade          facade.RuntimeFacade
+
+	FsFacade      facade.FsFacade
+	RuntimeFacade facade.RuntimeFacade
+
+	EventBus eventbus.EventBus
+
+	CleanCommandGroupsOnCommandDeletedHandler handlers.CleanCommandGroupsOnCommandDeleted
 }
 
 func (a *App) LoadDependencies(d Dependencies) {
@@ -55,6 +67,17 @@ func (a *App) LoadDependencies(d Dependencies) {
 	a.userConfigRepository = d.ConfigRepository
 	a.fsFacade = d.FsFacade
 	a.runtimeFacade = d.RuntimeFacade
+
+	a.eventBus = d.EventBus
+
+	a.cleanCommandGroupsOnCommandDeletedHandler = d.CleanCommandGroupsOnCommandDeletedHandler
+
+	a.ctx = context.Background()
+}
+
+func (a *App) RegisterHandlers() {
+	// Register event handlers
+	a.eventBus.RegisterHandler(a.cleanCommandGroupsOnCommandDeletedHandler)
 
 	a.ctx = context.Background()
 }

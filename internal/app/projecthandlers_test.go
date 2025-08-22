@@ -9,7 +9,7 @@ import (
 
 	"gomander/internal/app"
 	commanddomain "gomander/internal/command/domain"
-	commandgroupdomain "gomander/internal/commandgroup/domain"
+	commanddomainevent "gomander/internal/command/domain/event"
 	"gomander/internal/config/domain"
 	projectdomain "gomander/internal/project/domain"
 	"gomander/internal/testutils"
@@ -270,17 +270,17 @@ func TestApp_DeleteProject(t *testing.T) {
 	t.Run("Should delete a project and all its commands", func(t *testing.T) {
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
+		mockEventBus := new(MockEventBus)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
-			ProjectRepository:      mockProjectRepository,
-			CommandRepository:      mockCommandRepository,
-			CommandGroupRepository: mockCommandGroupRepository,
-			ConfigRepository:       mockUserConfigRepository,
-			Logger:                 mockLogger,
+			ProjectRepository: mockProjectRepository,
+			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
+			Logger:            mockLogger,
+			EventBus:          mockEventBus,
 		})
 
 		projectId := "1"
@@ -293,18 +293,23 @@ func TestApp_DeleteProject(t *testing.T) {
 
 		cmd1 := commandDataToDomain(testutils.NewCommand().WithProjectId(projectId).Data())
 		cmd2 := commandDataToDomain(testutils.NewCommand().WithProjectId(projectId).Data())
+
 		commands := []commanddomain.Command{
 			cmd1,
 			cmd2,
 		}
 
 		mockCommandRepository.On("GetAll", projectId).Return(commands, nil)
+
+		mockEventBus.On("PublishSync", commanddomainevent.NewCommandDeletedEvent(cmd1.Id)).Return(make([]error, 0))
+		mockEventBus.On("PublishSync", commanddomainevent.NewCommandDeletedEvent(cmd2.Id)).Return(make([]error, 0))
+
 		mockCommandRepository.On("Delete", cmd1.Id).Return(nil)
 		mockCommandRepository.On("Delete", cmd2.Id).Return(nil)
-		mockProjectRepository.On("Delete", projectId).Return(nil)
-		mockLogger.On("Info", mock.Anything).Return()
 
-		mockCommandGroupRepository.On("GetAll", projectId).Return([]commandgroupdomain.CommandGroup{}, nil)
+		mockProjectRepository.On("Delete", projectId).Return(nil)
+
+		mockLogger.On("Info", mock.Anything).Return()
 
 		assert.NoError(t, a.DeleteProject(projectId))
 	})
@@ -334,19 +339,16 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
-			ProjectRepository:      mockProjectRepository,
-			CommandRepository:      mockCommandRepository,
-			ConfigRepository:       mockUserConfigRepository,
-			Logger:                 mockLogger,
-			CommandGroupRepository: mockCommandGroupRepository,
+			ProjectRepository: mockProjectRepository,
+			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
+			Logger:            mockLogger,
 		})
 
 		projectId := "1"
-		mockCommandGroupRepository.On("GetAll", mock.Anything).Return([]commandgroupdomain.CommandGroup{}, nil)
 
 		cmd1 := commandDataToDomain(testutils.NewCommand().WithProjectId(projectId).Data())
 		cmd2 := commandDataToDomain(testutils.NewCommand().WithProjectId(projectId).Data())
@@ -368,23 +370,22 @@ func TestApp_DeleteProject(t *testing.T) {
 			mockCommandRepository,
 			mockUserConfigRepository,
 			mockLogger,
-			mockCommandGroupRepository,
 		)
 	})
 	t.Run("Should return an error if deleting the project fails", func(t *testing.T) {
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
+		mockEventBus := new(MockEventBus)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
-			ProjectRepository:      mockProjectRepository,
-			CommandRepository:      mockCommandRepository,
-			CommandGroupRepository: mockCommandGroupRepository,
-			ConfigRepository:       mockUserConfigRepository,
-			Logger:                 mockLogger,
+			ProjectRepository: mockProjectRepository,
+			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
+			Logger:            mockLogger,
+			EventBus:          mockEventBus,
 		})
 
 		projectId := "1"
@@ -405,10 +406,13 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockCommandRepository.On("GetAll", projectId).Return(commands, nil)
 		mockCommandRepository.On("Delete", cmd1.Id).Return(nil)
 		mockCommandRepository.On("Delete", cmd2.Id).Return(nil)
-		mockProjectRepository.On("Delete", projectId).Return(errors.New("some error occurred"))
-		mockLogger.On("Info", mock.Anything).Return()
 
-		mockCommandGroupRepository.On("GetAll", projectId).Return([]commandgroupdomain.CommandGroup{}, nil)
+		mockEventBus.On("PublishSync", commanddomainevent.NewCommandDeletedEvent(cmd1.Id)).Return(make([]error, 0))
+		mockEventBus.On("PublishSync", commanddomainevent.NewCommandDeletedEvent(cmd2.Id)).Return(make([]error, 0))
+
+		mockProjectRepository.On("Delete", projectId).Return(errors.New("some error occurred"))
+
+		mockLogger.On("Info", mock.Anything).Return()
 
 		assert.Error(t, a.DeleteProject(projectId))
 	})

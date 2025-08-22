@@ -6,4 +6,6 @@ type Repository interface {
 	Create(commandGroup *CommandGroup) error
 	Update(commandGroup *CommandGroup) error
 	Delete(commandGroupId string) error
+	RemoveCommandFromCommandGroups(commandId string) error
+	GetEmptyCommandGroups() ([]CommandGroup, error)
 }

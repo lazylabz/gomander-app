@@ -13,8 +13,10 @@ import (
 	gormlogger "gorm.io/gorm/logger"
 
 	commmandinfrastructure "gomander/internal/command/infrastructure"
+	"gomander/internal/commandgroup/application/handlers"
 	commandgroupinfrastructure "gomander/internal/commandgroup/infrastructure"
 	configinfrastructure "gomander/internal/config/infrastructure"
+	"gomander/internal/eventbus"
 	"gomander/internal/facade"
 	logger "gomander/internal/logger"
 	projectinfrastructure "gomander/internal/project/infrastructure"
@@ -127,21 +129,30 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	r := runner.NewDefaultRunner(l, ee)
 
 	// Initialize repos
-	comandRepo := commmandinfrastructure.NewGormCommandRepository(gormDb, ctx)
-	comandGroupRepo := commandgroupinfrastructure.NewGormCommandGroupRepository(gormDb, ctx)
+	commandRepo := commmandinfrastructure.NewGormCommandRepository(gormDb, ctx)
+	commandGroupRepo := commandgroupinfrastructure.NewGormCommandGroupRepository(gormDb, ctx)
 	projectRepo := projectinfrastructure.NewGormProjectRepository(gormDb, ctx)
 	configRepo := configinfrastructure.NewGormConfigRepository(gormDb, ctx)
 
+	cleanCommandGroupsOnCommandDeletedHandler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(commandGroupRepo)
+
+	eventBus := eventbus.NewInMemoryEventBus()
+
 	// Initialize event emitter
 	app.LoadDependencies(internalapp.Dependencies{
-		Logger:                 l,
-		EventEmitter:           ee,
-		Runner:                 r,
-		CommandRepository:      comandRepo,
-		CommandGroupRepository: comandGroupRepo,
+		Logger:       l,
+		EventEmitter: ee,
+		Runner:       r,
+
+		CommandRepository:      commandRepo,
+		CommandGroupRepository: commandGroupRepo,
 		ProjectRepository:      projectRepo,
 		ConfigRepository:       configRepo,
-		FsFacade:               facade.DefaultFsFacade{},
-		RuntimeFacade:          facade.DefaultRuntimeFacade{},
+
+		FsFacade:      facade.DefaultFsFacade{},
+		RuntimeFacade: facade.DefaultRuntimeFacade{},
+
+		EventBus: eventBus,
+		CleanCommandGroupsOnCommandDeletedHandler: cleanCommandGroupsOnCommandDeletedHandler,
 	})
 }
