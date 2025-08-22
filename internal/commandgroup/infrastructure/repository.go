@@ -7,7 +7,6 @@ import (
 	"gorm.io/gorm"
 
 	"gomander/internal/commandgroup/domain"
-	"gomander/internal/helpers/array"
 )
 
 type GormCommandGroupRepository struct {
@@ -194,6 +193,8 @@ func (r GormCommandGroupRepository) RemoveCommandFromCommandGroups(commandId str
 			Where("command_id = ?", commandId).
 			Find(r.ctx)
 
+		println("Relations found:", len(relations))
+
 		if err != nil {
 			return err
 		}
@@ -227,17 +228,14 @@ func (r GormCommandGroupRepository) RemoveCommandFromCommandGroups(commandId str
 	return nil
 }
 
-func (r GormCommandGroupRepository) GetEmptyCommandGroups() ([]domain.CommandGroup, error) {
-	commandGroups, err := gorm.G[CommandGroupModel](r.db).
+func (r GormCommandGroupRepository) DeleteEmptyGroups() error {
+	_, err := gorm.G[CommandGroupModel](r.db).
 		Where("id NOT IN (SELECT DISTINCT command_group_id FROM command_group_command)").
-		Order("position").
-		Find(r.ctx)
+		Delete(r.ctx)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return array.Map(commandGroups, func(cmdGroupModel CommandGroupModel) domain.CommandGroup {
-		return *ToDomainCommandGroup(cmdGroupModel)
-	}), nil
+	return nil
 }
