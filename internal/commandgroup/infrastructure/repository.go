@@ -194,8 +194,6 @@ func (r GormCommandGroupRepository) RemoveCommandFromCommandGroups(commandId str
 			Where("command_id = ?", commandId).
 			Find(r.ctx)
 
-		println("Found relations:", len(relations))
-
 		if err != nil {
 			return err
 		}
@@ -211,11 +209,9 @@ func (r GormCommandGroupRepository) RemoveCommandFromCommandGroups(commandId str
 		}
 
 		// Delete the command from all command groups
-		num, err := gorm.G[CommandToCommandGroupModel](tx).
+		_, err = gorm.G[CommandToCommandGroupModel](tx).
 			Where("command_id = ?", commandId).
 			Delete(r.ctx)
-
-		println("Deleted relations:", num)
 
 		if err != nil {
 			return err

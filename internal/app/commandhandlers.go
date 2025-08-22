@@ -50,12 +50,13 @@ func (a *App) RemoveCommand(id string) error {
 
 	if len(errs) > 0 {
 		combinedErrMsg := "Errors occurred while removing command:"
+
 		for _, pubErr := range errs {
 			combinedErrMsg += "\n- " + pubErr.Error()
+			a.logger.Error(pubErr.Error())
 		}
-		err = errors.New(combinedErrMsg)
 
-		a.logger.Error(err.Error())
+		err = errors.New(combinedErrMsg)
 
 		return err
 	}
