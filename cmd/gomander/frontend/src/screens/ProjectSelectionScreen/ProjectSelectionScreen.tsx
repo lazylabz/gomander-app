@@ -55,7 +55,7 @@ export const ProjectSelectionScreen = () => {
       const projectToImport = await dataService.getProjectToImport();
       setProjectBeingImported(projectToImport);
     } catch (e) {
-      toast.error("Failed to select project: " + parseError(e));
+      toast.error(parseError(e, "Failed to select project"));
     }
   };
 

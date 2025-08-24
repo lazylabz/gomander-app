@@ -101,7 +101,7 @@ export const AppSidebar = () => {
       await reorderCommandGroups(reorderedCommandGroupIds);
       toast.success("Reordered command groups successfully");
     } catch (e) {
-      toast.error("Failed to reorder command groups: " + parseError(e));
+      toast.error(parseError(e, "Failed to reorder command groups"));
     } finally {
       fetchCommandGroups();
     }
