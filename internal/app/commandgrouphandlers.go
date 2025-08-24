@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"sort"
 
 	"gomander/internal/commandgroup/domain"
@@ -62,6 +63,29 @@ func (a *App) AddCommandToCommandGroup(commandId, commandGroupId string) error {
 	}
 
 	commandGroup.Commands = append(commandGroup.Commands, *command)
+
+	if err := a.commandGroupRepository.Update(commandGroup); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *App) RemoveCommandFromCommandGroup(commandId, commandGroupId string) error {
+	commandGroup, err := a.commandGroupRepository.Get(commandGroupId)
+	if err != nil {
+		return err
+	}
+	if len(commandGroup.Commands) == 1 {
+		return errors.New("cannot remove the last command from the group; delete the group instead")
+	}
+
+	for i, cmd := range commandGroup.Commands {
+		if cmd.Id == commandId {
+			commandGroup.Commands = append(commandGroup.Commands[:i], commandGroup.Commands[i+1:]...)
+			break
+		}
+	}
 
 	if err := a.commandGroupRepository.Update(commandGroup); err != nil {
 		return err

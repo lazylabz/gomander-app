@@ -98,6 +98,10 @@ export function RemoveCommand(arg1) {
   return window['go']['app']['App']['RemoveCommand'](arg1);
 }
 
+export function RemoveCommandFromCommandGroup(arg1, arg2) {
+  return window['go']['app']['App']['RemoveCommandFromCommandGroup'](arg1, arg2);
+}
+
 export function ReorderCommandGroups(arg1) {
   return window['go']['app']['App']['ReorderCommandGroups'](arg1);
 }
