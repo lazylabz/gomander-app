@@ -55,7 +55,7 @@ func (a *App) DuplicateCommand(commandId, targetGroupId string) error {
 	duplicatedCommand := domain.Command{
 		Id:               uuid.New().String(),
 		ProjectId:        originalCommand.ProjectId,
-		Name:             originalCommand.Name + " (test)",
+		Name:             originalCommand.Name + " (copy)",
 		Command:          originalCommand.Command,
 		WorkingDirectory: originalCommand.WorkingDirectory,
 		Position:         len(allCommands),
