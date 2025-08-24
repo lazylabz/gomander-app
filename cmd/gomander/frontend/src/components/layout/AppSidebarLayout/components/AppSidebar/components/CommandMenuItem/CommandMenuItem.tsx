@@ -81,12 +81,7 @@ export const CommandMenuItem = ({
       await removeCommandFromGroup(command.id, insideGroupId);
       toast.success("Command removed from group successfully");
     } catch (e) {
-      // TODO: improve parseError to handle this case
-      if (e instanceof Error && e.cause === "FRONTEND_HANDLED_ERROR") {
-        toast.error(e.message);
-      } else {
-        toast.error("Failed to remove command from group: " + parseError(e));
-      }
+      toast.error(parseError(e, "Failed to remove command from group"));
     } finally {
       fetchCommandGroups();
     }
