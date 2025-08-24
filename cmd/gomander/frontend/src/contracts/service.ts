@@ -5,6 +5,7 @@ import {
   CreateProject,
   DeleteCommandGroup,
   DeleteProject,
+  DuplicateCommand,
   EditCommand,
   EditProject,
   ExportProject,
@@ -32,6 +33,7 @@ import { BrowserOpenURL, EventsOff, EventsOn } from "../../wailsjs/runtime";
 
 export const dataService = {
   addCommand: AddCommand,
+  duplicateCommand: DuplicateCommand,
   editCommand: EditCommand,
   reorderCommands: ReorderCommands,
   getAvailableProjects: GetAvailableProjects,

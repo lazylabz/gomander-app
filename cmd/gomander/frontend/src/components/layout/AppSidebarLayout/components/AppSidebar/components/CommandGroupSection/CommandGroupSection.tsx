@@ -157,7 +157,10 @@ export const CommandGroupSection = ({
           <SidebarMenu>
             {commandGroup.commands.map((command) => (
               <SidebarMenuItem key={command.id}>
-                <CommandMenuItem command={command} />
+                <CommandMenuItem
+                  command={command}
+                  insideGroupId={commandGroup.id}
+                />
               </SidebarMenuItem>
             ))}
           </SidebarMenu>

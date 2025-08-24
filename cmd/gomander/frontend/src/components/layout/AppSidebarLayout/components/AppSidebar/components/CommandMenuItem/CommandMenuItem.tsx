@@ -26,9 +26,11 @@ import { stopCommand } from "@/useCases/command/stopCommand.ts";
 
 export const CommandMenuItem = ({
   command,
+  insideGroupId,
   draggable = false,
 }: {
   command: Command;
+  insideGroupId?: string;
   draggable?: boolean;
 }) => {
   const { theme } = useTheme();
@@ -78,12 +80,15 @@ export const CommandMenuItem = ({
 
   const handleDuplicateCommand = async () => {
     try {
-      await duplicateCommand(command);
+      await duplicateCommand(command, insideGroupId);
       toast.success("Command duplicated successfully");
     } catch (e) {
       toast.error("Failed to duplicate command: " + parseError(e));
     } finally {
       fetchCommands();
+      if (insideGroupId) {
+        fetchCommandGroups();
+      }
     }
     setActiveCommandId(null); // Reset active command after duplication
   };
@@ -171,11 +176,11 @@ export const CommandMenuItem = ({
         <ContextMenuItem disabled={isRunning} onClick={handleEditCommand}>
           Edit
         </ContextMenuItem>
-        <ContextMenuItem disabled={isRunning} onClick={handleDeleteCommand}>
-          Delete
-        </ContextMenuItem>
         <ContextMenuItem disabled={isRunning} onClick={handleDuplicateCommand}>
           Duplicate
+        </ContextMenuItem>
+        <ContextMenuItem disabled={isRunning} onClick={handleDeleteCommand}>
+          Delete
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

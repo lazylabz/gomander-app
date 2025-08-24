@@ -44,6 +44,32 @@ func (a *App) DeleteCommandGroup(commandGroupId string) error {
 	return nil
 }
 
+func (a *App) AddCommandToCommandGroup(commandId, commandGroupId string) error {
+	commandGroup, err := a.commandGroupRepository.Get(commandGroupId)
+	if err != nil {
+		return err
+	}
+
+	for _, cmd := range commandGroup.Commands {
+		if cmd.Id == commandId {
+			return nil
+		}
+	}
+
+	command, err := a.commandRepository.Get(commandId)
+	if err != nil {
+		return err
+	}
+
+	commandGroup.Commands = append(commandGroup.Commands, *command)
+
+	if err := a.commandGroupRepository.Update(commandGroup); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (a *App) ReorderCommandGroups(newOrderedIds []string) error {
 	existingCommandGroups, err := a.commandGroupRepository.GetAll(a.openedProjectId)
 	if err != nil {

@@ -9,6 +9,8 @@ import (
 	domain2 "gomander/internal/config/domain"
 	"gomander/internal/event"
 	"gomander/internal/helpers/array"
+
+	"github.com/google/uuid"
 )
 
 func (a *App) GetCommands() ([]domain.Command, error) {
@@ -33,6 +35,47 @@ func (a *App) AddCommand(newCommand domain.Command) error {
 	}
 
 	a.logger.Info("Command added: " + newCommand.Id)
+
+	return nil
+}
+
+func (a *App) DuplicateCommand(commandId, targetGroupId string) error {
+	originalCommand, err := a.commandRepository.Get(commandId)
+	if err != nil {
+		a.logger.Error(err.Error())
+		return err
+	}
+
+	allCommands, err := a.commandRepository.GetAll(a.openedProjectId)
+	if err != nil {
+		a.logger.Error(err.Error())
+		return err
+	}
+
+	duplicatedCommand := domain.Command{
+		Id:               uuid.New().String(),
+		ProjectId:        originalCommand.ProjectId,
+		Name:             originalCommand.Name + " (test)",
+		Command:          originalCommand.Command,
+		WorkingDirectory: originalCommand.WorkingDirectory,
+		Position:         len(allCommands),
+	}
+
+	err = a.commandRepository.Create(&duplicatedCommand)
+	if err != nil {
+		a.logger.Error(err.Error())
+		return err
+	}
+
+	if targetGroupId != "" {
+		err = a.AddCommandToCommandGroup(duplicatedCommand.Id, targetGroupId)
+		if err != nil {
+			a.logger.Error(err.Error())
+			return err
+		}
+	}
+
+	a.logger.Info("Command duplicated: " + commandId + " to " + duplicatedCommand.Id)
 
 	return nil
 }
