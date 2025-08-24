@@ -21,6 +21,7 @@ import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { deleteCommand } from "@/useCases/command/deleteCommand.ts";
 import { duplicateCommand } from "@/useCases/command/duplicateCommand.ts";
+import { removeCommandFromGroup } from "@/useCases/command/removeCommandFromGroup.ts";
 import { startCommand } from "@/useCases/command/startCommand.ts";
 import { stopCommand } from "@/useCases/command/stopCommand.ts";
 
@@ -72,6 +73,23 @@ export const CommandMenuItem = ({
       fetchCommandGroups();
     }
     setActiveCommandId(null); // Reset active command after deletion
+  };
+
+  const handleRemoveFromGroup = async () => {
+    if (!insideGroupId) return;
+    try {
+      await removeCommandFromGroup(command.id, insideGroupId);
+      toast.success("Command removed from group successfully");
+    } catch (e) {
+      // TODO: improve parseError to handle this case
+      if (e instanceof Error && e.cause === "FRONTEND_HANDLED_ERROR") {
+        toast.error(e.message);
+      } else {
+        toast.error("Failed to remove command from group: " + parseError(e));
+      }
+    } finally {
+      fetchCommandGroups();
+    }
   };
 
   const handleEditCommand = () => {
@@ -179,9 +197,16 @@ export const CommandMenuItem = ({
         <ContextMenuItem disabled={isRunning} onClick={handleDuplicateCommand}>
           Duplicate
         </ContextMenuItem>
-        <ContextMenuItem disabled={isRunning} onClick={handleDeleteCommand}>
-          Delete
-        </ContextMenuItem>
+        {!insideGroupId && (
+          <ContextMenuItem disabled={isRunning} onClick={handleDeleteCommand}>
+            Delete
+          </ContextMenuItem>
+        )}
+        {insideGroupId && (
+          <ContextMenuItem disabled={isRunning} onClick={handleRemoveFromGroup}>
+            Remove from group
+          </ContextMenuItem>
+        )}
       </ContextMenuContent>
     </ContextMenu>
   );
