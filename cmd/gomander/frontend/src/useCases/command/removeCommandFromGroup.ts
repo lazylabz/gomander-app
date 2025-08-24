@@ -1,4 +1,5 @@
 import { dataService } from "@/contracts/service.ts";
+import { EXPECTED_VALIDATION_ERROR } from "@/helpers/errorHelpers.ts";
 import { commandGroupStore } from "@/store/commandGroupStore.ts";
 
 export const removeCommandFromGroup = async (
@@ -13,7 +14,7 @@ export const removeCommandFromGroup = async (
   if (group.commands.length <= 1) {
     throw new Error(
       "Cannot remove the last command from the group. Delete the group instead.",
-      { cause: "FRONTEND_HANDLED_ERROR" },
+      { cause: EXPECTED_VALIDATION_ERROR },
     );
   }
 
