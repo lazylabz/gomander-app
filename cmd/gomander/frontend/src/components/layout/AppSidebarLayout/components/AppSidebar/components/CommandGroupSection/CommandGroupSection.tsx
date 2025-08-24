@@ -81,7 +81,7 @@ export const CommandGroupSection = ({
       await deleteCommandGroup(commandGroup.id);
       toast.success("Command group deleted successfully");
     } catch (e) {
-      toast.error("Failed to delete command group: " + parseError(e));
+      toast.error(parseError(e, "Failed to delete command group"));
     } finally {
       fetchCommandGroups();
     }

@@ -57,7 +57,7 @@ export const CommandMenuItem = ({
     try {
       await startCommand(command.id);
     } catch (e) {
-      toast.error("Failed to run command: " + parseError(e));
+      toast.error(parseError(e, "Failed to run command"));
     }
   };
 
@@ -67,7 +67,7 @@ export const CommandMenuItem = ({
       setActiveCommandId(null); // Reset active command after deletion
       toast.success("Command deleted successfully");
     } catch (e) {
-      toast.error("Failed to delete command: " + parseError(e));
+      toast.error(parseError(e, "Failed to delete command"));
     } finally {
       fetchCommands();
       fetchCommandGroups();
@@ -96,7 +96,7 @@ export const CommandMenuItem = ({
       await duplicateCommand(command, insideGroupId);
       toast.success("Command duplicated successfully");
     } catch (e) {
-      toast.error("Failed to duplicate command: " + parseError(e));
+      toast.error(parseError(e, "Failed to duplicate command"));
     } finally {
       fetchCommands();
       if (insideGroupId) {
@@ -114,7 +114,7 @@ export const CommandMenuItem = ({
     try {
       await stopCommand(command.id);
     } catch (e) {
-      toast.error("Failed to stop command: " + parseError(e));
+      toast.error(parseError(e, "Failed to stop command"));
     }
     setActiveCommandId(command.id);
   };
