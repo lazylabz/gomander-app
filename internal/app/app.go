@@ -3,8 +3,9 @@ package app
 import (
 	"context"
 
+	commandhandlers "gomander/internal/command/application/handlers"
 	commanddomain "gomander/internal/command/domain"
-	"gomander/internal/commandgroup/application/handlers"
+	commandgrouphandlers "gomander/internal/commandgroup/application/handlers"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	configdomain "gomander/internal/config/domain"
 	"gomander/internal/event"
@@ -35,8 +36,9 @@ type App struct {
 
 	eventBus eventbus.EventBus
 
-	cleanCommandGroupsOnCommandDeletedHandler handlers.CleanCommandGroupsOnCommandDeleted
-	cleanCommandGroupsOnProjectDeletedHandler handlers.CleanCommandGroupsOnProjectDeleted
+	cleanCommandGroupsOnCommandDeletedHandler commandgrouphandlers.CleanCommandGroupsOnCommandDeleted
+	cleanCommandGroupsOnProjectDeletedHandler commandgrouphandlers.CleanCommandGroupsOnProjectDeleted
+	cleanCommandsOnProjectDeleted             commandhandlers.CleanCommandsOnProjectDeleted
 }
 
 type Dependencies struct {
@@ -54,8 +56,9 @@ type Dependencies struct {
 
 	EventBus eventbus.EventBus
 
-	CleanCommandGroupsOnCommandDeletedHandler handlers.CleanCommandGroupsOnCommandDeleted
-	CleanCommandGroupsOnProjectDeletedHandler handlers.CleanCommandGroupsOnProjectDeleted
+	CleanCommandGroupsOnCommandDeletedHandler commandgrouphandlers.CleanCommandGroupsOnCommandDeleted
+	CleanCommandGroupsOnProjectDeletedHandler commandgrouphandlers.CleanCommandGroupsOnProjectDeleted
+	CleanCommandsOnProjectDeleted             commandhandlers.CleanCommandsOnProjectDeleted
 }
 
 func (a *App) LoadDependencies(d Dependencies) {
@@ -74,12 +77,14 @@ func (a *App) LoadDependencies(d Dependencies) {
 
 	a.cleanCommandGroupsOnCommandDeletedHandler = d.CleanCommandGroupsOnCommandDeletedHandler
 	a.cleanCommandGroupsOnProjectDeletedHandler = d.CleanCommandGroupsOnProjectDeletedHandler
+	a.cleanCommandsOnProjectDeleted = d.CleanCommandsOnProjectDeleted
 }
 
 func (a *App) RegisterHandlers() {
 	// Register event handlers
 	a.eventBus.RegisterHandler(a.cleanCommandGroupsOnCommandDeletedHandler)
 	a.eventBus.RegisterHandler(a.cleanCommandGroupsOnProjectDeletedHandler)
+	a.eventBus.RegisterHandler(a.cleanCommandsOnProjectDeleted)
 }
 
 // NewApp creates a new App application struct
