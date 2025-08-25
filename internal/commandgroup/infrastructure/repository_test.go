@@ -247,6 +247,69 @@ func TestGormCommandGroupRepository_Delete(t *testing.T) {
 	})
 }
 
+func TestGormCommandGroupRepository_RemoveCommandFromCommandGroups(t *testing.T) {
+	t.Run("Should remove a command from all groups and update positions", func(t *testing.T) {
+		projectId := "project1"
+		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
+		cmd2 := testutils.NewCommand().WithName("Command 2").WithProjectId(projectId).Data()
+		cmd3 := testutils.NewCommand().WithName("Command 3").WithProjectId(projectId).Data()
+
+		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1, cmd2, cmd3).Data()
+		cmdGroup2 := testutils.NewCommandGroup().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd2, cmd1).Data()
+
+		groupModel1, commandToCommandGroupModels1, commandModels := commandGroupDataToModel(cmdGroup1)
+		groupModel2, commandToCommandGroupModels2, _ := commandGroupDataToModel(cmdGroup2)
+
+		helper := newTestHelper(
+			t,
+			commandModels,
+			[]infrastructure.CommandGroupModel{groupModel1, groupModel2},
+			slices.Concat(commandToCommandGroupModels1, commandToCommandGroupModels2),
+		)
+
+		err := helper.repo.RemoveCommandFromCommandGroups(cmd1.Id)
+		assert.Nil(t, err)
+
+		group1, _ := helper.repo.Get(cmdGroup1.Id)
+		group2, _ := helper.repo.Get(cmdGroup2.Id)
+
+		expectedGroup1Commands := []commanddomain.Command{commandDataToDomain(cmd2), commandDataToDomain(cmd3)}
+		expectedGroup2Commands := []commanddomain.Command{commandDataToDomain(cmd2)}
+
+		assert.Equal(t, expectedGroup1Commands, group1.Commands)
+		assert.Equal(t, expectedGroup2Commands, group2.Commands)
+	})
+}
+
+func TestGormCommandGroupRepository_DeleteEmptyGroups(t *testing.T) {
+	t.Run("Should delete only empty command groups", func(t *testing.T) {
+		projectId := "project1"
+		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
+		cmd2 := testutils.NewCommand().WithName("Command 2").WithProjectId(projectId).Data()
+
+		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1, cmd2).Data()
+		cmdGroup2 := testutils.NewCommandGroup().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands().Data()
+
+		groupModel1, commandToCommandGroupModels1, commandModels := commandGroupDataToModel(cmdGroup1)
+		groupModel2, _, _ := commandGroupDataToModel(cmdGroup2)
+
+		helper := newTestHelper(
+			t,
+			commandModels,
+			[]infrastructure.CommandGroupModel{groupModel1, groupModel2},
+			commandToCommandGroupModels1,
+		)
+
+		err := helper.repo.DeleteEmptyGroups()
+		assert.Nil(t, err)
+
+		group1, _ := helper.repo.Get(cmdGroup1.Id)
+		group2, _ := helper.repo.Get(cmdGroup2.Id)
+		assert.NotNil(t, group1)
+		assert.Nil(t, group2)
+	})
+}
+
 func arrange(
 	preloadedCommandModels []commandinfrastructure.CommandModel,
 	preloadedCommandGroupModels []infrastructure.CommandGroupModel,
