@@ -2,4 +2,5 @@ ignore:
   - "internal/testutils"
   - "migrations/*.go"
   - "cmd/gomander/main.go"
+  - "internal/app/app.go"
   - "**/*facade.go"

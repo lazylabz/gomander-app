@@ -82,12 +82,12 @@ export function OpenProject(arg1) {
   return window['go']['app']['App']['OpenProject'](arg1);
 }
 
-export function RemoveCommand(arg1) {
-  return window['go']['app']['App']['RemoveCommand'](arg1);
+export function RegisterHandlers() {
+  return window['go']['app']['App']['RegisterHandlers']();
 }
 
-export function RemoveCommandFromCommandGroups(arg1) {
-  return window['go']['app']['App']['RemoveCommandFromCommandGroups'](arg1);
+export function RemoveCommand(arg1) {
+  return window['go']['app']['App']['RemoveCommand'](arg1);
 }
 
 export function ReorderCommandGroups(arg1) {

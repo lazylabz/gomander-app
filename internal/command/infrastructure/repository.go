@@ -74,7 +74,7 @@ func (r GormCommandRepository) Delete(commandId string) error {
 	}
 
 	err = r.db.Transaction(func(tx *gorm.DB) error {
-		_, err := gorm.G[CommandModel](r.db).Where("id = ?", commandId).Delete(r.ctx)
+		_, err := gorm.G[CommandModel](tx).Where("id = ?", commandId).Delete(r.ctx)
 		if err != nil {
 			return err
 		}

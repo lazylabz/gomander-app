@@ -7,6 +7,7 @@ import (
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	"gomander/internal/config/domain"
 	"gomander/internal/event"
+	"gomander/internal/eventbus"
 	"gomander/internal/helpers/array"
 	projectdomain "gomander/internal/project/domain"
 	"gomander/internal/testutils"
@@ -82,6 +83,16 @@ func (m *MockCommandGroupRepository) Delete(commandGroupId string) error {
 	return args.Error(0)
 }
 
+func (m *MockCommandGroupRepository) RemoveCommandFromCommandGroups(commandId string) error {
+	args := m.Called(commandId)
+	return args.Error(0)
+}
+
+func (m *MockCommandGroupRepository) DeleteEmpty() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 type MockProjectRepository struct {
 	mock.Mock
 }
@@ -130,6 +141,19 @@ func (m *MockRunner) StopRunningCommand(id string) error {
 
 func (m *MockRunner) StopAllRunningCommands() []error {
 	args := m.Called()
+	return args.Get(0).([]error)
+}
+
+type MockEventBus struct {
+	mock.Mock
+}
+
+func (m *MockEventBus) RegisterHandler(handler eventbus.EventHandler) {
+	m.Called(handler)
+}
+
+func (m *MockEventBus) PublishSync(e eventbus.Event) []error {
+	args := m.Called(e)
 	return args.Get(0).([]error)
 }
 

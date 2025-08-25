@@ -12,6 +12,7 @@
       "outputType": "interfaces"
     }
   },
+  "reloaddirs": "../../internal",
   "author": {
     "name": "",
     "email": ""

@@ -3,7 +3,6 @@ package app
 import (
 	"sort"
 
-	commanddomain "gomander/internal/command/domain"
 	"gomander/internal/commandgroup/domain"
 	"gomander/internal/helpers/array"
 )
@@ -61,41 +60,6 @@ func (a *App) ReorderCommandGroups(newOrderedIds []string) error {
 		err := a.commandGroupRepository.Update(&existingCommandGroups[i])
 		if err != nil {
 			return err
-		}
-	}
-
-	return nil
-}
-
-func (a *App) RemoveCommandFromCommandGroups(id string) error {
-	commandGroups, err := a.commandGroupRepository.GetAll(a.openedProjectId)
-	if err != nil {
-		a.logger.Error(err.Error())
-		return err
-	}
-
-	for _, commandGroup := range commandGroups {
-		commands := commandGroup.Commands
-		commandIds := array.Map(commands, func(c commanddomain.Command) string { return c.Id })
-
-		if array.Contains(commandIds, id) {
-			commandGroup.Commands = array.Filter(commandGroup.Commands, func(c commanddomain.Command) bool {
-				return c.Id != id
-			})
-
-			if len(commandGroup.Commands) == 0 {
-				err := a.commandGroupRepository.Delete(commandGroup.Id)
-				if err != nil {
-					a.logger.Error(err.Error())
-					return err
-				}
-			} else {
-				err := a.commandGroupRepository.Update(&commandGroup)
-				if err != nil {
-					a.logger.Error(err.Error())
-					return err
-				}
-			}
 		}
 	}
 

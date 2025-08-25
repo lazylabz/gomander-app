@@ -9,7 +9,7 @@ import (
 
 	"gomander/internal/app"
 	commanddomain "gomander/internal/command/domain"
-	"gomander/internal/commandgroup/domain"
+	commanddomainevent "gomander/internal/command/domain/event"
 	configdomain "gomander/internal/config/domain"
 	"gomander/internal/event"
 	projectdomain "gomander/internal/project/domain"
@@ -208,6 +208,7 @@ func TestApp_RemoveCommand(t *testing.T) {
 	t.Run("Should remove the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockEventBus := new(MockEventBus)
 
 		mockLogger := new(MockLogger)
 
@@ -217,14 +218,15 @@ func TestApp_RemoveCommand(t *testing.T) {
 			CommandRepository:      mockCommandRepository,
 			CommandGroupRepository: mockCommandGroupRepository,
 			Logger:                 mockLogger,
+			EventBus:               mockEventBus,
 		})
 
 		a.SetOpenProjectId(projectId)
 
 		commandId := "command1"
 
-		mockCommandGroupRepository.On("GetAll", projectId).Return(make([]domain.CommandGroup, 0), nil)
 		mockCommandRepository.On("Delete", commandId).Return(nil)
+		mockEventBus.On("PublishSync", commanddomainevent.NewCommandDeletedEvent(commandId)).Return(make([]error, 0))
 
 		mockLogger.On("Info", "Command removed: "+commandId).Return(nil)
 
@@ -255,7 +257,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 
 		commandId := "command1"
 
-		mockCommandGroupRepository.On("GetAll", projectId).Return([]domain.CommandGroup{}, nil)
 		mockCommandRepository.On("Delete", commandId).Return(errors.New("failed to delete command"))
 
 		mockLogger.On("Error", mock.Anything).Return()
@@ -269,9 +270,10 @@ func TestApp_RemoveCommand(t *testing.T) {
 			mockCommandGroupRepository,
 		)
 	})
-	t.Run("Should return an error if fails to remove the command from a command group (e.g. fails to retrieve command groups)", func(t *testing.T) {
+	t.Run("Should return an error if side effect fail", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockEventBus := new(MockEventBus)
 
 		mockLogger := new(MockLogger)
 
@@ -281,13 +283,15 @@ func TestApp_RemoveCommand(t *testing.T) {
 			CommandRepository:      mockCommandRepository,
 			CommandGroupRepository: mockCommandGroupRepository,
 			Logger:                 mockLogger,
+			EventBus:               mockEventBus,
 		})
 
 		a.SetOpenProjectId(projectId)
 
 		commandId := "command1"
 
-		mockCommandGroupRepository.On("GetAll", projectId).Return(make([]domain.CommandGroup, 0), errors.New("failed to get command groups"))
+		mockCommandRepository.On("Delete", commandId).Return(nil)
+		mockEventBus.On("PublishSync", commanddomainevent.NewCommandDeletedEvent(commandId)).Return([]error{errors.New("Something happened")})
 
 		mockLogger.On("Error", mock.Anything).Return()
 
