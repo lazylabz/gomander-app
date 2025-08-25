@@ -310,6 +310,55 @@ func TestGormCommandGroupRepository_DeleteEmpty(t *testing.T) {
 	})
 }
 
+func TestGormCommandGroupRepository_DeleteAll(t *testing.T) {
+	t.Run("Should delete all command groups and their associations for a project", func(t *testing.T) {
+		projectId := "project1"
+		otherProjectId := "project2"
+
+		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
+		cmd2 := testutils.NewCommand().WithName("Command 2").WithProjectId(projectId).Data()
+		cmd3 := testutils.NewCommand().WithName("Command 3").WithProjectId(otherProjectId).Data()
+
+		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1, cmd2).Data()
+		cmdGroup2 := testutils.NewCommandGroup().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd2).Data()
+		cmdGroupOther := testutils.NewCommandGroup().WithName("Other Group").WithProjectId(otherProjectId).WithPosition(0).WithCommands(cmd3).Data()
+
+		groupModel1, commandToCommandGroupModels1, commandModels := commandGroupDataToModel(cmdGroup1)
+		groupModel2, commandToCommandGroupModels2, _ := commandGroupDataToModel(cmdGroup2)
+		groupModelOther, commandToCommandGroupModelsOther, commandModelsOther := commandGroupDataToModel(cmdGroupOther)
+
+		helper := newTestHelper(
+			t,
+			append(commandModels, commandModelsOther...),
+			[]infrastructure.CommandGroupModel{groupModel1, groupModel2, groupModelOther},
+			slices.Concat(commandToCommandGroupModels1, commandToCommandGroupModels2, commandToCommandGroupModelsOther),
+		)
+
+		err := helper.repo.DeleteAll(projectId)
+		assert.Nil(t, err)
+
+		// Command groups from the specified project should be deleted
+		result1, _ := helper.repo.Get(cmdGroup1.Id)
+		result2, _ := helper.repo.Get(cmdGroup2.Id)
+		assert.Nil(t, result1)
+		assert.Nil(t, result2)
+
+		// Other group from a different project should remain
+		resultOther, _ := helper.repo.Get(cmdGroupOther.Id)
+		assert.NotNil(t, resultOther)
+
+		// All associations for the deleted groups should be removed
+		relations, err := gorm.G[infrastructure.CommandToCommandGroupModel](helper.gormDb).Where("command_group_id IN ?", []string{cmdGroup1.Id, cmdGroup2.Id}).Find(context.Background())
+		assert.Nil(t, err)
+		assert.Len(t, relations, 0)
+
+		// Associations for the other group should remain
+		relationsOther, err := gorm.G[infrastructure.CommandToCommandGroupModel](helper.gormDb).Where("command_group_id = ?", cmdGroupOther.Id).Find(context.Background())
+		assert.Nil(t, err)
+		assert.NotEmpty(t, relationsOther)
+	})
+}
+
 func arrange(
 	preloadedCommandModels []commandinfrastructure.CommandModel,
 	preloadedCommandGroupModels []infrastructure.CommandGroupModel,
