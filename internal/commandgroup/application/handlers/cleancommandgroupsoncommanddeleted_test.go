@@ -105,3 +105,10 @@ func TestDefaultCleanCommandGroupsOnCommandDeleted_InvalidEventType(t *testing.T
 	assert.NoError(t, err)
 	mockRepo.AssertExpectations(t)
 }
+
+func TestDefaultCleanCommandGroupsOnCommandDeleted_GetEvent(t *testing.T) {
+	handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(nil)
+	event := handler.GetEvent()
+	_, ok := event.(commanddomainevent.CommandDeletedEvent)
+	assert.True(t, ok)
+}
