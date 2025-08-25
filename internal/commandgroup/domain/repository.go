@@ -8,4 +8,5 @@ type Repository interface {
 	Delete(commandGroupId string) error
 	RemoveCommandFromCommandGroups(commandId string) error
 	DeleteEmpty() error
+	DeleteAll(projectId string) error
 }

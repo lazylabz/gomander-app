@@ -239,3 +239,8 @@ func (r GormCommandGroupRepository) DeleteEmpty() error {
 
 	return nil
 }
+
+func (r GormCommandGroupRepository) DeleteAll(projectId string) error {
+	//TODO implement me
+	panic("implement me")
+}

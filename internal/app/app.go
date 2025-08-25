@@ -36,6 +36,7 @@ type App struct {
 	eventBus eventbus.EventBus
 
 	cleanCommandGroupsOnCommandDeletedHandler handlers.CleanCommandGroupsOnCommandDeleted
+	cleanCommandGroupsOnProjectDeletedHandler handlers.CleanCommandGroupsOnProjectDeleted
 }
 
 type Dependencies struct {
@@ -54,6 +55,7 @@ type Dependencies struct {
 	EventBus eventbus.EventBus
 
 	CleanCommandGroupsOnCommandDeletedHandler handlers.CleanCommandGroupsOnCommandDeleted
+	CleanCommandGroupsOnProjectDeletedHandler handlers.CleanCommandGroupsOnProjectDeleted
 }
 
 func (a *App) LoadDependencies(d Dependencies) {
@@ -71,11 +73,13 @@ func (a *App) LoadDependencies(d Dependencies) {
 	a.eventBus = d.EventBus
 
 	a.cleanCommandGroupsOnCommandDeletedHandler = d.CleanCommandGroupsOnCommandDeletedHandler
+	a.cleanCommandGroupsOnProjectDeletedHandler = d.CleanCommandGroupsOnProjectDeletedHandler
 }
 
 func (a *App) RegisterHandlers() {
 	// Register event handlers
 	a.eventBus.RegisterHandler(a.cleanCommandGroupsOnCommandDeletedHandler)
+	a.eventBus.RegisterHandler(a.cleanCommandGroupsOnProjectDeletedHandler)
 }
 
 // NewApp creates a new App application struct
