@@ -12,8 +12,9 @@ import (
 
 	gormlogger "gorm.io/gorm/logger"
 
+	"gomander/internal/command/application/handlers"
 	commmandinfrastructure "gomander/internal/command/infrastructure"
-	"gomander/internal/commandgroup/application/handlers"
+	commandgrouphandlers "gomander/internal/commandgroup/application/handlers"
 	commandgroupinfrastructure "gomander/internal/commandgroup/infrastructure"
 	configinfrastructure "gomander/internal/config/infrastructure"
 	"gomander/internal/eventbus"
@@ -137,8 +138,9 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	projectRepo := projectinfrastructure.NewGormProjectRepository(gormDb, ctx)
 	configRepo := configinfrastructure.NewGormConfigRepository(gormDb, ctx)
 
-	cleanCommandGroupsOnCommandDeletedHandler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(commandGroupRepo)
-	cleanCommandGroupsOnProjectDeletedHandler := handlers.NewDefaultCleanCommandGroupsOnProjectDeleted(commandGroupRepo)
+	cleanCommandGroupsOnCommandDeletedHandler := commandgrouphandlers.NewDefaultCleanCommandGroupsOnCommandDeleted(commandGroupRepo)
+	cleanCommandGroupsOnProjectDeletedHandler := commandgrouphandlers.NewDefaultCleanCommandGroupsOnProjectDeleted(commandGroupRepo)
+	cleanCommandsOnProjectDeleted := handlers.NewDefaultCleanCommandOnProjectDeleted(commandRepo)
 
 	eventBus := eventbus.NewInMemoryEventBus()
 
@@ -159,5 +161,6 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 		EventBus: eventBus,
 		CleanCommandGroupsOnCommandDeletedHandler: cleanCommandGroupsOnCommandDeletedHandler,
 		CleanCommandGroupsOnProjectDeletedHandler: cleanCommandGroupsOnProjectDeletedHandler,
+		CleanCommandsOnProjectDeleted:             cleanCommandsOnProjectDeleted,
 	})
 }
