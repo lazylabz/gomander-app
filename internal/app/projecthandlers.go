@@ -1,7 +1,10 @@
 package app
 
 import (
+	"errors"
+
 	"gomander/internal/project/domain"
+	"gomander/internal/project/domain/event"
 )
 
 func (a *App) GetCurrentProject() (*domain.Project, error) {
@@ -72,21 +75,26 @@ func (a *App) CloseProject() error {
 	return nil
 }
 
-func (a *App) DeleteProject(projectConfigId string) error {
-	commands, err := a.commandRepository.GetAll(projectConfigId)
+func (a *App) DeleteProject(projectId string) error {
+	err := a.projectRepository.Delete(projectId)
 	if err != nil {
 		return err
 	}
 
-	for _, command := range commands {
-		err := a.RemoveCommand(command.Id)
-		if err != nil {
-			return err
-		}
-	}
+	domainEvent := event.NewProjectDeletedEvent(projectId)
 
-	err = a.projectRepository.Delete(projectConfigId)
-	if err != nil {
+	errs := a.eventBus.PublishSync(domainEvent)
+
+	if len(errs) > 0 {
+		combinedErrMsg := "Errors occurred while removing project:"
+
+		for _, pubErr := range errs {
+			combinedErrMsg += "\n- " + pubErr.Error()
+			a.logger.Error(pubErr.Error())
+		}
+
+		err = errors.New(combinedErrMsg)
+
 		return err
 	}
 

@@ -8,11 +8,9 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/app"
-	commanddomain "gomander/internal/command/domain"
-	commanddomainevent "gomander/internal/command/domain/event"
 	"gomander/internal/config/domain"
 	projectdomain "gomander/internal/project/domain"
-	"gomander/internal/testutils"
+	"gomander/internal/project/domain/event"
 )
 
 func TestApp_GetCurrentProject(t *testing.T) {
@@ -269,150 +267,64 @@ func TestApp_CloseProject(t *testing.T) {
 func TestApp_DeleteProject(t *testing.T) {
 	t.Run("Should delete a project and all its commands", func(t *testing.T) {
 		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 		mockEventBus := new(MockEventBus)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			ProjectRepository: mockProjectRepository,
-			CommandRepository: mockCommandRepository,
-			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 			EventBus:          mockEventBus,
 		})
 
 		projectId := "1"
-		mockProjectRepository.On("Get", projectId).Return(&projectdomain.Project{Id: projectId}, nil)
-		mockUserConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: projectId}, nil)
-		mockUserConfigRepository.On("Update", mock.Anything).Return(nil)
 
-		err := a.OpenProject(projectId)
-		assert.NoError(t, err)
-
-		cmd1 := commandDataToDomain(testutils.NewCommand().WithProjectId(projectId).Data())
-		cmd2 := commandDataToDomain(testutils.NewCommand().WithProjectId(projectId).Data())
-
-		commands := []commanddomain.Command{
-			cmd1,
-			cmd2,
-		}
-
-		mockCommandRepository.On("GetAll", projectId).Return(commands, nil)
-
-		mockEventBus.On("PublishSync", commanddomainevent.NewCommandDeletedEvent(cmd1.Id)).Return(make([]error, 0))
-		mockEventBus.On("PublishSync", commanddomainevent.NewCommandDeletedEvent(cmd2.Id)).Return(make([]error, 0))
-
-		mockCommandRepository.On("Delete", cmd1.Id).Return(nil)
-		mockCommandRepository.On("Delete", cmd2.Id).Return(nil)
-
+		mockEventBus.On("PublishSync", event.NewProjectDeletedEvent(projectId)).Return(make([]error, 0))
 		mockProjectRepository.On("Delete", projectId).Return(nil)
 
 		mockLogger.On("Info", mock.Anything).Return()
 
 		assert.NoError(t, a.DeleteProject(projectId))
 	})
-	t.Run("Should return an error if getting project commands fails", func(t *testing.T) {
-		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockUserConfigRepository)
-
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ProjectRepository: mockProjectRepository,
-			CommandRepository: mockCommandRepository,
-			ConfigRepository:  mockUserConfigRepository,
-		})
-
-		projectId := "1"
-		mockProjectRepository.On("Get", projectId).Return(&projectdomain.Project{Id: projectId}, nil)
-		mockUserConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: projectId}, nil)
-
-		mockCommandRepository.On("GetAll", projectId).Return(make([]commanddomain.Command, 0), errors.New("fail"))
-
-		err := a.DeleteProject(projectId)
-		assert.Error(t, err)
-	})
-	t.Run("Should return an error if deleting a command fails", func(t *testing.T) {
-		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockUserConfigRepository)
-		mockLogger := new(MockLogger)
-
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ProjectRepository: mockProjectRepository,
-			CommandRepository: mockCommandRepository,
-			ConfigRepository:  mockUserConfigRepository,
-			Logger:            mockLogger,
-		})
-
-		projectId := "1"
-
-		cmd1 := commandDataToDomain(testutils.NewCommand().WithProjectId(projectId).Data())
-		cmd2 := commandDataToDomain(testutils.NewCommand().WithProjectId(projectId).Data())
-		commands := []commanddomain.Command{
-			cmd1,
-			cmd2,
-		}
-
-		mockCommandRepository.On("GetAll", projectId).Return(commands, nil)
-		mockCommandRepository.On("Delete", cmd1.Id).Return(errors.New("fail"))
-
-		mockLogger.On("Error", mock.Anything).Return()
-
-		err := a.DeleteProject(projectId)
-		assert.Error(t, err)
-
-		mock.AssertExpectationsForObjects(t,
-			mockProjectRepository,
-			mockCommandRepository,
-			mockUserConfigRepository,
-			mockLogger,
-		)
-	})
 	t.Run("Should return an error if deleting the project fails", func(t *testing.T) {
 		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 		mockEventBus := new(MockEventBus)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			ProjectRepository: mockProjectRepository,
-			CommandRepository: mockCommandRepository,
-			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 			EventBus:          mockEventBus,
 		})
 
 		projectId := "1"
-		mockProjectRepository.On("Get", projectId).Return(&projectdomain.Project{Id: projectId}, nil)
-		mockUserConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: projectId}, nil)
-		mockUserConfigRepository.On("Update", mock.Anything).Return(nil)
 
-		err := a.OpenProject(projectId)
-		assert.NoError(t, err)
-
-		cmd1 := commandDataToDomain(testutils.NewCommand().WithProjectId(projectId).Data())
-		cmd2 := commandDataToDomain(testutils.NewCommand().WithProjectId(projectId).Data())
-		commands := []commanddomain.Command{
-			cmd1,
-			cmd2,
-		}
-
-		mockCommandRepository.On("GetAll", projectId).Return(commands, nil)
-		mockCommandRepository.On("Delete", cmd1.Id).Return(nil)
-		mockCommandRepository.On("Delete", cmd2.Id).Return(nil)
-
-		mockEventBus.On("PublishSync", commanddomainevent.NewCommandDeletedEvent(cmd1.Id)).Return(make([]error, 0))
-		mockEventBus.On("PublishSync", commanddomainevent.NewCommandDeletedEvent(cmd2.Id)).Return(make([]error, 0))
-
+		mockEventBus.On("PublishSync", event.NewProjectDeletedEvent(projectId)).Return(make([]error, 0))
 		mockProjectRepository.On("Delete", projectId).Return(errors.New("some error occurred"))
 
 		mockLogger.On("Info", mock.Anything).Return()
+
+		assert.Error(t, a.DeleteProject(projectId))
+	})
+	t.Run("Should return an error if an async event handler fails", func(t *testing.T) {
+		mockProjectRepository := new(MockProjectRepository)
+		mockLogger := new(MockLogger)
+		mockEventBus := new(MockEventBus)
+
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			ProjectRepository: mockProjectRepository,
+			Logger:            mockLogger,
+			EventBus:          mockEventBus,
+		})
+
+		projectId := "1"
+
+		mockProjectRepository.On("Delete", projectId).Return(nil)
+		mockEventBus.On("PublishSync", event.NewProjectDeletedEvent(projectId)).Return([]error{errors.New("handler error")})
+
+		mockLogger.On("Error", mock.Anything).Return()
 
 		assert.Error(t, a.DeleteProject(projectId))
 	})
