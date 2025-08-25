@@ -228,7 +228,7 @@ func (r GormCommandGroupRepository) RemoveCommandFromCommandGroups(commandId str
 	return nil
 }
 
-func (r GormCommandGroupRepository) DeleteEmptyGroups() error {
+func (r GormCommandGroupRepository) DeleteEmpty() error {
 	_, err := gorm.G[CommandGroupModel](r.db).
 		Where("id NOT IN (SELECT DISTINCT command_group_id FROM command_group_command)").
 		Delete(r.ctx)

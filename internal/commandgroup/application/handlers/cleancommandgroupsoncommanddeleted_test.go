@@ -46,7 +46,7 @@ func (m *MockCommandGroupRepository) RemoveCommandFromCommandGroups(commandId st
 	return args.Error(0)
 }
 
-func (m *MockCommandGroupRepository) DeleteEmptyGroups() error {
+func (m *MockCommandGroupRepository) DeleteEmpty() error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -59,7 +59,7 @@ func TestDefaultCleanCommandGroupsOnCommandDeleted_Success(t *testing.T) {
 	event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
 
 	mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(nil).Once()
-	mockRepo.On("DeleteEmptyGroups").Return(nil).Once()
+	mockRepo.On("DeleteEmpty").Return(nil).Once()
 
 	err := handler.Execute(event)
 	assert.NoError(t, err)
@@ -79,14 +79,14 @@ func TestDefaultCleanCommandGroupsOnCommandDeleted_RemoveCommandFails(t *testing
 	mockRepo.AssertExpectations(t)
 }
 
-func TestDefaultCleanCommandGroupsOnCommandDeleted_DeleteEmptyGroupsFails(t *testing.T) {
+func TestDefaultCleanCommandGroupsOnCommandDeleted_DeleteEmptyFails(t *testing.T) {
 	mockRepo := new(MockCommandGroupRepository)
 	handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(mockRepo)
 	event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
 
 	mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(nil).Once()
 	expectedErr := errors.New("delete empty error")
-	mockRepo.On("DeleteEmptyGroups").Return(expectedErr).Once()
+	mockRepo.On("DeleteEmpty").Return(expectedErr).Once()
 
 	err := handler.Execute(event)
 	assert.ErrorIs(t, err, expectedErr)

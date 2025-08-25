@@ -36,7 +36,7 @@ func (h *DefaultCleanCommandGroupsOnCommandDeleted) Execute(e eventbus.Event) er
 		return err
 	}
 
-	err = h.commandGroupRepository.DeleteEmptyGroups()
+	err = h.commandGroupRepository.DeleteEmpty()
 	if err != nil {
 		return err
 	}

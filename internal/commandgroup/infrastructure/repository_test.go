@@ -281,7 +281,7 @@ func TestGormCommandGroupRepository_RemoveCommandFromCommandGroups(t *testing.T)
 	})
 }
 
-func TestGormCommandGroupRepository_DeleteEmptyGroups(t *testing.T) {
+func TestGormCommandGroupRepository_DeleteEmpty(t *testing.T) {
 	t.Run("Should delete only empty command groups", func(t *testing.T) {
 		projectId := "project1"
 		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
@@ -300,7 +300,7 @@ func TestGormCommandGroupRepository_DeleteEmptyGroups(t *testing.T) {
 			commandToCommandGroupModels1,
 		)
 
-		err := helper.repo.DeleteEmptyGroups()
+		err := helper.repo.DeleteEmpty()
 		assert.Nil(t, err)
 
 		group1, _ := helper.repo.Get(cmdGroup1.Id)
