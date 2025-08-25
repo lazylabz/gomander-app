@@ -51,59 +51,58 @@ func (m *MockCommandGroupRepository) DeleteEmpty() error {
 	return args.Error(0)
 }
 
+type FakeEvent struct{}
+
+func (FakeEvent) GetName() string { return "fake" }
+
 var cmdId = "cmd-123"
 
-func TestDefaultCleanCommandGroupsOnCommandDeleted_Success(t *testing.T) {
-	mockRepo := new(MockCommandGroupRepository)
-	handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(mockRepo)
-	event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
+func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
+	t.Run("Should remove command from command groups and delete empty groups", func(t *testing.T) {
+		mockRepo := new(MockCommandGroupRepository)
+		handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(mockRepo)
+		event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
 
-	mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(nil).Once()
-	mockRepo.On("DeleteEmpty").Return(nil).Once()
+		mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(nil).Once()
+		mockRepo.On("DeleteEmpty").Return(nil).Once()
 
-	err := handler.Execute(event)
-	assert.NoError(t, err)
-	mockRepo.AssertExpectations(t)
-}
+		err := handler.Execute(event)
+		assert.NoError(t, err)
+		mockRepo.AssertExpectations(t)
+	})
+	t.Run("Should return error if failing to remove command from command groups", func(t *testing.T) {
+		mockRepo := new(MockCommandGroupRepository)
+		handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(mockRepo)
+		event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
 
-func TestDefaultCleanCommandGroupsOnCommandDeleted_RemoveCommandFails(t *testing.T) {
-	mockRepo := new(MockCommandGroupRepository)
-	handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(mockRepo)
-	event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
+		expectedErr := errors.New("remove error")
+		mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(expectedErr).Once()
 
-	expectedErr := errors.New("remove error")
-	mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(expectedErr).Once()
+		err := handler.Execute(event)
+		assert.ErrorIs(t, err, expectedErr)
+		mockRepo.AssertExpectations(t)
+	})
+	t.Run("Should return error if failing to remove empty groups", func(t *testing.T) {
+		mockRepo := new(MockCommandGroupRepository)
+		handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(mockRepo)
+		event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
 
-	err := handler.Execute(event)
-	assert.ErrorIs(t, err, expectedErr)
-	mockRepo.AssertExpectations(t)
-}
+		mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(nil).Once()
+		expectedErr := errors.New("delete empty error")
+		mockRepo.On("DeleteEmpty").Return(expectedErr).Once()
 
-func TestDefaultCleanCommandGroupsOnCommandDeleted_DeleteEmptyFails(t *testing.T) {
-	mockRepo := new(MockCommandGroupRepository)
-	handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(mockRepo)
-	event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
+		err := handler.Execute(event)
+		assert.ErrorIs(t, err, expectedErr)
+		mockRepo.AssertExpectations(t)
+	})
+	t.Run("Should do nothing if command is the wrong type", func(t *testing.T) {
+		mockRepo := new(MockCommandGroupRepository)
+		handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(mockRepo)
 
-	mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(nil).Once()
-	expectedErr := errors.New("delete empty error")
-	mockRepo.On("DeleteEmpty").Return(expectedErr).Once()
-
-	err := handler.Execute(event)
-	assert.ErrorIs(t, err, expectedErr)
-	mockRepo.AssertExpectations(t)
-}
-
-type fakeEvent struct{}
-
-func (fakeEvent) GetName() string { return "fake" }
-
-func TestDefaultCleanCommandGroupsOnCommandDeleted_InvalidEventType(t *testing.T) {
-	mockRepo := new(MockCommandGroupRepository)
-	handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(mockRepo)
-
-	err := handler.Execute(fakeEvent{})
-	assert.NoError(t, err)
-	mockRepo.AssertExpectations(t)
+		err := handler.Execute(FakeEvent{})
+		assert.NoError(t, err)
+		mockRepo.AssertExpectations(t)
+	})
 }
 
 func TestDefaultCleanCommandGroupsOnCommandDeleted_GetEvent(t *testing.T) {
