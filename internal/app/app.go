@@ -71,8 +71,6 @@ func (a *App) LoadDependencies(d Dependencies) {
 	a.eventBus = d.EventBus
 
 	a.cleanCommandGroupsOnCommandDeletedHandler = d.CleanCommandGroupsOnCommandDeletedHandler
-
-	a.ctx = context.Background()
 }
 
 func (a *App) RegisterHandlers() {
