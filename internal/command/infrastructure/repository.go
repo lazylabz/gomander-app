@@ -99,3 +99,11 @@ func (r GormCommandRepository) Delete(commandId string) error {
 
 	return nil
 }
+
+func (r GormCommandRepository) DeleteAll(projectId string) error {
+	_, err := gorm.G[CommandModel](r.db).Where("project_id = ?", projectId).Delete(r.ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}

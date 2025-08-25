@@ -2,8 +2,9 @@ package infrastructure
 
 import (
 	"context"
-	"github.com/glebarez/sqlite"
 	"testing"
+
+	"github.com/glebarez/sqlite"
 
 	"gomander/internal/testutils"
 
@@ -228,6 +229,38 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 
 		assert.Equal(t, cmd1.Position, cmd1AfterDelete.Position, "Expected cmd1 position to remain unchanged")
 		assert.Equal(t, cmd3.Position-1, cmd3AfterDelete.Position, "Expected cmd3 position to be adjusted after deletion of cmd2")
+	})
+}
+
+func TestGormCommandRepository_DeleteAll(t *testing.T) {
+	t.Run("Should delete all commands for a project and not affect others", func(t *testing.T) {
+		projectId := "proj1"
+		otherProjectId := "proj2"
+
+		cmd1 := testutils.NewCommand().WithProjectId(projectId).WithPosition(0).Data()
+		cmd2 := testutils.NewCommand().WithProjectId(projectId).WithPosition(1).Data()
+		cmdOther := testutils.NewCommand().WithProjectId(otherProjectId).WithPosition(0).Data()
+
+		preloadedCommandModels := []*CommandModel{
+			commandDataToModel(cmd1),
+			commandDataToModel(cmd2),
+			commandDataToModel(cmdOther),
+		}
+
+		h := newTestHelper(t, preloadedCommandModels)
+
+		err := h.repo.DeleteAll(projectId)
+		assert.NoError(t, err)
+
+		// Project commands should be deleted
+		cmd1After, _ := h.repo.Get(cmd1.Id)
+		cmd2After, _ := h.repo.Get(cmd2.Id)
+		assert.Nil(t, cmd1After)
+		assert.Nil(t, cmd2After)
+
+		// Other project command should remain
+		cmdOtherAfter, _ := h.repo.Get(cmdOther.Id)
+		assert.NotNil(t, cmdOtherAfter)
 	})
 }
 
