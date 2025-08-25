@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"sort"
 
 	commanddomain "gomander/internal/command/domain"
@@ -39,6 +40,55 @@ func (a *App) UpdateCommandGroup(commandGroup *domain.CommandGroup) error {
 
 func (a *App) DeleteCommandGroup(commandGroupId string) error {
 	if err := a.commandGroupRepository.Delete(commandGroupId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *App) AddCommandToCommandGroup(commandId, commandGroupId string) error {
+	commandGroup, err := a.commandGroupRepository.Get(commandGroupId)
+	if err != nil {
+		return err
+	}
+
+	for _, cmd := range commandGroup.Commands {
+		if cmd.Id == commandId {
+			return nil
+		}
+	}
+
+	command, err := a.commandRepository.Get(commandId)
+	if err != nil {
+		return err
+	}
+
+	commandGroup.Commands = append(commandGroup.Commands, *command)
+
+	if err := a.commandGroupRepository.Update(commandGroup); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *App) RemoveCommandFromCommandGroup(commandId, commandGroupId string) error {
+	commandGroup, err := a.commandGroupRepository.Get(commandGroupId)
+	if err != nil {
+		return err
+	}
+	if len(commandGroup.Commands) == 1 {
+		return errors.New("cannot remove the last command from the group; delete the group instead")
+	}
+
+	for i, cmd := range commandGroup.Commands {
+		if cmd.Id == commandId {
+			commandGroup.Commands = append(commandGroup.Commands[:i], commandGroup.Commands[i+1:]...)
+			break
+		}
+	}
+
+	if err := a.commandGroupRepository.Update(commandGroup); err != nil {
 		return err
 	}
 

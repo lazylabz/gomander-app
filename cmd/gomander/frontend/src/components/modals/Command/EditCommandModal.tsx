@@ -63,7 +63,7 @@ export const EditCommandModal = ({
 
       setOpen(false);
     } catch (e: unknown) {
-      toast.error("Failed to update command: " + parseError(e));
+      toast.error(parseError(e, "Failed to update command"));
     } finally {
       fetchCommands();
       fetchCommandGroups();

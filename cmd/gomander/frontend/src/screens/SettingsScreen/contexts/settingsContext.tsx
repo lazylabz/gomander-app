@@ -98,7 +98,7 @@ export const SettingsContextProvider = ({
         });
         toast.success("User settings saved successfully");
       } catch (e) {
-        throw new Error("Failed to save user settings: " + parseError(e));
+        throw new Error(parseError(e, "Failed to save user settings"));
       }
       await fetchUserConfig();
     }
@@ -113,7 +113,7 @@ export const SettingsContextProvider = ({
         });
         toast.success("Project settings saved successfully");
       } catch (e) {
-        throw new Error("Failed to save project settings: " + parseError(e));
+        throw new Error(parseError(e, "Failed to save project settings"));
       }
 
       await fetchProject();

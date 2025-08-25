@@ -63,7 +63,7 @@ export const CreateCommandModal = ({
       setOpen(false);
       form.reset();
     } catch (e) {
-      toast.error("Failed to create command: " + parseError(e));
+      toast.error(parseError(e, "Failed to create command"));
     } finally {
       fetchCommands();
     }

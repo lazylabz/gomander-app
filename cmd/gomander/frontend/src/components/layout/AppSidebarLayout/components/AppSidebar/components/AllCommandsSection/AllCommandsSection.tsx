@@ -50,7 +50,7 @@ export const AllCommandsSection = () => {
     try {
       await reorderCommands(newOrder);
     } catch (e) {
-      toast.error("Failed to reorder commands: " + parseError(e));
+      toast.error(parseError(e, "Failed to reorder commands"));
     } finally {
       fetchCommands();
     }
