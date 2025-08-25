@@ -88,9 +88,9 @@ func (m *MockCommandGroupRepository) RemoveCommandFromCommandGroups(commandId st
 	return args.Error(0)
 }
 
-func (m *MockCommandGroupRepository) GetEmptyCommandGroups() ([]commandgroupdomain.CommandGroup, error) {
+func (m *MockCommandGroupRepository) DeleteEmptyGroups() error {
 	args := m.Called()
-	return args.Get(0).([]commandgroupdomain.CommandGroup), args.Error(1)
+	return args.Error(0)
 }
 
 type MockProjectRepository struct {
