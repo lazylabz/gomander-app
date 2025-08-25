@@ -6,4 +6,5 @@ type Repository interface {
 	Create(command *Command) error
 	Update(command *Command) error
 	Delete(commandId string) error
+	DeleteAll(projectId string) error
 }
