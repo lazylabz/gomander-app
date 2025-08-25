@@ -93,6 +93,11 @@ func (m *MockCommandGroupRepository) DeleteEmpty() error {
 	return args.Error(0)
 }
 
+func (m *MockCommandGroupRepository) DeleteAll(projectId string) error {
+	args := m.Called(projectId)
+	return args.Error(0)
+}
+
 type MockProjectRepository struct {
 	mock.Mock
 }
