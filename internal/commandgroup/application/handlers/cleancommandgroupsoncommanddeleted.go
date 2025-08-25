@@ -16,7 +16,7 @@ type DefaultCleanCommandGroupsOnCommandDeleted struct {
 }
 
 func (h *DefaultCleanCommandGroupsOnCommandDeleted) GetEvent() eventbus.Event {
-	return commanddomainevent.EmptyCommandDeletedEvent()
+	return commanddomainevent.CommandDeletedEvent{}
 }
 
 func NewDefaultCleanCommandGroupsOnCommandDeleted(commandGroupRepository commandgroupdomain.Repository) *DefaultCleanCommandGroupsOnCommandDeleted {

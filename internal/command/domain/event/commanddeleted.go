@@ -13,7 +13,3 @@ func NewCommandDeletedEvent(commandId string) CommandDeletedEvent {
 		CommandId: commandId,
 	}
 }
-
-func EmptyCommandDeletedEvent() CommandDeletedEvent {
-	return CommandDeletedEvent{}
-}
