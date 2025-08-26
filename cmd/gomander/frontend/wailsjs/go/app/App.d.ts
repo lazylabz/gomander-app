@@ -44,9 +44,9 @@ export function LoadDependencies(arg1:app.Dependencies):Promise<void>;
 
 export function OpenProject(arg1:string):Promise<void>;
 
-export function RemoveCommand(arg1:string):Promise<void>;
+export function RegisterHandlers():Promise<void>;
 
-export function RemoveCommandFromCommandGroups(arg1:string):Promise<void>;
+export function RemoveCommand(arg1:string):Promise<void>;
 
 export function ReorderCommandGroups(arg1:Array<string>):Promise<void>;
 

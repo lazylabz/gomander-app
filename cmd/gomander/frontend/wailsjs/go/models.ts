@@ -20,6 +20,8 @@ export namespace app {
 	    ConfigRepository: any;
 	    FsFacade: any;
 	    RuntimeFacade: any;
+	    EventBus: any;
+	    CleanCommandGroupsOnCommandDeletedHandler: any;
 	}
 	export interface ProjectExportJSONv1 {
 	    version: number;

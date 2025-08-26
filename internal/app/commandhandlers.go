@@ -1,9 +1,11 @@
 package app
 
 import (
+	"errors"
 	"sort"
 
 	"gomander/internal/command/domain"
+	domainevent "gomander/internal/command/domain/event"
 	domain2 "gomander/internal/config/domain"
 	"gomander/internal/event"
 	"gomander/internal/helpers/array"
@@ -36,15 +38,26 @@ func (a *App) AddCommand(newCommand domain.Command) error {
 }
 
 func (a *App) RemoveCommand(id string) error {
-	err := a.RemoveCommandFromCommandGroups(id)
+	err := a.commandRepository.Delete(id)
 	if err != nil {
 		a.logger.Error(err.Error())
 		return err
 	}
 
-	err = a.commandRepository.Delete(id)
-	if err != nil {
-		a.logger.Error(err.Error())
+	domainEvent := domainevent.NewCommandDeletedEvent(id)
+
+	errs := a.eventBus.PublishSync(domainEvent)
+
+	if len(errs) > 0 {
+		combinedErrMsg := "Errors occurred while removing command:"
+
+		for _, pubErr := range errs {
+			combinedErrMsg += "\n- " + pubErr.Error()
+			a.logger.Error(pubErr.Error())
+		}
+
+		err = errors.New(combinedErrMsg)
+
 		return err
 	}
 
