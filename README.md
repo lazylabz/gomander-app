@@ -1,41 +1,46 @@
-# Gomander - A simple GUI to launch and monitor commands
+# Gomander
 
 [![codecov](https://codecov.io/gh/lazylabz/gomander-app/branch/main/graph/badge.svg?token=D4LYOARMC5)](https://codecov.io/gh/lazylabz/gomander-app)
 
-## About
+A simple GUI to launch, monitor and organize your commands. Because nobody should have to juggle 12+ terminal windows just to run their project.
 
-Gomander is a simple GUI that allows you to easily launch, monitor, and organize commands. It is designed for users who need to launch and monitor multiple commands at the same time.
+We started building this for ourselves when we got tired of the daily terminal chaos, and figured other developers might find it useful too.
 
 ## Main Features
 
-- Launch custom commands from a user-friendly interface.
-- Organize commands into groups for group management.
-- Real-time display of command output (stdout/stderr).
-- Error handling and logging.
-- Configure system paths and working directories.
-- Cross-platform support (Windows, macOS, Linux).
-- Built with [Wails](https://wails.io) for a lightweight and native experience.
+- Keep all your commands organized by project so you never lose track of what belongs where
+- Bundle related commands into groups and run them all at once
+- See what's running, what's not, and check the logs without switching windows
+- Configure working directories however you want - use relative or absolute paths, whatever fits your workflow
+- Export and import project configurations to get your whole team on the same page
+- Works on macOS, Linux and Windows
 
 ---
 
 ## Contributing
 
-Contributions are welcome! You can open issues to report bugs or suggest improvements, and submit pull requests to contribute code.
+We'd love your help making Gomander better! Whether you've found a bug, have an idea for a new feature, or want to contribute code - all contributions are welcome.
+- **Found a bug?** Open an issue and let us know what happened
+- **Have a feature idea?** We're always curious to hear what would make your workflow smoother
+- **Want to contribute code?** Pull requests are always appreciated
+
+Don't hesitate to jump in, even if it's your first contribution to an open source project.
 
 ## License
 
-This project is licensed under the GPL-3 License. See the LICENSE file for details.
+This project is licensed under GPL-3. For more details, check out the [LICENSE](/LICENSE) file.
 
----
 ## Development
 
 ### Environment Setup
 
-Follow the [Wails documentation](https://wails.io/docs/) to set up your development environment. No extra steps are required beyond the standard Wails setup.
+To get started with development, you'll need to follow the [Wails installation guide](https://wails.io/docs/gettingstarted/installation).
 
-### Running in Development Mode
+That's it, no extra setup needed beyond what Wails requires.
 
-To run the application in development mode, use the following command:
+### Running Dev Mode
+
+Once you've got Wails set up, just run:
 
 ```bash
 wails dev
@@ -43,10 +48,16 @@ wails dev
 
 ### Building
 
-Pre-requisites:
+Before building, you'll need a couple of prerequisites:
 - [create-dmg](https://formulae.brew.sh/formula/create-dmg)
 - [makensis](https://formulae.brew.sh/formula/makensis)
 
-#### From Mac OS system
+To build for all platforms:
+```bash
+make all
+```
 
-Execute `make all` to build the application for all platforms or `make help` to see available options.
+Want to see more specific build options? Check them out with:
+```bash
+make help
+```
