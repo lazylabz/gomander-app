@@ -81,7 +81,7 @@ func main() {
 }
 
 func configDB(ctx context.Context) *gorm.DB {
-	gormDb, err := gorm.Open(sqlite.Open(getDbFile()), &gorm.Config{
+	gormDb, err := gorm.Open(sqlite.Open(getDbFile()+"?cache=shared"), &gorm.Config{
 		// Uncomment when debugging
 		// Logger: gormlogger.Default.LogMode(gormlogger.Info),
 		Logger: gormlogger.Default.LogMode(gormlogger.Error),
@@ -91,9 +91,16 @@ func configDB(ctx context.Context) *gorm.DB {
 	}
 
 	db, err := gormDb.DB()
+
 	if err != nil {
 		panic(err)
 	}
+
+	if db == nil {
+		panic("db is nil")
+	}
+
+	db.SetMaxOpenConns(1)
 
 	// Execute migrations
 	err = goose.SetDialect("sqlite3")
