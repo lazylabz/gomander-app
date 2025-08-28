@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sort"
 
+	commandDomain "gomander/internal/command/domain"
 	"gomander/internal/commandgroup/domain"
 	"gomander/internal/helpers/array"
 )
@@ -80,12 +81,9 @@ func (a *App) RemoveCommandFromCommandGroup(commandId, commandGroupId string) er
 		return errors.New("cannot remove the last command from the group; delete the group instead")
 	}
 
-	for i, cmd := range commandGroup.Commands {
-		if cmd.Id == commandId {
-			commandGroup.Commands = append(commandGroup.Commands[:i], commandGroup.Commands[i+1:]...)
-			break
-		}
-	}
+	commandGroup.Commands = array.Filter(commandGroup.Commands, func(cmd commandDomain.Command) bool {
+		return cmd.Id != commandId
+	})
 
 	if err := a.commandGroupRepository.Update(commandGroup); err != nil {
 		return err
