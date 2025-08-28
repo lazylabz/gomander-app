@@ -16,38 +16,6 @@ import (
 	"gomander/internal/testutils"
 )
 
-type MockCommandRepository struct {
-	mock.Mock
-}
-
-func (m *MockCommandRepository) Get(commandId string) (*commanddomain.Command, error) {
-	args := m.Called(commandId)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*commanddomain.Command), args.Error(1)
-}
-
-func (m *MockCommandRepository) GetAll(projectId string) ([]commanddomain.Command, error) {
-	args := m.Called(projectId)
-	return args.Get(0).([]commanddomain.Command), args.Error(1)
-}
-
-func (m *MockCommandRepository) Create(command *commanddomain.Command) error {
-	args := m.Called(command)
-	return args.Error(0)
-}
-
-func (m *MockCommandRepository) Update(command *commanddomain.Command) error {
-	args := m.Called(command)
-	return args.Error(0)
-}
-
-func (m *MockCommandRepository) Delete(commandId string) error {
-	args := m.Called(commandId)
-	return args.Error(0)
-}
-
 func TestApp_GetCommands(t *testing.T) {
 	t.Run("Should return the commands provided by the repository", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)

@@ -93,6 +93,11 @@ func (m *MockCommandGroupRepository) DeleteEmpty() error {
 	return args.Error(0)
 }
 
+func (m *MockCommandGroupRepository) DeleteAll(projectId string) error {
+	args := m.Called(projectId)
+	return args.Error(0)
+}
+
 type MockProjectRepository struct {
 	mock.Mock
 }
@@ -122,6 +127,43 @@ func (m *MockProjectRepository) Update(project projectdomain.Project) error {
 
 func (m *MockProjectRepository) Delete(id string) error {
 	args := m.Called(id)
+	return args.Error(0)
+}
+
+type MockCommandRepository struct {
+	mock.Mock
+}
+
+func (m *MockCommandRepository) Get(commandId string) (*commanddomain.Command, error) {
+	args := m.Called(commandId)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*commanddomain.Command), args.Error(1)
+}
+
+func (m *MockCommandRepository) GetAll(projectId string) ([]commanddomain.Command, error) {
+	args := m.Called(projectId)
+	return args.Get(0).([]commanddomain.Command), args.Error(1)
+}
+
+func (m *MockCommandRepository) Create(command *commanddomain.Command) error {
+	args := m.Called(command)
+	return args.Error(0)
+}
+
+func (m *MockCommandRepository) Update(command *commanddomain.Command) error {
+	args := m.Called(command)
+	return args.Error(0)
+}
+
+func (m *MockCommandRepository) Delete(commandId string) error {
+	args := m.Called(commandId)
+	return args.Error(0)
+}
+
+func (m *MockCommandRepository) DeleteAll(projectId string) error {
+	args := m.Called(projectId)
 	return args.Error(0)
 }
 

@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"gomander/internal/commandgroup/domain"
+	"gomander/internal/helpers/array"
 )
 
 type GormCommandGroupRepository struct {
@@ -232,6 +233,37 @@ func (r GormCommandGroupRepository) DeleteEmpty() error {
 	_, err := gorm.G[CommandGroupModel](r.db).
 		Where("id NOT IN (SELECT DISTINCT command_group_id FROM command_group_command)").
 		Delete(r.ctx)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r GormCommandGroupRepository) DeleteAll(projectId string) error {
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		commandGroups, err := gorm.G[CommandGroupModel](tx).Where("project_id = ?", projectId).Find(r.ctx)
+		if err != nil {
+			return err
+		}
+
+		commandGroupIds := array.Map(commandGroups, func(commandGroup CommandGroupModel) string {
+			return commandGroup.Id
+		})
+
+		_, err = gorm.G[CommandGroupModel](tx).Where("project_id = ?", projectId).Delete(r.ctx)
+		if err != nil {
+			return err
+		}
+
+		_, err = gorm.G[CommandToCommandGroupModel](tx).Where("command_group_id IN ?", commandGroupIds).Delete(r.ctx)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 
 	if err != nil {
 		return err

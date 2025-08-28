@@ -22,6 +22,8 @@ export namespace app {
 	    RuntimeFacade: any;
 	    EventBus: any;
 	    CleanCommandGroupsOnCommandDeletedHandler: any;
+	    CleanCommandGroupsOnProjectDeletedHandler: any;
+	    CleanCommandsOnProjectDeleted: any;
 	}
 	export interface ProjectExportJSONv1 {
 	    version: number;

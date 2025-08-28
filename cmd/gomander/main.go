@@ -12,8 +12,9 @@ import (
 
 	gormlogger "gorm.io/gorm/logger"
 
+	"gomander/internal/command/application/handlers"
 	commmandinfrastructure "gomander/internal/command/infrastructure"
-	"gomander/internal/commandgroup/application/handlers"
+	commandgrouphandlers "gomander/internal/commandgroup/application/handlers"
 	commandgroupinfrastructure "gomander/internal/commandgroup/infrastructure"
 	configinfrastructure "gomander/internal/config/infrastructure"
 	"gomander/internal/eventbus"
@@ -80,7 +81,7 @@ func main() {
 }
 
 func configDB(ctx context.Context) *gorm.DB {
-	gormDb, err := gorm.Open(sqlite.Open(getDbFile()), &gorm.Config{
+	gormDb, err := gorm.Open(sqlite.Open(getDbFile()+"?cache=shared"), &gorm.Config{
 		// Uncomment when debugging
 		// Logger: gormlogger.Default.LogMode(gormlogger.Info),
 		Logger: gormlogger.Default.LogMode(gormlogger.Error),
@@ -90,9 +91,16 @@ func configDB(ctx context.Context) *gorm.DB {
 	}
 
 	db, err := gormDb.DB()
+
 	if err != nil {
 		panic(err)
 	}
+
+	if db == nil {
+		panic("db is nil")
+	}
+
+	db.SetMaxOpenConns(1)
 
 	// Execute migrations
 	err = goose.SetDialect("sqlite3")
@@ -137,7 +145,9 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	projectRepo := projectinfrastructure.NewGormProjectRepository(gormDb, ctx)
 	configRepo := configinfrastructure.NewGormConfigRepository(gormDb, ctx)
 
-	cleanCommandGroupsOnCommandDeletedHandler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(commandGroupRepo)
+	cleanCommandGroupsOnCommandDeletedHandler := commandgrouphandlers.NewDefaultCleanCommandGroupsOnCommandDeleted(commandGroupRepo)
+	cleanCommandGroupsOnProjectDeletedHandler := commandgrouphandlers.NewDefaultCleanCommandGroupsOnProjectDeleted(commandGroupRepo)
+	cleanCommandsOnProjectDeleted := handlers.NewDefaultCleanCommandOnProjectDeleted(commandRepo)
 
 	eventBus := eventbus.NewInMemoryEventBus()
 
@@ -157,5 +167,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 
 		EventBus: eventBus,
 		CleanCommandGroupsOnCommandDeletedHandler: cleanCommandGroupsOnCommandDeletedHandler,
+		CleanCommandGroupsOnProjectDeletedHandler: cleanCommandGroupsOnProjectDeletedHandler,
+		CleanCommandsOnProjectDeleted:             cleanCommandsOnProjectDeleted,
 	})
 }
