@@ -148,6 +148,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	cleanCommandGroupsOnCommandDeletedHandler := commandgrouphandlers.NewDefaultCleanCommandGroupsOnCommandDeleted(commandGroupRepo)
 	cleanCommandGroupsOnProjectDeletedHandler := commandgrouphandlers.NewDefaultCleanCommandGroupsOnProjectDeleted(commandGroupRepo)
 	cleanCommandsOnProjectDeleted := handlers.NewDefaultCleanCommandOnProjectDeleted(commandRepo)
+	addCommandToGroupOnCommandDuplicated := commandgrouphandlers.NewDefaultAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo)
 
 	eventBus := eventbus.NewInMemoryEventBus()
 
@@ -169,5 +170,6 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 		CleanCommandGroupsOnCommandDeletedHandler: cleanCommandGroupsOnCommandDeletedHandler,
 		CleanCommandGroupsOnProjectDeletedHandler: cleanCommandGroupsOnProjectDeletedHandler,
 		CleanCommandsOnProjectDeleted:             cleanCommandsOnProjectDeleted,
+		AddCommandToGroupOnCommandDuplicated:      addCommandToGroupOnCommandDuplicated,
 	})
 }

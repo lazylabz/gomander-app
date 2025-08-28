@@ -67,12 +67,21 @@ func (a *App) DuplicateCommand(commandId, targetGroupId string) error {
 		return err
 	}
 
-	if targetGroupId != "" {
-		err = a.AddCommandToCommandGroup(duplicatedCommand.Id, targetGroupId)
-		if err != nil {
-			a.logger.Error(err.Error())
-			return err
+	domainEvent := domainevent.NewCommandDuplicatedEvent(duplicatedCommand.Id, targetGroupId)
+
+	errs := a.eventBus.PublishSync(domainEvent)
+
+	if len(errs) > 0 {
+		combinedErrMsg := "Errors occurred while duplicating command:"
+
+		for _, pubErr := range errs {
+			combinedErrMsg += "\n- " + pubErr.Error()
+			a.logger.Error(pubErr.Error())
 		}
+
+		err = errors.New(combinedErrMsg)
+
+		return err
 	}
 
 	a.logger.Info("Command duplicated: " + commandId + " to " + duplicatedCommand.Id)

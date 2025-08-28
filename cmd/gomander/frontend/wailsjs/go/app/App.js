@@ -6,10 +6,6 @@ export function AddCommand(arg1) {
   return window['go']['app']['App']['AddCommand'](arg1);
 }
 
-export function AddCommandToCommandGroup(arg1, arg2) {
-  return window['go']['app']['App']['AddCommandToCommandGroup'](arg1, arg2);
-}
-
 export function CloseProject() {
   return window['go']['app']['App']['CloseProject']();
 }
