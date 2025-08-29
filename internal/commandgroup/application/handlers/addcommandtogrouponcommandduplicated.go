@@ -45,6 +45,7 @@ func (h *DefaultAddCommandToGroupOnCommandDuplicated) Execute(e eventbus.Event) 
 		return err
 	}
 
+	// Check if the command is already in the group
 	for _, cmd := range commandGroup.Commands {
 		if cmd.Id == event.CommandId {
 			return nil
