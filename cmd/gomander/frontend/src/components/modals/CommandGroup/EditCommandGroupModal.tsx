@@ -59,7 +59,7 @@ export const EditCommandGroupModal = ({
       form.reset();
       toast.success("Command group updated successfully");
     } catch (e) {
-      toast.error("Failed to edit the command group: " + parseError(e));
+      toast.error(parseError(e, "Failed to edit the command group"));
     } finally {
       fetchCommandGroups();
     }

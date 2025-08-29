@@ -24,6 +24,7 @@ export namespace app {
 	    CleanCommandGroupsOnCommandDeletedHandler: any;
 	    CleanCommandGroupsOnProjectDeletedHandler: any;
 	    CleanCommandsOnProjectDeleted: any;
+	    AddCommandToGroupOnCommandDuplicated: any;
 	}
 	export interface ProjectExportJSONv1 {
 	    version: number;

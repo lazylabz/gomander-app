@@ -16,6 +16,8 @@ export function DeleteCommandGroup(arg1:string):Promise<void>;
 
 export function DeleteProject(arg1:string):Promise<void>;
 
+export function DuplicateCommand(arg1:string,arg2:string):Promise<void>;
+
 export function EditCommand(arg1:domain.Command):Promise<void>;
 
 export function EditProject(arg1:domain.Project):Promise<void>;
@@ -47,6 +49,8 @@ export function OpenProject(arg1:string):Promise<void>;
 export function RegisterHandlers():Promise<void>;
 
 export function RemoveCommand(arg1:string):Promise<void>;
+
+export function RemoveCommandFromCommandGroup(arg1:string,arg2:string):Promise<void>;
 
 export function ReorderCommandGroups(arg1:Array<string>):Promise<void>;
 
