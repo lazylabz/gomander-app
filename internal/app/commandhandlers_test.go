@@ -773,3 +773,222 @@ func TestApp_StopCommand(t *testing.T) {
 		)
 	})
 }
+
+func TestApp_DuplicateCommand(t *testing.T) {
+	t.Run("Should duplicate the command", func(t *testing.T) {
+		mockCommandRepository := new(MockCommandRepository)
+		mockEventBus := new(MockEventBus)
+		mockLogger := new(MockLogger)
+
+		projectId := "project1"
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			CommandRepository: mockCommandRepository,
+			EventBus:          mockEventBus,
+			Logger:            mockLogger,
+		})
+
+		a.SetOpenProjectId(projectId)
+
+		originalCmdData := testutils.NewCommand().WithProjectId(projectId).Data()
+		originalCmd := commandDataToDomain(originalCmdData)
+
+		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
+		mockCommandRepository.On("GetAll", projectId).Return([]commanddomain.Command{originalCmd}, nil)
+
+		mockCommandRepository.On("Create", mock.MatchedBy(func(cmd *commanddomain.Command) bool {
+			return cmd.Id != originalCmd.Id &&
+				cmd.ProjectId == originalCmd.ProjectId &&
+				cmd.Name == originalCmd.Name+" (copy)" &&
+				cmd.Command == originalCmd.Command &&
+				cmd.WorkingDirectory == originalCmd.WorkingDirectory &&
+				cmd.Position == 1
+		})).Return(nil)
+
+		mockEventBus.On("PublishSync", mock.MatchedBy(func(event interface{}) bool {
+			e, ok := event.(commanddomainevent.CommandDuplicatedEvent)
+			return ok && e.InsideGroupId == ""
+		})).Return(make([]error, 0))
+
+		mockLogger.On("Info", mock.Anything).Return(nil)
+
+		err := a.DuplicateCommand(originalCmd.Id, "")
+		assert.NoError(t, err)
+
+		mock.AssertExpectationsForObjects(t,
+			mockCommandRepository,
+			mockEventBus,
+			mockLogger,
+		)
+	})
+	t.Run("Should duplicate the command with a target group", func(t *testing.T) {
+		mockCommandRepository := new(MockCommandRepository)
+		mockEventBus := new(MockEventBus)
+		mockLogger := new(MockLogger)
+
+		projectId := "project1"
+		targetGroupId := "group1"
+
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			CommandRepository: mockCommandRepository,
+			EventBus:          mockEventBus,
+			Logger:            mockLogger,
+		})
+
+		a.SetOpenProjectId(projectId)
+
+		originalCmdData := testutils.NewCommand().WithProjectId(projectId).Data()
+		originalCmd := commandDataToDomain(originalCmdData)
+
+		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
+		mockCommandRepository.On("GetAll", projectId).Return([]commanddomain.Command{originalCmd}, nil)
+
+		mockCommandRepository.On("Create", mock.MatchedBy(func(cmd *commanddomain.Command) bool {
+			return cmd.Id != originalCmd.Id &&
+				cmd.ProjectId == originalCmd.ProjectId &&
+				cmd.Name == originalCmd.Name+" (copy)" &&
+				cmd.Command == originalCmd.Command &&
+				cmd.WorkingDirectory == originalCmd.WorkingDirectory &&
+				cmd.Position == 1
+		})).Return(nil)
+
+		mockEventBus.On("PublishSync", mock.MatchedBy(func(event interface{}) bool {
+			e, ok := event.(commanddomainevent.CommandDuplicatedEvent)
+			return ok && e.InsideGroupId == targetGroupId
+		})).Return(make([]error, 0))
+
+		mockLogger.On("Info", mock.Anything).Return(nil)
+
+		err := a.DuplicateCommand(originalCmd.Id, targetGroupId)
+		assert.NoError(t, err)
+
+		mock.AssertExpectationsForObjects(t,
+			mockCommandRepository,
+			mockEventBus,
+			mockLogger,
+		)
+	})
+	t.Run("Should return an error if the command does not exist", func(t *testing.T) {
+		mockCommandRepository := new(MockCommandRepository)
+		mockLogger := new(MockLogger)
+
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			CommandRepository: mockCommandRepository,
+			Logger:            mockLogger,
+		})
+
+		commandId := "non-existing-command"
+
+		expectedErr := errors.New("command not found")
+		mockCommandRepository.On("Get", commandId).Return(nil, expectedErr)
+		mockLogger.On("Error", "command not found").Return()
+
+		err := a.DuplicateCommand(commandId, "")
+		assert.ErrorIs(t, err, expectedErr)
+
+		mock.AssertExpectationsForObjects(t,
+			mockCommandRepository,
+			mockLogger,
+		)
+	})
+	t.Run("Should return an error if fails to get all commands", func(t *testing.T) {
+		mockCommandRepository := new(MockCommandRepository)
+		mockLogger := new(MockLogger)
+
+		projectId := "project1"
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			CommandRepository: mockCommandRepository,
+			Logger:            mockLogger,
+		})
+
+		a.SetOpenProjectId(projectId)
+
+		originalCmd := commandDataToDomain(testutils.NewCommand().Data())
+		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
+
+		expectedErr := errors.New("failed to get commands")
+		mockCommandRepository.On("GetAll", projectId).Return(nil, expectedErr)
+
+		mockLogger.On("Error", "failed to get commands").Return()
+
+		err := a.DuplicateCommand(originalCmd.Id, "")
+		assert.ErrorIs(t, err, expectedErr)
+
+		mock.AssertExpectationsForObjects(t,
+			mockCommandRepository,
+			mockLogger,
+		)
+	})
+	t.Run("Should return an error if fails to create the duplicated command", func(t *testing.T) {
+		mockCommandRepository := new(MockCommandRepository)
+		mockLogger := new(MockLogger)
+
+		projectId := "project1"
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			CommandRepository: mockCommandRepository,
+			Logger:            mockLogger,
+		})
+
+		a.SetOpenProjectId(projectId)
+
+		originalCmd := commandDataToDomain(testutils.NewCommand().Data())
+		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
+		mockCommandRepository.On("GetAll", projectId).Return([]commanddomain.Command{originalCmd}, nil)
+
+		expectedErr := errors.New("failed to create command")
+		mockCommandRepository.On("Create", mock.Anything).Return(expectedErr)
+		mockLogger.On("Error", "failed to create command").Return()
+
+		err := a.DuplicateCommand(originalCmd.Id, "")
+		assert.ErrorIs(t, err, expectedErr)
+
+		mock.AssertExpectationsForObjects(t,
+			mockCommandRepository,
+			mockLogger,
+		)
+	})
+	t.Run("Should return an error if side effects fail", func(t *testing.T) {
+		mockCommandRepository := new(MockCommandRepository)
+		mockEventBus := new(MockEventBus)
+		mockLogger := new(MockLogger)
+
+		projectId := "project1"
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			CommandRepository: mockCommandRepository,
+			EventBus:          mockEventBus,
+			Logger:            mockLogger,
+		})
+
+		a.SetOpenProjectId(projectId)
+
+		originalCmdData := testutils.NewCommand().WithProjectId(projectId).Data()
+		originalCmd := commandDataToDomain(originalCmdData)
+
+		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
+		mockCommandRepository.On("GetAll", projectId).Return([]commanddomain.Command{originalCmd}, nil)
+
+		mockCommandRepository.On("Create", mock.Anything).Return(nil)
+
+		sideEffectErrorMsg := "Something happened"
+		mockEventBus.On("PublishSync", mock.MatchedBy(func(event interface{}) bool {
+			e, ok := event.(commanddomainevent.CommandDuplicatedEvent)
+			return ok && e.InsideGroupId == ""
+		})).Return([]error{errors.New(sideEffectErrorMsg)})
+
+		mockLogger.On("Error", sideEffectErrorMsg).Return()
+
+		err := a.DuplicateCommand(originalCmd.Id, "")
+		assert.ErrorContains(t, err, sideEffectErrorMsg)
+
+		mock.AssertExpectationsForObjects(t,
+			mockCommandRepository,
+			mockEventBus,
+			mockLogger,
+		)
+	})
+}
