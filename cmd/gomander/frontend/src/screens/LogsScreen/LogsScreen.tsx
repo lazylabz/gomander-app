@@ -95,7 +95,7 @@ export const LogsScreen = () => {
     <div className="p-4 overflow-y-auto h-full w-full flex flex-col font-mono justify-end bg-background text-foreground">
       <div
         className={cn(
-          "fixed top-3.5 z-10 bg-background rounded-sm transition-all",
+          "fixed top-3.5 z-10 bg-background rounded-sm transition-[left] duration-200 ease-linear",
           isDesktopSidebarOpen ? "left-[16.5rem]" : "left-2",
         )}
       >
