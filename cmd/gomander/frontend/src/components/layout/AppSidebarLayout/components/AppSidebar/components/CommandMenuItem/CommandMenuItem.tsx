@@ -124,6 +124,7 @@ export const CommandMenuItem = ({
   const isActiveCommand = activeCommandId === command.id;
 
   const className = cn(
+    "p-2.5",
     isActiveCommand && "bg-sidebar-accent",
     isRunning &&
       "bg-green-100 hover:bg-green-200 focus:bg-green-100 active:bg-green-100",
@@ -168,7 +169,7 @@ export const CommandMenuItem = ({
             </div>
             {isIdle && (
               <Play
-                size={18}
+                size={16}
                 className="text-muted-foreground cursor-pointer hover:text-primary"
                 onClick={handleRunCommand}
               />
@@ -176,7 +177,7 @@ export const CommandMenuItem = ({
             {isRunning && (
               <div className="group/command p-0 m-0">
                 <Square
-                  size={18}
+                  size={16}
                   className="text-muted-foreground dark:text-primary/70 cursor-pointer hover:text-primary dark:hover:text-primary"
                   onClick={handleStopCommand}
                 />
