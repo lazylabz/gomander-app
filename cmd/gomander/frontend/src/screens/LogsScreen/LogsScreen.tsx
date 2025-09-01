@@ -10,6 +10,7 @@ import {
 
 import { AppSidebarLayout } from "@/components/layout/AppSidebarLayout/AppSidebarLayout.tsx";
 import { Input } from "@/components/ui/input.tsx";
+import { SidebarTrigger } from "@/components/ui/sidebar.tsx";
 import { useTheme } from "@/contexts/theme.tsx";
 import { useCurrentLogs } from "@/hooks/useCurrentLogs.ts";
 import { useShortcut } from "@/hooks/useShortcut.ts";
@@ -91,8 +92,11 @@ export const LogsScreen = () => {
 
   return (
     <AppSidebarLayout>
-      <div className="p-4 overflow-y-auto h-full w-full flex flex-col font-mono justify-end bg-background text-foreground">
-        <div className="fixed top-3 right-6 z-1 flex items-center gap-2">
+      <div className="p-4 overflow-y-auto h-full w-full flex flex-col font-mono justify-end bg-background text-foreground relative">
+        <div className="absolute top-3.5 left-2 z-1">
+          <SidebarTrigger className="opacity-25 hover:opacity-100 transition-opacity" />
+        </div>
+        <div className="fixed top-3 right-3 z-1 flex items-center gap-2">
           {searchOpen && (
             <div className="flex flex-col bg-background gap-1.5">
               <Input
@@ -130,7 +134,7 @@ export const LogsScreen = () => {
           )}
           <BrushCleaning
             onClick={clearCurrentLogs}
-            className="text-foreground opacity-25 hover:opacity-100 transition-opacity cursor-pointer self-start mt-1.5"
+            className="text-foreground opacity-25 hover:opacity-100 transition-opacity cursor-pointer self-start mt-1.5 ml-2 size-5"
           />
         </div>
         {parsedLogs.map((log, index) => (
