@@ -165,7 +165,12 @@ export const CommandMenuItem = ({
                   <GripVertical size={14} className="text-muted-foreground" />
                 </div>
               )}
-              <span className="cursor-default">{command.name}</span>
+              <p
+                className="cursor-default text-left line-clamp-1"
+                title={command.name}
+              >
+                {command.name}
+              </p>
             </div>
             {isIdle && (
               <Play
