@@ -124,6 +124,7 @@ export const CommandMenuItem = ({
   const isActiveCommand = activeCommandId === command.id;
 
   const className = cn(
+    "p-2.5",
     isActiveCommand && "bg-sidebar-accent",
     isRunning &&
       "bg-green-100 hover:bg-green-200 focus:bg-green-100 active:bg-green-100",
@@ -151,7 +152,7 @@ export const CommandMenuItem = ({
           >
             <div
               className={cn(
-                "flex items-center gap-1 w-full text-sm text-sidebar-foreground",
+                "flex items-center gap-1 w-full min-w-0 overflow-hidden text-sm text-sidebar-foreground",
                 !draggable && "pl-2",
               )}
             >
@@ -159,29 +160,34 @@ export const CommandMenuItem = ({
                 <div
                   {...attributes}
                   {...listeners}
-                  className="cursor-grab active:cursor-grabbing pr-0.5 rounded hover:bg-sidebar-accent/50"
+                  className="cursor-grab active:cursor-grabbing pr-0.5 rounded hover:bg-sidebar-accent/50 shrink-0"
                 >
                   <GripVertical size={14} className="text-muted-foreground" />
                 </div>
               )}
-              <span className="cursor-default">{command.name}</span>
+              <p
+                className="cursor-default text-left truncate"
+                title={command.name}
+              >
+                {command.name}
+              </p>
             </div>
-            {isIdle && (
-              <Play
-                size={18}
-                className="text-muted-foreground cursor-pointer hover:text-primary"
-                onClick={handleRunCommand}
-              />
-            )}
-            {isRunning && (
-              <div className="group/command p-0 m-0">
+            <div className="shrink-0">
+              {isIdle && (
+                <Play
+                  size={16}
+                  className="text-muted-foreground cursor-pointer hover:text-primary"
+                  onClick={handleRunCommand}
+                />
+              )}
+              {isRunning && (
                 <Square
-                  size={18}
+                  size={16}
                   className="text-muted-foreground dark:text-primary/70 cursor-pointer hover:text-primary dark:hover:text-primary"
                   onClick={handleStopCommand}
                 />
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </SidebarMenuButton>
       </ContextMenuTrigger>

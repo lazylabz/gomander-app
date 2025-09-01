@@ -136,7 +136,7 @@ export const AppSidebar = () => {
         setOpen={closeEditCommandGroupModal}
       />
       <AboutModal open={aboutModalOpen} setOpen={setAboutModalOpen} />
-      <Sidebar collapsible="icon">
+      <Sidebar collapsible="offcanvas">
         <SidebarHeader className="flex flex-row items-center justify-between p-2">
           <div className="flex items-center ml-2 gap-1">
             <Avatar className="size-9 rounded-lg mb-1">
@@ -172,18 +172,16 @@ export const AppSidebar = () => {
               <TooltipContent>
                 {isReorderingGroups ? "Apply reordering" : "Start reordering"}
               </TooltipContent>
-              <TooltipTrigger>
-                <button
-                  onClick={toggleReorderingMode}
-                  className={cn(
-                    "p-1 rounded hover:bg-sidebar-accent transition-colors border border-transparent",
-                    isReorderingGroups
-                      ? "text-primary bg-sidebar-accent border-muted-foreground"
-                      : "text-muted-foreground hover:text-primary",
-                  )}
-                >
-                  <ArrowUpDown size={14} />
-                </button>
+              <TooltipTrigger
+                onClick={toggleReorderingMode}
+                className={cn(
+                  "p-1 rounded hover:bg-sidebar-accent transition-colors border border-transparent",
+                  isReorderingGroups
+                    ? "text-primary bg-sidebar-accent border-muted-foreground"
+                    : "text-muted-foreground hover:text-primary",
+                )}
+              >
+                <ArrowUpDown size={14} />
               </TooltipTrigger>
             </Tooltip>
           </div>

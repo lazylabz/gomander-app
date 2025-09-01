@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Route, Routes } from "react-router";
 
+import { AppSidebarLayout } from "@/components/layout/AppSidebarLayout/AppSidebarLayout.tsx";
 import { Toaster } from "@/components/ui/sonner.tsx";
 import { EventListenersContainer } from "@/components/utility/EventListenersContainer.tsx";
 import { ThemeProvider } from "@/contexts/theme.tsx";
@@ -30,7 +31,14 @@ function App() {
             path={ScreenRoutes.ProjectSelection}
             element={<ProjectSelectionScreen />}
           />
-          <Route path={ScreenRoutes.Logs} element={<LogsScreen />} />
+          <Route
+            path={ScreenRoutes.Logs}
+            element={
+              <AppSidebarLayout>
+                <LogsScreen />
+              </AppSidebarLayout>
+            }
+          />
 
           <Route
             path={ScreenRoutes.Settings}

@@ -11,8 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
+import { useCommandStore } from "@/store/commandStore.ts";
 
 export const CreateMenu = () => {
+  const commands = useCommandStore((state) => state.commands);
   const [createCommandModalOpen, setCreateCommandModalOpen] = useState(false);
   const [createCommandGroupModalOpen, setCreateCommandGroupModalOpen] =
     useState(false);
@@ -20,6 +22,8 @@ export const CreateMenu = () => {
   const openCreateCommandModal = () => setCreateCommandModalOpen(true);
   const openCreateCommandGroupModal = () =>
     setCreateCommandGroupModalOpen(true);
+
+  const hasCommands = commands.length > 0;
 
   return (
     <>
@@ -51,6 +55,7 @@ export const CreateMenu = () => {
           <DropdownMenuItem
             onClick={openCreateCommandGroupModal}
             className="flex flex-row items-center justify-start"
+            disabled={!hasCommands}
           >
             <Group />
             Command Group
