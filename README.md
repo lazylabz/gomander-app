@@ -17,6 +17,28 @@ We started building this for ourselves when we got tired of the daily terminal c
 
 ---
 
+## macOS Users - Important Notice
+
+**⚠️ Code Signing Disclaimer**
+
+Since Gomander is a new project, we haven't purchased the $100 USD Apple Developer certificate required to sign the application. This means macOS will show a warning that the app is "damaged" or from an "unidentified developer."
+
+**To use Gomander on macOS, you'll need to manually remove it from quarantine:**
+
+If you downloaded the .app directly:
+```bash
+sudo xattr -d com.apple.quarantine /PATH/TO/YOUR/GOMANDER.app
+```
+
+If you installed via the DMG (most common):
+```bash
+sudo xattr -d com.apple.quarantine /Applications/gomander.app
+```
+
+This is a one-time process. Once you run this command, Gomander will launch normally.
+
+---
+
 ## Contributing
 
 We'd love your help making Gomander better! Whether you've found a bug, have an idea for a new feature, or want to contribute code - all contributions are welcome.
