@@ -172,18 +172,16 @@ export const AppSidebar = () => {
               <TooltipContent>
                 {isReorderingGroups ? "Apply reordering" : "Start reordering"}
               </TooltipContent>
-              <TooltipTrigger>
-                <button
-                  onClick={toggleReorderingMode}
-                  className={cn(
-                    "p-1 rounded hover:bg-sidebar-accent transition-colors border border-transparent",
-                    isReorderingGroups
-                      ? "text-primary bg-sidebar-accent border-muted-foreground"
-                      : "text-muted-foreground hover:text-primary",
-                  )}
-                >
-                  <ArrowUpDown size={14} />
-                </button>
+              <TooltipTrigger
+                onClick={toggleReorderingMode}
+                className={cn(
+                  "p-1 rounded hover:bg-sidebar-accent transition-colors border border-transparent",
+                  isReorderingGroups
+                    ? "text-primary bg-sidebar-accent border-muted-foreground"
+                    : "text-muted-foreground hover:text-primary",
+                )}
+              >
+                <ArrowUpDown size={14} />
               </TooltipTrigger>
             </Tooltip>
           </div>
