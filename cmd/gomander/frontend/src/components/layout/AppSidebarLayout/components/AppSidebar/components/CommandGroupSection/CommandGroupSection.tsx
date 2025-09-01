@@ -115,18 +115,18 @@ export const CommandGroupSection = ({
               disabled={isReorderingGroups}
               {...(isReorderingGroups ? { ...attributes, ...listeners } : {})}
             >
-              <div className="flex items-center gap-2">
-                <div className="size-4 flex items-center justify-center">
+              <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+                <div className="size-4 shrink-0 flex items-center justify-center">
                   {isOpen ? <FolderOpen size={16} /> : <Folder size={16} />}
                 </div>
-                <p className="text-left line-clamp-1" title={commandGroup.name}>
+                <p className="text-left truncate" title={commandGroup.name}>
                   {commandGroup.name}
                 </p>
               </div>
               {!isReorderingGroups && (
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-2 items-center shrink-0">
                   {someCommandIsRunning && (
-                    <span>
+                    <span className="whitespace-nowrap">
                       ({numberOfCommandsRunning}/{commandGroup.commands.length})
                     </span>
                   )}
