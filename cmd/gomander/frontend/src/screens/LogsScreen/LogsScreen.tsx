@@ -8,9 +8,8 @@ import {
   useState,
 } from "react";
 
-import { AppSidebarLayout } from "@/components/layout/AppSidebarLayout/AppSidebarLayout.tsx";
 import { Input } from "@/components/ui/input.tsx";
-import { SidebarTrigger } from "@/components/ui/sidebar.tsx";
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar.tsx";
 import { useTheme } from "@/contexts/theme.tsx";
 import { useCurrentLogs } from "@/hooks/useCurrentLogs.ts";
 import { useShortcut } from "@/hooks/useShortcut.ts";
@@ -29,6 +28,8 @@ export const LogsScreen = () => {
   const { currentLogs } = useCurrentLogs();
 
   const { theme } = useTheme();
+  const { open, isMobile } = useSidebar();
+  const isDesktopSidebarOpen = !isMobile && open;
 
   const searchInput = useRef<HTMLInputElement | null>(null);
 
@@ -91,82 +92,85 @@ export const LogsScreen = () => {
   }, [searchOpen]);
 
   return (
-    <AppSidebarLayout>
-      <div className="p-4 overflow-y-auto h-full w-full flex flex-col font-mono justify-end bg-background text-foreground relative">
-        <div className="absolute top-3.5 left-2 z-1">
-          <SidebarTrigger className="opacity-25 hover:opacity-100 transition-opacity" />
-        </div>
-        <div className="fixed top-3 right-3 z-1 flex items-center gap-2">
-          {searchOpen && (
-            <div className="flex flex-col bg-background gap-1.5">
-              <Input
-                ref={searchInput}
-                autoCorrect="off"
-                autoComplete="off"
-                className="w-64"
-                value={searchQuery}
-                onChange={handleSearchInputChange}
-                onKeyDown={handleInputKeyPress}
-              />
-              <span className="text-xs text-muted-foreground pl-2 flex items-center gap-2 pb-1 justify-between select-none">
-                <div className="flex flex-row items-center gap-2">
-                  <div className="flex flex-row items-center">
-                    <ChevronLeft
-                      className="text-muted-foreground hover:text-foreground cursor-pointer"
-                      onClick={prevMatch}
-                      size={14}
-                    />
-                    <ChevronRight
-                      className="text-muted-foreground hover:text-foreground cursor-pointer"
-                      onClick={nextMatch}
-                      size={14}
-                    />
-                  </div>
-                  {matchesIds.length} matches
-                </div>
-                <X
-                  size={14}
-                  onClick={closeSearch}
-                  className="text-muted-foreground hover:text-foreground cursor-pointer"
-                />
-              </span>
-            </div>
-          )}
-          <BrushCleaning
-            onClick={clearCurrentLogs}
-            className="text-foreground opacity-25 hover:opacity-100 transition-opacity cursor-pointer self-start mt-1.5 ml-2 size-5"
-          />
-        </div>
-        {parsedLogs.map((log, index) => (
-          <p className="w-full wrap-anywhere" key={index}>
-            {parse(log, {
-              replace: (domNode) => {
-                if (!(domNode instanceof Element && domNode.attribs)) {
-                  return;
-                }
-                if (!domNode.attribs.class?.includes("match")) {
-                  return;
-                }
-
-                const dataMatch = domNode.attribs["data-match"] || "";
-                const isMatch = dataMatch === focusedMatchId;
-
-                return (
-                  <span
-                    data-match={dataMatch}
-                    className={cn(
-                      "match bg-yellow-100",
-                      isMatch && "bg-yellow-300",
-                    )}
-                  >
-                    {domToReact(domNode.children as DOMNode[])}
-                  </span>
-                );
-              },
-            })}
-          </p>
-        ))}
+    <div className="p-4 overflow-y-auto h-full w-full flex flex-col font-mono justify-end bg-background text-foreground">
+      <div
+        className={cn(
+          "fixed top-3.5 z-10 bg-background rounded-sm transition-all",
+          isDesktopSidebarOpen ? "left-[16.5rem]" : "left-2",
+        )}
+      >
+        <SidebarTrigger className="opacity-25 hover:opacity-100 transition-opacity" />
       </div>
-    </AppSidebarLayout>
+      <div className="fixed top-3 right-3 z-1 flex items-center gap-2">
+        {searchOpen && (
+          <div className="flex flex-col bg-background gap-1.5">
+            <Input
+              ref={searchInput}
+              autoCorrect="off"
+              autoComplete="off"
+              className="w-64"
+              value={searchQuery}
+              onChange={handleSearchInputChange}
+              onKeyDown={handleInputKeyPress}
+            />
+            <span className="text-xs text-muted-foreground pl-2 flex items-center gap-2 pb-1 justify-between select-none">
+              <div className="flex flex-row items-center gap-2">
+                <div className="flex flex-row items-center">
+                  <ChevronLeft
+                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                    onClick={prevMatch}
+                    size={14}
+                  />
+                  <ChevronRight
+                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                    onClick={nextMatch}
+                    size={14}
+                  />
+                </div>
+                {matchesIds.length} matches
+              </div>
+              <X
+                size={14}
+                onClick={closeSearch}
+                className="text-muted-foreground hover:text-foreground cursor-pointer"
+              />
+            </span>
+          </div>
+        )}
+        <BrushCleaning
+          onClick={clearCurrentLogs}
+          className="text-foreground opacity-25 hover:opacity-100 transition-opacity cursor-pointer self-start mt-1.5 ml-2 size-5"
+        />
+      </div>
+      {parsedLogs.map((log, index) => (
+        <p className="w-full wrap-anywhere" key={index}>
+          {parse(log, {
+            replace: (domNode) => {
+              if (!(domNode instanceof Element && domNode.attribs)) {
+                return;
+              }
+              if (!domNode.attribs.class?.includes("match")) {
+                return;
+              }
+
+              const dataMatch = domNode.attribs["data-match"] || "";
+              const isMatch = dataMatch === focusedMatchId;
+
+              return (
+                <span
+                  data-match={dataMatch}
+                  className={cn(
+                    "match bg-yellow-100",
+                    isMatch && "bg-yellow-300",
+                  )}
+                >
+                  {domToReact(domNode.children as DOMNode[])}
+                </span>
+              );
+            },
+          })}
+        </p>
+      ))}
+    </div>
   );
 };
