@@ -5,6 +5,7 @@ import {
   CreateProject,
   DeleteCommandGroup,
   DeleteProject,
+  DuplicateCommand,
   EditCommand,
   EditProject,
   ExportProject,
@@ -19,6 +20,7 @@ import {
   IsThereANewRelease,
   OpenProject,
   RemoveCommand,
+  RemoveCommandFromCommandGroup,
   ReorderCommandGroups,
   ReorderCommands,
   RunCommand,
@@ -32,6 +34,7 @@ import { BrowserOpenURL, EventsOff, EventsOn } from "../../wailsjs/runtime";
 
 export const dataService = {
   addCommand: AddCommand,
+  duplicateCommand: DuplicateCommand,
   editCommand: EditCommand,
   reorderCommands: ReorderCommands,
   getAvailableProjects: GetAvailableProjects,
@@ -39,6 +42,7 @@ export const dataService = {
   createCommandGroup: CreateCommandGroup,
   deleteCommandGroup: DeleteCommandGroup,
   reorderCommandGroups: ReorderCommandGroups,
+  removeCommandFromGroup: RemoveCommandFromCommandGroup,
   getCommandGroups: GetCommandGroups,
   getCommands: GetCommands,
   getCurrentProject: GetCurrentProject as () => Promise<domain.Project | null>,

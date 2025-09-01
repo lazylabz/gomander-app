@@ -1,9 +1,16 @@
-export const parseError = (error: unknown): string => {
+export const EXPECTED_VALIDATION_ERROR = "EXPECTED_VALIDATION_ERROR";
+
+export const parseError = (error: unknown, messagePrefix?: string) => {
   if (error instanceof Error) {
-    return error.message;
+    if (error.cause === EXPECTED_VALIDATION_ERROR) {
+      return error.message;
+    }
+    return messagePrefix ? `${messagePrefix}: ${error.message}` : error.message;
   }
+
   if (typeof error === "string") {
-    return error;
+    return messagePrefix ? `${messagePrefix}: ${error}` : error;
   }
+
   return "Unknown error";
 };

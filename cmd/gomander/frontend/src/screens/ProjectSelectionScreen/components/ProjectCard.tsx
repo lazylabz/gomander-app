@@ -30,7 +30,7 @@ export const ProjectCard = ({
       await exportProject(project.id);
       toast.success("Project exported successfully!");
     } catch (e) {
-      toast.error("Failed to export the project: " + parseError(e));
+      toast.error(parseError(e, "Failed to export the project"));
     }
   };
 

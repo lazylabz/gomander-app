@@ -21,14 +21,17 @@ import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { deleteCommand } from "@/useCases/command/deleteCommand.ts";
 import { duplicateCommand } from "@/useCases/command/duplicateCommand.ts";
+import { removeCommandFromGroup } from "@/useCases/command/removeCommandFromGroup.ts";
 import { startCommand } from "@/useCases/command/startCommand.ts";
 import { stopCommand } from "@/useCases/command/stopCommand.ts";
 
 export const CommandMenuItem = ({
   command,
+  insideGroupId,
   draggable = false,
 }: {
   command: Command;
+  insideGroupId?: string;
   draggable?: boolean;
 }) => {
   const { theme } = useTheme();
@@ -54,7 +57,7 @@ export const CommandMenuItem = ({
     try {
       await startCommand(command.id);
     } catch (e) {
-      toast.error("Failed to run command: " + parseError(e));
+      toast.error(parseError(e, "Failed to run command"));
     }
   };
 
@@ -64,12 +67,24 @@ export const CommandMenuItem = ({
       setActiveCommandId(null); // Reset active command after deletion
       toast.success("Command deleted successfully");
     } catch (e) {
-      toast.error("Failed to delete command: " + parseError(e));
+      toast.error(parseError(e, "Failed to delete command"));
     } finally {
       fetchCommands();
       fetchCommandGroups();
     }
     setActiveCommandId(null); // Reset active command after deletion
+  };
+
+  const handleRemoveFromGroup = async () => {
+    if (!insideGroupId) return;
+    try {
+      await removeCommandFromGroup(command.id, insideGroupId);
+      toast.success("Command removed from group successfully");
+    } catch (e) {
+      toast.error(parseError(e, "Failed to remove command from group"));
+    } finally {
+      fetchCommandGroups();
+    }
   };
 
   const handleEditCommand = () => {
@@ -78,12 +93,15 @@ export const CommandMenuItem = ({
 
   const handleDuplicateCommand = async () => {
     try {
-      await duplicateCommand(command);
+      await duplicateCommand(command, insideGroupId);
       toast.success("Command duplicated successfully");
     } catch (e) {
-      toast.error("Failed to duplicate command: " + parseError(e));
+      toast.error(parseError(e, "Failed to duplicate command"));
     } finally {
       fetchCommands();
+      if (insideGroupId) {
+        fetchCommandGroups();
+      }
     }
     setActiveCommandId(null); // Reset active command after duplication
   };
@@ -96,7 +114,7 @@ export const CommandMenuItem = ({
     try {
       await stopCommand(command.id);
     } catch (e) {
-      toast.error("Failed to stop command: " + parseError(e));
+      toast.error(parseError(e, "Failed to stop command"));
     }
     setActiveCommandId(command.id);
   };
@@ -171,12 +189,19 @@ export const CommandMenuItem = ({
         <ContextMenuItem disabled={isRunning} onClick={handleEditCommand}>
           Edit
         </ContextMenuItem>
-        <ContextMenuItem disabled={isRunning} onClick={handleDeleteCommand}>
-          Delete
-        </ContextMenuItem>
         <ContextMenuItem disabled={isRunning} onClick={handleDuplicateCommand}>
           Duplicate
         </ContextMenuItem>
+        {!insideGroupId && (
+          <ContextMenuItem disabled={isRunning} onClick={handleDeleteCommand}>
+            Delete
+          </ContextMenuItem>
+        )}
+        {insideGroupId && (
+          <ContextMenuItem disabled={isRunning} onClick={handleRemoveFromGroup}>
+            Remove from group
+          </ContextMenuItem>
+        )}
       </ContextMenuContent>
     </ContextMenu>
   );

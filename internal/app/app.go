@@ -39,6 +39,7 @@ type App struct {
 	cleanCommandGroupsOnCommandDeletedHandler commandgrouphandlers.CleanCommandGroupsOnCommandDeleted
 	cleanCommandGroupsOnProjectDeletedHandler commandgrouphandlers.CleanCommandGroupsOnProjectDeleted
 	cleanCommandsOnProjectDeleted             commandhandlers.CleanCommandsOnProjectDeleted
+	addCommandToGroupOnCommandDuplicated      commandgrouphandlers.AddCommandToGroupOnCommandDuplicated
 }
 
 type Dependencies struct {
@@ -59,6 +60,7 @@ type Dependencies struct {
 	CleanCommandGroupsOnCommandDeletedHandler commandgrouphandlers.CleanCommandGroupsOnCommandDeleted
 	CleanCommandGroupsOnProjectDeletedHandler commandgrouphandlers.CleanCommandGroupsOnProjectDeleted
 	CleanCommandsOnProjectDeleted             commandhandlers.CleanCommandsOnProjectDeleted
+	AddCommandToGroupOnCommandDuplicated      commandgrouphandlers.AddCommandToGroupOnCommandDuplicated
 }
 
 func (a *App) LoadDependencies(d Dependencies) {
@@ -78,6 +80,7 @@ func (a *App) LoadDependencies(d Dependencies) {
 	a.cleanCommandGroupsOnCommandDeletedHandler = d.CleanCommandGroupsOnCommandDeletedHandler
 	a.cleanCommandGroupsOnProjectDeletedHandler = d.CleanCommandGroupsOnProjectDeletedHandler
 	a.cleanCommandsOnProjectDeleted = d.CleanCommandsOnProjectDeleted
+	a.addCommandToGroupOnCommandDuplicated = d.AddCommandToGroupOnCommandDuplicated
 }
 
 func (a *App) RegisterHandlers() {
@@ -85,6 +88,7 @@ func (a *App) RegisterHandlers() {
 	a.eventBus.RegisterHandler(a.cleanCommandGroupsOnCommandDeletedHandler)
 	a.eventBus.RegisterHandler(a.cleanCommandGroupsOnProjectDeletedHandler)
 	a.eventBus.RegisterHandler(a.cleanCommandsOnProjectDeleted)
+	a.eventBus.RegisterHandler(a.addCommandToGroupOnCommandDuplicated)
 }
 
 // NewApp creates a new App application struct

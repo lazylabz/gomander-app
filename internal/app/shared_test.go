@@ -60,6 +60,9 @@ type MockCommandGroupRepository struct {
 
 func (m *MockCommandGroupRepository) Get(id string) (*commandgroupdomain.CommandGroup, error) {
 	args := m.Called(id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).(*commandgroupdomain.CommandGroup), args.Error(1)
 }
 
@@ -144,6 +147,9 @@ func (m *MockCommandRepository) Get(commandId string) (*commanddomain.Command, e
 
 func (m *MockCommandRepository) GetAll(projectId string) ([]commanddomain.Command, error) {
 	args := m.Called(projectId)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).([]commanddomain.Command), args.Error(1)
 }
 

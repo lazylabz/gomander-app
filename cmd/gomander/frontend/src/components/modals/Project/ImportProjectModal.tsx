@@ -59,7 +59,7 @@ export const ImportProjectModal = ({
       handleOpenChange(false);
       toast.success("Project imported successfully");
     } catch (e) {
-      toast.error("Failed to import the project: " + parseError(e));
+      toast.error(parseError(e, "Failed to import the project"));
     }
   };
 

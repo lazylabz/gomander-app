@@ -56,7 +56,7 @@ export const CreateCommandGroupModal = ({
       });
       toast.success("Command group created successfully");
     } catch (e) {
-      toast.error("Failed to create command group: " + parseError(e));
+      toast.error(parseError(e, "Failed to create command group"));
     } finally {
       fetchCommandGroups();
     }
