@@ -116,8 +116,12 @@ export const CommandGroupSection = ({
               {...(isReorderingGroups ? { ...attributes, ...listeners } : {})}
             >
               <div className="flex items-center gap-2">
-                {isOpen ? <FolderOpen size={16} /> : <Folder size={16} />}
-                <p>{commandGroup.name}</p>
+                <div className="size-4 flex items-center justify-center">
+                  {isOpen ? <FolderOpen size={16} /> : <Folder size={16} />}
+                </div>
+                <p className="text-left line-clamp-1" title={commandGroup.name}>
+                  {commandGroup.name}
+                </p>
               </div>
               {!isReorderingGroups && (
                 <div className="flex gap-2 items-center">
