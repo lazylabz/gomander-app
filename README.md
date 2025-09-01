@@ -35,7 +35,7 @@ If you installed via the DMG (most common):
 sudo xattr -d com.apple.quarantine /Applications/gomander.app
 ```
 
-This is a one-time process. Once you run this command, Gomander will launch normally.
+This is a one-time process (every time you install a new release 😂). Once you run this command, Gomander will launch normally.
 
 ---
 
