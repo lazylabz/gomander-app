@@ -158,10 +158,10 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	configRepo := configinfrastructure.NewGormConfigRepository(gormDb, ctx)
 
 	// Initialize event handlers
-	cleanCommandGroupsOnCommandDeleted := commandgrouphandlers.NewDefaultCleanCommandGroupsOnCommandDeleted(commandGroupRepo)
-	cleanCommandGroupsOnProjectDeleted := commandgrouphandlers.NewDefaultCleanCommandGroupsOnProjectDeleted(commandGroupRepo)
-	cleanCommandsOnProjectDeleted := handlers.NewDefaultCleanCommandOnProjectDeleted(commandRepo)
-	addCommandToGroupOnCommandDuplicated := commandgrouphandlers.NewDefaultAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo)
+	cleanCommandGroupsOnCommandDeleted := commandgrouphandlers.NewCleanCommandGroupsOnCommandDeleted(commandGroupRepo)
+	cleanCommandGroupsOnProjectDeleted := commandgrouphandlers.NewCleanCommandGroupsOnProjectDeleted(commandGroupRepo)
+	cleanCommandsOnProjectDeleted := handlers.NewCleanCommandOnProjectDeleted(commandRepo)
+	addCommandToGroupOnCommandDuplicated := commandgrouphandlers.NewAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo)
 
 	// Initialize use cases
 	getUserConfig := configusecases.NewGetUserConfig(configRepo)

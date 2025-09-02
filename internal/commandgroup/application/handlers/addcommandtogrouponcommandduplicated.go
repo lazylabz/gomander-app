@@ -21,7 +21,7 @@ func (h *DefaultAddCommandToGroupOnCommandDuplicated) GetEvent() eventbus.Event 
 	return commanddomainevent.CommandDuplicatedEvent{}
 }
 
-func NewDefaultAddCommandToGroupOnCommandDuplicated(
+func NewAddCommandToGroupOnCommandDuplicated(
 	commandRepository commanddomain.Repository,
 	commandGroupRepository commandgroupdomain.Repository,
 ) *DefaultAddCommandToGroupOnCommandDuplicated {

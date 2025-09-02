@@ -58,7 +58,7 @@ var pjId = "pj-123"
 func TestDefaultCleanCommandsOnProjectDeleted(t *testing.T) {
 	t.Run("Should remove command from command groups and delete empty groups", func(t *testing.T) {
 		mockRepo := new(MockCommandRepository)
-		handler := handlers.NewDefaultCleanCommandOnProjectDeleted(mockRepo)
+		handler := handlers.NewCleanCommandOnProjectDeleted(mockRepo)
 		event := projectdomainevent.ProjectDeletedEvent{ProjectId: pjId}
 
 		mockRepo.On("DeleteAll", pjId).Return(nil).Once()
@@ -69,7 +69,7 @@ func TestDefaultCleanCommandsOnProjectDeleted(t *testing.T) {
 	})
 	t.Run("Should return error if failing to remove command from command groups", func(t *testing.T) {
 		mockRepo := new(MockCommandRepository)
-		handler := handlers.NewDefaultCleanCommandOnProjectDeleted(mockRepo)
+		handler := handlers.NewCleanCommandOnProjectDeleted(mockRepo)
 		event := projectdomainevent.ProjectDeletedEvent{ProjectId: pjId}
 
 		expectedErr := errors.New("remove error")
@@ -81,7 +81,7 @@ func TestDefaultCleanCommandsOnProjectDeleted(t *testing.T) {
 	})
 	t.Run("Should do nothing if command is the wrong type", func(t *testing.T) {
 		mockRepo := new(MockCommandRepository)
-		handler := handlers.NewDefaultCleanCommandOnProjectDeleted(mockRepo)
+		handler := handlers.NewCleanCommandOnProjectDeleted(mockRepo)
 
 		err := handler.Execute(FakeEvent{})
 		assert.NoError(t, err)
@@ -90,7 +90,7 @@ func TestDefaultCleanCommandsOnProjectDeleted(t *testing.T) {
 }
 
 func TestDefaultCleanCommandsOnProjectDeleted_GetEvent(t *testing.T) {
-	handler := handlers.NewDefaultCleanCommandOnProjectDeleted(nil)
+	handler := handlers.NewCleanCommandOnProjectDeleted(nil)
 	event := handler.GetEvent()
 	_, ok := event.(projectdomainevent.ProjectDeletedEvent)
 	assert.True(t, ok)
