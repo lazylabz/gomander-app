@@ -108,6 +108,8 @@ func configDB(ctx context.Context) *gorm.DB {
 		panic(err)
 	}
 
+	goose.SetBaseFS(embed.FS{})
+
 	err = goose.UpContext(ctx, db, ".")
 	if err != nil {
 		panic(err)
