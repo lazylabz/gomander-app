@@ -15,9 +15,8 @@ func TestDefaultSaveUserConfig_Execute(t *testing.T) {
 	t.Parallel()
 	t.Run("Should save user configuration successfully", func(t *testing.T) {
 		mockRepository := new(MockUserConfigRepository)
-		mockLogger := new(MockLogger)
 
-		sut := usecases.NewSaveUserConfig(mockRepository, mockLogger)
+		sut := usecases.NewSaveUserConfig(mockRepository)
 
 		newUserConfig := domain.Config{
 			LastOpenedProjectId: "new-project-id",
@@ -31,19 +30,16 @@ func TestDefaultSaveUserConfig_Execute(t *testing.T) {
 
 		mockRepository.On("Update", &newUserConfig).Return(nil)
 
-		mockLogger.On("Info", mock.Anything).Return(nil)
-
 		err := sut.Execute(newUserConfig)
 		assert.NoError(t, err)
 
 		mockRepository.AssertCalled(t, "Update", &newUserConfig)
-		mock.AssertExpectationsForObjects(t, mockRepository, mockLogger)
+		mock.AssertExpectationsForObjects(t, mockRepository)
 	})
 	t.Run("Should fail to save user configuration", func(t *testing.T) {
 		mockRepository := new(MockUserConfigRepository)
-		mockLogger := new(MockLogger)
 
-		sut := usecases.NewSaveUserConfig(mockRepository, mockLogger)
+		sut := usecases.NewSaveUserConfig(mockRepository)
 
 		newUserConfig := domain.Config{
 			LastOpenedProjectId: "new-project-id",
@@ -57,12 +53,10 @@ func TestDefaultSaveUserConfig_Execute(t *testing.T) {
 
 		mockRepository.On("Update", &newUserConfig).Return(errors.New("failed to save user configuration"))
 
-		mockLogger.On("Error", mock.Anything).Return(nil)
-
 		err := sut.Execute(newUserConfig)
 		assert.Error(t, err)
 
 		mockRepository.AssertCalled(t, "Update", &newUserConfig)
-		mock.AssertExpectationsForObjects(t, mockRepository, mockLogger)
+		mock.AssertExpectationsForObjects(t, mockRepository)
 	})
 }
