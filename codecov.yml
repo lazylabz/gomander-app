@@ -1,6 +1,6 @@
 ignore:
   - "internal/testutils"
   - "migrations/*.go"
-  - "cmd/gomander/main.go"
+  - "cmd/gomander"
   - "internal/app/app.go"
   - "**/*facade.go"

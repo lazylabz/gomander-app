@@ -7,6 +7,7 @@ import (
 	commanddomain "gomander/internal/command/domain"
 	commandgrouphandlers "gomander/internal/commandgroup/application/handlers"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
+	configusecases "gomander/internal/config/application/usecases"
 	configdomain "gomander/internal/config/domain"
 	"gomander/internal/event"
 	"gomander/internal/eventbus"
@@ -21,6 +22,10 @@ type EventHandlers struct {
 	CleanCommandGroupsOnProjectDeleted   commandgrouphandlers.CleanCommandGroupsOnProjectDeleted
 	CleanCommandsOnProjectDeleted        commandhandlers.CleanCommandsOnProjectDeleted
 	AddCommandToGroupOnCommandDuplicated commandgrouphandlers.AddCommandToGroupOnCommandDuplicated
+}
+
+type UseCases struct {
+	GetUserConfig configusecases.GetUserConfig
 }
 
 // App struct
@@ -44,6 +49,7 @@ type App struct {
 	eventBus eventbus.EventBus
 
 	eventHandlers EventHandlers
+	UseCases      UseCases
 }
 
 type Dependencies struct {
@@ -62,6 +68,7 @@ type Dependencies struct {
 	EventBus eventbus.EventBus
 
 	EventHandlers EventHandlers
+	UseCases      UseCases
 }
 
 func (a *App) LoadDependencies(d Dependencies) {
@@ -79,6 +86,7 @@ func (a *App) LoadDependencies(d Dependencies) {
 	a.eventBus = d.EventBus
 
 	a.eventHandlers = d.EventHandlers
+	a.UseCases = d.UseCases
 }
 
 func (a *App) RegisterHandlers() {

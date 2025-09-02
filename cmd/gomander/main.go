@@ -16,6 +16,7 @@ import (
 	commmandinfrastructure "gomander/internal/command/infrastructure"
 	commandgrouphandlers "gomander/internal/commandgroup/application/handlers"
 	commandgroupinfrastructure "gomander/internal/commandgroup/infrastructure"
+	configusecases "gomander/internal/config/application/usecases"
 	configinfrastructure "gomander/internal/config/infrastructure"
 	"gomander/internal/eventbus"
 	"gomander/internal/facade"
@@ -41,7 +42,12 @@ const ConfigFolderPathName = "gomander"
 func main() {
 	// Create an instance of the app structure
 	app := internalapp.NewApp()
+
+	// Create instance of helpers
 	uiPathHelper := path.NewUiPathHelper()
+
+	// Create instance of controllers
+	controllers := NewWailsControllers()
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -64,10 +70,14 @@ func main() {
 
 			// Start app
 			app.Startup(ctx)
+
+			// Initialize controllers
+			controllers.loadUseCases(app.UseCases)
 		},
 		Bind: []interface{}{
 			app,
 			uiPathHelper,
+			controllers,
 		},
 		OnBeforeClose: app.OnBeforeClose,
 		EnumBind: []interface{}{
@@ -153,6 +163,9 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	cleanCommandsOnProjectDeleted := handlers.NewDefaultCleanCommandOnProjectDeleted(commandRepo)
 	addCommandToGroupOnCommandDuplicated := commandgrouphandlers.NewDefaultAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo)
 
+	// Initialize use cases
+	getUserConfig := configusecases.NewDefaultGetUserConfig(configRepo)
+
 	eventBus := eventbus.NewInMemoryEventBus()
 
 	// Initialize event emitter
@@ -175,6 +188,10 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 			CleanCommandGroupsOnProjectDeleted:   cleanCommandGroupsOnProjectDeleted,
 			CleanCommandsOnProjectDeleted:        cleanCommandsOnProjectDeleted,
 			AddCommandToGroupOnCommandDuplicated: addCommandToGroupOnCommandDuplicated,
+		},
+
+		UseCases: internalapp.UseCases{
+			GetUserConfig: getUserConfig,
 		},
 	})
 }

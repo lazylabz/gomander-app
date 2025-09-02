@@ -11,32 +11,6 @@ import (
 	"gomander/internal/config/domain"
 )
 
-func TestApp_GetUserConfig(t *testing.T) {
-	mockRepository := new(MockUserConfigRepository)
-
-	a := app.NewApp()
-
-	a.LoadDependencies(app.Dependencies{
-		ConfigRepository: mockRepository,
-	})
-
-	expectedResult := domain.Config{
-		LastOpenedProjectId: "test-project-id",
-		EnvironmentPaths: []domain.EnvironmentPath{
-			{
-				Id:   "test-env-path-id",
-				Path: "test/path",
-			},
-		},
-	}
-	mockRepository.On("GetOrCreate").Return(&expectedResult, nil)
-
-	config, err := a.GetUserConfig()
-
-	assert.NoError(t, err)
-	assert.Equal(t, expectedResult, *config)
-}
-
 func TestApp_SaveUserConfig(t *testing.T) {
 	t.Parallel()
 	t.Run("Should save user configuration successfully", func(t *testing.T) {

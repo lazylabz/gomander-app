@@ -10,6 +10,9 @@ export namespace app {
 	    command: string;
 	    workingDirectory: string;
 	}
+	export interface UseCases {
+	    GetUserConfig: any;
+	}
 	export interface EventHandlers {
 	    CleanCommandGroupsOnCommandDeleted: any;
 	    CleanCommandGroupsOnProjectDeleted: any;
@@ -28,6 +31,7 @@ export namespace app {
 	    RuntimeFacade: any;
 	    EventBus: any;
 	    EventHandlers: EventHandlers;
+	    UseCases: UseCases;
 	}
 	
 	export interface ProjectExportJSONv1 {
