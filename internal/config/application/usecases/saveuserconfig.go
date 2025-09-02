@@ -14,7 +14,7 @@ type DefaultSaveUserConfig struct {
 	logger     logger.Logger
 }
 
-func NewDefaultSaveUserConfig(repository domain.Repository, logger logger.Logger) *DefaultSaveUserConfig {
+func NewSaveUserConfig(repository domain.Repository, logger logger.Logger) *DefaultSaveUserConfig {
 	return &DefaultSaveUserConfig{repository: repository, logger: logger}
 }
 

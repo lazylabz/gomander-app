@@ -17,7 +17,7 @@ func TestDefaultSaveUserConfig_Execute(t *testing.T) {
 		mockRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 
-		sut := usecases.NewDefaultSaveUserConfig(mockRepository, mockLogger)
+		sut := usecases.NewSaveUserConfig(mockRepository, mockLogger)
 
 		newUserConfig := domain.Config{
 			LastOpenedProjectId: "new-project-id",
@@ -43,7 +43,7 @@ func TestDefaultSaveUserConfig_Execute(t *testing.T) {
 		mockRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 
-		sut := usecases.NewDefaultSaveUserConfig(mockRepository, mockLogger)
+		sut := usecases.NewSaveUserConfig(mockRepository, mockLogger)
 
 		newUserConfig := domain.Config{
 			LastOpenedProjectId: "new-project-id",

@@ -164,8 +164,8 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	addCommandToGroupOnCommandDuplicated := commandgrouphandlers.NewDefaultAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo)
 
 	// Initialize use cases
-	getUserConfig := configusecases.NewDefaultGetUserConfig(configRepo)
-	saveUserConfig := configusecases.NewDefaultSaveUserConfig(configRepo, l)
+	getUserConfig := configusecases.NewGetUserConfig(configRepo)
+	saveUserConfig := configusecases.NewSaveUserConfig(configRepo, l)
 
 	eventBus := eventbus.NewInMemoryEventBus()
 

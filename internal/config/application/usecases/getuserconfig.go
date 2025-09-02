@@ -10,7 +10,7 @@ type DefaultGetUserConfig struct {
 	repository domain.Repository
 }
 
-func NewDefaultGetUserConfig(repository domain.Repository) *DefaultGetUserConfig {
+func NewGetUserConfig(repository domain.Repository) *DefaultGetUserConfig {
 	return &DefaultGetUserConfig{repository: repository}
 }
 

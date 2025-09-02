@@ -12,7 +12,7 @@ import (
 func TestDefaultGetUserConfig_Execute(t *testing.T) {
 	mockRepository := new(MockUserConfigRepository)
 
-	sut := usecases.NewDefaultGetUserConfig(mockRepository)
+	sut := usecases.NewGetUserConfig(mockRepository)
 
 	expectedResult := domain.Config{
 		LastOpenedProjectId: "test-project-id",
