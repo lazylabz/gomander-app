@@ -1,4 +1,4 @@
-package app_test
+package usecases_test
 
 import (
 	"errors"
@@ -7,22 +7,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"gomander/internal/app"
+	"gomander/internal/config/application/usecases"
 	"gomander/internal/config/domain"
 )
 
-func TestApp_SaveUserConfig(t *testing.T) {
+func TestDefaultSaveUserConfig_Execute(t *testing.T) {
 	t.Parallel()
 	t.Run("Should save user configuration successfully", func(t *testing.T) {
 		mockRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 
-		a := app.NewApp()
-
-		a.LoadDependencies(app.Dependencies{
-			ConfigRepository: mockRepository,
-			Logger:           mockLogger,
-		})
+		sut := usecases.NewDefaultSaveUserConfig(mockRepository, mockLogger)
 
 		newUserConfig := domain.Config{
 			LastOpenedProjectId: "new-project-id",
@@ -38,7 +33,7 @@ func TestApp_SaveUserConfig(t *testing.T) {
 
 		mockLogger.On("Info", mock.Anything).Return(nil)
 
-		err := a.SaveUserConfig(newUserConfig)
+		err := sut.Execute(newUserConfig)
 		assert.NoError(t, err)
 
 		mockRepository.AssertCalled(t, "Update", &newUserConfig)
@@ -48,12 +43,7 @@ func TestApp_SaveUserConfig(t *testing.T) {
 		mockRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 
-		a := app.NewApp()
-
-		a.LoadDependencies(app.Dependencies{
-			ConfigRepository: mockRepository,
-			Logger:           mockLogger,
-		})
+		sut := usecases.NewDefaultSaveUserConfig(mockRepository, mockLogger)
 
 		newUserConfig := domain.Config{
 			LastOpenedProjectId: "new-project-id",
@@ -69,7 +59,7 @@ func TestApp_SaveUserConfig(t *testing.T) {
 
 		mockLogger.On("Error", mock.Anything).Return(nil)
 
-		err := a.SaveUserConfig(newUserConfig)
+		err := sut.Execute(newUserConfig)
 		assert.Error(t, err)
 
 		mockRepository.AssertCalled(t, "Update", &newUserConfig)

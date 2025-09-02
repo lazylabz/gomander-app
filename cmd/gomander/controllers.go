@@ -20,3 +20,7 @@ func (wc *WailsControllers) loadUseCases(useCases app.UseCases) {
 func (wc *WailsControllers) GetUserConfigController() (*domain.Config, error) {
 	return wc.useCases.GetUserConfig.Execute()
 }
+
+func (wc *WailsControllers) SaveUserConfigController(newConfig domain.Config) error {
+	return wc.useCases.SaveUserConfig.Execute(newConfig)
+}

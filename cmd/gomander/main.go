@@ -165,6 +165,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 
 	// Initialize use cases
 	getUserConfig := configusecases.NewDefaultGetUserConfig(configRepo)
+	saveUserConfig := configusecases.NewDefaultSaveUserConfig(configRepo, l)
 
 	eventBus := eventbus.NewInMemoryEventBus()
 
@@ -191,7 +192,8 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 		},
 
 		UseCases: internalapp.UseCases{
-			GetUserConfig: getUserConfig,
+			GetUserConfig:  getUserConfig,
+			SaveUserConfig: saveUserConfig,
 		},
 	})
 }
