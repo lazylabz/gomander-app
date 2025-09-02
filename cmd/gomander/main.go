@@ -147,8 +147,9 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	projectRepo := projectinfrastructure.NewGormProjectRepository(gormDb, ctx)
 	configRepo := configinfrastructure.NewGormConfigRepository(gormDb, ctx)
 
-	cleanCommandGroupsOnCommandDeletedHandler := commandgrouphandlers.NewDefaultCleanCommandGroupsOnCommandDeleted(commandGroupRepo)
-	cleanCommandGroupsOnProjectDeletedHandler := commandgrouphandlers.NewDefaultCleanCommandGroupsOnProjectDeleted(commandGroupRepo)
+	// Initialize event handlers
+	cleanCommandGroupsOnCommandDeleted := commandgrouphandlers.NewDefaultCleanCommandGroupsOnCommandDeleted(commandGroupRepo)
+	cleanCommandGroupsOnProjectDeleted := commandgrouphandlers.NewDefaultCleanCommandGroupsOnProjectDeleted(commandGroupRepo)
 	cleanCommandsOnProjectDeleted := handlers.NewDefaultCleanCommandOnProjectDeleted(commandRepo)
 	addCommandToGroupOnCommandDuplicated := commandgrouphandlers.NewDefaultAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo)
 
@@ -169,9 +170,11 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 		RuntimeFacade: facade.DefaultRuntimeFacade{},
 
 		EventBus: eventBus,
-		CleanCommandGroupsOnCommandDeletedHandler: cleanCommandGroupsOnCommandDeletedHandler,
-		CleanCommandGroupsOnProjectDeletedHandler: cleanCommandGroupsOnProjectDeletedHandler,
-		CleanCommandsOnProjectDeleted:             cleanCommandsOnProjectDeleted,
-		AddCommandToGroupOnCommandDuplicated:      addCommandToGroupOnCommandDuplicated,
+		EventHandlers: internalapp.EventHandlers{
+			CleanCommandGroupsOnCommandDeleted:   cleanCommandGroupsOnCommandDeleted,
+			CleanCommandGroupsOnProjectDeleted:   cleanCommandGroupsOnProjectDeleted,
+			CleanCommandsOnProjectDeleted:        cleanCommandsOnProjectDeleted,
+			AddCommandToGroupOnCommandDuplicated: addCommandToGroupOnCommandDuplicated,
+		},
 	})
 }

@@ -10,6 +10,12 @@ export namespace app {
 	    command: string;
 	    workingDirectory: string;
 	}
+	export interface EventHandlers {
+	    CleanCommandGroupsOnCommandDeleted: any;
+	    CleanCommandGroupsOnProjectDeleted: any;
+	    CleanCommandsOnProjectDeleted: any;
+	    AddCommandToGroupOnCommandDuplicated: any;
+	}
 	export interface Dependencies {
 	    Logger: any;
 	    EventEmitter: any;
@@ -21,11 +27,9 @@ export namespace app {
 	    FsFacade: any;
 	    RuntimeFacade: any;
 	    EventBus: any;
-	    CleanCommandGroupsOnCommandDeletedHandler: any;
-	    CleanCommandGroupsOnProjectDeletedHandler: any;
-	    CleanCommandsOnProjectDeleted: any;
-	    AddCommandToGroupOnCommandDuplicated: any;
+	    EventHandlers: EventHandlers;
 	}
+	
 	export interface ProjectExportJSONv1 {
 	    version: number;
 	    name: string;
