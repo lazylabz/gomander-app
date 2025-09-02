@@ -3,3 +3,5 @@
 import {domain} from '../models';
 
 export function GetUserConfigController():Promise<domain.Config>;
+
+export function SaveUserConfigController(arg1:domain.Config):Promise<void>;

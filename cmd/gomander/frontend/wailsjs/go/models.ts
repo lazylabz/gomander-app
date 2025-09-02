@@ -12,6 +12,7 @@ export namespace app {
 	}
 	export interface UseCases {
 	    GetUserConfig: any;
+	    SaveUserConfig: any;
 	}
 	export interface EventHandlers {
 	    CleanCommandGroupsOnCommandDeleted: any;

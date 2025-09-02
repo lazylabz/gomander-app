@@ -5,3 +5,7 @@
 export function GetUserConfigController() {
   return window['go']['main']['WailsControllers']['GetUserConfigController']();
 }
+
+export function SaveUserConfigController(arg1) {
+  return window['go']['main']['WailsControllers']['SaveUserConfigController'](arg1);
+}

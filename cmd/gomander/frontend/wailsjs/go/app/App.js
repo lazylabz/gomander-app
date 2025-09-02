@@ -106,10 +106,6 @@ export function RunCommand(arg1) {
   return window['go']['app']['App']['RunCommand'](arg1);
 }
 
-export function SaveUserConfig(arg1) {
-  return window['go']['app']['App']['SaveUserConfig'](arg1);
-}
-
 export function SetOpenProjectId(arg1) {
   return window['go']['app']['App']['SetOpenProjectId'](arg1);
 }
