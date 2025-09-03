@@ -56,8 +56,6 @@ export function ReorderCommands(arg1:Array<string>):Promise<void>;
 
 export function RunCommand(arg1:string):Promise<void>;
 
-export function SetOpenProjectId(arg1:string):Promise<void>;
-
 export function Startup(arg1:context.Context):Promise<void>;
 
 export function StopCommand(arg1:string):Promise<void>;

@@ -14,11 +14,19 @@ import (
 )
 
 func (a *App) GetCommands() ([]domain.Command, error) {
-	return a.commandRepository.GetAll(a.openedProjectId)
+	userConfig, err := a.userConfigRepository.GetOrCreate()
+	if err != nil {
+		return make([]domain.Command, 0), err
+	}
+	return a.commandRepository.GetAll(userConfig.LastOpenedProjectId)
 }
 
 func (a *App) AddCommand(newCommand domain.Command) error {
-	allCommands, err := a.commandRepository.GetAll(a.openedProjectId)
+	userConfig, err := a.userConfigRepository.GetOrCreate()
+	if err != nil {
+		return err
+	}
+	allCommands, err := a.commandRepository.GetAll(userConfig.LastOpenedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
 		return err
@@ -40,13 +48,18 @@ func (a *App) AddCommand(newCommand domain.Command) error {
 }
 
 func (a *App) DuplicateCommand(commandId, targetGroupId string) error {
+	userConfig, err := a.userConfigRepository.GetOrCreate()
+	if err != nil {
+		return err
+	}
+
 	originalCommand, err := a.commandRepository.Get(commandId)
 	if err != nil {
 		a.logger.Error(err.Error())
 		return err
 	}
 
-	allCommands, err := a.commandRepository.GetAll(a.openedProjectId)
+	allCommands, err := a.commandRepository.GetAll(userConfig.LastOpenedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
 		return err
@@ -131,7 +144,11 @@ func (a *App) EditCommand(newCommand domain.Command) error {
 }
 
 func (a *App) ReorderCommands(orderedIds []string) error {
-	existingCommands, err := a.commandRepository.GetAll(a.openedProjectId)
+	userConfig, err := a.userConfigRepository.GetOrCreate()
+	if err != nil {
+		return err
+	}
+	existingCommands, err := a.commandRepository.GetAll(userConfig.LastOpenedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
 		return err
@@ -170,7 +187,7 @@ func (a *App) RunCommand(id string) error {
 		return err
 	}
 
-	currentProject, err := a.projectRepository.Get(a.openedProjectId)
+	currentProject, err := a.projectRepository.Get(userConfig.LastOpenedProjectId)
 	if err != nil {
 		a.logger.Error(err.Error())
 		return err

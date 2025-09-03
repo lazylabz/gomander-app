@@ -11,12 +11,10 @@ func (a *App) Startup(ctx context.Context) {
 
 	a.logger.Info("Loading configuration...")
 
-	config, err := a.userConfigRepository.GetOrCreate()
+	_, err := a.userConfigRepository.GetOrCreate()
 	if err != nil {
 		panic(err)
 	}
-
-	a.SetOpenProjectId(config.LastOpenedProjectId)
 
 	a.logger.Info("Configuration loaded successfully")
 }

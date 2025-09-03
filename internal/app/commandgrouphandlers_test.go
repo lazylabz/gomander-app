@@ -10,20 +10,23 @@ import (
 	"gomander/internal/app"
 	commanddomain "gomander/internal/command/domain"
 	"gomander/internal/commandgroup/domain"
+	configdomain "gomander/internal/config/domain"
 	"gomander/internal/testutils"
 )
 
 func TestApp_GetCommandGroups(t *testing.T) {
 	t.Run("Should return the command groups provided by the command group repository", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
+			ConfigRepository:       mockUserConfigRepository,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -42,12 +45,14 @@ func TestApp_GetCommandGroups(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Len(t, got, 1)
 		assert.Equal(t, expectedCommandGroup, got[0])
+		mock.AssertExpectationsForObjects(t, mockCommandGroupRepository, mockUserConfigRepository)
 	})
 }
 
 func TestApp_CreateCommandGroup(t *testing.T) {
 	t.Run("Should create a command group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		projectId := "project1"
 
@@ -55,9 +60,10 @@ func TestApp_CreateCommandGroup(t *testing.T) {
 
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
+			ConfigRepository:       mockUserConfigRepository,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		otherCommandGroupData := testutils.
 			NewCommandGroup().
@@ -86,19 +92,22 @@ func TestApp_CreateCommandGroup(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
+			mockUserConfigRepository,
 		)
 	})
 	t.Run("Should return an error if failing to retrieve existing command groups", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		projectId := "project1"
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
+			ConfigRepository:       mockUserConfigRepository,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -114,19 +123,22 @@ func TestApp_CreateCommandGroup(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
+			mockUserConfigRepository,
 		)
 	})
 	t.Run("Should return an error if failing to save the command group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		projectId := "project1"
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
+			ConfigRepository:       mockUserConfigRepository,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -143,6 +155,7 @@ func TestApp_CreateCommandGroup(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
+			mockUserConfigRepository,
 		)
 	})
 }
@@ -157,8 +170,6 @@ func TestApp_UpdateCommandGroup(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 		})
-
-		a.SetOpenProjectId(projectId)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -186,8 +197,6 @@ func TestApp_UpdateCommandGroup(t *testing.T) {
 			CommandGroupRepository: mockCommandGroupRepository,
 		})
 
-		a.SetOpenProjectId(projectId)
-
 		commandGroupData := testutils.
 			NewCommandGroup().
 			WithProjectId(projectId).
@@ -200,7 +209,7 @@ func TestApp_UpdateCommandGroup(t *testing.T) {
 		err := a.UpdateCommandGroup(&paramCommandGroup)
 		assert.Error(t, err)
 
-		mockCommandGroupRepository.AssertExpectations(t)
+		mock.AssertExpectationsForObjects(t, mockCommandGroupRepository)
 	})
 }
 
@@ -214,8 +223,6 @@ func TestApp_DeleteCommandGroup(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 		})
-
-		a.SetOpenProjectId(projectId)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -243,8 +250,6 @@ func TestApp_DeleteCommandGroup(t *testing.T) {
 			CommandGroupRepository: mockCommandGroupRepository,
 		})
 
-		a.SetOpenProjectId(projectId)
-
 		commandGroupData := testutils.
 			NewCommandGroup().
 			WithProjectId(projectId).
@@ -266,15 +271,17 @@ func TestApp_DeleteCommandGroup(t *testing.T) {
 func TestApp_ReorderCommandGroups(t *testing.T) {
 	t.Run("Should reorder command groups based on the provided IDs", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		projectId := "project1"
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
+			ConfigRepository:       mockUserConfigRepository,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		commandGroupData1 := testutils.
 			NewCommandGroup().
@@ -304,37 +311,44 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
+			mockUserConfigRepository,
 		)
 	})
 	t.Run("Should return an error if failing to retrieve existing command groups", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		projectId := "project1"
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
+			ConfigRepository:       mockUserConfigRepository,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		newOrder := []string{"group1", "group2"}
 
 		mockCommandGroupRepository.On("GetAll", projectId).Return(make([]domain.CommandGroup, 0), errors.New("failed to get command groups"))
 		err := a.ReorderCommandGroups(newOrder)
 		assert.Error(t, err)
+
+		mock.AssertExpectationsForObjects(t, mockCommandGroupRepository, mockUserConfigRepository)
 	})
 	t.Run("Should return an error if failing to update a command group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		projectId := "project1"
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
+			ConfigRepository:       mockUserConfigRepository,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		commandGroupData1 := testutils.
 			NewCommandGroup().
@@ -355,7 +369,7 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 		err := a.ReorderCommandGroups(newOrder)
 		assert.Error(t, err)
 
-		mockCommandGroupRepository.AssertExpectations(t)
+		mock.AssertExpectationsForObjects(t, mockCommandGroupRepository, mockUserConfigRepository)
 	})
 }
 
@@ -370,8 +384,6 @@ func TestApp_RemoveCommandFromCommandGroup(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 		})
-
-		a.SetOpenProjectId(projectId)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -393,19 +405,15 @@ func TestApp_RemoveCommandFromCommandGroup(t *testing.T) {
 		err := a.RemoveCommandFromCommandGroup(cmdId, existingCommandGroup.Id)
 		assert.NoError(t, err)
 
-		mockCommandGroupRepository.AssertExpectations(t)
+		mock.AssertExpectationsForObjects(t, mockCommandGroupRepository)
 	})
 	t.Run("Should return an error if failing to get command group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-
-		projectId := "project1"
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 		})
-
-		a.SetOpenProjectId(projectId)
 
 		expectedError := errors.New("failed to get command group")
 		mockCommandGroupRepository.On("Get", "group1").Return(nil, expectedError)
@@ -413,7 +421,7 @@ func TestApp_RemoveCommandFromCommandGroup(t *testing.T) {
 		err := a.RemoveCommandFromCommandGroup("cmd-1", "group1")
 		assert.ErrorIs(t, err, expectedError)
 
-		mockCommandGroupRepository.AssertExpectations(t)
+		mock.AssertExpectationsForObjects(t, mockCommandGroupRepository)
 	})
 	t.Run("Should return an error if failing to update command group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
@@ -425,8 +433,6 @@ func TestApp_RemoveCommandFromCommandGroup(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 		})
-
-		a.SetOpenProjectId(projectId)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -443,7 +449,7 @@ func TestApp_RemoveCommandFromCommandGroup(t *testing.T) {
 		err := a.RemoveCommandFromCommandGroup("cmd-1", existingCommandGroup.Id)
 		assert.ErrorIs(t, err, expectedError)
 
-		mockCommandGroupRepository.AssertExpectations(t)
+		mock.AssertExpectationsForObjects(t, mockCommandGroupRepository)
 	})
 	t.Run("Should return an error when trying to remove the last command from the group", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
@@ -455,8 +461,6 @@ func TestApp_RemoveCommandFromCommandGroup(t *testing.T) {
 		a.LoadDependencies(app.Dependencies{
 			CommandGroupRepository: mockCommandGroupRepository,
 		})
-
-		a.SetOpenProjectId(projectId)
 
 		commandGroupData := testutils.
 			NewCommandGroup().
@@ -472,6 +476,6 @@ func TestApp_RemoveCommandFromCommandGroup(t *testing.T) {
 		assert.Error(t, err)
 		assert.ErrorContains(t, err, "cannot remove the last command from the group")
 
-		mockCommandGroupRepository.AssertExpectations(t)
+		mock.AssertExpectationsForObjects(t, mockCommandGroupRepository)
 	})
 }

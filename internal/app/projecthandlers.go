@@ -8,7 +8,11 @@ import (
 )
 
 func (a *App) GetCurrentProject() (*domain.Project, error) {
-	return a.projectRepository.Get(a.openedProjectId)
+	userConfig, err := a.userConfigRepository.GetOrCreate()
+	if err != nil {
+		return nil, err
+	}
+	return a.projectRepository.Get(userConfig.LastOpenedProjectId)
 }
 
 func (a *App) GetAvailableProjects() ([]domain.Project, error) {
@@ -32,8 +36,6 @@ func (a *App) OpenProject(projectConfigId string) error {
 	if err != nil {
 		return err
 	}
-
-	a.SetOpenProjectId(projectConfigId)
 
 	return nil
 }
@@ -70,8 +72,6 @@ func (a *App) CloseProject() error {
 		return err
 	}
 
-	a.SetOpenProjectId("")
-
 	return nil
 }
 
@@ -99,8 +99,4 @@ func (a *App) DeleteProject(projectId string) error {
 	}
 
 	return nil
-}
-
-func (a *App) SetOpenProjectId(projectId string) {
-	a.openedProjectId = projectId
 }
