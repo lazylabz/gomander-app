@@ -26,9 +26,10 @@ type EventHandlers struct {
 }
 
 type UseCases struct {
-	GetUserConfig     configusecases.GetUserConfig
-	SaveUserConfig    configusecases.SaveUserConfig
-	GetCurrentProject projectusecases.GetCurrentProject
+	GetUserConfig        configusecases.GetUserConfig
+	SaveUserConfig       configusecases.SaveUserConfig
+	GetCurrentProject    projectusecases.GetCurrentProject
+	GetAvailableProjects projectusecases.GetAvailableProjects
 }
 
 // App struct

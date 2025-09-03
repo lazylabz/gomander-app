@@ -9,7 +9,6 @@ import {
   EditCommand,
   EditProject,
   ExportProject,
-  GetAvailableProjects,
   GetCommandGroups,
   GetCommands,
   GetCurrentRelease,
@@ -26,6 +25,7 @@ import {
   UpdateCommandGroup,
 } from "../../wailsjs/go/app/App";
 import {
+  GetAvailableProjectsController,
   GetCurrentProjectController,
   GetUserConfigController,
   SaveUserConfigController,
@@ -39,7 +39,7 @@ export const dataService = {
   duplicateCommand: DuplicateCommand,
   editCommand: EditCommand,
   reorderCommands: ReorderCommands,
-  getAvailableProjects: GetAvailableProjects,
+  getAvailableProjects: GetAvailableProjectsController,
   editCommandGroup: UpdateCommandGroup,
   createCommandGroup: CreateCommandGroup,
   deleteCommandGroup: DeleteCommandGroup,

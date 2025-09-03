@@ -7,10 +7,6 @@ import (
 	"gomander/internal/project/domain/event"
 )
 
-func (a *App) GetAvailableProjects() ([]domain.Project, error) {
-	return a.projectRepository.GetAll()
-}
-
 func (a *App) OpenProject(projectConfigId string) error {
 	_, err := a.projectRepository.Get(projectConfigId)
 	if err != nil {

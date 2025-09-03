@@ -33,3 +33,7 @@ func (wc *WailsControllers) SaveUserConfigController(newConfig configdomain.Conf
 func (wc *WailsControllers) GetCurrentProjectController() (*projectdomain.Project, error) {
 	return wc.useCases.GetCurrentProject.Execute()
 }
+
+func (wc *WailsControllers) GetAvailableProjectsController() ([]projectdomain.Project, error) {
+	return wc.useCases.GetAvailableProjects.Execute()
+}

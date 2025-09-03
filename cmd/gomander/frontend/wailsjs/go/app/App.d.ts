@@ -24,8 +24,6 @@ export function EditProject(arg1:domain.Project):Promise<void>;
 
 export function ExportProject(arg1:string):Promise<void>;
 
-export function GetAvailableProjects():Promise<Array<domain.Project>>;
-
 export function GetCommandGroups():Promise<Array<domain.CommandGroup>>;
 
 export function GetCommands():Promise<Array<domain.Command>>;

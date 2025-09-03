@@ -13,46 +13,6 @@ import (
 	"gomander/internal/project/domain/event"
 )
 
-func TestApp_GetAvailableProjects(t *testing.T) {
-	t.Run("Should return available projects", func(t *testing.T) {
-		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ProjectRepository: mockProjectRepository,
-		})
-
-		projects := []projectdomain.Project{{Id: "1", Name: "A", WorkingDirectory: "/a"}}
-		mockProjectRepository.On("GetAll").Return(projects, nil)
-
-		// Act
-		got, err := a.GetAvailableProjects()
-
-		// Assert
-		assert.NoError(t, err)
-		assert.Equal(t, projects, got)
-		mock.AssertExpectationsForObjects(t, mockProjectRepository)
-	})
-
-	t.Run("Should return an error if fetching projects fails", func(t *testing.T) {
-		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ProjectRepository: mockProjectRepository,
-		})
-
-		mockProjectRepository.On("GetAll").Return(make([]projectdomain.Project, 0), errors.New("fail"))
-
-		// Act
-		_, err := a.GetAvailableProjects()
-
-		// Assert
-		assert.Error(t, err)
-		mock.AssertExpectationsForObjects(t, mockProjectRepository)
-	})
-}
-
 func TestApp_OpenProject(t *testing.T) {
 	t.Run("Should open a project successfully", func(t *testing.T) {
 		// Arrange

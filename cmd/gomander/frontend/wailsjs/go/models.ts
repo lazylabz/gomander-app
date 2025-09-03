@@ -14,6 +14,7 @@ export namespace app {
 	    GetUserConfig: any;
 	    SaveUserConfig: any;
 	    GetCurrentProject: any;
+	    GetAvailableProjects: any;
 	}
 	export interface EventHandlers {
 	    CleanCommandGroupsOnCommandDeleted: any;
