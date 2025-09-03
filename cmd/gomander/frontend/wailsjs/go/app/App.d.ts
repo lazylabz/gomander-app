@@ -18,8 +18,6 @@ export function DuplicateCommand(arg1:string,arg2:string):Promise<void>;
 
 export function EditCommand(arg1:domain.Command):Promise<void>;
 
-export function EditProject(arg1:domain.Project):Promise<void>;
-
 export function ExportProject(arg1:string):Promise<void>;
 
 export function GetCommandGroups():Promise<Array<domain.CommandGroup>>;

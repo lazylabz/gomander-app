@@ -45,3 +45,7 @@ func (wc *WailsControllers) OpenProjectController(projectId string) error {
 func (wc *WailsControllers) CreateProjectController(project projectdomain.Project) error {
 	return wc.useCases.CreateProject.Execute(project)
 }
+
+func (wc *WailsControllers) EditProjectController(project projectdomain.Project) error {
+	return wc.useCases.EditProject.Execute(project)
+}

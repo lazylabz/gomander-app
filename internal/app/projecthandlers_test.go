@@ -9,49 +9,8 @@ import (
 
 	"gomander/internal/app"
 	"gomander/internal/config/domain"
-	projectdomain "gomander/internal/project/domain"
 	"gomander/internal/project/domain/event"
 )
-
-func TestApp_EditProject(t *testing.T) {
-	t.Run("Should edit a project successfully", func(t *testing.T) {
-		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ProjectRepository: mockProjectRepository,
-		})
-
-		project := projectdomain.Project{Id: "1", Name: "A", WorkingDirectory: "/a"}
-		mockProjectRepository.On("Update", project).Return(nil)
-
-		// Act
-		err := a.EditProject(project)
-
-		// Assert
-		assert.NoError(t, err)
-		mock.AssertExpectationsForObjects(t, mockProjectRepository)
-	})
-
-	t.Run("Should return an error if project update fails", func(t *testing.T) {
-		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ProjectRepository: mockProjectRepository,
-		})
-
-		project := projectdomain.Project{Id: "1", Name: "A", WorkingDirectory: "/a"}
-		mockProjectRepository.On("Update", project).Return(errors.New("fail"))
-
-		// Act
-		err := a.EditProject(project)
-
-		// Assert
-		assert.Error(t, err)
-		mock.AssertExpectationsForObjects(t, mockProjectRepository)
-	})
-}
 
 func TestApp_CloseProject(t *testing.T) {
 	t.Run("Should close the current project", func(t *testing.T) {

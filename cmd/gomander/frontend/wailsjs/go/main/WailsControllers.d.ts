@@ -4,6 +4,8 @@ import {domain} from '../models';
 
 export function CreateProjectController(arg1:domain.Project):Promise<void>;
 
+export function EditProjectController(arg1:domain.Project):Promise<void>;
+
 export function GetAvailableProjectsController():Promise<Array<domain.Project>>;
 
 export function GetCurrentProjectController():Promise<domain.Project>;

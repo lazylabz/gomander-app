@@ -3,18 +3,8 @@ package app
 import (
 	"errors"
 
-	"gomander/internal/project/domain"
 	"gomander/internal/project/domain/event"
 )
-
-func (a *App) EditProject(project domain.Project) error {
-	err := a.projectRepository.Update(project)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
 
 func (a *App) CloseProject() error {
 	config, err := a.userConfigRepository.GetOrCreate()

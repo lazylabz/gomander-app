@@ -1,4 +1,3 @@
-// filepath: /Users/moises/Code/personal/gomander/internal/project/application/usecases/openproject.go
 package usecases
 
 import (

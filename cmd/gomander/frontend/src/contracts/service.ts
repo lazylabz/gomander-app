@@ -6,7 +6,6 @@ import {
   DeleteProject,
   DuplicateCommand,
   EditCommand,
-  EditProject,
   ExportProject,
   GetCommandGroups,
   GetCommands,
@@ -24,6 +23,7 @@ import {
 } from "../../wailsjs/go/app/App";
 import {
   CreateProjectController,
+  EditProjectController,
   GetAvailableProjectsController,
   GetCurrentProjectController,
   GetUserConfigController,
@@ -61,7 +61,7 @@ export const dataService = {
   exportProject: ExportProject,
   importProject: ImportProject,
   getProjectToImport: GetProjectToImport,
-  editProject: EditProject,
+  editProject: EditProjectController,
 };
 
 export const helpersService = {

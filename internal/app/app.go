@@ -32,6 +32,7 @@ type UseCases struct {
 	GetAvailableProjects projectusecases.GetAvailableProjects
 	OpenProject          projectusecases.OpenProject
 	CreateProject        projectusecases.CreateProject
+	EditProject          projectusecases.EditProject
 }
 
 // App struct

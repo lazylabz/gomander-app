@@ -171,6 +171,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	getAvailableProjects := projectusecases.NewGetAvailableProjects(projectRepo)
 	openProject := projectusecases.NewOpenProject(configRepo, projectRepo)
 	createProject := projectusecases.NewCreateProject(projectRepo)
+	editProject := projectusecases.NewEditProject(projectRepo)
 
 	eventBus := eventbus.NewInMemoryEventBus()
 
@@ -203,6 +204,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 			GetAvailableProjects: getAvailableProjects,
 			OpenProject:          openProject,
 			CreateProject:        createProject,
+			EditProject:          editProject,
 		},
 	})
 }
