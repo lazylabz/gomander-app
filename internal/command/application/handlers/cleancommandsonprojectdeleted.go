@@ -19,7 +19,7 @@ func (h *DefaultCleanCommandsOnProjectDeleted) GetEvent() eventbus.Event {
 	return projectdomainevent.ProjectDeletedEvent{}
 }
 
-func NewDefaultCleanCommandOnProjectDeleted(commandRepository commanddomain.Repository) *DefaultCleanCommandsOnProjectDeleted {
+func NewCleanCommandOnProjectDeleted(commandRepository commanddomain.Repository) *DefaultCleanCommandsOnProjectDeleted {
 	return &DefaultCleanCommandsOnProjectDeleted{
 		commandRepository: commandRepository,
 	}

@@ -16,7 +16,7 @@ import (
 )
 
 func TestDefaultAddCommandToGroupOnCommandDuplicated_GetEvent(t *testing.T) {
-	handler := handlers.NewDefaultAddCommandToGroupOnCommandDuplicated(nil, nil)
+	handler := handlers.NewAddCommandToGroupOnCommandDuplicated(nil, nil)
 	event := handler.GetEvent()
 	_, ok := event.(commanddomainevent.CommandDuplicatedEvent)
 	assert.True(t, ok)
@@ -26,7 +26,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 	t.Run("Should do nothing if command was not duplicated inside a group", func(t *testing.T) {
 		mockCommandRepo := new(MockCommandRepository)
 		mockCommandGroupRepo := new(MockCommandGroupRepository)
-		handler := handlers.NewDefaultAddCommandToGroupOnCommandDuplicated(mockCommandRepo, mockCommandGroupRepo)
+		handler := handlers.NewAddCommandToGroupOnCommandDuplicated(mockCommandRepo, mockCommandGroupRepo)
 		event := commanddomainevent.CommandDuplicatedEvent{
 			CommandId:     "cmd-1",
 			InsideGroupId: "",
@@ -40,7 +40,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 	t.Run("Should add duplicated command to the group", func(t *testing.T) {
 		mockCommandRepo := new(MockCommandRepository)
 		mockCommandGroupRepo := new(MockCommandGroupRepository)
-		handler := handlers.NewDefaultAddCommandToGroupOnCommandDuplicated(mockCommandRepo, mockCommandGroupRepo)
+		handler := handlers.NewAddCommandToGroupOnCommandDuplicated(mockCommandRepo, mockCommandGroupRepo)
 		event := commanddomainevent.CommandDuplicatedEvent{
 			CommandId:     "cmd-1",
 			InsideGroupId: "group-1",
@@ -66,7 +66,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 	t.Run("Should do nothing if command is already in the group", func(t *testing.T) {
 		mockCommandRepo := new(MockCommandRepository)
 		mockCommandGroupRepo := new(MockCommandGroupRepository)
-		handler := handlers.NewDefaultAddCommandToGroupOnCommandDuplicated(mockCommandRepo, mockCommandGroupRepo)
+		handler := handlers.NewAddCommandToGroupOnCommandDuplicated(mockCommandRepo, mockCommandGroupRepo)
 		event := commanddomainevent.CommandDuplicatedEvent{
 			CommandId:     "cmd-1",
 			InsideGroupId: "group-1",
@@ -87,7 +87,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 	t.Run("Should do nothing if command is the wrong type", func(t *testing.T) {
 		mockCommandRepo := new(MockCommandRepository)
 		mockCommandGroupRepo := new(MockCommandGroupRepository)
-		handler := handlers.NewDefaultAddCommandToGroupOnCommandDuplicated(mockCommandRepo, mockCommandGroupRepo)
+		handler := handlers.NewAddCommandToGroupOnCommandDuplicated(mockCommandRepo, mockCommandGroupRepo)
 
 		err := handler.Execute(FakeEvent{})
 		assert.NoError(t, err)
@@ -96,7 +96,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 	t.Run("Should return error if failing to get command group", func(t *testing.T) {
 		mockCommandRepo := new(MockCommandRepository)
 		mockCommandGroupRepo := new(MockCommandGroupRepository)
-		handler := handlers.NewDefaultAddCommandToGroupOnCommandDuplicated(mockCommandRepo, mockCommandGroupRepo)
+		handler := handlers.NewAddCommandToGroupOnCommandDuplicated(mockCommandRepo, mockCommandGroupRepo)
 		event := commanddomainevent.CommandDuplicatedEvent{
 			CommandId:     "cmd-1",
 			InsideGroupId: "group-1",
@@ -112,7 +112,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 	t.Run("Should return error if failing to get duplicated command", func(t *testing.T) {
 		mockCommandRepo := new(MockCommandRepository)
 		mockCommandGroupRepo := new(MockCommandGroupRepository)
-		handler := handlers.NewDefaultAddCommandToGroupOnCommandDuplicated(mockCommandRepo, mockCommandGroupRepo)
+		handler := handlers.NewAddCommandToGroupOnCommandDuplicated(mockCommandRepo, mockCommandGroupRepo)
 		event := commanddomainevent.CommandDuplicatedEvent{
 			CommandId:     "cmd-1",
 			InsideGroupId: "group-1",
@@ -133,7 +133,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 	t.Run("Should return error if failing to update command group", func(t *testing.T) {
 		mockCommandRepo := new(MockCommandRepository)
 		mockCommandGroupRepo := new(MockCommandGroupRepository)
-		handler := handlers.NewDefaultAddCommandToGroupOnCommandDuplicated(mockCommandRepo, mockCommandGroupRepo)
+		handler := handlers.NewAddCommandToGroupOnCommandDuplicated(mockCommandRepo, mockCommandGroupRepo)
 		event := commanddomainevent.CommandDuplicatedEvent{
 			CommandId:     "cmd-1",
 			InsideGroupId: "group-1",

@@ -19,7 +19,7 @@ func (h *DefaultCleanCommandGroupsOnProjectDeleted) GetEvent() eventbus.Event {
 	return projectdomainevent.ProjectDeletedEvent{}
 }
 
-func NewDefaultCleanCommandGroupsOnProjectDeleted(commandGroupRepository commandgroupdomain.Repository) *DefaultCleanCommandGroupsOnProjectDeleted {
+func NewCleanCommandGroupsOnProjectDeleted(commandGroupRepository commandgroupdomain.Repository) *DefaultCleanCommandGroupsOnProjectDeleted {
 	return &DefaultCleanCommandGroupsOnProjectDeleted{
 		commandGroupRepository: commandGroupRepository,
 	}

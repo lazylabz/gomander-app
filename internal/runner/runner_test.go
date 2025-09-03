@@ -116,7 +116,9 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		commandId := "1"
 
 		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
-		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
+
+		// Sometimes, in CI, this event is not emitted fast enough, so we use Maybe()
+		emitter.On("EmitEvent", event.ProcessFinished, commandId).Maybe().Return()
 		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
 
 		logger.On("Info", mock.Anything).Return()

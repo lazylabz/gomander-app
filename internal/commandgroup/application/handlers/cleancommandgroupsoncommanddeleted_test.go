@@ -15,7 +15,7 @@ var cmdId = "cmd-123"
 func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
 	t.Run("Should remove command from command groups and delete empty groups", func(t *testing.T) {
 		mockRepo := new(MockCommandGroupRepository)
-		handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(mockRepo)
+		handler := handlers.NewCleanCommandGroupsOnCommandDeleted(mockRepo)
 		event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
 
 		mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(nil).Once()
@@ -27,7 +27,7 @@ func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
 	})
 	t.Run("Should return error if failing to remove command from command groups", func(t *testing.T) {
 		mockRepo := new(MockCommandGroupRepository)
-		handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(mockRepo)
+		handler := handlers.NewCleanCommandGroupsOnCommandDeleted(mockRepo)
 		event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
 
 		expectedErr := errors.New("remove error")
@@ -39,7 +39,7 @@ func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
 	})
 	t.Run("Should return error if failing to remove empty groups", func(t *testing.T) {
 		mockRepo := new(MockCommandGroupRepository)
-		handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(mockRepo)
+		handler := handlers.NewCleanCommandGroupsOnCommandDeleted(mockRepo)
 		event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
 
 		mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(nil).Once()
@@ -52,7 +52,7 @@ func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
 	})
 	t.Run("Should do nothing if command is the wrong type", func(t *testing.T) {
 		mockRepo := new(MockCommandGroupRepository)
-		handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(mockRepo)
+		handler := handlers.NewCleanCommandGroupsOnCommandDeleted(mockRepo)
 
 		err := handler.Execute(FakeEvent{})
 		assert.NoError(t, err)
@@ -61,7 +61,7 @@ func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
 }
 
 func TestDefaultCleanCommandGroupsOnCommandDeleted_GetEvent(t *testing.T) {
-	handler := handlers.NewDefaultCleanCommandGroupsOnCommandDeleted(nil)
+	handler := handlers.NewCleanCommandGroupsOnCommandDeleted(nil)
 	event := handler.GetEvent()
 	_, ok := event.(commanddomainevent.CommandDeletedEvent)
 	assert.True(t, ok)

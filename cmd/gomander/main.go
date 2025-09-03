@@ -16,6 +16,7 @@ import (
 	commmandinfrastructure "gomander/internal/command/infrastructure"
 	commandgrouphandlers "gomander/internal/commandgroup/application/handlers"
 	commandgroupinfrastructure "gomander/internal/commandgroup/infrastructure"
+	configusecases "gomander/internal/config/application/usecases"
 	configinfrastructure "gomander/internal/config/infrastructure"
 	"gomander/internal/eventbus"
 	"gomander/internal/facade"
@@ -41,7 +42,12 @@ const ConfigFolderPathName = "gomander"
 func main() {
 	// Create an instance of the app structure
 	app := internalapp.NewApp()
+
+	// Create instance of helpers
 	uiPathHelper := path.NewUiPathHelper()
+
+	// Create instance of controllers
+	controllers := NewWailsControllers()
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -64,10 +70,14 @@ func main() {
 
 			// Start app
 			app.Startup(ctx)
+
+			// Initialize controllers
+			controllers.loadUseCases(app.UseCases)
 		},
 		Bind: []interface{}{
 			app,
 			uiPathHelper,
+			controllers,
 		},
 		OnBeforeClose: app.OnBeforeClose,
 		EnumBind: []interface{}{
@@ -147,10 +157,15 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	projectRepo := projectinfrastructure.NewGormProjectRepository(gormDb, ctx)
 	configRepo := configinfrastructure.NewGormConfigRepository(gormDb, ctx)
 
-	cleanCommandGroupsOnCommandDeletedHandler := commandgrouphandlers.NewDefaultCleanCommandGroupsOnCommandDeleted(commandGroupRepo)
-	cleanCommandGroupsOnProjectDeletedHandler := commandgrouphandlers.NewDefaultCleanCommandGroupsOnProjectDeleted(commandGroupRepo)
-	cleanCommandsOnProjectDeleted := handlers.NewDefaultCleanCommandOnProjectDeleted(commandRepo)
-	addCommandToGroupOnCommandDuplicated := commandgrouphandlers.NewDefaultAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo)
+	// Initialize event handlers
+	cleanCommandGroupsOnCommandDeleted := commandgrouphandlers.NewCleanCommandGroupsOnCommandDeleted(commandGroupRepo)
+	cleanCommandGroupsOnProjectDeleted := commandgrouphandlers.NewCleanCommandGroupsOnProjectDeleted(commandGroupRepo)
+	cleanCommandsOnProjectDeleted := handlers.NewCleanCommandOnProjectDeleted(commandRepo)
+	addCommandToGroupOnCommandDuplicated := commandgrouphandlers.NewAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo)
+
+	// Initialize use cases
+	getUserConfig := configusecases.NewGetUserConfig(configRepo)
+	saveUserConfig := configusecases.NewSaveUserConfig(configRepo)
 
 	eventBus := eventbus.NewInMemoryEventBus()
 
@@ -169,9 +184,16 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 		RuntimeFacade: facade.DefaultRuntimeFacade{},
 
 		EventBus: eventBus,
-		CleanCommandGroupsOnCommandDeletedHandler: cleanCommandGroupsOnCommandDeletedHandler,
-		CleanCommandGroupsOnProjectDeletedHandler: cleanCommandGroupsOnProjectDeletedHandler,
-		CleanCommandsOnProjectDeleted:             cleanCommandsOnProjectDeleted,
-		AddCommandToGroupOnCommandDuplicated:      addCommandToGroupOnCommandDuplicated,
+		EventHandlers: internalapp.EventHandlers{
+			CleanCommandGroupsOnCommandDeleted:   cleanCommandGroupsOnCommandDeleted,
+			CleanCommandGroupsOnProjectDeleted:   cleanCommandGroupsOnProjectDeleted,
+			CleanCommandsOnProjectDeleted:        cleanCommandsOnProjectDeleted,
+			AddCommandToGroupOnCommandDuplicated: addCommandToGroupOnCommandDuplicated,
+		},
+
+		UseCases: internalapp.UseCases{
+			GetUserConfig:  getUserConfig,
+			SaveUserConfig: saveUserConfig,
+		},
 	})
 }

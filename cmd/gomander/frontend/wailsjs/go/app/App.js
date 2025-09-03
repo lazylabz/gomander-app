@@ -66,10 +66,6 @@ export function GetProjectToImport() {
   return window['go']['app']['App']['GetProjectToImport']();
 }
 
-export function GetUserConfig() {
-  return window['go']['app']['App']['GetUserConfig']();
-}
-
 export function ImportProject(arg1, arg2, arg3) {
   return window['go']['app']['App']['ImportProject'](arg1, arg2, arg3);
 }
@@ -108,10 +104,6 @@ export function ReorderCommands(arg1) {
 
 export function RunCommand(arg1) {
   return window['go']['app']['App']['RunCommand'](arg1);
-}
-
-export function SaveUserConfig(arg1) {
-  return window['go']['app']['App']['SaveUserConfig'](arg1);
 }
 
 export function SetOpenProjectId(arg1) {

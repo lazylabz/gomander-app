@@ -36,8 +36,6 @@ export function GetCurrentRelease():Promise<string>;
 
 export function GetProjectToImport():Promise<app.ProjectExportJSONv1>;
 
-export function GetUserConfig():Promise<domain.Config>;
-
 export function ImportProject(arg1:app.ProjectExportJSONv1,arg2:string,arg3:string):Promise<void>;
 
 export function IsThereANewRelease():Promise<string>;
@@ -57,8 +55,6 @@ export function ReorderCommandGroups(arg1:Array<string>):Promise<void>;
 export function ReorderCommands(arg1:Array<string>):Promise<void>;
 
 export function RunCommand(arg1:string):Promise<void>;
-
-export function SaveUserConfig(arg1:domain.Config):Promise<void>;
 
 export function SetOpenProjectId(arg1:string):Promise<void>;
 

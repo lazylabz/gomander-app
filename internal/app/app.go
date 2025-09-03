@@ -7,6 +7,7 @@ import (
 	commanddomain "gomander/internal/command/domain"
 	commandgrouphandlers "gomander/internal/commandgroup/application/handlers"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
+	configusecases "gomander/internal/config/application/usecases"
 	configdomain "gomander/internal/config/domain"
 	"gomander/internal/event"
 	"gomander/internal/eventbus"
@@ -15,6 +16,18 @@ import (
 	projectdomain "gomander/internal/project/domain"
 	"gomander/internal/runner"
 )
+
+type EventHandlers struct {
+	CleanCommandGroupsOnCommandDeleted   commandgrouphandlers.CleanCommandGroupsOnCommandDeleted
+	CleanCommandGroupsOnProjectDeleted   commandgrouphandlers.CleanCommandGroupsOnProjectDeleted
+	CleanCommandsOnProjectDeleted        commandhandlers.CleanCommandsOnProjectDeleted
+	AddCommandToGroupOnCommandDuplicated commandgrouphandlers.AddCommandToGroupOnCommandDuplicated
+}
+
+type UseCases struct {
+	GetUserConfig  configusecases.GetUserConfig
+	SaveUserConfig configusecases.SaveUserConfig
+}
 
 // App struct
 type App struct {
@@ -36,10 +49,8 @@ type App struct {
 
 	eventBus eventbus.EventBus
 
-	cleanCommandGroupsOnCommandDeletedHandler commandgrouphandlers.CleanCommandGroupsOnCommandDeleted
-	cleanCommandGroupsOnProjectDeletedHandler commandgrouphandlers.CleanCommandGroupsOnProjectDeleted
-	cleanCommandsOnProjectDeleted             commandhandlers.CleanCommandsOnProjectDeleted
-	addCommandToGroupOnCommandDuplicated      commandgrouphandlers.AddCommandToGroupOnCommandDuplicated
+	eventHandlers EventHandlers
+	UseCases      UseCases
 }
 
 type Dependencies struct {
@@ -57,10 +68,8 @@ type Dependencies struct {
 
 	EventBus eventbus.EventBus
 
-	CleanCommandGroupsOnCommandDeletedHandler commandgrouphandlers.CleanCommandGroupsOnCommandDeleted
-	CleanCommandGroupsOnProjectDeletedHandler commandgrouphandlers.CleanCommandGroupsOnProjectDeleted
-	CleanCommandsOnProjectDeleted             commandhandlers.CleanCommandsOnProjectDeleted
-	AddCommandToGroupOnCommandDuplicated      commandgrouphandlers.AddCommandToGroupOnCommandDuplicated
+	EventHandlers EventHandlers
+	UseCases      UseCases
 }
 
 func (a *App) LoadDependencies(d Dependencies) {
@@ -77,18 +86,16 @@ func (a *App) LoadDependencies(d Dependencies) {
 
 	a.eventBus = d.EventBus
 
-	a.cleanCommandGroupsOnCommandDeletedHandler = d.CleanCommandGroupsOnCommandDeletedHandler
-	a.cleanCommandGroupsOnProjectDeletedHandler = d.CleanCommandGroupsOnProjectDeletedHandler
-	a.cleanCommandsOnProjectDeleted = d.CleanCommandsOnProjectDeleted
-	a.addCommandToGroupOnCommandDuplicated = d.AddCommandToGroupOnCommandDuplicated
+	a.eventHandlers = d.EventHandlers
+	a.UseCases = d.UseCases
 }
 
 func (a *App) RegisterHandlers() {
 	// Register event handlers
-	a.eventBus.RegisterHandler(a.cleanCommandGroupsOnCommandDeletedHandler)
-	a.eventBus.RegisterHandler(a.cleanCommandGroupsOnProjectDeletedHandler)
-	a.eventBus.RegisterHandler(a.cleanCommandsOnProjectDeleted)
-	a.eventBus.RegisterHandler(a.addCommandToGroupOnCommandDuplicated)
+	a.eventBus.RegisterHandler(a.eventHandlers.CleanCommandGroupsOnCommandDeleted)
+	a.eventBus.RegisterHandler(a.eventHandlers.CleanCommandGroupsOnProjectDeleted)
+	a.eventBus.RegisterHandler(a.eventHandlers.CleanCommandsOnProjectDeleted)
+	a.eventBus.RegisterHandler(a.eventHandlers.AddCommandToGroupOnCommandDuplicated)
 }
 
 // NewApp creates a new App application struct
