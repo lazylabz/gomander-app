@@ -41,21 +41,31 @@ func newTestHelper(t *testing.T,
 
 func TestGormConfigRepository_GetOrCreate(t *testing.T) {
 	t.Run("Should create config if not exists", func(t *testing.T) {
+		// Arrange
 		helper := newTestHelper(t, nil, nil)
+
+		// Act
 		config, err := helper.repo.GetOrCreate()
+
+		// Assert
 		assert.NoError(t, err)
 		assert.NotNil(t, config)
 		assert.Equal(t, "", config.LastOpenedProjectId)
 		assert.Empty(t, config.EnvironmentPaths)
 	})
 	t.Run("Should return existing config with environment paths", func(t *testing.T) {
+		// Arrange
 		preloadedConfig := &ConfigModel{Id: 1, LastOpenedProjectId: "proj-123"}
 		preloadedPaths := []*EnvironmentPathModel{
 			{Id: "path1", Path: "/usr/bin"},
 			{Id: "path2", Path: "/usr/local/bin"},
 		}
 		helper := newTestHelper(t, preloadedConfig, preloadedPaths)
+
+		// Act
 		config, err := helper.repo.GetOrCreate()
+
+		// Assert
 		assert.NoError(t, err)
 		assert.Equal(t, &domain.Config{
 			LastOpenedProjectId: "proj-123",
@@ -68,6 +78,7 @@ func TestGormConfigRepository_GetOrCreate(t *testing.T) {
 
 func TestGormConfigRepository_Update(t *testing.T) {
 	t.Run("Should save config and environment paths", func(t *testing.T) {
+		// Arrange
 		preloadedConfig := &ConfigModel{Id: 1, LastOpenedProjectId: "proj-123"}
 		preloadedPaths := []*EnvironmentPathModel{
 			{Id: "path1", Path: "/usr/bin"},
@@ -84,9 +95,13 @@ func TestGormConfigRepository_Update(t *testing.T) {
 			},
 		}
 
+		// Act
 		err := helper.repo.Update(newConfig)
+
+		// Assert
 		assert.NoError(t, err)
 
+		// Verify the config was updated correctly
 		got, err := helper.repo.GetOrCreate()
 		assert.NoError(t, err)
 		assert.Equal(t, &domain.Config{

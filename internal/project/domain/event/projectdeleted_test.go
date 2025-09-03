@@ -9,6 +9,12 @@ import (
 )
 
 func TestProjectDeletedEvent_GetName(t *testing.T) {
+	// Arrange
 	e := event.ProjectDeletedEvent{}
-	assert.Equal(t, "domain_event.project.delete", e.GetName())
+
+	// Act
+	result := e.GetName()
+
+	// Assert
+	assert.Equal(t, "domain_event.project.delete", result)
 }

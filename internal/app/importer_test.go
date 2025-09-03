@@ -34,6 +34,7 @@ func (m *MockFsFacade) ReadFile(path string) ([]byte, error) {
 
 func TestApp_ExportProject(t *testing.T) {
 	t.Run("Should export the project to the selected file", func(t *testing.T) {
+		// Arrange
 		projectId := "test-project-id"
 
 		a := app.NewApp()
@@ -101,7 +102,10 @@ func TestApp_ExportProject(t *testing.T) {
 
 		mockFsFacade.On("WriteFile", "/somedir/file.json", expectedBytes, os.FileMode(0644)).Return(nil)
 
+		// Act
 		err = a.ExportProject(projectId)
+
+		// Assert
 		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -111,6 +115,7 @@ func TestApp_ExportProject(t *testing.T) {
 		)
 	})
 	t.Run("Should return error if there is a problem opening the destination file", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -124,16 +129,19 @@ func TestApp_ExportProject(t *testing.T) {
 		})
 
 		mockProjectRepository.On("Get", "test-project-id").Return(&projectdomain.Project{Id: "test-project-id", Name: "Test Project"}, nil)
-
 		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("", assert.AnError)
 
+		// Act
 		err := a.ExportProject("test-project-id")
+
+		// Assert
 		assert.Error(t, err)
 		assert.Equal(t, assert.AnError, err)
 
 		mock.AssertExpectationsForObjects(t, mockRuntimeFacade, mockFsFacade)
 	})
 	t.Run("Should return nil if the user cancels the save dialog", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -147,15 +155,18 @@ func TestApp_ExportProject(t *testing.T) {
 		})
 
 		mockProjectRepository.On("Get", "test-project-id").Return(&projectdomain.Project{Id: "test-project-id", Name: "Test Project"}, nil)
-
 		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("", nil)
 
+		// Act
 		err := a.ExportProject("test-project-id")
+
+		// Assert
 		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t, mockRuntimeFacade, mockFsFacade)
 	})
 	t.Run("Should return error if there is a problem reading the project data", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -170,13 +181,17 @@ func TestApp_ExportProject(t *testing.T) {
 
 		mockProjectRepository.On("Get", "test-project-id").Return(nil, assert.AnError)
 
+		// Act
 		err := a.ExportProject("test-project-id")
+
+		// Assert
 		assert.Error(t, err)
 		assert.Equal(t, assert.AnError, err)
 
 		mock.AssertExpectationsForObjects(t, mockRuntimeFacade, mockFsFacade, mockProjectRepository)
 	})
 	t.Run("Should return error if there is a problem reading the commands ", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -195,13 +210,17 @@ func TestApp_ExportProject(t *testing.T) {
 		mockCommandRepository.On("GetAll", "test-project-id").Return(make([]domain.Command, 0), assert.AnError)
 		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("/somedir/file.json", nil)
 
+		// Act
 		err := a.ExportProject("test-project-id")
+
+		// Assert
 		assert.Error(t, err)
 		assert.Equal(t, assert.AnError, err)
 
 		mock.AssertExpectationsForObjects(t, mockRuntimeFacade, mockFsFacade, mockProjectRepository, mockCommandRepository)
 	})
 	t.Run("Should return error if there is a problem reading the command groups", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -223,7 +242,10 @@ func TestApp_ExportProject(t *testing.T) {
 		mockCommandGroupRepository.On("GetAll", "test-project-id").Return([]commandgroupdomain.CommandGroup{}, assert.AnError)
 		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("/somedir/file.json", nil)
 
+		// Act
 		err := a.ExportProject("test-project-id")
+
+		// Assert
 		assert.Error(t, err)
 		assert.Equal(t, assert.AnError, err)
 
@@ -310,6 +332,7 @@ func TestApp_ExportProject(t *testing.T) {
 
 func TestApp_ImportProject(t *testing.T) {
 	t.Run("Should import the project", func(t *testing.T) {
+		// Arrange
 		projectId := "test-project-id"
 
 		a := app.NewApp()
@@ -403,7 +426,10 @@ func TestApp_ImportProject(t *testing.T) {
 			capturedCommandGroups = append(capturedCommandGroups, args.Get(0).(*commandgroupdomain.CommandGroup))
 		}).Return(nil)
 
+		// Act
 		err := a.ImportProject(projectJSON, newName, newWorkingDirectory)
+
+		// Assert
 		assert.NoError(t, err)
 
 		for i, expectedCmd := range commands {
@@ -437,6 +463,7 @@ func TestApp_ImportProject(t *testing.T) {
 		)
 	})
 	t.Run("Should return error if there is a problem saving the project", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 
 		mockProjectRepository := new(MockProjectRepository)
@@ -468,7 +495,10 @@ func TestApp_ImportProject(t *testing.T) {
 
 		mockProjectRepository.On("Create", mock.Anything).Return(assert.AnError).Once()
 
+		// Act
 		err := a.ImportProject(projectJSON, "Imported Project", "/imported/project/dir")
+
+		// Assert
 		assert.Error(t, err)
 		assert.Equal(t, assert.AnError, err)
 
@@ -481,6 +511,7 @@ func TestApp_ImportProject(t *testing.T) {
 		)
 	})
 	t.Run("Should return error if there is a problem saving the commands", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 
 		mockProjectRepository := new(MockProjectRepository)
@@ -513,7 +544,10 @@ func TestApp_ImportProject(t *testing.T) {
 		mockProjectRepository.On("Create", mock.Anything).Return(nil)
 		mockCommandRepository.On("Create", mock.Anything).Return(assert.AnError)
 
+		// Act
 		err := a.ImportProject(projectJSON, "Imported Project", "/imported/project/dir")
+
+		// Assert
 		assert.Error(t, err)
 		assert.Equal(t, assert.AnError, err)
 
@@ -526,6 +560,7 @@ func TestApp_ImportProject(t *testing.T) {
 		)
 	})
 	t.Run("Should return error if there is a problem saving the command groups", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 
 		mockProjectRepository := new(MockProjectRepository)
@@ -559,7 +594,10 @@ func TestApp_ImportProject(t *testing.T) {
 		mockCommandRepository.On("Create", mock.Anything).Return(nil)
 		mockCommandGroupRepository.On("Create", mock.Anything).Return(assert.AnError)
 
+		// Act
 		err := a.ImportProject(projectJSON, "Imported Project", "/imported/project/dir")
+
+		// Assert
 		assert.Error(t, err)
 		assert.Equal(t, assert.AnError, err)
 
@@ -575,6 +613,7 @@ func TestApp_ImportProject(t *testing.T) {
 
 func TestApp_GetProjectToImport(t *testing.T) {
 	t.Run("Should return project import", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -598,13 +637,17 @@ func TestApp_GetProjectToImport(t *testing.T) {
 		mockRuntimeFacade.On("OpenFileDialog", mock.Anything, mock.Anything).Return("/path/to/project.json", nil)
 		mockFsFacade.On("ReadFile", "/path/to/project.json").Return(basicProjectJsonBytes, nil)
 
+		// Act
 		toImport, err := a.GetProjectToImport()
+
+		// Assert
 		assert.NoError(t, err)
 		assert.Equal(t, &basicProjectJson, toImport)
 
 		mock.AssertExpectationsForObjects(t, mockRuntimeFacade, mockFsFacade)
 	})
 	t.Run("Should return error if there is a problem opening the file dialog", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -617,13 +660,17 @@ func TestApp_GetProjectToImport(t *testing.T) {
 
 		mockRuntimeFacade.On("OpenFileDialog", mock.Anything, mock.Anything).Return("", assert.AnError)
 
+		// Act
 		toImport, err := a.GetProjectToImport()
+
+		// Assert
 		assert.Error(t, err)
 		assert.Nil(t, toImport)
 
 		mock.AssertExpectationsForObjects(t, mockRuntimeFacade, mockFsFacade)
 	})
 	t.Run("Should return nil if the user cancels the file dialog", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -636,13 +683,17 @@ func TestApp_GetProjectToImport(t *testing.T) {
 
 		mockRuntimeFacade.On("OpenFileDialog", mock.Anything, mock.Anything).Return("", nil)
 
+		// Act
 		toImport, err := a.GetProjectToImport()
+
+		// Assert
 		assert.NoError(t, err)
 		assert.Nil(t, toImport)
 
 		mock.AssertExpectationsForObjects(t, mockRuntimeFacade, mockFsFacade)
 	})
 	t.Run("Should return error if there is a problem reading the file", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -656,7 +707,10 @@ func TestApp_GetProjectToImport(t *testing.T) {
 		mockRuntimeFacade.On("OpenFileDialog", mock.Anything, mock.Anything).Return("/path/to/project.json", nil)
 		mockFsFacade.On("ReadFile", "/path/to/project.json").Return([]byte{}, assert.AnError)
 
+		// Act
 		toImport, err := a.GetProjectToImport()
+
+		// Assert
 		assert.Error(t, err)
 		assert.Nil(t, toImport)
 

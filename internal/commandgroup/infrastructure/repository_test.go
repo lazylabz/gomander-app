@@ -49,6 +49,7 @@ func newTestHelper(t *testing.T,
 
 func TestGormCommandGroupRepository_GetAll(t *testing.T) {
 	t.Run("Should return all command groups sorted by position with their commands sorted by position", func(t *testing.T) {
+		// Arrange
 		projectId := "project1"
 
 		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
@@ -68,8 +69,10 @@ func TestGormCommandGroupRepository_GetAll(t *testing.T) {
 			slices.Concat(commandToCommandGroupModels, commandToCommandGroupModels2),
 		)
 
+		// Act
 		result, err := helper.repo.GetAll(projectId)
 
+		// Assert
 		expectedCommandGroups := []domain.CommandGroup{
 			commandGroupDataToDomain(cmdGroup1),
 			commandGroupDataToDomain(cmdGroup2),
@@ -84,6 +87,7 @@ func TestGormCommandGroupRepository_GetAll(t *testing.T) {
 
 func TestGormCommandGroupRepository_Get(t *testing.T) {
 	t.Run("Should return a command group by id with sorted commands", func(t *testing.T) {
+		// Arrange
 		projectId := "project1"
 
 		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
@@ -103,7 +107,10 @@ func TestGormCommandGroupRepository_Get(t *testing.T) {
 			slices.Concat(commandToCommandGroupModels, commandToCommandGroupModels2),
 		)
 
+		// Act
 		result, err := helper.repo.Get(cmdGroup1.Id)
+
+		// Assert
 		assert.Nil(t, err)
 
 		expectedCommandGroup := commandGroupDataToDomain(cmdGroup1)
@@ -111,10 +118,13 @@ func TestGormCommandGroupRepository_Get(t *testing.T) {
 		assert.Equal(t, &expectedCommandGroup, result)
 	})
 	t.Run("Should return nil if command group does not exist", func(t *testing.T) {
+		// Arrange
 		helper := newTestHelper(t, nil, nil, nil)
 
+		// Act
 		result, err := helper.repo.Get("non-existent-id")
 
+		// Assert
 		assert.Nil(t, err)
 		assert.Nil(t, result)
 	})
@@ -122,6 +132,7 @@ func TestGormCommandGroupRepository_Get(t *testing.T) {
 
 func TestGormCommandGroupRepository_Create(t *testing.T) {
 	t.Run("Should create a new command group and its associations", func(t *testing.T) {
+		// Arrange
 		projectId := "project1"
 
 		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
@@ -141,9 +152,13 @@ func TestGormCommandGroupRepository_Create(t *testing.T) {
 
 		newGroup := commandGroupDataToDomain(cmdGroup1)
 
+		// Act
 		err := helper.repo.Create(&newGroup)
+
+		// Assert
 		assert.Nil(t, err)
 
+		// Verify the group was created correctly
 		result, err := helper.repo.Get(newGroup.Id)
 		assert.Nil(t, err)
 		assert.Equal(t, &newGroup, result)

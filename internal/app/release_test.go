@@ -14,10 +14,13 @@ import (
 )
 
 func TestApp_GetCurrentRelease(t *testing.T) {
+	// Arrange
 	a := &app.App{}
 
+	// Act
 	currentRelease := a.GetCurrentRelease()
 
+	// Assert
 	assert.Equal(t, "1.0.0", currentRelease)
 
 	// Verify it's a valid semver
@@ -27,6 +30,7 @@ func TestApp_GetCurrentRelease(t *testing.T) {
 
 func TestApp_IsThereANewRelease(t *testing.T) {
 	t.Run("Should return new release when available", func(t *testing.T) {
+		// Arrange
 		a := &app.App{}
 
 		mockLogger := new(MockLogger)
@@ -65,12 +69,16 @@ func TestApp_IsThereANewRelease(t *testing.T) {
 
 		app.LatestReleaseUrl = ts.URL + "/releases.atom"
 
+		// Act
 		release, err := a.IsThereANewRelease()
-		assert.NoError(t, err)
 
+		// Assert
+		assert.NoError(t, err)
 		assert.Equal(t, "9999.9.9", release)
 	})
+
 	t.Run("Should return empty string when no new release", func(t *testing.T) {
+		// Arrange
 		a := &app.App{}
 
 		mockLogger := new(MockLogger)
@@ -109,12 +117,16 @@ func TestApp_IsThereANewRelease(t *testing.T) {
 
 		app.LatestReleaseUrl = ts.URL + "/releases.atom"
 
+		// Act
 		release, err := a.IsThereANewRelease()
-		assert.NoError(t, err)
 
+		// Assert
+		assert.NoError(t, err)
 		assert.Equal(t, "", release)
 	})
+
 	t.Run("Should return nil when no releases found", func(t *testing.T) {
+		// Arrange
 		a := &app.App{}
 
 		mockLogger := new(MockLogger)
@@ -137,12 +149,16 @@ func TestApp_IsThereANewRelease(t *testing.T) {
 
 		app.LatestReleaseUrl = ts.URL + "/releases.atom"
 
+		// Act
 		release, err := a.IsThereANewRelease()
-		assert.NoError(t, err)
 
+		// Assert
+		assert.NoError(t, err)
 		assert.Equal(t, "", release)
 	})
+
 	t.Run("Should return error when failing to retrieve releases", func(t *testing.T) {
+		// Arrange
 		a := &app.App{}
 
 		mockLogger := new(MockLogger)
@@ -163,7 +179,10 @@ func TestApp_IsThereANewRelease(t *testing.T) {
 
 		app.LatestReleaseUrl = ts.URL + "/releases.atom"
 
+		// Act
 		release, err := a.IsThereANewRelease()
+
+		// Assert
 		assert.Error(t, err)
 		assert.Equal(t, "", release)
 	})

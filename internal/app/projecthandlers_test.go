@@ -15,6 +15,7 @@ import (
 
 func TestApp_GetCurrentProject(t *testing.T) {
 	t.Run("Should return the current project", func(t *testing.T) {
+		// Arrange
 		mockProjectRepository := new(MockProjectRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
 
@@ -30,24 +31,35 @@ func TestApp_GetCurrentProject(t *testing.T) {
 		mockConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: projectId}, nil)
 		mockProjectRepository.On("Get", projectId).Return(project, nil)
 
+		// Act
 		got, err := a.GetCurrentProject()
+
+		// Assert
 		assert.NoError(t, err)
 		assert.Equal(t, project, got)
 		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockConfigRepository)
 	})
+
 	t.Run("Should return an error if getting the config fails", func(t *testing.T) {
+		// Arrange
 		mockConfigRepository := new(MockUserConfigRepository)
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			ConfigRepository: mockConfigRepository,
 		})
 		mockConfigRepository.On("GetOrCreate").Return(nil, errors.New("config error"))
+
+		// Act
 		_, err := a.GetCurrentProject()
+
+		// Assert
 		assert.Error(t, err)
 
 		mock.AssertExpectationsForObjects(t, mockConfigRepository)
 	})
+
 	t.Run("Should return an error if project does not exist", func(t *testing.T) {
+		// Arrange
 		mockProjectRepository := new(MockProjectRepository)
 		mockConfigRepository := new(MockUserConfigRepository)
 
@@ -60,7 +72,10 @@ func TestApp_GetCurrentProject(t *testing.T) {
 		mockConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: "nonexistent"}, nil)
 		mockProjectRepository.On("Get", "nonexistent").Return(nil, errors.New("project not found"))
 
+		// Act
 		_, err := a.GetCurrentProject()
+
+		// Assert
 		assert.Error(t, err)
 		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockConfigRepository)
 	})
@@ -68,6 +83,7 @@ func TestApp_GetCurrentProject(t *testing.T) {
 
 func TestApp_GetAvailableProjects(t *testing.T) {
 	t.Run("Should return available projects", func(t *testing.T) {
+		// Arrange
 		mockProjectRepository := new(MockProjectRepository)
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
@@ -77,12 +93,17 @@ func TestApp_GetAvailableProjects(t *testing.T) {
 		projects := []projectdomain.Project{{Id: "1", Name: "A", WorkingDirectory: "/a"}}
 		mockProjectRepository.On("GetAll").Return(projects, nil)
 
+		// Act
 		got, err := a.GetAvailableProjects()
+
+		// Assert
 		assert.NoError(t, err)
 		assert.Equal(t, projects, got)
 		mock.AssertExpectationsForObjects(t, mockProjectRepository)
 	})
+
 	t.Run("Should return an error if fetching projects fails", func(t *testing.T) {
+		// Arrange
 		mockProjectRepository := new(MockProjectRepository)
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
@@ -91,7 +112,10 @@ func TestApp_GetAvailableProjects(t *testing.T) {
 
 		mockProjectRepository.On("GetAll").Return(make([]projectdomain.Project, 0), errors.New("fail"))
 
+		// Act
 		_, err := a.GetAvailableProjects()
+
+		// Assert
 		assert.Error(t, err)
 		mock.AssertExpectationsForObjects(t, mockProjectRepository)
 	})
@@ -99,6 +123,7 @@ func TestApp_GetAvailableProjects(t *testing.T) {
 
 func TestApp_OpenProject(t *testing.T) {
 	t.Run("Should open a project successfully", func(t *testing.T) {
+		// Arrange
 		mockConfigRepository := new(MockUserConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
 
@@ -122,7 +147,10 @@ func TestApp_OpenProject(t *testing.T) {
 		mockConfigRepository.On("Update", mock.Anything).Return(nil)
 		mockProjectRepository.On("Get", projectId).Return(&projectdomain.Project{Id: projectId}, nil).Once()
 
+		// Act
 		err := a.OpenProject(projectId)
+
+		// Assert
 		assert.NoError(t, err)
 
 		// Assert that the project is saved in memory as the current project
@@ -131,7 +159,9 @@ func TestApp_OpenProject(t *testing.T) {
 		assert.NoError(t, err)
 		mock.AssertExpectationsForObjects(t, mockConfigRepository, mockProjectRepository)
 	})
+
 	t.Run("Should return an error if project does not exist", func(t *testing.T) {
+		// Arrange
 		mockProjectRepository := new(MockProjectRepository)
 
 		a := app.NewApp()
@@ -142,11 +172,16 @@ func TestApp_OpenProject(t *testing.T) {
 		projectId := "nonexistent"
 		mockProjectRepository.On("Get", projectId).Return(nil, errors.New("project not found"))
 
+		// Act
 		err := a.OpenProject(projectId)
+
+		// Assert
 		assert.Error(t, err)
 		mock.AssertExpectationsForObjects(t, mockProjectRepository)
 	})
+
 	t.Run("Should return an error if getting the config fails", func(t *testing.T) {
+		// Arrange
 		mockConfigRepository := new(MockUserConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
 
@@ -160,11 +195,16 @@ func TestApp_OpenProject(t *testing.T) {
 		mockProjectRepository.On("Get", projectId).Return(nil, nil)
 		mockConfigRepository.On("GetOrCreate").Return(nil, errors.New("config error"))
 
+		// Act
 		err := a.OpenProject(projectId)
+
+		// Assert
 		assert.Error(t, err)
 		mock.AssertExpectationsForObjects(t, mockConfigRepository, mockProjectRepository)
 	})
+
 	t.Run("Should return an error if updating the config fails", func(t *testing.T) {
+		// Arrange
 		mockConfigRepository := new(MockUserConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
 
@@ -180,7 +220,10 @@ func TestApp_OpenProject(t *testing.T) {
 		mockConfigRepository.On("Update", mock.Anything).Return(errors.New("update error"))
 		mockProjectRepository.On("Get", projectId).Return(&projectdomain.Project{Id: projectId}, nil)
 
+		// Act
 		err := a.OpenProject(projectId)
+
+		// Assert
 		assert.Error(t, err)
 		mock.AssertExpectationsForObjects(t, mockConfigRepository, mockProjectRepository)
 	})
@@ -188,6 +231,7 @@ func TestApp_OpenProject(t *testing.T) {
 
 func TestApp_CreateProject(t *testing.T) {
 	t.Run("Should create a project successfully", func(t *testing.T) {
+		// Arrange
 		mockProjectRepository := new(MockProjectRepository)
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
@@ -196,10 +240,17 @@ func TestApp_CreateProject(t *testing.T) {
 
 		project := projectdomain.Project{Id: "1", Name: "A", WorkingDirectory: "/a"}
 		mockProjectRepository.On("Create", project).Return(nil)
-		assert.NoError(t, a.CreateProject(project))
+
+		// Act
+		err := a.CreateProject(project)
+
+		// Assert
+		assert.NoError(t, err)
 		mock.AssertExpectationsForObjects(t, mockProjectRepository)
 	})
+
 	t.Run("Should return an error if project creation fails", func(t *testing.T) {
+		// Arrange
 		mockProjectRepository := new(MockProjectRepository)
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
@@ -208,13 +259,19 @@ func TestApp_CreateProject(t *testing.T) {
 
 		project := projectdomain.Project{Id: "1", Name: "A", WorkingDirectory: "/a"}
 		mockProjectRepository.On("Create", project).Return(errors.New("fail"))
-		assert.Error(t, a.CreateProject(project))
+
+		// Act
+		err := a.CreateProject(project)
+
+		// Assert
+		assert.Error(t, err)
 		mock.AssertExpectationsForObjects(t, mockProjectRepository)
 	})
 }
 
 func TestApp_EditProject(t *testing.T) {
 	t.Run("Should edit a project successfully", func(t *testing.T) {
+		// Arrange
 		mockProjectRepository := new(MockProjectRepository)
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
@@ -223,10 +280,17 @@ func TestApp_EditProject(t *testing.T) {
 
 		project := projectdomain.Project{Id: "1", Name: "A", WorkingDirectory: "/a"}
 		mockProjectRepository.On("Update", project).Return(nil)
-		assert.NoError(t, a.EditProject(project))
+
+		// Act
+		err := a.EditProject(project)
+
+		// Assert
+		assert.NoError(t, err)
 		mock.AssertExpectationsForObjects(t, mockProjectRepository)
 	})
+
 	t.Run("Should return an error if project update fails", func(t *testing.T) {
+		// Arrange
 		mockProjectRepository := new(MockProjectRepository)
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
@@ -235,13 +299,19 @@ func TestApp_EditProject(t *testing.T) {
 
 		project := projectdomain.Project{Id: "1", Name: "A", WorkingDirectory: "/a"}
 		mockProjectRepository.On("Update", project).Return(errors.New("fail"))
-		assert.Error(t, a.EditProject(project))
+
+		// Act
+		err := a.EditProject(project)
+
+		// Assert
+		assert.Error(t, err)
 		mock.AssertExpectationsForObjects(t, mockProjectRepository)
 	})
 }
 
 func TestApp_CloseProject(t *testing.T) {
 	t.Run("Should close the current project", func(t *testing.T) {
+		// Arrange
 		mockConfigRepository := new(MockUserConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
 		a := app.NewApp()
@@ -256,15 +326,22 @@ func TestApp_CloseProject(t *testing.T) {
 		}
 		mockConfigRepository.On("GetOrCreate").Return(&mockConfig, nil)
 		mockConfigRepository.On("Update", mock.Anything).Return(nil)
-		assert.NoError(t, a.CloseProject())
+
+		// Act
+		err := a.CloseProject()
+
+		// Assert
+		assert.NoError(t, err)
 
 		// Assert that the project is closed in memory
 		mockProjectRepository.On("Get", "").Return(&projectdomain.Project{}, nil).Once()
-		_, err := a.GetCurrentProject()
+		_, err = a.GetCurrentProject()
 		assert.NoError(t, err)
 		mock.AssertExpectationsForObjects(t, mockConfigRepository, mockProjectRepository)
 	})
+
 	t.Run("Should return an error if getting the config fails", func(t *testing.T) {
+		// Arrange
 		mockConfigRepository := new(MockUserConfigRepository)
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
@@ -272,10 +349,17 @@ func TestApp_CloseProject(t *testing.T) {
 		})
 
 		mockConfigRepository.On("GetOrCreate").Return(nil, errors.New("config error"))
-		assert.Error(t, a.CloseProject())
+
+		// Act
+		err := a.CloseProject()
+
+		// Assert
+		assert.Error(t, err)
 		mock.AssertExpectationsForObjects(t, mockConfigRepository)
 	})
+
 	t.Run("Should return an error if updating the config fails", func(t *testing.T) {
+		// Arrange
 		mockConfigRepository := new(MockUserConfigRepository)
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
@@ -285,13 +369,19 @@ func TestApp_CloseProject(t *testing.T) {
 		mockConfig := domain.Config{LastOpenedProjectId: "project1"}
 		mockConfigRepository.On("GetOrCreate").Return(&mockConfig, nil)
 		mockConfigRepository.On("Update", mock.Anything).Return(errors.New("update error"))
-		assert.Error(t, a.CloseProject())
+
+		// Act
+		err := a.CloseProject()
+
+		// Assert
+		assert.Error(t, err)
 		mock.AssertExpectationsForObjects(t, mockConfigRepository)
 	})
 }
 
 func TestApp_DeleteProject(t *testing.T) {
 	t.Run("Should delete a project and all its commands", func(t *testing.T) {
+		// Arrange
 		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventBus := new(MockEventBus)
@@ -308,10 +398,16 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockEventBus.On("PublishSync", event.NewProjectDeletedEvent(projectId)).Return(make([]error, 0))
 		mockProjectRepository.On("Delete", projectId).Return(nil)
 
-		assert.NoError(t, a.DeleteProject(projectId))
+		// Act
+		err := a.DeleteProject(projectId)
+
+		// Assert
+		assert.NoError(t, err)
 		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockLogger, mockEventBus)
 	})
+
 	t.Run("Should return an error if deleting the project fails", func(t *testing.T) {
+		// Arrange
 		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 
@@ -325,10 +421,16 @@ func TestApp_DeleteProject(t *testing.T) {
 
 		mockProjectRepository.On("Delete", projectId).Return(errors.New("some error occurred"))
 
-		assert.Error(t, a.DeleteProject(projectId))
+		// Act
+		err := a.DeleteProject(projectId)
+
+		// Assert
+		assert.Error(t, err)
 		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockLogger)
 	})
+
 	t.Run("Should return an error if an async event handler fails", func(t *testing.T) {
+		// Arrange
 		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventBus := new(MockEventBus)
@@ -347,7 +449,11 @@ func TestApp_DeleteProject(t *testing.T) {
 
 		mockLogger.On("Error", mock.Anything).Return()
 
-		assert.Error(t, a.DeleteProject(projectId))
+		// Act
+		err := a.DeleteProject(projectId)
+
+		// Assert
+		assert.Error(t, err)
 		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockLogger, mockEventBus)
 	})
 }

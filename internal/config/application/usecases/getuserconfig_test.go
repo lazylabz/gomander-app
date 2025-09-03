@@ -10,6 +10,7 @@ import (
 )
 
 func TestDefaultGetUserConfig_Execute(t *testing.T) {
+	// Arrange
 	mockRepository := new(MockUserConfigRepository)
 
 	sut := usecases.NewGetUserConfig(mockRepository)
@@ -25,8 +26,10 @@ func TestDefaultGetUserConfig_Execute(t *testing.T) {
 	}
 	mockRepository.On("GetOrCreate").Return(&expectedResult, nil)
 
+	// Act
 	config, err := sut.Execute()
 
+	// Assert
 	assert.NoError(t, err)
 	assert.Equal(t, expectedResult, *config)
 }

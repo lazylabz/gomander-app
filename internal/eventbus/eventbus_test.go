@@ -34,6 +34,7 @@ func (t *TestHandler) GetEvent() eventbus.Event {
 }
 
 func TestRegisterHandlerAndPublishSync_Success(t *testing.T) {
+	// Arrange
 	bus := eventbus.NewInMemoryEventBus()
 	handler := new(TestHandler)
 
@@ -43,13 +44,18 @@ func TestRegisterHandlerAndPublishSync_Success(t *testing.T) {
 	handler.On("Execute", testEvent).Return(nil).Once()
 
 	bus.RegisterHandler(handler)
+
+	// Act
 	evt := testEvent
 	errs := bus.PublishSync(evt)
+
+	// Assert
 	assert.Empty(t, errs)
 	mock.AssertExpectationsForObjects(t, handler)
 }
 
 func TestPublishSync_MultipleHandlers(t *testing.T) {
+	// Arrange
 	bus := eventbus.NewInMemoryEventBus()
 	evt := &TestEvent{name: "multi"}
 
@@ -63,13 +69,17 @@ func TestPublishSync_MultipleHandlers(t *testing.T) {
 
 	bus.RegisterHandler(h1)
 	bus.RegisterHandler(h2)
-	errs := bus.PublishSync(evt)
-	assert.Empty(t, errs)
 
+	// Act
+	errs := bus.PublishSync(evt)
+
+	// Assert
+	assert.Empty(t, errs)
 	mock.AssertExpectationsForObjects(t, h1, h2)
 }
 
 func TestPublishSync_HandlerReturnsError(t *testing.T) {
+	// Arrange
 	bus := eventbus.NewInMemoryEventBus()
 	evt := &TestEvent{name: "err"}
 
@@ -80,15 +90,24 @@ func TestPublishSync_HandlerReturnsError(t *testing.T) {
 	handler.On("Execute", evt).Return(handlerErr).Once()
 
 	bus.RegisterHandler(handler)
+
+	// Act
 	errs := bus.PublishSync(evt)
+
+	// Assert
 	assert.Len(t, errs, 1)
 	assert.Equal(t, handlerErr, errs[0])
 }
 
 func TestPublishSync_NoHandlers(t *testing.T) {
+	// Arrange
 	bus := eventbus.NewInMemoryEventBus()
 	evt := &TestEvent{name: "nohandlers"}
+
+	// Act
 	errs := bus.PublishSync(evt)
+
+	// Assert
 	if len(errs) != 0 {
 		t.Errorf("Expected no errors, got %v", errs)
 	}

@@ -37,6 +37,7 @@ func newTestHelper(t *testing.T, preloadedProjects []*ProjectModel) *testHelper 
 
 func TestGormProjectRepository_GetAll(t *testing.T) {
 	t.Run("Should return all projects", func(t *testing.T) {
+		// Arrange
 		preloadedProjects := []*ProjectModel{
 			{Id: "p1", Name: "Project 1", WorkingDirectory: "/tmp/1"},
 			{Id: "p2", Name: "Project 2", WorkingDirectory: "/tmp/2"},
@@ -46,7 +47,11 @@ func TestGormProjectRepository_GetAll(t *testing.T) {
 			{Id: "p2", Name: "Project 2", WorkingDirectory: "/tmp/2"},
 		}
 		h := newTestHelper(t, preloadedProjects)
+
+		// Act
 		projects, err := h.repo.GetAll()
+
+		// Assert
 		assert.NoError(t, err)
 		assert.Len(t, projects, 2)
 		assert.Equal(t, expectedProjects, projects)
@@ -55,20 +60,30 @@ func TestGormProjectRepository_GetAll(t *testing.T) {
 
 func TestGormProjectRepository_Get(t *testing.T) {
 	t.Run("Should return project when it exists", func(t *testing.T) {
+		// Arrange
 		preloadedProjects := []*ProjectModel{
 			{Id: "p1", Name: "Project 1", WorkingDirectory: "/tmp/1"},
 		}
 		expectedProject := domain.Project{Id: "p1", Name: "Project 1", WorkingDirectory: "/tmp/1"}
 		h := newTestHelper(t, preloadedProjects)
+
+		// Act
 		project, err := h.repo.Get("p1")
+
+		// Assert
 		assert.NoError(t, err)
 		assert.NotNil(t, project)
 		assert.Equal(t, "p1", project.Id)
 		assert.Equal(t, project, &expectedProject)
 	})
 	t.Run("Should return nil when project does not exist", func(t *testing.T) {
+		// Arrange
 		h := newTestHelper(t, nil)
+
+		// Act
 		project, err := h.repo.Get("nonexistent")
+
+		// Assert
 		assert.NoError(t, err)
 		assert.Nil(t, project)
 	})
@@ -76,10 +91,17 @@ func TestGormProjectRepository_Get(t *testing.T) {
 
 func TestGormProjectRepository_Create(t *testing.T) {
 	t.Run("Should create a new project", func(t *testing.T) {
+		// Arrange
 		h := newTestHelper(t, nil)
 		newProject := domain.Project{Id: "p3", Name: "Project 3", WorkingDirectory: "/tmp/3"}
+
+		// Act
 		err := h.repo.Create(newProject)
+
+		// Assert
 		assert.NoError(t, err)
+
+		// Verify the project was created
 		project, err := h.repo.Get("p3")
 		assert.NoError(t, err)
 		assert.NotNil(t, project)
@@ -89,13 +111,20 @@ func TestGormProjectRepository_Create(t *testing.T) {
 
 func TestGormProjectRepository_Update(t *testing.T) {
 	t.Run("Should update an existing project", func(t *testing.T) {
+		// Arrange
 		preloadedProjects := []*ProjectModel{
 			{Id: "p1", Name: "Old Name", WorkingDirectory: "/tmp/old"},
 		}
 		h := newTestHelper(t, preloadedProjects)
 		updated := domain.Project{Id: "p1", Name: "New Name", WorkingDirectory: "/tmp/new"}
+
+		// Act
 		err := h.repo.Update(updated)
+
+		// Assert
 		assert.NoError(t, err)
+
+		// Verify the project was updated
 		project, err := h.repo.Get("p1")
 		assert.NoError(t, err)
 		assert.NotNil(t, project)
@@ -106,12 +135,19 @@ func TestGormProjectRepository_Update(t *testing.T) {
 
 func TestGormProjectRepository_Delete(t *testing.T) {
 	t.Run("Should delete an existing project", func(t *testing.T) {
+		// Arrange
 		preloadedProjects := []*ProjectModel{
 			{Id: "p1", Name: "To Delete", WorkingDirectory: "/tmp/del"},
 		}
 		h := newTestHelper(t, preloadedProjects)
+
+		// Act
 		err := h.repo.Delete("p1")
+
+		// Assert
 		assert.NoError(t, err)
+
+		// Verify the project was deleted
 		project, err := h.repo.Get("p1")
 		assert.NoError(t, err)
 		assert.Nil(t, project)
