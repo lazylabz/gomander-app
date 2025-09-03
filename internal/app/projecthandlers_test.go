@@ -13,46 +13,6 @@ import (
 	"gomander/internal/project/domain/event"
 )
 
-func TestApp_CreateProject(t *testing.T) {
-	t.Run("Should create a project successfully", func(t *testing.T) {
-		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ProjectRepository: mockProjectRepository,
-		})
-
-		project := projectdomain.Project{Id: "1", Name: "A", WorkingDirectory: "/a"}
-		mockProjectRepository.On("Create", project).Return(nil)
-
-		// Act
-		err := a.CreateProject(project)
-
-		// Assert
-		assert.NoError(t, err)
-		mock.AssertExpectationsForObjects(t, mockProjectRepository)
-	})
-
-	t.Run("Should return an error if project creation fails", func(t *testing.T) {
-		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ProjectRepository: mockProjectRepository,
-		})
-
-		project := projectdomain.Project{Id: "1", Name: "A", WorkingDirectory: "/a"}
-		mockProjectRepository.On("Create", project).Return(errors.New("fail"))
-
-		// Act
-		err := a.CreateProject(project)
-
-		// Assert
-		assert.Error(t, err)
-		mock.AssertExpectationsForObjects(t, mockProjectRepository)
-	})
-}
-
 func TestApp_EditProject(t *testing.T) {
 	t.Run("Should edit a project successfully", func(t *testing.T) {
 		// Arrange

@@ -7,16 +7,6 @@ import (
 	"gomander/internal/project/domain/event"
 )
 
-func (a *App) CreateProject(project domain.Project) error {
-	err := a.projectRepository.Create(project)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (a *App) EditProject(project domain.Project) error {
 	err := a.projectRepository.Update(project)
 	if err != nil {

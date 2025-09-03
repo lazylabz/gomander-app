@@ -41,3 +41,7 @@ func (wc *WailsControllers) GetAvailableProjectsController() ([]projectdomain.Pr
 func (wc *WailsControllers) OpenProjectController(projectId string) error {
 	return wc.useCases.OpenProject.Execute(projectId)
 }
+
+func (wc *WailsControllers) CreateProjectController(project projectdomain.Project) error {
+	return wc.useCases.CreateProject.Execute(project)
+}

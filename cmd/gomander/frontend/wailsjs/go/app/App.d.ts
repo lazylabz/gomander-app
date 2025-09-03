@@ -10,8 +10,6 @@ export function CloseProject():Promise<void>;
 
 export function CreateCommandGroup(arg1:domain.CommandGroup):Promise<void>;
 
-export function CreateProject(arg1:domain.Project):Promise<void>;
-
 export function DeleteCommandGroup(arg1:string):Promise<void>;
 
 export function DeleteProject(arg1:string):Promise<void>;

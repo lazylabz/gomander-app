@@ -14,10 +14,6 @@ export function CreateCommandGroup(arg1) {
   return window['go']['app']['App']['CreateCommandGroup'](arg1);
 }
 
-export function CreateProject(arg1) {
-  return window['go']['app']['App']['CreateProject'](arg1);
-}
-
 export function DeleteCommandGroup(arg1) {
   return window['go']['app']['App']['DeleteCommandGroup'](arg1);
 }
