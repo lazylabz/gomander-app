@@ -35,6 +35,18 @@ func TestApp_GetCurrentProject(t *testing.T) {
 		assert.Equal(t, project, got)
 		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockConfigRepository)
 	})
+	t.Run("Should return an error if getting the config fails", func(t *testing.T) {
+		mockConfigRepository := new(MockUserConfigRepository)
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			ConfigRepository: mockConfigRepository,
+		})
+		mockConfigRepository.On("GetOrCreate").Return(nil, errors.New("config error"))
+		_, err := a.GetCurrentProject()
+		assert.Error(t, err)
+
+		mock.AssertExpectationsForObjects(t, mockConfigRepository)
+	})
 	t.Run("Should return an error if project does not exist", func(t *testing.T) {
 		mockProjectRepository := new(MockProjectRepository)
 		mockConfigRepository := new(MockUserConfigRepository)

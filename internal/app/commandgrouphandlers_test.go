@@ -47,6 +47,24 @@ func TestApp_GetCommandGroups(t *testing.T) {
 		assert.Equal(t, expectedCommandGroup, got[0])
 		mock.AssertExpectationsForObjects(t, mockCommandGroupRepository, mockUserConfigRepository)
 	})
+	t.Run("Should return an error if failing to retrieve user config", func(t *testing.T) {
+		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
+
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			CommandGroupRepository: mockCommandGroupRepository,
+			ConfigRepository:       mockUserConfigRepository,
+		})
+
+		expectedError := errors.New("failed to get user config")
+		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedError)
+
+		got, err := a.GetCommandGroups()
+		assert.ErrorIs(t, err, expectedError)
+		assert.Len(t, got, 0)
+		mock.AssertExpectationsForObjects(t, mockCommandGroupRepository, mockUserConfigRepository)
+	})
 }
 
 func TestApp_CreateCommandGroup(t *testing.T) {
@@ -89,6 +107,34 @@ func TestApp_CreateCommandGroup(t *testing.T) {
 
 		err := a.CreateCommandGroup(&paramCommandGroup)
 		assert.NoError(t, err)
+
+		mock.AssertExpectationsForObjects(t,
+			mockCommandGroupRepository,
+			mockUserConfigRepository,
+		)
+	})
+	t.Run("Should return an error if failing to retrieve user config", func(t *testing.T) {
+		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
+
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			CommandGroupRepository: mockCommandGroupRepository,
+			ConfigRepository:       mockUserConfigRepository,
+		})
+
+		expectedError := errors.New("failed to get user config")
+		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedError)
+
+		commandGroupData := testutils.
+			NewCommandGroup().
+			WithProjectId("project1").
+			Data()
+
+		paramCommandGroup := commandGroupDataToDomain(commandGroupData)
+
+		err := a.CreateCommandGroup(&paramCommandGroup)
+		assert.ErrorIs(t, err, expectedError)
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
@@ -313,6 +359,23 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 			mockCommandGroupRepository,
 			mockUserConfigRepository,
 		)
+	})
+	t.Run("Should return an error if failing to retrieve user config", func(t *testing.T) {
+		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			CommandGroupRepository: mockCommandGroupRepository,
+			ConfigRepository:       mockUserConfigRepository,
+		})
+		expectedError := errors.New("failed to get user config")
+		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedError)
+
+		newOrder := []string{"group1", "group2"}
+		err := a.ReorderCommandGroups(newOrder)
+
+		assert.ErrorIs(t, err, expectedError)
+		mock.AssertExpectationsForObjects(t, mockCommandGroupRepository, mockUserConfigRepository)
 	})
 	t.Run("Should return an error if failing to retrieve existing command groups", func(t *testing.T) {
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
