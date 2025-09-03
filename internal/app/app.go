@@ -34,6 +34,7 @@ type UseCases struct {
 	CreateProject        projectusecases.CreateProject
 	EditProject          projectusecases.EditProject
 	CloseProject         projectusecases.CloseProject
+	DeleteProject        projectusecases.DeleteProject
 }
 
 // App struct

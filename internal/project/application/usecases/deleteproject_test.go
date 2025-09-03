@@ -1,4 +1,4 @@
-package app_test
+package usecases_test
 
 import (
 	"errors"
@@ -7,23 +7,22 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"gomander/internal/app"
+	"gomander/internal/project/application/usecases"
 	"gomander/internal/project/domain/event"
 )
 
-func TestApp_DeleteProject(t *testing.T) {
+func TestDefaultDeleteProject_Execute(t *testing.T) {
 	t.Run("Should delete a project and all its commands", func(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventBus := new(MockEventBus)
 
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ProjectRepository: mockProjectRepository,
-			Logger:            mockLogger,
-			EventBus:          mockEventBus,
-		})
+		sut := usecases.NewDeleteProject(
+			mockProjectRepository,
+			mockEventBus,
+			mockLogger,
+		)
 
 		projectId := "1"
 
@@ -31,7 +30,7 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockProjectRepository.On("Delete", projectId).Return(nil)
 
 		// Act
-		err := a.DeleteProject(projectId)
+		err := sut.Execute(projectId)
 
 		// Assert
 		assert.NoError(t, err)
@@ -41,20 +40,21 @@ func TestApp_DeleteProject(t *testing.T) {
 	t.Run("Should return an error if deleting the project fails", func(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(MockProjectRepository)
+		mockEventBus := new(MockEventBus)
 		mockLogger := new(MockLogger)
 
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ProjectRepository: mockProjectRepository,
-			Logger:            mockLogger,
-		})
+		sut := usecases.NewDeleteProject(
+			mockProjectRepository,
+			mockEventBus,
+			mockLogger,
+		)
 
 		projectId := "1"
 
 		mockProjectRepository.On("Delete", projectId).Return(errors.New("some error occurred"))
 
 		// Act
-		err := a.DeleteProject(projectId)
+		err := sut.Execute(projectId)
 
 		// Assert
 		assert.Error(t, err)
@@ -67,12 +67,11 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockLogger := new(MockLogger)
 		mockEventBus := new(MockEventBus)
 
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ProjectRepository: mockProjectRepository,
-			Logger:            mockLogger,
-			EventBus:          mockEventBus,
-		})
+		sut := usecases.NewDeleteProject(
+			mockProjectRepository,
+			mockEventBus,
+			mockLogger,
+		)
 
 		projectId := "1"
 
@@ -82,7 +81,7 @@ func TestApp_DeleteProject(t *testing.T) {
 		mockLogger.On("Error", mock.Anything).Return()
 
 		// Act
-		err := a.DeleteProject(projectId)
+		err := sut.Execute(projectId)
 
 		// Assert
 		assert.Error(t, err)

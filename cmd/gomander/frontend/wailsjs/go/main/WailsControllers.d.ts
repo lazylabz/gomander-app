@@ -6,6 +6,8 @@ export function CloseProjectController():Promise<void>;
 
 export function CreateProjectController(arg1:domain.Project):Promise<void>;
 
+export function DeleteProjectController(arg1:string):Promise<void>;
+
 export function EditProjectController(arg1:domain.Project):Promise<void>;
 
 export function GetAvailableProjectsController():Promise<Array<domain.Project>>;

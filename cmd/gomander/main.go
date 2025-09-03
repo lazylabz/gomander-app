@@ -164,6 +164,9 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	cleanCommandsOnProjectDeleted := handlers.NewCleanCommandOnProjectDeleted(commandRepo)
 	addCommandToGroupOnCommandDuplicated := commandgrouphandlers.NewAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo)
 
+	// Initialize event bus
+	eventBus := eventbus.NewInMemoryEventBus()
+
 	// Initialize use cases
 	getUserConfig := configusecases.NewGetUserConfig(configRepo)
 	saveUserConfig := configusecases.NewSaveUserConfig(configRepo)
@@ -173,10 +176,8 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	createProject := projectusecases.NewCreateProject(projectRepo)
 	editProject := projectusecases.NewEditProject(projectRepo)
 	closeProject := projectusecases.NewCloseProject(configRepo)
+	deleteProject := projectusecases.NewDeleteProject(projectRepo, eventBus, l)
 
-	eventBus := eventbus.NewInMemoryEventBus()
-
-	// Initialize event emitter
 	app.LoadDependencies(internalapp.Dependencies{
 		Logger:       l,
 		EventEmitter: ee,
@@ -207,6 +208,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 			CreateProject:        createProject,
 			EditProject:          editProject,
 			CloseProject:         closeProject,
+			DeleteProject:        deleteProject,
 		},
 	})
 }

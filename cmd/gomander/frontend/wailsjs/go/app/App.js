@@ -14,10 +14,6 @@ export function DeleteCommandGroup(arg1) {
   return window['go']['app']['App']['DeleteCommandGroup'](arg1);
 }
 
-export function DeleteProject(arg1) {
-  return window['go']['app']['App']['DeleteProject'](arg1);
-}
-
 export function DuplicateCommand(arg1, arg2) {
   return window['go']['app']['App']['DuplicateCommand'](arg1, arg2);
 }

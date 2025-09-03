@@ -53,3 +53,7 @@ func (wc *WailsControllers) EditProjectController(project projectdomain.Project)
 func (wc *WailsControllers) CloseProjectController() error {
 	return wc.useCases.CloseProject.Execute()
 }
+
+func (wc *WailsControllers) DeleteProjectController(projectId string) error {
+	return wc.useCases.DeleteProject.Execute(projectId)
+}
