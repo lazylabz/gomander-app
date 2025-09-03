@@ -11,6 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip.tsx";
 import { useCommandStore } from "@/store/commandStore.ts";
 
 export const CreateMenu = () => {
@@ -52,14 +57,24 @@ export const CreateMenu = () => {
             <Terminal />
             Command
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={openCreateCommandGroupModal}
-            className="flex flex-row items-center justify-start"
-            disabled={!hasCommands}
-          >
-            <Group />
-            Command Group
-          </DropdownMenuItem>
+          <Tooltip delayDuration={500}>
+            <TooltipTrigger>
+              <DropdownMenuItem
+                onClick={openCreateCommandGroupModal}
+                className="flex flex-row items-center justify-start"
+                disabled={!hasCommands}
+              >
+                <Group />
+                Command Group
+              </DropdownMenuItem>
+            </TooltipTrigger>
+            {!hasCommands && (
+              <TooltipContent side="bottom">
+                Groups don't make sense without commands! Create a command
+                first.
+              </TooltipContent>
+            )}
+          </Tooltip>
         </DropdownMenuContent>
       </DropdownMenu>
     </>
