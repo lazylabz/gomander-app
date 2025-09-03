@@ -38,8 +38,6 @@ export function IsThereANewRelease():Promise<string>;
 
 export function LoadDependencies(arg1:app.Dependencies):Promise<void>;
 
-export function OpenProject(arg1:string):Promise<void>;
-
 export function RegisterHandlers():Promise<void>;
 
 export function RemoveCommand(arg1:string):Promise<void>;

@@ -30,6 +30,7 @@ type UseCases struct {
 	SaveUserConfig       configusecases.SaveUserConfig
 	GetCurrentProject    projectusecases.GetCurrentProject
 	GetAvailableProjects projectusecases.GetAvailableProjects
+	OpenProject          projectusecases.OpenProject
 }
 
 // App struct

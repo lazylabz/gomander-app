@@ -70,10 +70,6 @@ export function LoadDependencies(arg1) {
   return window['go']['app']['App']['LoadDependencies'](arg1);
 }
 
-export function OpenProject(arg1) {
-  return window['go']['app']['App']['OpenProject'](arg1);
-}
-
 export function RegisterHandlers() {
   return window['go']['app']['App']['RegisterHandlers']();
 }

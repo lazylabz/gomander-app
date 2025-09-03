@@ -7,27 +7,6 @@ import (
 	"gomander/internal/project/domain/event"
 )
 
-func (a *App) OpenProject(projectConfigId string) error {
-	_, err := a.projectRepository.Get(projectConfigId)
-	if err != nil {
-		return err
-	}
-
-	config, err := a.userConfigRepository.GetOrCreate()
-	if err != nil {
-		return err
-	}
-
-	config.LastOpenedProjectId = projectConfigId
-
-	err = a.userConfigRepository.Update(config)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (a *App) CreateProject(project domain.Project) error {
 	err := a.projectRepository.Create(project)
 

@@ -8,4 +8,6 @@ export function GetCurrentProjectController():Promise<domain.Project>;
 
 export function GetUserConfigController():Promise<domain.Config>;
 
+export function OpenProjectController(arg1:string):Promise<void>;
+
 export function SaveUserConfigController(arg1:domain.Config):Promise<void>;
