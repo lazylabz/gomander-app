@@ -12,7 +12,6 @@ import {
   GetAvailableProjects,
   GetCommandGroups,
   GetCommands,
-  GetCurrentProject,
   GetCurrentRelease,
   GetProjectToImport,
   ImportProject,
@@ -27,6 +26,7 @@ import {
   UpdateCommandGroup,
 } from "../../wailsjs/go/app/App";
 import {
+  GetCurrentProjectController,
   GetUserConfigController,
   SaveUserConfigController,
 } from "../../wailsjs/go/main/WailsControllers";
@@ -47,7 +47,8 @@ export const dataService = {
   removeCommandFromGroup: RemoveCommandFromCommandGroup,
   getCommandGroups: GetCommandGroups,
   getCommands: GetCommands,
-  getCurrentProject: GetCurrentProject as () => Promise<domain.Project | null>,
+  getCurrentProject:
+    GetCurrentProjectController as () => Promise<domain.Project | null>,
   getUserConfig: GetUserConfigController,
   removeCommand: RemoveCommand,
   runCommand: RunCommand,

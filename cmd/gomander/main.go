@@ -21,6 +21,7 @@ import (
 	"gomander/internal/eventbus"
 	"gomander/internal/facade"
 	logger "gomander/internal/logger"
+	projectusecases "gomander/internal/project/application/usecases"
 	projectinfrastructure "gomander/internal/project/infrastructure"
 	"gomander/internal/runner"
 	"gomander/internal/uihelpers/path"
@@ -166,6 +167,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	// Initialize use cases
 	getUserConfig := configusecases.NewGetUserConfig(configRepo)
 	saveUserConfig := configusecases.NewSaveUserConfig(configRepo)
+	getCurrentProject := projectusecases.NewGetCurrentProject(configRepo, projectRepo)
 
 	eventBus := eventbus.NewInMemoryEventBus()
 
@@ -192,8 +194,9 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 		},
 
 		UseCases: internalapp.UseCases{
-			GetUserConfig:  getUserConfig,
-			SaveUserConfig: saveUserConfig,
+			GetUserConfig:     getUserConfig,
+			SaveUserConfig:    saveUserConfig,
+			GetCurrentProject: getCurrentProject,
 		},
 	})
 }

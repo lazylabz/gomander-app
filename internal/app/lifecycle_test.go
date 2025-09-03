@@ -9,7 +9,6 @@ import (
 
 	"gomander/internal/app"
 	"gomander/internal/config/domain"
-	domain2 "gomander/internal/project/domain"
 )
 
 func TestApp_Startup(t *testing.T) {
@@ -31,17 +30,10 @@ func TestApp_Startup(t *testing.T) {
 		mockLogger.On("Info", mock.Anything).Return()
 		mockUserConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: "123"}, nil)
 
-		// Act
+		// Act & Assert
 		assert.NotPanics(t, func() {
 			a.Startup(ctx)
 		})
-
-		// Assert
-		// Verify that the openedProjectId is set correctly
-		mockProjectRepository.On("Get", "123").Return(&domain2.Project{}, nil)
-
-		_, err := a.GetCurrentProject()
-		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t, mockUserConfigRepository, mockLogger)
 	})

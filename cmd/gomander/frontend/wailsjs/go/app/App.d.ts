@@ -30,8 +30,6 @@ export function GetCommandGroups():Promise<Array<domain.CommandGroup>>;
 
 export function GetCommands():Promise<Array<domain.Command>>;
 
-export function GetCurrentProject():Promise<domain.Project>;
-
 export function GetCurrentRelease():Promise<string>;
 
 export function GetProjectToImport():Promise<app.ProjectExportJSONv1>;

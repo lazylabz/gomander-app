@@ -13,74 +13,6 @@ import (
 	"gomander/internal/project/domain/event"
 )
 
-func TestApp_GetCurrentProject(t *testing.T) {
-	t.Run("Should return the current project", func(t *testing.T) {
-		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
-		mockConfigRepository := new(MockUserConfigRepository)
-
-		projectId := "project1"
-		project := &projectdomain.Project{Id: projectId, Name: "Test", WorkingDirectory: "/tmp"}
-
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ProjectRepository: mockProjectRepository,
-			ConfigRepository:  mockConfigRepository,
-		})
-
-		mockConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: projectId}, nil)
-		mockProjectRepository.On("Get", projectId).Return(project, nil)
-
-		// Act
-		got, err := a.GetCurrentProject()
-
-		// Assert
-		assert.NoError(t, err)
-		assert.Equal(t, project, got)
-		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockConfigRepository)
-	})
-
-	t.Run("Should return an error if getting the config fails", func(t *testing.T) {
-		// Arrange
-		mockConfigRepository := new(MockUserConfigRepository)
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ConfigRepository: mockConfigRepository,
-		})
-		mockConfigRepository.On("GetOrCreate").Return(nil, errors.New("config error"))
-
-		// Act
-		_, err := a.GetCurrentProject()
-
-		// Assert
-		assert.Error(t, err)
-
-		mock.AssertExpectationsForObjects(t, mockConfigRepository)
-	})
-
-	t.Run("Should return an error if project does not exist", func(t *testing.T) {
-		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
-		mockConfigRepository := new(MockUserConfigRepository)
-
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ProjectRepository: mockProjectRepository,
-			ConfigRepository:  mockConfigRepository,
-		})
-
-		mockConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: "nonexistent"}, nil)
-		mockProjectRepository.On("Get", "nonexistent").Return(nil, errors.New("project not found"))
-
-		// Act
-		_, err := a.GetCurrentProject()
-
-		// Assert
-		assert.Error(t, err)
-		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockConfigRepository)
-	})
-}
-
 func TestApp_GetAvailableProjects(t *testing.T) {
 	t.Run("Should return available projects", func(t *testing.T) {
 		// Arrange
@@ -134,6 +66,8 @@ func TestApp_OpenProject(t *testing.T) {
 		})
 
 		projectId := "project1"
+		projectId2 := "project2"
+
 		mockConfig := domain.Config{
 			LastOpenedProjectId: projectId,
 			EnvironmentPaths: []domain.EnvironmentPath{
@@ -143,21 +77,24 @@ func TestApp_OpenProject(t *testing.T) {
 				},
 			},
 		}
+		mockUpdatedConfig := domain.Config{
+			LastOpenedProjectId: projectId2,
+			EnvironmentPaths: []domain.EnvironmentPath{
+				{
+					Id:   "path1",
+					Path: "TestPath",
+				},
+			},
+		}
 		mockConfigRepository.On("GetOrCreate").Return(&mockConfig, nil)
-		mockConfigRepository.On("Update", mock.Anything).Return(nil)
-		mockProjectRepository.On("Get", projectId).Return(&projectdomain.Project{Id: projectId}, nil).Once()
+		mockConfigRepository.On("Update", &mockUpdatedConfig).Return(nil)
+		mockProjectRepository.On("Get", projectId2).Return(&projectdomain.Project{Id: projectId2}, nil).Once()
 
 		// Act
-		err := a.OpenProject(projectId)
+		err := a.OpenProject(projectId2)
 
 		// Assert
 		assert.NoError(t, err)
-
-		// Assert that the project is saved in memory as the current project
-		mockProjectRepository.On("Get", "project1").Return(&projectdomain.Project{}, nil).Once()
-		_, err = a.GetCurrentProject()
-		assert.NoError(t, err)
-		mock.AssertExpectationsForObjects(t, mockConfigRepository, mockProjectRepository)
 	})
 
 	t.Run("Should return an error if project does not exist", func(t *testing.T) {
@@ -324,20 +261,18 @@ func TestApp_CloseProject(t *testing.T) {
 			LastOpenedProjectId: "project1",
 			EnvironmentPaths:    []domain.EnvironmentPath{{Id: "path1", Path: "TestPath"}},
 		}
+		mockUpdatedConfig := domain.Config{
+			LastOpenedProjectId: "",
+			EnvironmentPaths:    []domain.EnvironmentPath{{Id: "path1", Path: "TestPath"}},
+		}
 		mockConfigRepository.On("GetOrCreate").Return(&mockConfig, nil)
-		mockConfigRepository.On("Update", mock.Anything).Return(nil)
+		mockConfigRepository.On("Update", &mockUpdatedConfig).Return(nil)
 
 		// Act
 		err := a.CloseProject()
 
 		// Assert
 		assert.NoError(t, err)
-
-		// Assert that the project is closed in memory
-		mockProjectRepository.On("Get", "").Return(&projectdomain.Project{}, nil).Once()
-		_, err = a.GetCurrentProject()
-		assert.NoError(t, err)
-		mock.AssertExpectationsForObjects(t, mockConfigRepository, mockProjectRepository)
 	})
 
 	t.Run("Should return an error if getting the config fails", func(t *testing.T) {

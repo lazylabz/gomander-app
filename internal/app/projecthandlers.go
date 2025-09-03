@@ -7,14 +7,6 @@ import (
 	"gomander/internal/project/domain/event"
 )
 
-func (a *App) GetCurrentProject() (*domain.Project, error) {
-	userConfig, err := a.userConfigRepository.GetOrCreate()
-	if err != nil {
-		return nil, err
-	}
-	return a.projectRepository.Get(userConfig.LastOpenedProjectId)
-}
-
 func (a *App) GetAvailableProjects() ([]domain.Project, error) {
 	return a.projectRepository.GetAll()
 }
