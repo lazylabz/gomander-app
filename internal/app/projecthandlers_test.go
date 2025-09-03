@@ -8,77 +8,8 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/app"
-	"gomander/internal/config/domain"
 	"gomander/internal/project/domain/event"
 )
-
-func TestApp_CloseProject(t *testing.T) {
-	t.Run("Should close the current project", func(t *testing.T) {
-		// Arrange
-		mockConfigRepository := new(MockUserConfigRepository)
-		mockProjectRepository := new(MockProjectRepository)
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ConfigRepository:  mockConfigRepository,
-			ProjectRepository: mockProjectRepository,
-		})
-
-		mockConfig := domain.Config{
-			LastOpenedProjectId: "project1",
-			EnvironmentPaths:    []domain.EnvironmentPath{{Id: "path1", Path: "TestPath"}},
-		}
-		mockUpdatedConfig := domain.Config{
-			LastOpenedProjectId: "",
-			EnvironmentPaths:    []domain.EnvironmentPath{{Id: "path1", Path: "TestPath"}},
-		}
-		mockConfigRepository.On("GetOrCreate").Return(&mockConfig, nil)
-		mockConfigRepository.On("Update", &mockUpdatedConfig).Return(nil)
-
-		// Act
-		err := a.CloseProject()
-
-		// Assert
-		assert.NoError(t, err)
-	})
-
-	t.Run("Should return an error if getting the config fails", func(t *testing.T) {
-		// Arrange
-		mockConfigRepository := new(MockUserConfigRepository)
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ConfigRepository: mockConfigRepository,
-		})
-
-		mockConfigRepository.On("GetOrCreate").Return(nil, errors.New("config error"))
-
-		// Act
-		err := a.CloseProject()
-
-		// Assert
-		assert.Error(t, err)
-		mock.AssertExpectationsForObjects(t, mockConfigRepository)
-	})
-
-	t.Run("Should return an error if updating the config fails", func(t *testing.T) {
-		// Arrange
-		mockConfigRepository := new(MockUserConfigRepository)
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			ConfigRepository: mockConfigRepository,
-		})
-
-		mockConfig := domain.Config{LastOpenedProjectId: "project1"}
-		mockConfigRepository.On("GetOrCreate").Return(&mockConfig, nil)
-		mockConfigRepository.On("Update", mock.Anything).Return(errors.New("update error"))
-
-		// Act
-		err := a.CloseProject()
-
-		// Assert
-		assert.Error(t, err)
-		mock.AssertExpectationsForObjects(t, mockConfigRepository)
-	})
-}
 
 func TestApp_DeleteProject(t *testing.T) {
 	t.Run("Should delete a project and all its commands", func(t *testing.T) {

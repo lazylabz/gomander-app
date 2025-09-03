@@ -18,6 +18,7 @@ export namespace app {
 	    OpenProject: any;
 	    CreateProject: any;
 	    EditProject: any;
+	    CloseProject: any;
 	}
 	export interface EventHandlers {
 	    CleanCommandGroupsOnCommandDeleted: any;

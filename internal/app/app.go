@@ -33,6 +33,7 @@ type UseCases struct {
 	OpenProject          projectusecases.OpenProject
 	CreateProject        projectusecases.CreateProject
 	EditProject          projectusecases.EditProject
+	CloseProject         projectusecases.CloseProject
 }
 
 // App struct

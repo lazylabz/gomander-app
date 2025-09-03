@@ -1,6 +1,5 @@
 import {
   AddCommand,
-  CloseProject,
   CreateCommandGroup,
   DeleteCommandGroup,
   DeleteProject,
@@ -22,6 +21,7 @@ import {
   UpdateCommandGroup,
 } from "../../wailsjs/go/app/App";
 import {
+  CloseProjectController,
   CreateProjectController,
   EditProjectController,
   GetAvailableProjectsController,
@@ -56,7 +56,7 @@ export const dataService = {
   createProject: CreateProjectController,
   stopCommand: StopCommand,
   openProject: OpenProjectController,
-  closeProject: CloseProject,
+  closeProject: CloseProjectController,
   deleteProject: DeleteProject,
   exportProject: ExportProject,
   importProject: ImportProject,

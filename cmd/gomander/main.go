@@ -172,6 +172,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	openProject := projectusecases.NewOpenProject(configRepo, projectRepo)
 	createProject := projectusecases.NewCreateProject(projectRepo)
 	editProject := projectusecases.NewEditProject(projectRepo)
+	closeProject := projectusecases.NewCloseProject(configRepo)
 
 	eventBus := eventbus.NewInMemoryEventBus()
 
@@ -205,6 +206,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 			OpenProject:          openProject,
 			CreateProject:        createProject,
 			EditProject:          editProject,
+			CloseProject:         closeProject,
 		},
 	})
 }

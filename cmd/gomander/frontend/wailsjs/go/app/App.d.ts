@@ -6,8 +6,6 @@ import {context} from '../models';
 
 export function AddCommand(arg1:domain.Command):Promise<void>;
 
-export function CloseProject():Promise<void>;
-
 export function CreateCommandGroup(arg1:domain.CommandGroup):Promise<void>;
 
 export function DeleteCommandGroup(arg1:string):Promise<void>;

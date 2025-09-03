@@ -6,22 +6,6 @@ import (
 	"gomander/internal/project/domain/event"
 )
 
-func (a *App) CloseProject() error {
-	config, err := a.userConfigRepository.GetOrCreate()
-	if err != nil {
-		return err
-	}
-
-	config.LastOpenedProjectId = ""
-
-	err = a.userConfigRepository.Update(config)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (a *App) DeleteProject(projectId string) error {
 	err := a.projectRepository.Delete(projectId)
 	if err != nil {
