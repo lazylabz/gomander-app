@@ -1,4 +1,3 @@
-// filepath: /Users/moises/Code/personal/gomander/internal/project/application/usecases/deleteproject.go
 package usecases
 
 import (
