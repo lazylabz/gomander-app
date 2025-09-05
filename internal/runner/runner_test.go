@@ -48,6 +48,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 	commandId := "1"
 
 	t.Run("Should run command with success and emit events for each line", func(t *testing.T) {
+		// Arrange
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
@@ -61,6 +62,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
 
+		// Act
 		err := r.RunCommand(&commanddomain.Command{
 			Id:               commandId,
 			ProjectId:        commandId,
@@ -71,11 +73,14 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		}, []string{"/test"}, "/test")
 		r.WaitForCommand(commandId)
 
+		// Assert
 		assert.NoError(t, err)
 		assert.Empty(t, r.GetRunningCommands())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
+
 	t.Run("Should log error when executing an invalid command", func(t *testing.T) {
+		// Arrange
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
@@ -90,6 +95,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger.On("Error", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
 
+		// Act
 		err := r.RunCommand(&commanddomain.Command{
 			Id:               commandId,
 			ProjectId:        commandId,
@@ -100,6 +106,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		}, []string{}, "")
 		r.WaitForCommand(commandId)
 
+		// Assert
 		assert.NoError(t, err)
 		assert.Empty(t, r.GetRunningCommands())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
@@ -108,6 +115,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 
 func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 	t.Run("Should stop running command", func(t *testing.T) {
+		// Arrange
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
@@ -126,6 +134,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		// Depends on OS
 		logger.On("Error", mock.Anything).Maybe().Return()
 
+		// Act
 		err := r.RunCommand(&commanddomain.Command{
 			Id:               commandId,
 			ProjectId:        commandId,
@@ -145,17 +154,23 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		err = r.StopRunningCommand(commandId)
 		r.WaitForCommand(commandId)
 
+		// Assert
 		assert.NoError(t, err)
 		assert.Empty(t, r.GetRunningCommands())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
+
 	t.Run("Should return error when stopping non-existing command", func(t *testing.T) {
+		// Arrange
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
+		// Act
 		err := r.StopRunningCommand("non-existing-command")
+
+		// Assert
 		assert.Error(t, err)
 		assert.Equal(t, "No running command with id: non-existing-command", err.Error())
 	})
@@ -163,6 +178,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 
 func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 	t.Run("Should stop all running commands", func(t *testing.T) {
+		// Arrange
 		logger := new(MockLogger)
 		emitter := new(MockEventEmitter)
 
@@ -183,6 +199,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		// Depends on OS
 		logger.On("Error", mock.Anything).Maybe().Return()
 
+		// Act
 		err := r.RunCommand(&commanddomain.Command{
 			Id:               cmd1Id,
 			ProjectId:        cmd1Id,
@@ -214,6 +231,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		r.WaitForCommand(cmd1Id)
 		r.WaitForCommand(cmd2Id)
 
+		// Assert
 		assert.Empty(t, errs)
 		assert.Empty(t, r.GetRunningCommands())
 	})

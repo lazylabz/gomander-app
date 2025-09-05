@@ -14,6 +14,7 @@ import (
 
 func TestApp_Startup(t *testing.T) {
 	t.Run("Should successfully load configuration", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 		ctx := context.Background()
 
@@ -30,10 +31,12 @@ func TestApp_Startup(t *testing.T) {
 		mockLogger.On("Info", mock.Anything).Return()
 		mockUserConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: "123"}, nil)
 
+		// Act
 		assert.NotPanics(t, func() {
 			a.Startup(ctx)
 		})
 
+		// Assert
 		// Verify that the openedProjectId is set correctly
 		mockProjectRepository.On("Get", "123").Return(&domain2.Project{}, nil)
 
@@ -42,7 +45,9 @@ func TestApp_Startup(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t, mockUserConfigRepository, mockLogger)
 	})
+
 	t.Run("Should panic if configuration loading fails", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 		ctx := context.Background()
 
@@ -57,6 +62,7 @@ func TestApp_Startup(t *testing.T) {
 		mockLogger.On("Info", mock.Anything).Return()
 		mockUserConfigRepository.On("GetOrCreate").Return(nil, assert.AnError)
 
+		// Act & Assert
 		assert.Panics(t, func() {
 			a.Startup(ctx)
 		})
@@ -67,6 +73,7 @@ func TestApp_Startup(t *testing.T) {
 
 func TestApp_OnBeforeClose(t *testing.T) {
 	t.Run("Should stop all running commands and stop successfully", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 
 		mockCommandRunner := new(MockRunner)
@@ -79,12 +86,16 @@ func TestApp_OnBeforeClose(t *testing.T) {
 
 		mockCommandRunner.On("StopAllRunningCommands").Return([]error{})
 
+		// Act
 		prevent := a.OnBeforeClose(context.Background())
 
+		// Assert
 		assert.False(t, prevent)
 		mock.AssertExpectationsForObjects(t, mockCommandRunner, mockLogger)
 	})
+
 	t.Run("Should prevent closing if there are errors stopping commands", func(t *testing.T) {
+		// Arrange
 		a := app.NewApp()
 
 		mockCommandRunner := new(MockRunner)
@@ -100,8 +111,10 @@ func TestApp_OnBeforeClose(t *testing.T) {
 
 		mockLogger.On("Error", mock.Anything).Return()
 
+		// Act
 		prevent := a.OnBeforeClose(context.Background())
 
+		// Assert
 		assert.True(t, prevent)
 
 		mock.AssertExpectationsForObjects(t, mockCommandRunner, mockLogger)

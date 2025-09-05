@@ -18,6 +18,7 @@ import (
 
 func TestApp_GetCommands(t *testing.T) {
 	t.Run("Should return the commands provided by the repository", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 
@@ -49,13 +50,18 @@ func TestApp_GetCommands(t *testing.T) {
 
 		mockCommandRepository.On("GetAll", projectId).Return(expectedCommandGroup, nil)
 
+		// Act
 		got, err := a.GetCommands()
+
+		// Assert
 		assert.NoError(t, err)
 		assert.Equal(t, got, expectedCommandGroup)
 
 		mock.AssertExpectationsForObjects(t, mockCommandRepository, mockUserConfigRepository)
 	})
+
 	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 
@@ -66,7 +72,11 @@ func TestApp_GetCommands(t *testing.T) {
 		})
 		expectedErr := errors.New("failed to get user config")
 		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedErr)
+
+		// Act
 		got, err := a.GetCommands()
+
+		// Assert
 		assert.ErrorIs(t, err, expectedErr)
 		assert.Empty(t, got)
 		mock.AssertExpectationsForObjects(t, mockCommandRepository, mockUserConfigRepository)
@@ -75,6 +85,7 @@ func TestApp_GetCommands(t *testing.T) {
 
 func TestApp_AddCommand(t *testing.T) {
 	t.Run("Should add the command", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
@@ -109,7 +120,10 @@ func TestApp_AddCommand(t *testing.T) {
 
 		mockLogger.On("Info", mock.Anything).Return(nil)
 
+		// Act
 		err := a.AddCommand(parameterCommand)
+
+		// Assert
 		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -118,7 +132,9 @@ func TestApp_AddCommand(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 
@@ -131,14 +147,20 @@ func TestApp_AddCommand(t *testing.T) {
 		parameterCommand := commandDataToDomain(newCommandData.Data())
 		expectedErr := errors.New("failed to get user config")
 		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedErr)
+
+		// Act
 		err := a.AddCommand(parameterCommand)
+
+		// Assert
 		assert.ErrorIs(t, err, expectedErr)
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockUserConfigRepository,
 		)
 	})
+
 	t.Run("Should return an error if fails to get all commands", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 
@@ -163,7 +185,10 @@ func TestApp_AddCommand(t *testing.T) {
 		mockCommandRepository.On("GetAll", projectId).Return(make([]commanddomain.Command, 0), errors.New("failed to get commands"))
 		mockLogger.On("Error", mock.Anything).Return()
 
+		// Act
 		err := a.AddCommand(parameterCommand)
+
+		// Assert
 		assert.Error(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -172,7 +197,9 @@ func TestApp_AddCommand(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return an error if fails to create commands", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 
@@ -208,7 +235,10 @@ func TestApp_AddCommand(t *testing.T) {
 
 		mockLogger.On("Error", mock.Anything).Return()
 
+		// Act
 		err := a.AddCommand(parameterCommand)
+
+		// Assert
 		assert.Error(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -221,6 +251,7 @@ func TestApp_AddCommand(t *testing.T) {
 
 func TestApp_RemoveCommand(t *testing.T) {
 	t.Run("Should remove the command", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockEventBus := new(MockEventBus)
@@ -242,7 +273,10 @@ func TestApp_RemoveCommand(t *testing.T) {
 
 		mockLogger.On("Info", "Command removed: "+commandId).Return(nil)
 
+		// Act
 		err := a.RemoveCommand(commandId)
+
+		// Assert
 		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -252,7 +286,9 @@ func TestApp_RemoveCommand(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return an error if fails to remove the command", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 
 		mockLogger := new(MockLogger)
@@ -271,7 +307,10 @@ func TestApp_RemoveCommand(t *testing.T) {
 
 		mockLogger.On("Error", mock.Anything).Return()
 
+		// Act
 		err := a.RemoveCommand(commandId)
+
+		// Assert
 		assert.Error(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -280,7 +319,9 @@ func TestApp_RemoveCommand(t *testing.T) {
 			mockCommandGroupRepository,
 		)
 	})
+
 	t.Run("Should return an error if side effect fail", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 		mockEventBus := new(MockEventBus)
@@ -302,7 +343,10 @@ func TestApp_RemoveCommand(t *testing.T) {
 
 		mockLogger.On("Error", mock.Anything).Return()
 
+		// Act
 		err := a.RemoveCommand(commandId)
+
+		// Assert
 		assert.Error(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -316,6 +360,7 @@ func TestApp_RemoveCommand(t *testing.T) {
 
 func TestApp_EditCommand(t *testing.T) {
 	t.Run("Should edit the command", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 
@@ -342,7 +387,10 @@ func TestApp_EditCommand(t *testing.T) {
 
 		mockLogger.On("Info", "Command edited: "+commandToEdit.Id).Return(nil)
 
+		// Act
 		err := a.EditCommand(commandToEdit)
+
+		// Assert
 		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -350,7 +398,9 @@ func TestApp_EditCommand(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return an error if fails to edit the command", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 
@@ -377,7 +427,10 @@ func TestApp_EditCommand(t *testing.T) {
 
 		mockLogger.On("Error", mock.Anything).Return()
 
+		// Act
 		err := a.EditCommand(commandToEdit)
+
+		// Assert
 		assert.Error(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -389,6 +442,7 @@ func TestApp_EditCommand(t *testing.T) {
 
 func TestApp_ReorderCommands(t *testing.T) {
 	t.Run("Should reorder commands", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 
@@ -428,7 +482,10 @@ func TestApp_ReorderCommands(t *testing.T) {
 
 		mockLogger.On("Info", "Commands reordered").Return(nil)
 
+		// Act
 		err := a.ReorderCommands(orderedIds)
+
+		// Assert
 		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -436,7 +493,9 @@ func TestApp_ReorderCommands(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 
@@ -447,14 +506,20 @@ func TestApp_ReorderCommands(t *testing.T) {
 		})
 		expectedErr := errors.New("failed to get user config")
 		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedErr)
+
+		// Act
 		err := a.ReorderCommands([]string{})
+
+		// Assert
 		assert.ErrorIs(t, err, expectedErr)
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockUserConfigRepository,
 		)
 	})
+
 	t.Run("Should return an error if fails to retrieve commands", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 
@@ -476,7 +541,10 @@ func TestApp_ReorderCommands(t *testing.T) {
 
 		mockLogger.On("Error", mock.Anything).Return()
 
+		// Act
 		err := a.ReorderCommands([]string{})
+
+		// Assert
 		assert.Error(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -484,7 +552,9 @@ func TestApp_ReorderCommands(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return an error if fails to update commands", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 
@@ -524,7 +594,10 @@ func TestApp_ReorderCommands(t *testing.T) {
 
 		mockLogger.On("Error", mock.Anything).Return()
 
+		// Act
 		err := a.ReorderCommands(orderedIds)
+
+		// Assert
 		assert.Error(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -536,6 +609,7 @@ func TestApp_ReorderCommands(t *testing.T) {
 
 func TestApp_RunCommand(t *testing.T) {
 	t.Run("Should run the command", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
@@ -586,10 +660,13 @@ func TestApp_RunCommand(t *testing.T) {
 
 		mockRunner.On("RunCommand", &cmd, []string{"/1"}, project.WorkingDirectory).Return(nil)
 
+		// Act
 		err := a.OpenProject(projectId)
 		assert.NoError(t, err)
 
 		err = a.RunCommand(cmd.Id)
+
+		// Assert
 		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -600,7 +677,9 @@ func TestApp_RunCommand(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return an error if failing to retrieve the command", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
@@ -617,7 +696,10 @@ func TestApp_RunCommand(t *testing.T) {
 
 		mockLogger.On("Error", mock.Anything).Return()
 
+		// Act
 		err := a.RunCommand(cmdId)
+
+		// Assert
 		assert.Error(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -625,7 +707,9 @@ func TestApp_RunCommand(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return an error if failing to retrieve the user config", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
@@ -645,7 +729,10 @@ func TestApp_RunCommand(t *testing.T) {
 
 		mockLogger.On("Error", mock.Anything).Return()
 
+		// Act
 		err := a.RunCommand(cmd.Id)
+
+		// Assert
 		assert.Error(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -654,7 +741,9 @@ func TestApp_RunCommand(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return an error if failing to retrieve the project", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
@@ -680,7 +769,10 @@ func TestApp_RunCommand(t *testing.T) {
 
 		mockLogger.On("Error", mock.Anything).Return()
 
+		// Act
 		err := a.RunCommand(cmd.Id)
+
+		// Assert
 		assert.Error(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -690,7 +782,9 @@ func TestApp_RunCommand(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return an error if failing to run the command", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
@@ -741,10 +835,13 @@ func TestApp_RunCommand(t *testing.T) {
 
 		mockRunner.On("RunCommand", &cmd, []string{"/1"}, project.WorkingDirectory).Return(errors.New("failed to run command"))
 
+		// Act
 		err := a.OpenProject(projectId)
 		assert.NoError(t, err)
 
 		err = a.RunCommand(cmd.Id)
+
+		// Assert
 		assert.Error(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -758,6 +855,7 @@ func TestApp_RunCommand(t *testing.T) {
 
 func TestApp_StopCommand(t *testing.T) {
 	t.Run("Should stop the command", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
@@ -783,8 +881,10 @@ func TestApp_StopCommand(t *testing.T) {
 
 		mockRunner.On("StopRunningCommand", cmd.Id).Return(nil)
 
+		// Act
 		a.StopCommand(cmd.Id)
 
+		// Assert
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockUserConfigRepository,
@@ -795,6 +895,7 @@ func TestApp_StopCommand(t *testing.T) {
 	})
 
 	t.Run("Should return error if the command does not exist", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
@@ -812,15 +913,19 @@ func TestApp_StopCommand(t *testing.T) {
 
 		mockLogger.On("Error", mock.Anything).Return()
 
+		// Act
 		a.StopCommand(commandId)
 
+		// Assert
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockUserConfigRepository,
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return error if fails to stop the command", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
@@ -843,8 +948,10 @@ func TestApp_StopCommand(t *testing.T) {
 
 		mockRunner.On("StopRunningCommand", cmd.Id).Return(errors.New("failed to stop command"))
 
+		// Act
 		a.StopCommand(cmd.Id)
 
+		// Assert
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockUserConfigRepository,
@@ -856,6 +963,7 @@ func TestApp_StopCommand(t *testing.T) {
 
 func TestApp_DuplicateCommand(t *testing.T) {
 	t.Run("Should duplicate the command", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockEventBus := new(MockEventBus)
@@ -894,7 +1002,10 @@ func TestApp_DuplicateCommand(t *testing.T) {
 
 		mockLogger.On("Info", mock.Anything).Return(nil)
 
+		// Act
 		err := a.DuplicateCommand(originalCmd.Id, "")
+
+		// Assert
 		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -904,7 +1015,9 @@ func TestApp_DuplicateCommand(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should duplicate the command with a target group", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockEventBus := new(MockEventBus)
@@ -945,7 +1058,10 @@ func TestApp_DuplicateCommand(t *testing.T) {
 
 		mockLogger.On("Info", mock.Anything).Return(nil)
 
+		// Act
 		err := a.DuplicateCommand(originalCmd.Id, targetGroupId)
+
+		// Assert
 		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t,
@@ -955,7 +1071,9 @@ func TestApp_DuplicateCommand(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 
@@ -967,14 +1085,20 @@ func TestApp_DuplicateCommand(t *testing.T) {
 		commandId := "command1"
 		expectedErr := errors.New("failed to get user config")
 		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedErr)
+
+		// Act
 		err := a.DuplicateCommand(commandId, "")
+
+		// Assert
 		assert.ErrorIs(t, err, expectedErr)
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
 			mockUserConfigRepository,
 		)
 	})
+
 	t.Run("Should return an error if the command does not exist", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
@@ -993,7 +1117,10 @@ func TestApp_DuplicateCommand(t *testing.T) {
 		mockCommandRepository.On("Get", commandId).Return(nil, expectedErr)
 		mockLogger.On("Error", "command not found").Return()
 
+		// Act
 		err := a.DuplicateCommand(commandId, "")
+
+		// Assert
 		assert.ErrorIs(t, err, expectedErr)
 
 		mock.AssertExpectationsForObjects(t,
@@ -1001,7 +1128,9 @@ func TestApp_DuplicateCommand(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return an error if fails to get all commands", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
@@ -1024,7 +1153,10 @@ func TestApp_DuplicateCommand(t *testing.T) {
 
 		mockLogger.On("Error", "failed to get commands").Return()
 
+		// Act
 		err := a.DuplicateCommand(originalCmd.Id, "")
+
+		// Assert
 		assert.ErrorIs(t, err, expectedErr)
 
 		mock.AssertExpectationsForObjects(t,
@@ -1032,7 +1164,9 @@ func TestApp_DuplicateCommand(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return an error if fails to create the duplicated command", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
@@ -1055,7 +1189,10 @@ func TestApp_DuplicateCommand(t *testing.T) {
 		mockCommandRepository.On("Create", mock.Anything).Return(expectedErr)
 		mockLogger.On("Error", "failed to create command").Return()
 
+		// Act
 		err := a.DuplicateCommand(originalCmd.Id, "")
+
+		// Assert
 		assert.ErrorIs(t, err, expectedErr)
 
 		mock.AssertExpectationsForObjects(t,
@@ -1063,7 +1200,9 @@ func TestApp_DuplicateCommand(t *testing.T) {
 			mockLogger,
 		)
 	})
+
 	t.Run("Should return an error if side effects fail", func(t *testing.T) {
+		// Arrange
 		mockCommandRepository := new(MockCommandRepository)
 		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockEventBus := new(MockEventBus)
@@ -1096,7 +1235,10 @@ func TestApp_DuplicateCommand(t *testing.T) {
 
 		mockLogger.On("Error", sideEffectErrorMsg).Return()
 
+		// Act
 		err := a.DuplicateCommand(originalCmd.Id, "")
+
+		// Assert
 		assert.ErrorContains(t, err, sideEffectErrorMsg)
 
 		mock.AssertExpectationsForObjects(t,

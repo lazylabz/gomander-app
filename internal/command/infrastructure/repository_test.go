@@ -59,6 +59,7 @@ func newTestHelper(t *testing.T, preloaded []*CommandModel) *testHelper {
 func TestGormCommandRepository_Get(t *testing.T) {
 	t.Parallel()
 	t.Run("Should return command when it exists", func(t *testing.T) {
+		// Arrange
 		cmdData := testutils.NewCommand().Data()
 
 		preloadedCommandModels := []*CommandModel{
@@ -69,25 +70,30 @@ func TestGormCommandRepository_Get(t *testing.T) {
 
 		h := newTestHelper(t, preloadedCommandModels)
 
+		// Act
 		cmd, err := h.repo.Get(cmdData.Id)
-		assert.NoError(t, err)
 
+		// Assert
+		assert.NoError(t, err)
 		assert.Equal(t, expectedCommand, cmd)
 	})
 	t.Run("Should return nil when it doesn't exists", func(t *testing.T) {
+		// Arrange
 		var preloadedCommandModels []*CommandModel
-
 		h := newTestHelper(t, preloadedCommandModels)
 
+		// Act
 		cmd, err := h.repo.Get("nonexistent")
-		assert.NoError(t, err)
 
+		// Assert
+		assert.NoError(t, err)
 		assert.Nil(t, cmd)
 	})
 }
 
 func TestGormCommandRepository_GetAll(t *testing.T) {
 	t.Run("Should return all commands for a project, sorted", func(t *testing.T) {
+		// Arrange
 		projectId := "proj1"
 		cmd1 := testutils.NewCommand().
 			WithProjectId(projectId).
@@ -110,9 +116,11 @@ func TestGormCommandRepository_GetAll(t *testing.T) {
 
 		h := newTestHelper(t, preloadedCommandModels)
 
+		// Act
 		cmds, err := h.repo.GetAll(projectId)
-		assert.NoError(t, err)
 
+		// Assert
+		assert.NoError(t, err)
 		for i, cmd := range cmds {
 			assert.Equal(t, expectedCommands[i], &cmd)
 		}
@@ -122,8 +130,8 @@ func TestGormCommandRepository_GetAll(t *testing.T) {
 func TestGormCommandRepository_Save(t *testing.T) {
 	t.Parallel()
 	t.Run("Should save a new command", func(t *testing.T) {
+		// Arrange
 		var preloadedCommandModels []*CommandModel
-
 		h := newTestHelper(t, preloadedCommandModels)
 
 		cmdData := testutils.NewCommand().
@@ -136,12 +144,15 @@ func TestGormCommandRepository_Save(t *testing.T) {
 			Data()
 		createdCommand := commandDataToDomain(cmdData)
 
+		// Act
 		err := h.repo.Create(createdCommand)
+
+		// Assert
 		assert.NoError(t, err)
 
+		// Verify the command was saved
 		actual, err := h.repo.Get("cmd3")
 		assert.NoError(t, err)
-
 		assert.Equal(t, createdCommand, actual)
 	})
 }
@@ -149,6 +160,7 @@ func TestGormCommandRepository_Save(t *testing.T) {
 func TestGormCommandRepository_Edit(t *testing.T) {
 	t.Parallel()
 	t.Run("Should edit an existing command", func(t *testing.T) {
+		// Arrange
 		existingCommand := testutils.NewCommand().
 			WithProjectId("proj1").
 			WithName("Old Command").
@@ -167,12 +179,15 @@ func TestGormCommandRepository_Edit(t *testing.T) {
 			Data()
 		domainEditedCommand := commandDataToDomain(editedCommand)
 
+		// Act
 		err := h.repo.Update(domainEditedCommand)
+
+		// Assert
 		assert.NoError(t, err)
 
+		// Verify the command was updated
 		actual, err := h.repo.Get(existingCommand.Data().Id)
 		assert.NoError(t, err)
-
 		assert.Equal(t, domainEditedCommand, actual)
 	})
 }
@@ -180,6 +195,7 @@ func TestGormCommandRepository_Edit(t *testing.T) {
 func TestGormCommandRepository_Delete(t *testing.T) {
 	t.Parallel()
 	t.Run("Should delete an existing command", func(t *testing.T) {
+		// Arrange
 		cmd := testutils.NewCommand().Data()
 		preloadedCommandModels := []*CommandModel{
 			commandDataToModel(cmd),
@@ -187,15 +203,19 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 
 		h := newTestHelper(t, preloadedCommandModels)
 
+		// Act
 		err := h.repo.Delete(cmd.Id)
+
+		// Assert
 		assert.NoError(t, err)
 
+		// Verify the command was deleted
 		deletedCommand, err := h.repo.Get(cmd.Id)
 		assert.NoError(t, err)
-
 		assert.Nil(t, deletedCommand)
 	})
 	t.Run("Should delete an existing command and adjust other commands positions", func(t *testing.T) {
+		// Arrange
 		projectId := "proj1"
 		cmd1 := testutils.NewCommand().
 			WithProjectId(projectId).
@@ -218,9 +238,13 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 
 		h := newTestHelper(t, preloadedCommandModels)
 
+		// Act
 		err := h.repo.Delete(cmd2.Id)
+
+		// Assert
 		assert.NoError(t, err)
 
+		// Verify positions were adjusted correctly
 		cmd1AfterDelete, err := h.repo.Get(cmd1.Id)
 		assert.NoError(t, err)
 
@@ -234,6 +258,7 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 
 func TestGormCommandRepository_DeleteAll(t *testing.T) {
 	t.Run("Should delete all commands for a project and not affect others", func(t *testing.T) {
+		// Arrange
 		projectId := "proj1"
 		otherProjectId := "proj2"
 
@@ -249,16 +274,19 @@ func TestGormCommandRepository_DeleteAll(t *testing.T) {
 
 		h := newTestHelper(t, preloadedCommandModels)
 
+		// Act
 		err := h.repo.DeleteAll(projectId)
+
+		// Assert
 		assert.NoError(t, err)
 
-		// Project commands should be deleted
+		// Verify project commands were deleted
 		cmd1After, _ := h.repo.Get(cmd1.Id)
 		cmd2After, _ := h.repo.Get(cmd2.Id)
 		assert.Nil(t, cmd1After)
 		assert.Nil(t, cmd2After)
 
-		// Other project command should remain
+		// Verify other project command remains
 		cmdOtherAfter, _ := h.repo.Get(cmdOther.Id)
 		assert.NotNil(t, cmdOtherAfter)
 	})
