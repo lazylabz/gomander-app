@@ -33,8 +33,6 @@ type UseCases struct {
 type App struct {
 	ctx context.Context
 
-	openedProjectId string
-
 	logger        logger.Logger
 	eventEmitter  event.EventEmitter
 	commandRunner runner.Runner

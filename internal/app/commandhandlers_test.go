@@ -19,14 +19,16 @@ import (
 func TestApp_GetCommands(t *testing.T) {
 	t.Run("Should return the commands provided by the repository", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		command1Data := testutils.
 			NewCommand().
@@ -51,23 +53,41 @@ func TestApp_GetCommands(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, got, expectedCommandGroup)
 
-		mock.AssertExpectationsForObjects(t, mockCommandRepository)
+		mock.AssertExpectationsForObjects(t, mockCommandRepository, mockUserConfigRepository)
+	})
+	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
+		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
+
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
+		})
+		expectedErr := errors.New("failed to get user config")
+		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedErr)
+		got, err := a.GetCommands()
+		assert.ErrorIs(t, err, expectedErr)
+		assert.Empty(t, got)
+		mock.AssertExpectationsForObjects(t, mockCommandRepository, mockUserConfigRepository)
 	})
 }
 
 func TestApp_AddCommand(t *testing.T) {
 	t.Run("Should add the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		existingCommandData := testutils.
 			NewCommand().
@@ -94,11 +114,33 @@ func TestApp_AddCommand(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
+			mockUserConfigRepository,
 			mockLogger,
+		)
+	})
+	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
+		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
+
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
+		})
+		newCommandData := testutils.NewCommand()
+		parameterCommand := commandDataToDomain(newCommandData.Data())
+		expectedErr := errors.New("failed to get user config")
+		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedErr)
+		err := a.AddCommand(parameterCommand)
+		assert.ErrorIs(t, err, expectedErr)
+		mock.AssertExpectationsForObjects(t,
+			mockCommandRepository,
+			mockUserConfigRepository,
 		)
 	})
 	t.Run("Should return an error if fails to get all commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		mockLogger := new(MockLogger)
 
@@ -106,10 +148,11 @@ func TestApp_AddCommand(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		newCommandData := testutils.
 			NewCommand().
@@ -125,11 +168,13 @@ func TestApp_AddCommand(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
+			mockUserConfigRepository,
 			mockLogger,
 		)
 	})
 	t.Run("Should return an error if fails to create commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		mockLogger := new(MockLogger)
 
@@ -137,10 +182,11 @@ func TestApp_AddCommand(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		existingCommandData := testutils.
 			NewCommand().
@@ -167,6 +213,7 @@ func TestApp_AddCommand(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
+			mockUserConfigRepository,
 			mockLogger,
 		)
 	})
@@ -180,7 +227,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 
 		mockLogger := new(MockLogger)
 
-		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository:      mockCommandRepository,
@@ -188,8 +234,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 			Logger:                 mockLogger,
 			EventBus:               mockEventBus,
 		})
-
-		a.SetOpenProjectId(projectId)
 
 		commandId := "command1"
 
@@ -204,6 +248,7 @@ func TestApp_RemoveCommand(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
 			mockCommandRepository,
+			mockEventBus,
 			mockLogger,
 		)
 	})
@@ -213,15 +258,12 @@ func TestApp_RemoveCommand(t *testing.T) {
 		mockLogger := new(MockLogger)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
-		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository:      mockCommandRepository,
 			Logger:                 mockLogger,
 			CommandGroupRepository: mockCommandGroupRepository,
 		})
-
-		a.SetOpenProjectId(projectId)
 
 		commandId := "command1"
 
@@ -245,7 +287,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 
 		mockLogger := new(MockLogger)
 
-		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository:      mockCommandRepository,
@@ -253,8 +294,6 @@ func TestApp_RemoveCommand(t *testing.T) {
 			Logger:                 mockLogger,
 			EventBus:               mockEventBus,
 		})
-
-		a.SetOpenProjectId(projectId)
 
 		commandId := "command1"
 
@@ -269,6 +308,7 @@ func TestApp_RemoveCommand(t *testing.T) {
 		mock.AssertExpectationsForObjects(t,
 			mockCommandGroupRepository,
 			mockCommandRepository,
+			mockEventBus,
 			mockLogger,
 		)
 	})
@@ -277,6 +317,7 @@ func TestApp_RemoveCommand(t *testing.T) {
 func TestApp_EditCommand(t *testing.T) {
 	t.Run("Should edit the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		mockLogger := new(MockLogger)
 
@@ -284,10 +325,11 @@ func TestApp_EditCommand(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		commandData := testutils.
 			NewCommand().
@@ -310,6 +352,7 @@ func TestApp_EditCommand(t *testing.T) {
 	})
 	t.Run("Should return an error if fails to edit the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		mockLogger := new(MockLogger)
 
@@ -317,10 +360,11 @@ func TestApp_EditCommand(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		commandData := testutils.
 			NewCommand().
@@ -346,6 +390,7 @@ func TestApp_EditCommand(t *testing.T) {
 func TestApp_ReorderCommands(t *testing.T) {
 	t.Run("Should reorder commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		mockLogger := new(MockLogger)
 
@@ -353,10 +398,11 @@ func TestApp_ReorderCommands(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		cmd1 := testutils.NewCommand().WithProjectId(projectId).WithPosition(0)
 		cmd2 := testutils.NewCommand().WithProjectId(projectId).WithPosition(1)
@@ -390,8 +436,27 @@ func TestApp_ReorderCommands(t *testing.T) {
 			mockLogger,
 		)
 	})
+	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
+		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
+
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
+		})
+		expectedErr := errors.New("failed to get user config")
+		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedErr)
+		err := a.ReorderCommands([]string{})
+		assert.ErrorIs(t, err, expectedErr)
+		mock.AssertExpectationsForObjects(t,
+			mockCommandRepository,
+			mockUserConfigRepository,
+		)
+	})
 	t.Run("Should return an error if fails to retrieve commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		mockLogger := new(MockLogger)
 
@@ -399,10 +464,11 @@ func TestApp_ReorderCommands(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		mockCommandRepository.On("GetAll", projectId).Return(
 			make([]commanddomain.Command, 0),
@@ -420,6 +486,7 @@ func TestApp_ReorderCommands(t *testing.T) {
 	})
 	t.Run("Should return an error if fails to update commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 
 		mockLogger := new(MockLogger)
 
@@ -427,10 +494,11 @@ func TestApp_ReorderCommands(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		cmd1 := testutils.NewCommand().WithProjectId(projectId).WithPosition(0)
 		cmd2 := testutils.NewCommand().WithProjectId(projectId).WithPosition(1)
@@ -469,7 +537,7 @@ func TestApp_ReorderCommands(t *testing.T) {
 func TestApp_RunCommand(t *testing.T) {
 	t.Run("Should run the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
-		mockConfigRepository := new(MockUserConfigRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
 		mockRunner := new(MockRunner)
 		mockLogger := new(MockLogger)
@@ -478,7 +546,7 @@ func TestApp_RunCommand(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
-			ConfigRepository:  mockConfigRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			ProjectRepository: mockProjectRepository,
 			Runner:            mockRunner,
 			Logger:            mockLogger,
@@ -491,12 +559,12 @@ func TestApp_RunCommand(t *testing.T) {
 
 		envPaths := []configdomain.EnvironmentPath{envPath}
 
-		mockConfigRepository.On("GetOrCreate").Return(&configdomain.Config{
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{
 			LastOpenedProjectId: "",
 			EnvironmentPaths:    envPaths,
 		}, nil)
 
-		mockConfigRepository.On("Update", mock.Anything).Return(nil)
+		mockUserConfigRepository.On("Update", mock.Anything).Return(nil)
 
 		cmdData := testutils.
 			NewCommand().
@@ -526,18 +594,21 @@ func TestApp_RunCommand(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
-			mockConfigRepository,
+			mockUserConfigRepository,
 			mockProjectRepository,
 			mockRunner,
+			mockLogger,
 		)
 	})
 	t.Run("Should return an error if failing to retrieve the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 		})
 		cmdId := "command1"
@@ -556,13 +627,13 @@ func TestApp_RunCommand(t *testing.T) {
 	})
 	t.Run("Should return an error if failing to retrieve the user config", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
-		mockConfigRepository := new(MockUserConfigRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
-			ConfigRepository:  mockConfigRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 		})
 
@@ -570,7 +641,7 @@ func TestApp_RunCommand(t *testing.T) {
 		cmd := commandDataToDomain(cmdData)
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
-		mockConfigRepository.On("GetOrCreate").Return(nil, errors.New("failed to get user config"))
+		mockUserConfigRepository.On("GetOrCreate").Return(nil, errors.New("failed to get user config"))
 
 		mockLogger.On("Error", mock.Anything).Return()
 
@@ -579,32 +650,32 @@ func TestApp_RunCommand(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
-			mockConfigRepository,
+			mockUserConfigRepository,
 			mockLogger,
 		)
 	})
 	t.Run("Should return an error if failing to retrieve the project", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
-		mockConfigRepository := new(MockUserConfigRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
 		mockLogger := new(MockLogger)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
-			ConfigRepository:  mockConfigRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			ProjectRepository: mockProjectRepository,
 			Logger:            mockLogger,
 		})
 
 		projectId := "project1"
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		cmdData := testutils.NewCommand().WithProjectId(projectId).Data()
 		cmd := commandDataToDomain(cmdData)
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
-		mockConfigRepository.On("GetOrCreate").Return(&configdomain.Config{}, nil)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{}, nil)
 		mockProjectRepository.On("Get", projectId).Return(nil, errors.New("failed to get project"))
 
 		mockLogger.On("Error", mock.Anything).Return()
@@ -614,14 +685,14 @@ func TestApp_RunCommand(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
-			mockConfigRepository,
+			mockUserConfigRepository,
 			mockProjectRepository,
 			mockLogger,
 		)
 	})
 	t.Run("Should return an error if failing to run the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
-		mockConfigRepository := new(MockUserConfigRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
 		mockRunner := new(MockRunner)
 		mockLogger := new(MockLogger)
@@ -630,7 +701,7 @@ func TestApp_RunCommand(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
-			ConfigRepository:  mockConfigRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			ProjectRepository: mockProjectRepository,
 			Runner:            mockRunner,
 			Logger:            mockLogger,
@@ -643,12 +714,12 @@ func TestApp_RunCommand(t *testing.T) {
 
 		envPaths := []configdomain.EnvironmentPath{envPath}
 
-		mockConfigRepository.On("GetOrCreate").Return(&configdomain.Config{
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{
 			LastOpenedProjectId: "",
 			EnvironmentPaths:    envPaths,
 		}, nil)
 
-		mockConfigRepository.On("Update", mock.Anything).Return(nil)
+		mockUserConfigRepository.On("Update", mock.Anything).Return(nil)
 
 		cmdData := testutils.
 			NewCommand().
@@ -678,7 +749,7 @@ func TestApp_RunCommand(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
-			mockConfigRepository,
+			mockUserConfigRepository,
 			mockProjectRepository,
 			mockLogger,
 		)
@@ -688,6 +759,7 @@ func TestApp_RunCommand(t *testing.T) {
 func TestApp_StopCommand(t *testing.T) {
 	t.Run("Should stop the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 		mockEventEmitter := new(MockEventEmitter)
 		mockRunner := new(MockRunner)
@@ -695,6 +767,7 @@ func TestApp_StopCommand(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 			EventEmitter:      mockEventEmitter,
 			Runner:            mockRunner,
@@ -714,6 +787,7 @@ func TestApp_StopCommand(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
+			mockUserConfigRepository,
 			mockLogger,
 			mockEventEmitter,
 			mockRunner,
@@ -722,11 +796,13 @@ func TestApp_StopCommand(t *testing.T) {
 
 	t.Run("Should return error if the command does not exist", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 		})
 
@@ -740,17 +816,20 @@ func TestApp_StopCommand(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
+			mockUserConfigRepository,
 			mockLogger,
 		)
 	})
 	t.Run("Should return error if fails to stop the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 		mockRunner := new(MockRunner)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 			Runner:            mockRunner,
 		})
@@ -768,6 +847,7 @@ func TestApp_StopCommand(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
+			mockUserConfigRepository,
 			mockLogger,
 			mockRunner,
 		)
@@ -777,6 +857,7 @@ func TestApp_StopCommand(t *testing.T) {
 func TestApp_DuplicateCommand(t *testing.T) {
 	t.Run("Should duplicate the command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockEventBus := new(MockEventBus)
 		mockLogger := new(MockLogger)
 
@@ -784,11 +865,12 @@ func TestApp_DuplicateCommand(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			EventBus:          mockEventBus,
 			Logger:            mockLogger,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		originalCmdData := testutils.NewCommand().WithProjectId(projectId).Data()
 		originalCmd := commandDataToDomain(originalCmdData)
@@ -817,12 +899,14 @@ func TestApp_DuplicateCommand(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
+			mockUserConfigRepository,
 			mockEventBus,
 			mockLogger,
 		)
 	})
 	t.Run("Should duplicate the command with a target group", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockEventBus := new(MockEventBus)
 		mockLogger := new(MockLogger)
 
@@ -832,11 +916,12 @@ func TestApp_DuplicateCommand(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			EventBus:          mockEventBus,
 			Logger:            mockLogger,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		originalCmdData := testutils.NewCommand().WithProjectId(projectId).Data()
 		originalCmd := commandDataToDomain(originalCmdData)
@@ -865,22 +950,45 @@ func TestApp_DuplicateCommand(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
+			mockUserConfigRepository,
 			mockEventBus,
 			mockLogger,
 		)
 	})
+	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
+		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
+
+		a := app.NewApp()
+		a.LoadDependencies(app.Dependencies{
+			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
+		})
+		commandId := "command1"
+		expectedErr := errors.New("failed to get user config")
+		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedErr)
+		err := a.DuplicateCommand(commandId, "")
+		assert.ErrorIs(t, err, expectedErr)
+		mock.AssertExpectationsForObjects(t,
+			mockCommandRepository,
+			mockUserConfigRepository,
+		)
+	})
 	t.Run("Should return an error if the command does not exist", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 		})
 
 		commandId := "non-existing-command"
 
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: "project1"}, nil)
 		expectedErr := errors.New("command not found")
 		mockCommandRepository.On("Get", commandId).Return(nil, expectedErr)
 		mockLogger.On("Error", "command not found").Return()
@@ -895,16 +1003,18 @@ func TestApp_DuplicateCommand(t *testing.T) {
 	})
 	t.Run("Should return an error if fails to get all commands", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		originalCmd := commandDataToDomain(testutils.NewCommand().Data())
 		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
@@ -924,16 +1034,18 @@ func TestApp_DuplicateCommand(t *testing.T) {
 	})
 	t.Run("Should return an error if fails to create the duplicated command", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockLogger := new(MockLogger)
 
 		projectId := "project1"
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			Logger:            mockLogger,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		originalCmd := commandDataToDomain(testutils.NewCommand().Data())
 		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
@@ -953,6 +1065,7 @@ func TestApp_DuplicateCommand(t *testing.T) {
 	})
 	t.Run("Should return an error if side effects fail", func(t *testing.T) {
 		mockCommandRepository := new(MockCommandRepository)
+		mockUserConfigRepository := new(MockUserConfigRepository)
 		mockEventBus := new(MockEventBus)
 		mockLogger := new(MockLogger)
 
@@ -960,11 +1073,12 @@ func TestApp_DuplicateCommand(t *testing.T) {
 		a := app.NewApp()
 		a.LoadDependencies(app.Dependencies{
 			CommandRepository: mockCommandRepository,
+			ConfigRepository:  mockUserConfigRepository,
 			EventBus:          mockEventBus,
 			Logger:            mockLogger,
 		})
 
-		a.SetOpenProjectId(projectId)
+		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
 		originalCmdData := testutils.NewCommand().WithProjectId(projectId).Data()
 		originalCmd := commandDataToDomain(originalCmdData)
@@ -987,6 +1101,7 @@ func TestApp_DuplicateCommand(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t,
 			mockCommandRepository,
+			mockUserConfigRepository,
 			mockEventBus,
 			mockLogger,
 		)

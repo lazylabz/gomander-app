@@ -10,11 +10,20 @@ import (
 )
 
 func (a *App) GetCommandGroups() ([]domain.CommandGroup, error) {
-	return a.commandGroupRepository.GetAll(a.openedProjectId)
+	userConfig, err := a.userConfigRepository.GetOrCreate()
+	if err != nil {
+		return make([]domain.CommandGroup, 0), err
+	}
+	return a.commandGroupRepository.GetAll(userConfig.LastOpenedProjectId)
 }
 
 func (a *App) CreateCommandGroup(commandGroup *domain.CommandGroup) error {
-	existingCommandGroups, err := a.commandGroupRepository.GetAll(a.openedProjectId)
+	userConfig, err := a.userConfigRepository.GetOrCreate()
+	if err != nil {
+		return err
+	}
+
+	existingCommandGroups, err := a.commandGroupRepository.GetAll(userConfig.LastOpenedProjectId)
 	if err != nil {
 		return err
 	}
@@ -67,7 +76,12 @@ func (a *App) RemoveCommandFromCommandGroup(commandId, commandGroupId string) er
 }
 
 func (a *App) ReorderCommandGroups(newOrderedIds []string) error {
-	existingCommandGroups, err := a.commandGroupRepository.GetAll(a.openedProjectId)
+	userConfig, err := a.userConfigRepository.GetOrCreate()
+	if err != nil {
+		return err
+	}
+
+	existingCommandGroups, err := a.commandGroupRepository.GetAll(userConfig.LastOpenedProjectId)
 	if err != nil {
 		return err
 	}
