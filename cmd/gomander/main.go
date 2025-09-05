@@ -20,7 +20,8 @@ import (
 	configinfrastructure "gomander/internal/config/infrastructure"
 	"gomander/internal/eventbus"
 	"gomander/internal/facade"
-	logger "gomander/internal/logger"
+	"gomander/internal/logger"
+	projectusecases "gomander/internal/project/application/usecases"
 	projectinfrastructure "gomander/internal/project/infrastructure"
 	"gomander/internal/runner"
 	"gomander/internal/uihelpers/path"
@@ -163,13 +164,20 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	cleanCommandsOnProjectDeleted := handlers.NewCleanCommandOnProjectDeleted(commandRepo)
 	addCommandToGroupOnCommandDuplicated := commandgrouphandlers.NewAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo)
 
+	// Initialize event bus
+	eventBus := eventbus.NewInMemoryEventBus()
+
 	// Initialize use cases
 	getUserConfig := configusecases.NewGetUserConfig(configRepo)
 	saveUserConfig := configusecases.NewSaveUserConfig(configRepo)
+	getCurrentProject := projectusecases.NewGetCurrentProject(configRepo, projectRepo)
+	getAvailableProjects := projectusecases.NewGetAvailableProjects(projectRepo)
+	openProject := projectusecases.NewOpenProject(configRepo, projectRepo)
+	createProject := projectusecases.NewCreateProject(projectRepo)
+	editProject := projectusecases.NewEditProject(projectRepo)
+	closeProject := projectusecases.NewCloseProject(configRepo)
+	deleteProject := projectusecases.NewDeleteProject(projectRepo, eventBus, l)
 
-	eventBus := eventbus.NewInMemoryEventBus()
-
-	// Initialize event emitter
 	app.LoadDependencies(internalapp.Dependencies{
 		Logger:       l,
 		EventEmitter: ee,
@@ -192,8 +200,15 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 		},
 
 		UseCases: internalapp.UseCases{
-			GetUserConfig:  getUserConfig,
-			SaveUserConfig: saveUserConfig,
+			GetUserConfig:        getUserConfig,
+			SaveUserConfig:       saveUserConfig,
+			GetCurrentProject:    getCurrentProject,
+			GetAvailableProjects: getAvailableProjects,
+			OpenProject:          openProject,
+			CreateProject:        createProject,
+			EditProject:          editProject,
+			CloseProject:         closeProject,
+			DeleteProject:        deleteProject,
 		},
 	})
 }

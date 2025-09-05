@@ -634,11 +634,9 @@ func TestApp_RunCommand(t *testing.T) {
 		envPaths := []configdomain.EnvironmentPath{envPath}
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{
-			LastOpenedProjectId: "",
+			LastOpenedProjectId: projectId,
 			EnvironmentPaths:    envPaths,
 		}, nil)
-
-		mockUserConfigRepository.On("Update", mock.Anything).Return(nil)
 
 		cmdData := testutils.
 			NewCommand().
@@ -661,10 +659,7 @@ func TestApp_RunCommand(t *testing.T) {
 		mockRunner.On("RunCommand", &cmd, []string{"/1"}, project.WorkingDirectory).Return(nil)
 
 		// Act
-		err := a.OpenProject(projectId)
-		assert.NoError(t, err)
-
-		err = a.RunCommand(cmd.Id)
+		err := a.RunCommand(cmd.Id)
 
 		// Assert
 		assert.NoError(t, err)
@@ -809,11 +804,9 @@ func TestApp_RunCommand(t *testing.T) {
 		envPaths := []configdomain.EnvironmentPath{envPath}
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{
-			LastOpenedProjectId: "",
+			LastOpenedProjectId: projectId,
 			EnvironmentPaths:    envPaths,
 		}, nil)
-
-		mockUserConfigRepository.On("Update", mock.Anything).Return(nil)
 
 		cmdData := testutils.
 			NewCommand().
@@ -836,10 +829,7 @@ func TestApp_RunCommand(t *testing.T) {
 		mockRunner.On("RunCommand", &cmd, []string{"/1"}, project.WorkingDirectory).Return(errors.New("failed to run command"))
 
 		// Act
-		err := a.OpenProject(projectId)
-		assert.NoError(t, err)
-
-		err = a.RunCommand(cmd.Id)
+		err := a.RunCommand(cmd.Id)
 
 		// Assert
 		assert.Error(t, err)

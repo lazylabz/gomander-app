@@ -6,31 +6,19 @@ import {context} from '../models';
 
 export function AddCommand(arg1:domain.Command):Promise<void>;
 
-export function CloseProject():Promise<void>;
-
 export function CreateCommandGroup(arg1:domain.CommandGroup):Promise<void>;
 
-export function CreateProject(arg1:domain.Project):Promise<void>;
-
 export function DeleteCommandGroup(arg1:string):Promise<void>;
-
-export function DeleteProject(arg1:string):Promise<void>;
 
 export function DuplicateCommand(arg1:string,arg2:string):Promise<void>;
 
 export function EditCommand(arg1:domain.Command):Promise<void>;
 
-export function EditProject(arg1:domain.Project):Promise<void>;
-
 export function ExportProject(arg1:string):Promise<void>;
-
-export function GetAvailableProjects():Promise<Array<domain.Project>>;
 
 export function GetCommandGroups():Promise<Array<domain.CommandGroup>>;
 
 export function GetCommands():Promise<Array<domain.Command>>;
-
-export function GetCurrentProject():Promise<domain.Project>;
 
 export function GetCurrentRelease():Promise<string>;
 
@@ -41,8 +29,6 @@ export function ImportProject(arg1:app.ProjectExportJSONv1,arg2:string,arg3:stri
 export function IsThereANewRelease():Promise<string>;
 
 export function LoadDependencies(arg1:app.Dependencies):Promise<void>;
-
-export function OpenProject(arg1:string):Promise<void>;
 
 export function RegisterHandlers():Promise<void>;
 

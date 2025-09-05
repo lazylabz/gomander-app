@@ -13,6 +13,7 @@ import (
 	"gomander/internal/eventbus"
 	"gomander/internal/facade"
 	"gomander/internal/logger"
+	projectusecases "gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
 	"gomander/internal/runner"
 )
@@ -25,8 +26,15 @@ type EventHandlers struct {
 }
 
 type UseCases struct {
-	GetUserConfig  configusecases.GetUserConfig
-	SaveUserConfig configusecases.SaveUserConfig
+	GetUserConfig        configusecases.GetUserConfig
+	SaveUserConfig       configusecases.SaveUserConfig
+	GetCurrentProject    projectusecases.GetCurrentProject
+	GetAvailableProjects projectusecases.GetAvailableProjects
+	OpenProject          projectusecases.OpenProject
+	CreateProject        projectusecases.CreateProject
+	EditProject          projectusecases.EditProject
+	CloseProject         projectusecases.CloseProject
+	DeleteProject        projectusecases.DeleteProject
 }
 
 // App struct

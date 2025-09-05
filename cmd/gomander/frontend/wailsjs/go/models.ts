@@ -13,6 +13,13 @@ export namespace app {
 	export interface UseCases {
 	    GetUserConfig: any;
 	    SaveUserConfig: any;
+	    GetCurrentProject: any;
+	    GetAvailableProjects: any;
+	    OpenProject: any;
+	    CreateProject: any;
+	    EditProject: any;
+	    CloseProject: any;
+	    DeleteProject: any;
 	}
 	export interface EventHandlers {
 	    CleanCommandGroupsOnCommandDeleted: any;
