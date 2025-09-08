@@ -1,4 +1,4 @@
-package app
+package releases
 
 import (
 	"encoding/xml"
@@ -21,25 +21,28 @@ type ReleasesFeedXML struct {
 	} `xml:"entry"`
 }
 
-func (a *App) GetCurrentRelease() string {
+type ReleaseHelper struct{}
+
+func NewReleaseHelper() *ReleaseHelper {
+	return &ReleaseHelper{}
+}
+
+func (rh *ReleaseHelper) GetCurrentRelease() string {
 	return semver.MustParse(CurrentRelease).String()
 }
 
 // IsThereANewRelease checks if there is a new release available.
 // If a new release is available, it returns the version of the new release.
 // If no new release is available, it returns an empty string.
-func (a *App) IsThereANewRelease() (release string, err error) {
+func (rh *ReleaseHelper) IsThereANewRelease() (release string, err error) {
 	release = ""
 
-	a.logger.Info("Checking for new releases...")
 	currentRelease := semver.MustParse(CurrentRelease)
 	latestRelease, err := getLatestRelease()
 	if err != nil {
-		a.logger.Error("Failed to get latest release: " + err.Error())
 		return "", errors.New("failed to get latest release: " + err.Error())
 	}
 	if latestRelease == nil {
-		a.logger.Info("No new releases found.")
 		return "", nil
 	}
 

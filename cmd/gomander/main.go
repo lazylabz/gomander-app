@@ -25,6 +25,7 @@ import (
 	"gomander/internal/logger"
 	projectusecases "gomander/internal/project/application/usecases"
 	projectinfrastructure "gomander/internal/project/infrastructure"
+	"gomander/internal/releases"
 	"gomander/internal/runner"
 	"gomander/internal/uihelpers/path"
 
@@ -48,6 +49,7 @@ func main() {
 
 	// Create instance of helpers
 	uiPathHelper := path.NewUiPathHelper()
+	releaseHelper := releases.NewReleaseHelper()
 
 	// Create instance of controllers
 	controllers := NewWailsControllers()
@@ -81,6 +83,7 @@ func main() {
 			app,
 			uiPathHelper,
 			controllers,
+			releaseHelper,
 		},
 		OnBeforeClose: app.OnBeforeClose,
 		EnumBind: []interface{}{
