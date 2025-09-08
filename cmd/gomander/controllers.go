@@ -68,3 +68,7 @@ func (wc *WailsControllers) GetCommandGroupsController() ([]commandgroupdomain.C
 func (wc *WailsControllers) CreateCommandGroupController(commandGroup commandgroupdomain.CommandGroup) error {
 	return wc.useCases.CreateCommandGroup.Execute(&commandGroup)
 }
+
+func (wc *WailsControllers) UpdateCommandGroupController(commandGroup commandgroupdomain.CommandGroup) error {
+	return wc.useCases.UpdateCommandGroup.Execute(&commandGroup)
+}

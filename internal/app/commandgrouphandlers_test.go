@@ -14,68 +14,6 @@ import (
 	"gomander/internal/testutils"
 )
 
-func TestApp_UpdateCommandGroup(t *testing.T) {
-	t.Run("Should update a command group", func(t *testing.T) {
-		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
-
-		projectId := "project1"
-
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			CommandGroupRepository: mockCommandGroupRepository,
-		})
-
-		commandGroupData := testutils.
-			NewCommandGroup().
-			WithProjectId(projectId).
-			Data()
-
-		paramCommandGroup := commandGroupDataToDomain(commandGroupData)
-
-		mockCommandGroupRepository.On("Update", &paramCommandGroup).Return(nil)
-
-		// Act
-		err := a.UpdateCommandGroup(&paramCommandGroup)
-
-		// Assert
-		assert.NoError(t, err)
-
-		mock.AssertExpectationsForObjects(t,
-			mockCommandGroupRepository,
-		)
-	})
-
-	t.Run("Should return an error if failing to update the command group", func(t *testing.T) {
-		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
-
-		projectId := "project1"
-
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			CommandGroupRepository: mockCommandGroupRepository,
-		})
-
-		commandGroupData := testutils.
-			NewCommandGroup().
-			WithProjectId(projectId).
-			Data()
-
-		paramCommandGroup := commandGroupDataToDomain(commandGroupData)
-
-		mockCommandGroupRepository.On("Update", &paramCommandGroup).Return(errors.New("failed to update command group"))
-
-		// Act
-		err := a.UpdateCommandGroup(&paramCommandGroup)
-
-		// Assert
-		assert.Error(t, err)
-
-		mock.AssertExpectationsForObjects(t, mockCommandGroupRepository)
-	})
-}
-
 func TestApp_DeleteCommandGroup(t *testing.T) {
 	t.Run("Should delete a command group", func(t *testing.T) {
 		// Arrange

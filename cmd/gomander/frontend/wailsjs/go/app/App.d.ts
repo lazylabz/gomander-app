@@ -41,5 +41,3 @@ export function RunCommand(arg1:string):Promise<void>;
 export function Startup(arg1:context.Context):Promise<void>;
 
 export function StopCommand(arg1:string):Promise<void>;
-
-export function UpdateCommandGroup(arg1:domain.CommandGroup):Promise<void>;

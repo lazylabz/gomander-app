@@ -5,17 +5,8 @@ import (
 	"sort"
 
 	commandDomain "gomander/internal/command/domain"
-	"gomander/internal/commandgroup/domain"
 	"gomander/internal/helpers/array"
 )
-
-func (a *App) UpdateCommandGroup(commandGroup *domain.CommandGroup) error {
-	if err := a.commandGroupRepository.Update(commandGroup); err != nil {
-		return err
-	}
-
-	return nil
-}
 
 func (a *App) DeleteCommandGroup(commandGroupId string) error {
 	if err := a.commandGroupRepository.Delete(commandGroupId); err != nil {

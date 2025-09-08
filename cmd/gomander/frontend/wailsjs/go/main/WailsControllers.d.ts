@@ -23,3 +23,5 @@ export function GetUserConfigController():Promise<domain.Config>;
 export function OpenProjectController(arg1:string):Promise<void>;
 
 export function SaveUserConfigController(arg1:domain.Config):Promise<void>;
+
+export function UpdateCommandGroupController(arg1:domain.CommandGroup):Promise<void>;

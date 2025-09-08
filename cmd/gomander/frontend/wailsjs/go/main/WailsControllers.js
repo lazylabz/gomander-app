@@ -45,3 +45,7 @@ export function OpenProjectController(arg1) {
 export function SaveUserConfigController(arg1) {
   return window['go']['main']['WailsControllers']['SaveUserConfigController'](arg1);
 }
+
+export function UpdateCommandGroupController(arg1) {
+  return window['go']['main']['WailsControllers']['UpdateCommandGroupController'](arg1);
+}

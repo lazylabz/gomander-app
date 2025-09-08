@@ -15,7 +15,6 @@ import {
   ReorderCommands,
   RunCommand,
   StopCommand,
-  UpdateCommandGroup,
 } from "../../wailsjs/go/app/App";
 import {
   CloseProjectController,
@@ -29,6 +28,7 @@ import {
   GetUserConfigController,
   OpenProjectController,
   SaveUserConfigController,
+  UpdateCommandGroupController,
 } from "../../wailsjs/go/main/WailsControllers";
 import type { domain } from "../../wailsjs/go/models.ts";
 import { GetComputedPath } from "../../wailsjs/go/path/UiPathHelper";
@@ -40,7 +40,7 @@ export const dataService = {
   editCommand: EditCommand,
   reorderCommands: ReorderCommands,
   getAvailableProjects: GetAvailableProjectsController,
-  editCommandGroup: UpdateCommandGroup,
+  editCommandGroup: UpdateCommandGroupController,
   createCommandGroup: CreateCommandGroupController,
   deleteCommandGroup: DeleteCommandGroup,
   reorderCommandGroups: ReorderCommandGroups,
