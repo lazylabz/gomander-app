@@ -3,23 +3,10 @@ package app
 import (
 	"sort"
 
-	"gomander/internal/command/domain"
 	domain2 "gomander/internal/config/domain"
 	"gomander/internal/event"
 	"gomander/internal/helpers/array"
 )
-
-func (a *App) EditCommand(newCommand domain.Command) error {
-	err := a.commandRepository.Update(&newCommand)
-	if err != nil {
-		a.logger.Error(err.Error())
-		return err
-	}
-
-	a.logger.Info("Command edited: " + newCommand.Id)
-
-	return nil
-}
 
 func (a *App) ReorderCommands(orderedIds []string) error {
 	userConfig, err := a.userConfigRepository.GetOrCreate()

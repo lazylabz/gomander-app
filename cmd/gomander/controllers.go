@@ -103,3 +103,7 @@ func (wc *WailsControllers) DuplicateCommandController(commandId string, targetG
 func (wc *WailsControllers) RemoveCommandController(commandId string) error {
 	return wc.useCases.RemoveCommand.Execute(commandId)
 }
+
+func (wc *WailsControllers) EditCommandController(command commanddomain.Command) error {
+	return wc.useCases.EditCommand.Execute(command)
+}

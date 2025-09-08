@@ -30,6 +30,10 @@ export function DuplicateCommandController(arg1, arg2) {
   return window['go']['main']['WailsControllers']['DuplicateCommandController'](arg1, arg2);
 }
 
+export function EditCommandController(arg1) {
+  return window['go']['main']['WailsControllers']['EditCommandController'](arg1);
+}
+
 export function EditProjectController(arg1) {
   return window['go']['main']['WailsControllers']['EditProjectController'](arg1);
 }

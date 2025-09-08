@@ -47,6 +47,7 @@ type UseCases struct {
 	AddCommand                    commandusecases.AddCommand
 	DuplicateCommand              commandusecases.DuplicateCommand
 	RemoveCommand                 commandusecases.RemoveCommand
+	EditCommand                   commandusecases.EditCommand
 }
 
 // App struct
