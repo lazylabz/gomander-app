@@ -33,6 +33,7 @@ export namespace app {
 	    EditCommand: any;
 	    ReorderCommands: any;
 	    RunCommand: any;
+	    StopCommand: any;
 	}
 	export interface EventHandlers {
 	    CleanCommandGroupsOnCommandDeleted: any;

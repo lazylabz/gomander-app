@@ -50,6 +50,7 @@ type UseCases struct {
 	EditCommand                   commandusecases.EditCommand
 	ReorderCommands               commandusecases.ReorderCommands
 	RunCommand                    commandusecases.RunCommand
+	StopCommand                   commandusecases.StopCommand
 }
 
 // App struct

@@ -115,3 +115,7 @@ func (wc *WailsControllers) ReorderCommandsController(orderedIds []string) error
 func (wc *WailsControllers) RunCommandController(commandId string) error {
 	return wc.useCases.RunCommand.Execute(commandId)
 }
+
+func (wc *WailsControllers) StopCommandController(commandId string) error {
+	return wc.useCases.StopCommand.Execute(commandId)
+}

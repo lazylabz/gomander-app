@@ -18,5 +18,3 @@ export function LoadDependencies(arg1:app.Dependencies):Promise<void>;
 export function RegisterHandlers():Promise<void>;
 
 export function Startup(arg1:context.Context):Promise<void>;
-
-export function StopCommand(arg1:string):Promise<void>;

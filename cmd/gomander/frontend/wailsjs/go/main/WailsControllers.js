@@ -86,6 +86,10 @@ export function SaveUserConfigController(arg1) {
   return window['go']['main']['WailsControllers']['SaveUserConfigController'](arg1);
 }
 
+export function StopCommandController(arg1) {
+  return window['go']['main']['WailsControllers']['StopCommandController'](arg1);
+}
+
 export function UpdateCommandGroupController(arg1) {
   return window['go']['main']['WailsControllers']['UpdateCommandGroupController'](arg1);
 }
