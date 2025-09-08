@@ -8,7 +8,6 @@ import (
 
 	"gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
-	"gomander/internal/helpers/array"
 	projectdomain "gomander/internal/project/domain"
 )
 
@@ -29,69 +28,6 @@ type ProjectExportJSONv1 struct {
 	Name          string               `json:"name"`
 	Commands      []CommandJSONv1      `json:"commands"`
 	CommandGroups []CommandGroupJSONv1 `json:"commandGroups"`
-}
-
-func (a *App) ExportProject(projectConfigId string) (err error) {
-	project, err := a.projectRepository.Get(projectConfigId)
-	if err != nil {
-		return err
-	}
-
-	filePath, err := a.runtimeFacade.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{Title: "Select a destination", CanCreateDirectories: true, DefaultFilename: project.Name + ".json"})
-	if err != nil {
-		return err
-	}
-
-	if filePath == "" {
-		return nil
-	}
-
-	commands, err := a.commandRepository.GetAll(projectConfigId)
-	if err != nil {
-		return err
-	}
-	commandGroups, err := a.commandGroupRepository.GetAll(projectConfigId)
-	if err != nil {
-		return err
-	}
-
-	exportData := ProjectExportJSONv1{
-		Version: 1,
-	}
-
-	// Load project data
-	exportData.Name = project.Name
-
-	// Load commands
-	for _, cmd := range commands {
-		exportData.Commands = append(exportData.Commands, CommandJSONv1{
-			Id:               cmd.Id,
-			Name:             cmd.Name,
-			Command:          cmd.Command,
-			WorkingDirectory: cmd.WorkingDirectory,
-		})
-	}
-
-	// Load command groups
-	for _, group := range commandGroups {
-		exportData.CommandGroups = append(exportData.CommandGroups, CommandGroupJSONv1{
-			Name:       group.Name,
-			CommandIds: array.Map(group.Commands, func(cmd domain.Command) string { return cmd.Id }),
-		})
-	}
-
-	jsonData, err := json.MarshalIndent(exportData, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	// Write directly to file
-	err = a.fsFacade.WriteFile(filePath, jsonData, 0644)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (a *App) ImportProject(projectJSON ProjectExportJSONv1, name, workingDirectory string) error {

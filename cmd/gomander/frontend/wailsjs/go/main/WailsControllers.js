@@ -38,6 +38,10 @@ export function EditProjectController(arg1) {
   return window['go']['main']['WailsControllers']['EditProjectController'](arg1);
 }
 
+export function ExportProjectController(arg1) {
+  return window['go']['main']['WailsControllers']['ExportProjectController'](arg1);
+}
+
 export function GetAvailableProjectsController() {
   return window['go']['main']['WailsControllers']['GetAvailableProjectsController']();
 }

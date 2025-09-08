@@ -1,5 +1,4 @@
 import {
-  ExportProject,
   GetCurrentRelease,
   GetProjectToImport,
   ImportProject,
@@ -15,6 +14,7 @@ import {
   DuplicateCommandController,
   EditCommandController,
   EditProjectController,
+  ExportProjectController,
   GetAvailableProjectsController,
   GetCommandGroupsController,
   GetCommandsController,
@@ -58,7 +58,7 @@ export const dataService = {
   openProject: OpenProjectController,
   closeProject: CloseProjectController,
   deleteProject: DeleteProjectController,
-  exportProject: ExportProject,
+  exportProject: ExportProjectController,
   importProject: ImportProject,
   getProjectToImport: GetProjectToImport,
   editProject: EditProjectController,

@@ -179,6 +179,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	editProject := projectusecases.NewEditProject(projectRepo)
 	closeProject := projectusecases.NewCloseProject(configRepo)
 	deleteProject := projectusecases.NewDeleteProject(projectRepo, eventBus, l)
+	exportProject := projectusecases.NewExportProject(ctx, projectRepo, commandRepo, commandGroupRepo, facade.DefaultRuntimeFacade{}, facade.DefaultFsFacade{})
 	getCommandGroups := commandgroupusecases.NewGetCommandGroups(configRepo, commandGroupRepo)
 	createCommandGroup := commandgroupusecases.NewCreateCommandGroup(configRepo, commandGroupRepo)
 	updateCommandGroup := commandgroupusecases.NewUpdateCommandGroup(commandGroupRepo)
@@ -225,6 +226,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 			EditProject:                   editProject,
 			CloseProject:                  closeProject,
 			DeleteProject:                 deleteProject,
+			ExportProject:                 exportProject,
 			GetCommandGroups:              getCommandGroups,
 			CreateCommandGroup:            createCommandGroup,
 			UpdateCommandGroup:            updateCommandGroup,

@@ -20,6 +20,7 @@ export namespace app {
 	    EditProject: any;
 	    CloseProject: any;
 	    DeleteProject: any;
+	    ExportProject: any;
 	    GetCommandGroups: any;
 	    CreateCommandGroup: any;
 	    UpdateCommandGroup: any;
