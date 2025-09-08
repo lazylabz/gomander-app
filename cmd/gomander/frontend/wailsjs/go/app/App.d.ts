@@ -20,8 +20,6 @@ export function LoadDependencies(arg1:app.Dependencies):Promise<void>;
 
 export function RegisterHandlers():Promise<void>;
 
-export function RemoveCommand(arg1:string):Promise<void>;
-
 export function ReorderCommands(arg1:Array<string>):Promise<void>;
 
 export function RunCommand(arg1:string):Promise<void>;

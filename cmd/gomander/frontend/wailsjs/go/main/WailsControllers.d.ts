@@ -30,6 +30,8 @@ export function GetUserConfigController():Promise<domain.Config>;
 
 export function OpenProjectController(arg1:string):Promise<void>;
 
+export function RemoveCommandController(arg1:string):Promise<void>;
+
 export function RemoveCommandFromCommandGroupController(arg1:string,arg2:string):Promise<void>;
 
 export function ReorderCommandGroupsController(arg1:Array<string>):Promise<void>;

@@ -58,6 +58,10 @@ export function OpenProjectController(arg1) {
   return window['go']['main']['WailsControllers']['OpenProjectController'](arg1);
 }
 
+export function RemoveCommandController(arg1) {
+  return window['go']['main']['WailsControllers']['RemoveCommandController'](arg1);
+}
+
 export function RemoveCommandFromCommandGroupController(arg1, arg2) {
   return window['go']['main']['WailsControllers']['RemoveCommandFromCommandGroupController'](arg1, arg2);
 }
