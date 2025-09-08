@@ -76,3 +76,7 @@ func (wc *WailsControllers) UpdateCommandGroupController(commandGroup commandgro
 func (wc *WailsControllers) DeleteCommandGroupController(commandGroupId string) error {
 	return wc.useCases.DeleteCommandGroup.Execute(commandGroupId)
 }
+
+func (wc *WailsControllers) RemoveCommandFromCommandGroupController(commandId string, commandGroupId string) error {
+	return wc.useCases.RemoveCommandFromCommandGroup.Execute(commandId, commandGroupId)
+}

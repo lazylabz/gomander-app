@@ -182,6 +182,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	createCommandGroup := commandgroupusecases.NewCreateCommandGroup(configRepo, commandGroupRepo)
 	updateCommandGroup := commandgroupusecases.NewUpdateCommandGroup(commandGroupRepo)
 	deleteCommandGroup := commandgroupusecases.NewDeleteCommandGroup(commandGroupRepo)
+	removeCommandFromCommandGroup := commandgroupusecases.NewRemoveCommandFromCommandGroup(commandGroupRepo)
 
 	app.LoadDependencies(internalapp.Dependencies{
 		Logger:       l,
@@ -205,19 +206,20 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 		},
 
 		UseCases: internalapp.UseCases{
-			GetUserConfig:        getUserConfig,
-			SaveUserConfig:       saveUserConfig,
-			GetCurrentProject:    getCurrentProject,
-			GetAvailableProjects: getAvailableProjects,
-			OpenProject:          openProject,
-			CreateProject:        createProject,
-			EditProject:          editProject,
-			CloseProject:         closeProject,
-			DeleteProject:        deleteProject,
-			GetCommandGroups:     getCommandGroups,
-			CreateCommandGroup:   createCommandGroup,
-			UpdateCommandGroup:   updateCommandGroup,
-			DeleteCommandGroup:   deleteCommandGroup,
+			GetUserConfig:                 getUserConfig,
+			SaveUserConfig:                saveUserConfig,
+			GetCurrentProject:             getCurrentProject,
+			GetAvailableProjects:          getAvailableProjects,
+			OpenProject:                   openProject,
+			CreateProject:                 createProject,
+			EditProject:                   editProject,
+			CloseProject:                  closeProject,
+			DeleteProject:                 deleteProject,
+			GetCommandGroups:              getCommandGroups,
+			CreateCommandGroup:            createCommandGroup,
+			UpdateCommandGroup:            updateCommandGroup,
+			DeleteCommandGroup:            deleteCommandGroup,
+			RemoveCommandFromCommandGroup: removeCommandFromCommandGroup,
 		},
 	})
 }

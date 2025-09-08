@@ -28,8 +28,6 @@ export function RegisterHandlers():Promise<void>;
 
 export function RemoveCommand(arg1:string):Promise<void>;
 
-export function RemoveCommandFromCommandGroup(arg1:string,arg2:string):Promise<void>;
-
 export function ReorderCommandGroups(arg1:Array<string>):Promise<void>;
 
 export function ReorderCommands(arg1:Array<string>):Promise<void>;

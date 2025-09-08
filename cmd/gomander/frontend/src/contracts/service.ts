@@ -9,7 +9,6 @@ import {
   ImportProject,
   IsThereANewRelease,
   RemoveCommand,
-  RemoveCommandFromCommandGroup,
   ReorderCommandGroups,
   ReorderCommands,
   RunCommand,
@@ -27,6 +26,7 @@ import {
   GetCurrentProjectController,
   GetUserConfigController,
   OpenProjectController,
+  RemoveCommandFromCommandGroupController,
   SaveUserConfigController,
   UpdateCommandGroupController,
 } from "../../wailsjs/go/main/WailsControllers";
@@ -44,7 +44,7 @@ export const dataService = {
   createCommandGroup: CreateCommandGroupController,
   deleteCommandGroup: DeleteCommandGroupController,
   reorderCommandGroups: ReorderCommandGroups,
-  removeCommandFromGroup: RemoveCommandFromCommandGroup,
+  removeCommandFromGroup: RemoveCommandFromCommandGroupController,
   getCommandGroups: GetCommandGroupsController,
   getCommands: GetCommands,
   getCurrentProject:

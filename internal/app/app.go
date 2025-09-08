@@ -27,19 +27,20 @@ type EventHandlers struct {
 }
 
 type UseCases struct {
-	GetUserConfig        configusecases.GetUserConfig
-	SaveUserConfig       configusecases.SaveUserConfig
-	GetCurrentProject    projectusecases.GetCurrentProject
-	GetAvailableProjects projectusecases.GetAvailableProjects
-	OpenProject          projectusecases.OpenProject
-	CreateProject        projectusecases.CreateProject
-	EditProject          projectusecases.EditProject
-	CloseProject         projectusecases.CloseProject
-	DeleteProject        projectusecases.DeleteProject
-	GetCommandGroups     commandgroupusecases.GetCommandGroups
-	CreateCommandGroup   commandgroupusecases.CreateCommandGroup
-	UpdateCommandGroup   commandgroupusecases.UpdateCommandGroup
-	DeleteCommandGroup   commandgroupusecases.DeleteCommandGroup
+	GetUserConfig                 configusecases.GetUserConfig
+	SaveUserConfig                configusecases.SaveUserConfig
+	GetCurrentProject             projectusecases.GetCurrentProject
+	GetAvailableProjects          projectusecases.GetAvailableProjects
+	OpenProject                   projectusecases.OpenProject
+	CreateProject                 projectusecases.CreateProject
+	EditProject                   projectusecases.EditProject
+	CloseProject                  projectusecases.CloseProject
+	DeleteProject                 projectusecases.DeleteProject
+	GetCommandGroups              commandgroupusecases.GetCommandGroups
+	CreateCommandGroup            commandgroupusecases.CreateCommandGroup
+	UpdateCommandGroup            commandgroupusecases.UpdateCommandGroup
+	DeleteCommandGroup            commandgroupusecases.DeleteCommandGroup
+	RemoveCommandFromCommandGroup commandgroupusecases.RemoveCommandFromCommandGroup
 }
 
 // App struct
