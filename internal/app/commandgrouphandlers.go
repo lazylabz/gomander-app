@@ -9,28 +9,6 @@ import (
 	"gomander/internal/helpers/array"
 )
 
-func (a *App) CreateCommandGroup(commandGroup *domain.CommandGroup) error {
-	userConfig, err := a.userConfigRepository.GetOrCreate()
-	if err != nil {
-		return err
-	}
-
-	existingCommandGroups, err := a.commandGroupRepository.GetAll(userConfig.LastOpenedProjectId)
-	if err != nil {
-		return err
-	}
-
-	newPosition := len(existingCommandGroups)
-
-	commandGroup.Position = newPosition
-
-	if err := a.commandGroupRepository.Create(commandGroup); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (a *App) UpdateCommandGroup(commandGroup *domain.CommandGroup) error {
 	if err := a.commandGroupRepository.Update(commandGroup); err != nil {
 		return err

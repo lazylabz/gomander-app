@@ -4,6 +4,8 @@ import {domain} from '../models';
 
 export function CloseProjectController():Promise<void>;
 
+export function CreateCommandGroupController(arg1:domain.CommandGroup):Promise<void>;
+
 export function CreateProjectController(arg1:domain.Project):Promise<void>;
 
 export function DeleteProjectController(arg1:string):Promise<void>;

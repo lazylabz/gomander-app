@@ -64,3 +64,7 @@ func (wc *WailsControllers) DeleteProjectController(projectId string) error {
 func (wc *WailsControllers) GetCommandGroupsController() ([]commandgroupdomain.CommandGroup, error) {
 	return wc.useCases.GetCommandGroups.Execute()
 }
+
+func (wc *WailsControllers) CreateCommandGroupController(commandGroup commandgroupdomain.CommandGroup) error {
+	return wc.useCases.CreateCommandGroup.Execute(&commandGroup)
+}

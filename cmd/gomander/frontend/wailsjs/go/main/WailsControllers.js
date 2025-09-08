@@ -6,6 +6,10 @@ export function CloseProjectController() {
   return window['go']['main']['WailsControllers']['CloseProjectController']();
 }
 
+export function CreateCommandGroupController(arg1) {
+  return window['go']['main']['WailsControllers']['CreateCommandGroupController'](arg1);
+}
+
 export function CreateProjectController(arg1) {
   return window['go']['main']['WailsControllers']['CreateProjectController'](arg1);
 }

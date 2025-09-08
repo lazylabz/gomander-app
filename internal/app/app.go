@@ -37,6 +37,7 @@ type UseCases struct {
 	CloseProject         projectusecases.CloseProject
 	DeleteProject        projectusecases.DeleteProject
 	GetCommandGroups     commandgroupusecases.GetCommandGroups
+	CreateCommandGroup   commandgroupusecases.CreateCommandGroup
 }
 
 // App struct
