@@ -62,6 +62,10 @@ export function GetUserConfigController() {
   return window['go']['main']['WailsControllers']['GetUserConfigController']();
 }
 
+export function ImportProjectController(arg1, arg2, arg3) {
+  return window['go']['main']['WailsControllers']['ImportProjectController'](arg1, arg2, arg3);
+}
+
 export function OpenProjectController(arg1) {
   return window['go']['main']['WailsControllers']['OpenProjectController'](arg1);
 }

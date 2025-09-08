@@ -32,6 +32,8 @@ export function GetCurrentProjectController():Promise<domain.Project>;
 
 export function GetUserConfigController():Promise<domain.Config>;
 
+export function ImportProjectController(arg1:domain.ProjectExportJSONv1,arg2:string,arg3:string):Promise<void>;
+
 export function OpenProjectController(arg1:string):Promise<void>;
 
 export function RemoveCommandController(arg1:string):Promise<void>;
