@@ -107,3 +107,7 @@ func (wc *WailsControllers) RemoveCommandController(commandId string) error {
 func (wc *WailsControllers) EditCommandController(command commanddomain.Command) error {
 	return wc.useCases.EditCommand.Execute(command)
 }
+
+func (wc *WailsControllers) ReorderCommandsController(orderedIds []string) error {
+	return wc.useCases.ReorderCommands.Execute(orderedIds)
+}

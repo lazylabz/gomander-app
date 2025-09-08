@@ -74,6 +74,10 @@ export function ReorderCommandGroupsController(arg1) {
   return window['go']['main']['WailsControllers']['ReorderCommandGroupsController'](arg1);
 }
 
+export function ReorderCommandsController(arg1) {
+  return window['go']['main']['WailsControllers']['ReorderCommandsController'](arg1);
+}
+
 export function SaveUserConfigController(arg1) {
   return window['go']['main']['WailsControllers']['SaveUserConfigController'](arg1);
 }
