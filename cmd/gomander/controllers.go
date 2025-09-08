@@ -68,6 +68,10 @@ func (wc *WailsControllers) ImportProjectController(projectJSON projectdomain.Pr
 	return wc.useCases.ImportProject.Execute(projectJSON, name, workingDirectory)
 }
 
+func (wc *WailsControllers) GetProjectToImportController() (*projectdomain.ProjectExportJSONv1, error) {
+	return wc.useCases.GetProjectToImport.Execute()
+}
+
 // CommandGroup controllers
 
 func (wc *WailsControllers) GetCommandGroupsController() ([]commandgroupdomain.CommandGroup, error) {

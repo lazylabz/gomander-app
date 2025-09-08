@@ -5,8 +5,6 @@ import {context} from '../models';
 
 export function GetCurrentRelease():Promise<string>;
 
-export function GetProjectToImport():Promise<app.ProjectExportJSONv1>;
-
 export function IsThereANewRelease():Promise<string>;
 
 export function LoadDependencies(arg1:app.Dependencies):Promise<void>;

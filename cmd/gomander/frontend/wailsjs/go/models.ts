@@ -1,15 +1,5 @@
 export namespace app {
 	
-	export interface CommandGroupJSONv1 {
-	    name: string;
-	    commandIds: string[];
-	}
-	export interface CommandJSONv1 {
-	    id: string;
-	    name: string;
-	    command: string;
-	    workingDirectory: string;
-	}
 	export interface UseCases {
 	    GetUserConfig: any;
 	    SaveUserConfig: any;
@@ -22,6 +12,7 @@ export namespace app {
 	    DeleteProject: any;
 	    ExportProject: any;
 	    ImportProject: any;
+	    GetProjectToImport: any;
 	    GetCommandGroups: any;
 	    CreateCommandGroup: any;
 	    UpdateCommandGroup: any;
@@ -58,12 +49,6 @@ export namespace app {
 	    UseCases: UseCases;
 	}
 	
-	export interface ProjectExportJSONv1 {
-	    version: number;
-	    name: string;
-	    commands: CommandJSONv1[];
-	    commandGroups: CommandGroupJSONv1[];
-	}
 
 }
 

@@ -58,6 +58,10 @@ export function GetCurrentProjectController() {
   return window['go']['main']['WailsControllers']['GetCurrentProjectController']();
 }
 
+export function GetProjectToImportController() {
+  return window['go']['main']['WailsControllers']['GetProjectToImportController']();
+}
+
 export function GetUserConfigController() {
   return window['go']['main']['WailsControllers']['GetUserConfigController']();
 }

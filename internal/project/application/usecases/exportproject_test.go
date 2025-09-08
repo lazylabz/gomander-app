@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"gomander/internal/app"
 	"gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	"gomander/internal/helpers/array"
@@ -66,19 +65,19 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 
 		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("/somedir/file.json", nil)
 
-		expectedExportJSON := app.ProjectExportJSONv1{
+		expectedExportJSON := projectdomain.ProjectExportJSONv1{
 			Version: 1,
 			Name:    project.Name,
-			Commands: array.Map([]domain.Command{cmd1, cmd2, cmd3}, func(cmd domain.Command) app.CommandJSONv1 {
-				return app.CommandJSONv1{
+			Commands: array.Map([]domain.Command{cmd1, cmd2, cmd3}, func(cmd domain.Command) projectdomain.CommandJSONv1 {
+				return projectdomain.CommandJSONv1{
 					Id:               cmd.Id,
 					Name:             cmd.Name,
 					Command:          cmd.Command,
 					WorkingDirectory: cmd.WorkingDirectory,
 				}
 			}),
-			CommandGroups: array.Map([]commandgroupdomain.CommandGroup{cmdGroup1, cmdGroup2}, func(group commandgroupdomain.CommandGroup) app.CommandGroupJSONv1 {
-				return app.CommandGroupJSONv1{
+			CommandGroups: array.Map([]commandgroupdomain.CommandGroup{cmdGroup1, cmdGroup2}, func(group commandgroupdomain.CommandGroup) projectdomain.CommandGroupJSONv1 {
+				return projectdomain.CommandGroupJSONv1{
 					Name:       group.Name,
 					CommandIds: array.Map(group.Commands, func(cmd domain.Command) string { return cmd.Id }),
 				}
@@ -293,19 +292,19 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 
 		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("/somedir/file.json", nil)
 
-		expectedExportJSON := app.ProjectExportJSONv1{
+		expectedExportJSON := projectdomain.ProjectExportJSONv1{
 			Version: 1,
 			Name:    project.Name,
-			Commands: array.Map([]domain.Command{cmd1, cmd2, cmd3}, func(cmd domain.Command) app.CommandJSONv1 {
-				return app.CommandJSONv1{
+			Commands: array.Map([]domain.Command{cmd1, cmd2, cmd3}, func(cmd domain.Command) projectdomain.CommandJSONv1 {
+				return projectdomain.CommandJSONv1{
 					Id:               cmd.Id,
 					Name:             cmd.Name,
 					Command:          cmd.Command,
 					WorkingDirectory: cmd.WorkingDirectory,
 				}
 			}),
-			CommandGroups: array.Map([]commandgroupdomain.CommandGroup{cmdGroup1, cmdGroup2}, func(group commandgroupdomain.CommandGroup) app.CommandGroupJSONv1 {
-				return app.CommandGroupJSONv1{
+			CommandGroups: array.Map([]commandgroupdomain.CommandGroup{cmdGroup1, cmdGroup2}, func(group commandgroupdomain.CommandGroup) projectdomain.CommandGroupJSONv1 {
+				return projectdomain.CommandGroupJSONv1{
 					Name:       group.Name,
 					CommandIds: array.Map(group.Commands, func(cmd domain.Command) string { return cmd.Id }),
 				}

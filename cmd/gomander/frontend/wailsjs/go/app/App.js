@@ -6,10 +6,6 @@ export function GetCurrentRelease() {
   return window['go']['app']['App']['GetCurrentRelease']();
 }
 
-export function GetProjectToImport() {
-  return window['go']['app']['App']['GetProjectToImport']();
-}
-
 export function IsThereANewRelease() {
   return window['go']['app']['App']['IsThereANewRelease']();
 }

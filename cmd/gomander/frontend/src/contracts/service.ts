@@ -1,6 +1,5 @@
 import {
   GetCurrentRelease,
-  GetProjectToImport,
   IsThereANewRelease,
 } from "../../wailsjs/go/app/App";
 import {
@@ -18,6 +17,7 @@ import {
   GetCommandGroupsController,
   GetCommandsController,
   GetCurrentProjectController,
+  GetProjectToImportController,
   GetUserConfigController,
   ImportProjectController,
   OpenProjectController,
@@ -60,7 +60,7 @@ export const dataService = {
   deleteProject: DeleteProjectController,
   exportProject: ExportProjectController,
   importProject: ImportProjectController,
-  getProjectToImport: GetProjectToImport,
+  getProjectToImport: GetProjectToImportController,
   editProject: EditProjectController,
 };
 

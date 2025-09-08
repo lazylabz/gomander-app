@@ -30,6 +30,8 @@ export function GetCommandsController():Promise<Array<domain.Command>>;
 
 export function GetCurrentProjectController():Promise<domain.Project>;
 
+export function GetProjectToImportController():Promise<domain.ProjectExportJSONv1>;
+
 export function GetUserConfigController():Promise<domain.Config>;
 
 export function ImportProjectController(arg1:domain.ProjectExportJSONv1,arg2:string,arg3:string):Promise<void>;
