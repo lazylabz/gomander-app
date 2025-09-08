@@ -6,6 +6,7 @@ import (
 	commandhandlers "gomander/internal/command/application/handlers"
 	commanddomain "gomander/internal/command/domain"
 	commandgrouphandlers "gomander/internal/commandgroup/application/handlers"
+	commandgroupusecases "gomander/internal/commandgroup/application/usecases"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	configusecases "gomander/internal/config/application/usecases"
 	configdomain "gomander/internal/config/domain"
@@ -35,6 +36,7 @@ type UseCases struct {
 	EditProject          projectusecases.EditProject
 	CloseProject         projectusecases.CloseProject
 	DeleteProject        projectusecases.DeleteProject
+	GetCommandGroups     commandgroupusecases.GetCommandGroups
 }
 
 // App struct

@@ -14,68 +14,6 @@ import (
 	"gomander/internal/testutils"
 )
 
-func TestApp_GetCommandGroups(t *testing.T) {
-	t.Run("Should return the command groups provided by the command group repository", func(t *testing.T) {
-		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockUserConfigRepository)
-
-		projectId := "project1"
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			CommandGroupRepository: mockCommandGroupRepository,
-			ConfigRepository:       mockUserConfigRepository,
-		})
-
-		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
-
-		commandGroupData := testutils.
-			NewCommandGroup().
-			WithProjectId(projectId).
-			WithCommands(testutils.
-				NewCommand().
-				WithProjectId(projectId).
-				Data(),
-			).Data()
-
-		expectedCommandGroup := commandGroupDataToDomain(commandGroupData)
-
-		mockCommandGroupRepository.On("GetAll", projectId).Return([]domain.CommandGroup{expectedCommandGroup}, nil)
-
-		// Act
-		got, err := a.GetCommandGroups()
-
-		// Assert
-		assert.NoError(t, err)
-		assert.Len(t, got, 1)
-		assert.Equal(t, expectedCommandGroup, got[0])
-		mock.AssertExpectationsForObjects(t, mockCommandGroupRepository, mockUserConfigRepository)
-	})
-
-	t.Run("Should return an error if failing to retrieve user config", func(t *testing.T) {
-		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockUserConfigRepository)
-
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			CommandGroupRepository: mockCommandGroupRepository,
-			ConfigRepository:       mockUserConfigRepository,
-		})
-
-		expectedError := errors.New("failed to get user config")
-		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedError)
-
-		// Act
-		got, err := a.GetCommandGroups()
-
-		// Assert
-		assert.ErrorIs(t, err, expectedError)
-		assert.Len(t, got, 0)
-		mock.AssertExpectationsForObjects(t, mockCommandGroupRepository, mockUserConfigRepository)
-	})
-}
-
 func TestApp_CreateCommandGroup(t *testing.T) {
 	t.Run("Should create a command group", func(t *testing.T) {
 		// Arrange

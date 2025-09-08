@@ -26,10 +26,6 @@ export function ExportProject(arg1) {
   return window['go']['app']['App']['ExportProject'](arg1);
 }
 
-export function GetCommandGroups() {
-  return window['go']['app']['App']['GetCommandGroups']();
-}
-
 export function GetCommands() {
   return window['go']['app']['App']['GetCommands']();
 }

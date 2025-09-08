@@ -9,14 +9,6 @@ import (
 	"gomander/internal/helpers/array"
 )
 
-func (a *App) GetCommandGroups() ([]domain.CommandGroup, error) {
-	userConfig, err := a.userConfigRepository.GetOrCreate()
-	if err != nil {
-		return make([]domain.CommandGroup, 0), err
-	}
-	return a.commandGroupRepository.GetAll(userConfig.LastOpenedProjectId)
-}
-
 func (a *App) CreateCommandGroup(commandGroup *domain.CommandGroup) error {
 	userConfig, err := a.userConfigRepository.GetOrCreate()
 	if err != nil {

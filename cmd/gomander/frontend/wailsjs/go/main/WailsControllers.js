@@ -22,6 +22,10 @@ export function GetAvailableProjectsController() {
   return window['go']['main']['WailsControllers']['GetAvailableProjectsController']();
 }
 
+export function GetCommandGroupsController() {
+  return window['go']['main']['WailsControllers']['GetCommandGroupsController']();
+}
+
 export function GetCurrentProjectController() {
   return window['go']['main']['WailsControllers']['GetCurrentProjectController']();
 }
