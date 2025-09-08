@@ -18,6 +18,8 @@ export function GetAvailableProjectsController():Promise<Array<domain.Project>>;
 
 export function GetCommandGroupsController():Promise<Array<domain.CommandGroup>>;
 
+export function GetCommandsController():Promise<Array<domain.Command>>;
+
 export function GetCurrentProjectController():Promise<domain.Project>;
 
 export function GetUserConfigController():Promise<domain.Config>;

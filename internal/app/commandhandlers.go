@@ -13,14 +13,6 @@ import (
 	"github.com/google/uuid"
 )
 
-func (a *App) GetCommands() ([]domain.Command, error) {
-	userConfig, err := a.userConfigRepository.GetOrCreate()
-	if err != nil {
-		return make([]domain.Command, 0), err
-	}
-	return a.commandRepository.GetAll(userConfig.LastOpenedProjectId)
-}
-
 func (a *App) AddCommand(newCommand domain.Command) error {
 	userConfig, err := a.userConfigRepository.GetOrCreate()
 	if err != nil {

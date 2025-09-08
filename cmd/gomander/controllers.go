@@ -2,6 +2,7 @@ package main
 
 import (
 	"gomander/internal/app"
+	commanddomain "gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	configdomain "gomander/internal/config/domain"
 	projectdomain "gomander/internal/project/domain"
@@ -83,4 +84,10 @@ func (wc *WailsControllers) RemoveCommandFromCommandGroupController(commandId st
 
 func (wc *WailsControllers) ReorderCommandGroupsController(newOrderedIds []string) error {
 	return wc.useCases.ReorderCommandGroups.Execute(newOrderedIds)
+}
+
+// Command controllers
+
+func (wc *WailsControllers) GetCommandsController() ([]commanddomain.Command, error) {
+	return wc.useCases.GetCommands.Execute()
 }

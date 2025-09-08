@@ -26,6 +26,7 @@ export namespace app {
 	    DeleteCommandGroup: any;
 	    RemoveCommandFromCommandGroup: any;
 	    ReorderCommandGroups: any;
+	    GetCommands: any;
 	}
 	export interface EventHandlers {
 	    CleanCommandGroupsOnCommandDeleted: any;

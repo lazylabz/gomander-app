@@ -34,6 +34,10 @@ export function GetCommandGroupsController() {
   return window['go']['main']['WailsControllers']['GetCommandGroupsController']();
 }
 
+export function GetCommandsController() {
+  return window['go']['main']['WailsControllers']['GetCommandsController']();
+}
+
 export function GetCurrentProjectController() {
   return window['go']['main']['WailsControllers']['GetCurrentProjectController']();
 }
