@@ -91,3 +91,7 @@ func (wc *WailsControllers) ReorderCommandGroupsController(newOrderedIds []strin
 func (wc *WailsControllers) GetCommandsController() ([]commanddomain.Command, error) {
 	return wc.useCases.GetCommands.Execute()
 }
+
+func (wc *WailsControllers) AddCommandController(command commanddomain.Command) error {
+	return wc.useCases.AddCommand.Execute(command)
+}

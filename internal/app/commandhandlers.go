@@ -13,32 +13,6 @@ import (
 	"github.com/google/uuid"
 )
 
-func (a *App) AddCommand(newCommand domain.Command) error {
-	userConfig, err := a.userConfigRepository.GetOrCreate()
-	if err != nil {
-		return err
-	}
-	allCommands, err := a.commandRepository.GetAll(userConfig.LastOpenedProjectId)
-	if err != nil {
-		a.logger.Error(err.Error())
-		return err
-	}
-
-	newPosition := len(allCommands)
-
-	newCommand.Position = newPosition
-
-	err = a.commandRepository.Create(&newCommand)
-	if err != nil {
-		a.logger.Error(err.Error())
-		return err
-	}
-
-	a.logger.Info("Command added: " + newCommand.Id)
-
-	return nil
-}
-
 func (a *App) DuplicateCommand(commandId, targetGroupId string) error {
 	userConfig, err := a.userConfigRepository.GetOrCreate()
 	if err != nil {

@@ -44,6 +44,7 @@ type UseCases struct {
 	RemoveCommandFromCommandGroup commandgroupusecases.RemoveCommandFromCommandGroup
 	ReorderCommandGroups          commandgroupusecases.ReorderCommandGroups
 	GetCommands                   commandusecases.GetCommands
+	AddCommand                    commandusecases.AddCommand
 }
 
 // App struct

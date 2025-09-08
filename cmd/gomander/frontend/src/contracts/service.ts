@@ -1,5 +1,4 @@
 import {
-  AddCommand,
   DuplicateCommand,
   EditCommand,
   ExportProject,
@@ -13,6 +12,7 @@ import {
   StopCommand,
 } from "../../wailsjs/go/app/App";
 import {
+  AddCommandController,
   CloseProjectController,
   CreateCommandGroupController,
   CreateProjectController,
@@ -35,7 +35,7 @@ import { GetComputedPath } from "../../wailsjs/go/path/UiPathHelper";
 import { BrowserOpenURL, EventsOff, EventsOn } from "../../wailsjs/runtime";
 
 export const dataService = {
-  addCommand: AddCommand,
+  addCommand: AddCommandController,
   duplicateCommand: DuplicateCommand,
   editCommand: EditCommand,
   reorderCommands: ReorderCommands,
