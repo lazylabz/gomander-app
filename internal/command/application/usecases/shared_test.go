@@ -6,6 +6,7 @@ import (
 	commanddomain "gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	"gomander/internal/config/domain"
+	"gomander/internal/eventbus"
 	"gomander/internal/helpers/array"
 	"gomander/internal/testutils"
 )
@@ -65,6 +66,19 @@ func (m *MockConfigRepository) GetOrCreate() (*domain.Config, error) {
 func (m *MockConfigRepository) Update(config *domain.Config) error {
 	args := m.Called(config)
 	return args.Error(0)
+}
+
+type MockEventBus struct {
+	mock.Mock
+}
+
+func (m *MockEventBus) RegisterHandler(handler eventbus.EventHandler) {
+	m.Called(handler)
+}
+
+func (m *MockEventBus) PublishSync(e eventbus.Event) []error {
+	args := m.Called(e)
+	return args.Get(0).([]error)
 }
 
 func commandDataToDomain(data testutils.CommandData) commanddomain.Command {

@@ -95,3 +95,7 @@ func (wc *WailsControllers) GetCommandsController() ([]commanddomain.Command, er
 func (wc *WailsControllers) AddCommandController(command commanddomain.Command) error {
 	return wc.useCases.AddCommand.Execute(command)
 }
+
+func (wc *WailsControllers) DuplicateCommandController(commandId string, targetGroupId string) error {
+	return wc.useCases.DuplicateCommand.Execute(commandId, targetGroupId)
+}

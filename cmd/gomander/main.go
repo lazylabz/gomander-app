@@ -187,6 +187,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	reorderCommandGroups := commandgroupusecases.NewReorderCommandGroups(configRepo, commandGroupRepo)
 	getCommands := commandusecases.NewGetCommands(configRepo, commandRepo)
 	addCommand := commandusecases.NewAddCommand(configRepo, commandRepo)
+	duplicateCommand := commandusecases.NewDuplicateCommand(configRepo, commandRepo, eventBus)
 
 	app.LoadDependencies(internalapp.Dependencies{
 		Logger:       l,
@@ -227,6 +228,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 			ReorderCommandGroups:          reorderCommandGroups,
 			GetCommands:                   getCommands,
 			AddCommand:                    addCommand,
+			DuplicateCommand:              duplicateCommand,
 		},
 	})
 }

@@ -14,6 +14,8 @@ export function DeleteCommandGroupController(arg1:string):Promise<void>;
 
 export function DeleteProjectController(arg1:string):Promise<void>;
 
+export function DuplicateCommandController(arg1:string,arg2:string):Promise<void>;
+
 export function EditProjectController(arg1:domain.Project):Promise<void>;
 
 export function GetAvailableProjectsController():Promise<Array<domain.Project>>;

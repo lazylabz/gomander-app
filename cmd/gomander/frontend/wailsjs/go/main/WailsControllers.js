@@ -26,6 +26,10 @@ export function DeleteProjectController(arg1) {
   return window['go']['main']['WailsControllers']['DeleteProjectController'](arg1);
 }
 
+export function DuplicateCommandController(arg1, arg2) {
+  return window['go']['main']['WailsControllers']['DuplicateCommandController'](arg1, arg2);
+}
+
 export function EditProjectController(arg1) {
   return window['go']['main']['WailsControllers']['EditProjectController'](arg1);
 }

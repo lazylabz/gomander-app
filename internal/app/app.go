@@ -45,6 +45,7 @@ type UseCases struct {
 	ReorderCommandGroups          commandgroupusecases.ReorderCommandGroups
 	GetCommands                   commandusecases.GetCommands
 	AddCommand                    commandusecases.AddCommand
+	DuplicateCommand              commandusecases.DuplicateCommand
 }
 
 // App struct

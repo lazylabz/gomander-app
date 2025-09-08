@@ -9,64 +9,7 @@ import (
 	domain2 "gomander/internal/config/domain"
 	"gomander/internal/event"
 	"gomander/internal/helpers/array"
-
-	"github.com/google/uuid"
 )
-
-func (a *App) DuplicateCommand(commandId, targetGroupId string) error {
-	userConfig, err := a.userConfigRepository.GetOrCreate()
-	if err != nil {
-		return err
-	}
-
-	originalCommand, err := a.commandRepository.Get(commandId)
-	if err != nil {
-		a.logger.Error(err.Error())
-		return err
-	}
-
-	allCommands, err := a.commandRepository.GetAll(userConfig.LastOpenedProjectId)
-	if err != nil {
-		a.logger.Error(err.Error())
-		return err
-	}
-
-	duplicatedCommand := domain.Command{
-		Id:               uuid.New().String(),
-		ProjectId:        originalCommand.ProjectId,
-		Name:             originalCommand.Name + " (copy)",
-		Command:          originalCommand.Command,
-		WorkingDirectory: originalCommand.WorkingDirectory,
-		Position:         len(allCommands),
-	}
-
-	err = a.commandRepository.Create(&duplicatedCommand)
-	if err != nil {
-		a.logger.Error(err.Error())
-		return err
-	}
-
-	domainEvent := domainevent.NewCommandDuplicatedEvent(duplicatedCommand.Id, targetGroupId)
-
-	errs := a.eventBus.PublishSync(domainEvent)
-
-	if len(errs) > 0 {
-		combinedErrMsg := "Errors occurred while duplicating command:"
-
-		for _, pubErr := range errs {
-			combinedErrMsg += "\n- " + pubErr.Error()
-			a.logger.Error(pubErr.Error())
-		}
-
-		err = errors.New(combinedErrMsg)
-
-		return err
-	}
-
-	a.logger.Info("Command duplicated: " + commandId + " to " + duplicatedCommand.Id)
-
-	return nil
-}
 
 func (a *App) RemoveCommand(id string) error {
 	err := a.commandRepository.Delete(id)

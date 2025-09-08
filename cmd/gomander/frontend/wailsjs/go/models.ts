@@ -28,6 +28,7 @@ export namespace app {
 	    ReorderCommandGroups: any;
 	    GetCommands: any;
 	    AddCommand: any;
+	    DuplicateCommand: any;
 	}
 	export interface EventHandlers {
 	    CleanCommandGroupsOnCommandDeleted: any;

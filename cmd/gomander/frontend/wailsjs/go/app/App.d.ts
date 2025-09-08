@@ -4,8 +4,6 @@ import {domain} from '../models';
 import {app} from '../models';
 import {context} from '../models';
 
-export function DuplicateCommand(arg1:string,arg2:string):Promise<void>;
-
 export function EditCommand(arg1:domain.Command):Promise<void>;
 
 export function ExportProject(arg1:string):Promise<void>;
