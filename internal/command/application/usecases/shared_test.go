@@ -8,6 +8,7 @@ import (
 	"gomander/internal/config/domain"
 	"gomander/internal/eventbus"
 	"gomander/internal/helpers/array"
+	projectdomain "gomander/internal/project/domain"
 	"gomander/internal/testutils"
 )
 
@@ -78,6 +79,57 @@ func (m *MockEventBus) RegisterHandler(handler eventbus.EventHandler) {
 
 func (m *MockEventBus) PublishSync(e eventbus.Event) []error {
 	args := m.Called(e)
+	return args.Get(0).([]error)
+}
+
+type MockProjectRepository struct {
+	mock.Mock
+}
+
+func (m *MockProjectRepository) GetAll() ([]projectdomain.Project, error) {
+	args := m.Called()
+	return args.Get(0).([]projectdomain.Project), args.Error(1)
+}
+
+func (m *MockProjectRepository) Get(id string) (*projectdomain.Project, error) {
+	args := m.Called(id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*projectdomain.Project), args.Error(1)
+}
+
+func (m *MockProjectRepository) Create(project projectdomain.Project) error {
+	args := m.Called(project)
+	return args.Error(0)
+}
+
+func (m *MockProjectRepository) Update(project projectdomain.Project) error {
+	args := m.Called(project)
+	return args.Error(0)
+}
+
+func (m *MockProjectRepository) Delete(id string) error {
+	args := m.Called(id)
+	return args.Error(0)
+}
+
+type MockRunner struct {
+	mock.Mock
+}
+
+func (m *MockRunner) RunCommand(command *commanddomain.Command, environmentPaths []string, baseWorkingDirectory string) error {
+	args := m.Called(command, environmentPaths, baseWorkingDirectory)
+	return args.Error(0)
+}
+
+func (m *MockRunner) StopRunningCommand(id string) error {
+	args := m.Called(id)
+	return args.Error(0)
+}
+
+func (m *MockRunner) StopAllRunningCommands() []error {
+	args := m.Called()
 	return args.Get(0).([]error)
 }
 

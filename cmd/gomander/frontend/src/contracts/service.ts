@@ -4,7 +4,6 @@ import {
   GetProjectToImport,
   ImportProject,
   IsThereANewRelease,
-  RunCommand,
   StopCommand,
 } from "../../wailsjs/go/app/App";
 import {
@@ -27,6 +26,7 @@ import {
   RemoveCommandFromCommandGroupController,
   ReorderCommandGroupsController,
   ReorderCommandsController,
+  RunCommandController,
   SaveUserConfigController,
   UpdateCommandGroupController,
 } from "../../wailsjs/go/main/WailsControllers";
@@ -51,7 +51,7 @@ export const dataService = {
     GetCurrentProjectController as () => Promise<domain.Project | null>,
   getUserConfig: GetUserConfigController,
   removeCommand: RemoveCommandController,
-  runCommand: RunCommand,
+  runCommand: RunCommandController,
   saveUserConfig: SaveUserConfigController,
   createProject: CreateProjectController,
   stopCommand: StopCommand,

@@ -30,10 +30,6 @@ export function RegisterHandlers() {
   return window['go']['app']['App']['RegisterHandlers']();
 }
 
-export function RunCommand(arg1) {
-  return window['go']['app']['App']['RunCommand'](arg1);
-}
-
 export function Startup(arg1) {
   return window['go']['app']['App']['Startup'](arg1);
 }

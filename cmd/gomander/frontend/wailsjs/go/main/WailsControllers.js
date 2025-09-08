@@ -78,6 +78,10 @@ export function ReorderCommandsController(arg1) {
   return window['go']['main']['WailsControllers']['ReorderCommandsController'](arg1);
 }
 
+export function RunCommandController(arg1) {
+  return window['go']['main']['WailsControllers']['RunCommandController'](arg1);
+}
+
 export function SaveUserConfigController(arg1) {
   return window['go']['main']['WailsControllers']['SaveUserConfigController'](arg1);
 }

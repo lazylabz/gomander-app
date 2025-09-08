@@ -191,6 +191,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	removeCommand := commandusecases.NewRemoveCommand(commandRepo, eventBus)
 	editCommand := commandusecases.NewEditCommand(commandRepo)
 	reorderCommands := commandusecases.NewReorderCommands(configRepo, commandRepo)
+	runCommand := commandusecases.NewRunCommand(configRepo, commandRepo, projectRepo, r)
 
 	app.LoadDependencies(internalapp.Dependencies{
 		Logger:       l,
@@ -235,6 +236,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 			RemoveCommand:                 removeCommand,
 			EditCommand:                   editCommand,
 			ReorderCommands:               reorderCommands,
+			RunCommand:                    runCommand,
 		},
 	})
 }
