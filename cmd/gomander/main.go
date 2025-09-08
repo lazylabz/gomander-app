@@ -183,6 +183,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	updateCommandGroup := commandgroupusecases.NewUpdateCommandGroup(commandGroupRepo)
 	deleteCommandGroup := commandgroupusecases.NewDeleteCommandGroup(commandGroupRepo)
 	removeCommandFromCommandGroup := commandgroupusecases.NewRemoveCommandFromCommandGroup(commandGroupRepo)
+	reorderCommandGroups := commandgroupusecases.NewReorderCommandGroups(configRepo, commandGroupRepo)
 
 	app.LoadDependencies(internalapp.Dependencies{
 		Logger:       l,
@@ -220,6 +221,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 			UpdateCommandGroup:            updateCommandGroup,
 			DeleteCommandGroup:            deleteCommandGroup,
 			RemoveCommandFromCommandGroup: removeCommandFromCommandGroup,
+			ReorderCommandGroups:          reorderCommandGroups,
 		},
 	})
 }

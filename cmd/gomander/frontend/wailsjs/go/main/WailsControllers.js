@@ -50,6 +50,10 @@ export function RemoveCommandFromCommandGroupController(arg1, arg2) {
   return window['go']['main']['WailsControllers']['RemoveCommandFromCommandGroupController'](arg1, arg2);
 }
 
+export function ReorderCommandGroupsController(arg1) {
+  return window['go']['main']['WailsControllers']['ReorderCommandGroupsController'](arg1);
+}
+
 export function SaveUserConfigController(arg1) {
   return window['go']['main']['WailsControllers']['SaveUserConfigController'](arg1);
 }

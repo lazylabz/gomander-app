@@ -80,3 +80,7 @@ func (wc *WailsControllers) DeleteCommandGroupController(commandGroupId string) 
 func (wc *WailsControllers) RemoveCommandFromCommandGroupController(commandId string, commandGroupId string) error {
 	return wc.useCases.RemoveCommandFromCommandGroup.Execute(commandId, commandGroupId)
 }
+
+func (wc *WailsControllers) ReorderCommandGroupsController(newOrderedIds []string) error {
+	return wc.useCases.ReorderCommandGroups.Execute(newOrderedIds)
+}

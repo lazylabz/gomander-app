@@ -1,4 +1,4 @@
-package app_test
+package usecases_test
 
 import (
 	"errors"
@@ -7,25 +7,21 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"gomander/internal/app"
+	"gomander/internal/commandgroup/application/usecases"
 	"gomander/internal/commandgroup/domain"
 	configdomain "gomander/internal/config/domain"
 	"gomander/internal/testutils"
 )
 
-func TestApp_ReorderCommandGroups(t *testing.T) {
+func TestDefaultReorderCommandGroups_Execute(t *testing.T) {
 	t.Run("Should reorder command groups based on the provided IDs", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockUserConfigRepository)
+		mockUserConfigRepository := new(MockConfigRepository)
 
 		projectId := "project1"
 
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			CommandGroupRepository: mockCommandGroupRepository,
-			ConfigRepository:       mockUserConfigRepository,
-		})
+		sut := usecases.NewReorderCommandGroups(mockUserConfigRepository, mockCommandGroupRepository)
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
@@ -53,7 +49,7 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 		mockCommandGroupRepository.On("Update", &expectedCommandGroup1Call).Return(nil).Once()
 
 		// Act
-		err := a.ReorderCommandGroups(newOrder)
+		err := sut.Execute(newOrder)
 
 		// Assert
 		assert.NoError(t, err)
@@ -67,19 +63,15 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve user config", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockUserConfigRepository)
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			CommandGroupRepository: mockCommandGroupRepository,
-			ConfigRepository:       mockUserConfigRepository,
-		})
+		mockUserConfigRepository := new(MockConfigRepository)
+		sut := usecases.NewReorderCommandGroups(mockUserConfigRepository, mockCommandGroupRepository)
 		expectedError := errors.New("failed to get user config")
 		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedError)
 
 		newOrder := []string{"group1", "group2"}
 
 		// Act
-		err := a.ReorderCommandGroups(newOrder)
+		err := sut.Execute(newOrder)
 
 		// Assert
 		assert.ErrorIs(t, err, expectedError)
@@ -89,15 +81,11 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve existing command groups", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockUserConfigRepository)
+		mockUserConfigRepository := new(MockConfigRepository)
 
 		projectId := "project1"
 
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			CommandGroupRepository: mockCommandGroupRepository,
-			ConfigRepository:       mockUserConfigRepository,
-		})
+		sut := usecases.NewReorderCommandGroups(mockUserConfigRepository, mockCommandGroupRepository)
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
@@ -106,7 +94,7 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 		mockCommandGroupRepository.On("GetAll", projectId).Return(make([]domain.CommandGroup, 0), errors.New("failed to get command groups"))
 
 		// Act
-		err := a.ReorderCommandGroups(newOrder)
+		err := sut.Execute(newOrder)
 
 		// Assert
 		assert.Error(t, err)
@@ -117,15 +105,11 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 	t.Run("Should return an error if failing to update a command group", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockUserConfigRepository)
+		mockUserConfigRepository := new(MockConfigRepository)
 
 		projectId := "project1"
 
-		a := app.NewApp()
-		a.LoadDependencies(app.Dependencies{
-			CommandGroupRepository: mockCommandGroupRepository,
-			ConfigRepository:       mockUserConfigRepository,
-		})
+		sut := usecases.NewReorderCommandGroups(mockUserConfigRepository, mockCommandGroupRepository)
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
@@ -146,7 +130,7 @@ func TestApp_ReorderCommandGroups(t *testing.T) {
 		mockCommandGroupRepository.On("Update", &expectedCommandGroup1Call).Return(errors.New("failed to update command group")).Once()
 
 		// Act
-		err := a.ReorderCommandGroups(newOrder)
+		err := sut.Execute(newOrder)
 
 		// Assert
 		assert.Error(t, err)

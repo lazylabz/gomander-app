@@ -50,10 +50,6 @@ export function RemoveCommand(arg1) {
   return window['go']['app']['App']['RemoveCommand'](arg1);
 }
 
-export function ReorderCommandGroups(arg1) {
-  return window['go']['app']['App']['ReorderCommandGroups'](arg1);
-}
-
 export function ReorderCommands(arg1) {
   return window['go']['app']['App']['ReorderCommands'](arg1);
 }
