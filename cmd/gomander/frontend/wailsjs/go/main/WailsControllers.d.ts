@@ -8,6 +8,8 @@ export function CreateCommandGroupController(arg1:domain.CommandGroup):Promise<v
 
 export function CreateProjectController(arg1:domain.Project):Promise<void>;
 
+export function DeleteCommandGroupController(arg1:string):Promise<void>;
+
 export function DeleteProjectController(arg1:string):Promise<void>;
 
 export function EditProjectController(arg1:domain.Project):Promise<void>;

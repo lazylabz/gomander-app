@@ -8,14 +8,6 @@ import (
 	"gomander/internal/helpers/array"
 )
 
-func (a *App) DeleteCommandGroup(commandGroupId string) error {
-	if err := a.commandGroupRepository.Delete(commandGroupId); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (a *App) RemoveCommandFromCommandGroup(commandId, commandGroupId string) error {
 	commandGroup, err := a.commandGroupRepository.Get(commandGroupId)
 	if err != nil {

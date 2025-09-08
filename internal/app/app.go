@@ -39,6 +39,7 @@ type UseCases struct {
 	GetCommandGroups     commandgroupusecases.GetCommandGroups
 	CreateCommandGroup   commandgroupusecases.CreateCommandGroup
 	UpdateCommandGroup   commandgroupusecases.UpdateCommandGroup
+	DeleteCommandGroup   commandgroupusecases.DeleteCommandGroup
 }
 
 // App struct

@@ -14,6 +14,10 @@ export function CreateProjectController(arg1) {
   return window['go']['main']['WailsControllers']['CreateProjectController'](arg1);
 }
 
+export function DeleteCommandGroupController(arg1) {
+  return window['go']['main']['WailsControllers']['DeleteCommandGroupController'](arg1);
+}
+
 export function DeleteProjectController(arg1) {
   return window['go']['main']['WailsControllers']['DeleteProjectController'](arg1);
 }

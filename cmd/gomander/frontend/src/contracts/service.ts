@@ -1,6 +1,5 @@
 import {
   AddCommand,
-  DeleteCommandGroup,
   DuplicateCommand,
   EditCommand,
   ExportProject,
@@ -20,6 +19,7 @@ import {
   CloseProjectController,
   CreateCommandGroupController,
   CreateProjectController,
+  DeleteCommandGroupController,
   DeleteProjectController,
   EditProjectController,
   GetAvailableProjectsController,
@@ -42,7 +42,7 @@ export const dataService = {
   getAvailableProjects: GetAvailableProjectsController,
   editCommandGroup: UpdateCommandGroupController,
   createCommandGroup: CreateCommandGroupController,
-  deleteCommandGroup: DeleteCommandGroup,
+  deleteCommandGroup: DeleteCommandGroupController,
   reorderCommandGroups: ReorderCommandGroups,
   removeCommandFromGroup: RemoveCommandFromCommandGroup,
   getCommandGroups: GetCommandGroupsController,

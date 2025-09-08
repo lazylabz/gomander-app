@@ -6,10 +6,6 @@ export function AddCommand(arg1) {
   return window['go']['app']['App']['AddCommand'](arg1);
 }
 
-export function DeleteCommandGroup(arg1) {
-  return window['go']['app']['App']['DeleteCommandGroup'](arg1);
-}
-
 export function DuplicateCommand(arg1, arg2) {
   return window['go']['app']['App']['DuplicateCommand'](arg1, arg2);
 }
