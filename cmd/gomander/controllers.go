@@ -2,6 +2,7 @@ package main
 
 import (
 	"gomander/internal/app"
+	commandgroupdomain "gomander/internal/commandgroup/domain"
 	configdomain "gomander/internal/config/domain"
 	projectdomain "gomander/internal/project/domain"
 )
@@ -56,4 +57,30 @@ func (wc *WailsControllers) CloseProjectController() error {
 
 func (wc *WailsControllers) DeleteProjectController(projectId string) error {
 	return wc.useCases.DeleteProject.Execute(projectId)
+}
+
+// CommandGroup controllers
+
+func (wc *WailsControllers) GetCommandGroupsController() ([]commandgroupdomain.CommandGroup, error) {
+	return wc.useCases.GetCommandGroups.Execute()
+}
+
+func (wc *WailsControllers) CreateCommandGroupController(commandGroup commandgroupdomain.CommandGroup) error {
+	return wc.useCases.CreateCommandGroup.Execute(&commandGroup)
+}
+
+func (wc *WailsControllers) UpdateCommandGroupController(commandGroup commandgroupdomain.CommandGroup) error {
+	return wc.useCases.UpdateCommandGroup.Execute(&commandGroup)
+}
+
+func (wc *WailsControllers) DeleteCommandGroupController(commandGroupId string) error {
+	return wc.useCases.DeleteCommandGroup.Execute(commandGroupId)
+}
+
+func (wc *WailsControllers) RemoveCommandFromCommandGroupController(commandId string, commandGroupId string) error {
+	return wc.useCases.RemoveCommandFromCommandGroup.Execute(commandId, commandGroupId)
+}
+
+func (wc *WailsControllers) ReorderCommandGroupsController(newOrderedIds []string) error {
+	return wc.useCases.ReorderCommandGroups.Execute(newOrderedIds)
 }

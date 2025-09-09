@@ -15,6 +15,7 @@ import (
 	"gomander/internal/command/application/handlers"
 	commmandinfrastructure "gomander/internal/command/infrastructure"
 	commandgrouphandlers "gomander/internal/commandgroup/application/handlers"
+	commandgroupusecases "gomander/internal/commandgroup/application/usecases"
 	commandgroupinfrastructure "gomander/internal/commandgroup/infrastructure"
 	configusecases "gomander/internal/config/application/usecases"
 	configinfrastructure "gomander/internal/config/infrastructure"
@@ -177,6 +178,12 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	editProject := projectusecases.NewEditProject(projectRepo)
 	closeProject := projectusecases.NewCloseProject(configRepo)
 	deleteProject := projectusecases.NewDeleteProject(projectRepo, eventBus, l)
+	getCommandGroups := commandgroupusecases.NewGetCommandGroups(configRepo, commandGroupRepo)
+	createCommandGroup := commandgroupusecases.NewCreateCommandGroup(configRepo, commandGroupRepo)
+	updateCommandGroup := commandgroupusecases.NewUpdateCommandGroup(commandGroupRepo)
+	deleteCommandGroup := commandgroupusecases.NewDeleteCommandGroup(commandGroupRepo)
+	removeCommandFromCommandGroup := commandgroupusecases.NewRemoveCommandFromCommandGroup(commandGroupRepo)
+	reorderCommandGroups := commandgroupusecases.NewReorderCommandGroups(configRepo, commandGroupRepo)
 
 	app.LoadDependencies(internalapp.Dependencies{
 		Logger:       l,
@@ -200,15 +207,21 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 		},
 
 		UseCases: internalapp.UseCases{
-			GetUserConfig:        getUserConfig,
-			SaveUserConfig:       saveUserConfig,
-			GetCurrentProject:    getCurrentProject,
-			GetAvailableProjects: getAvailableProjects,
-			OpenProject:          openProject,
-			CreateProject:        createProject,
-			EditProject:          editProject,
-			CloseProject:         closeProject,
-			DeleteProject:        deleteProject,
+			GetUserConfig:                 getUserConfig,
+			SaveUserConfig:                saveUserConfig,
+			GetCurrentProject:             getCurrentProject,
+			GetAvailableProjects:          getAvailableProjects,
+			OpenProject:                   openProject,
+			CreateProject:                 createProject,
+			EditProject:                   editProject,
+			CloseProject:                  closeProject,
+			DeleteProject:                 deleteProject,
+			GetCommandGroups:              getCommandGroups,
+			CreateCommandGroup:            createCommandGroup,
+			UpdateCommandGroup:            updateCommandGroup,
+			DeleteCommandGroup:            deleteCommandGroup,
+			RemoveCommandFromCommandGroup: removeCommandFromCommandGroup,
+			ReorderCommandGroups:          reorderCommandGroups,
 		},
 	})
 }

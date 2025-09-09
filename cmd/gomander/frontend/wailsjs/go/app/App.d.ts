@@ -6,17 +6,11 @@ import {context} from '../models';
 
 export function AddCommand(arg1:domain.Command):Promise<void>;
 
-export function CreateCommandGroup(arg1:domain.CommandGroup):Promise<void>;
-
-export function DeleteCommandGroup(arg1:string):Promise<void>;
-
 export function DuplicateCommand(arg1:string,arg2:string):Promise<void>;
 
 export function EditCommand(arg1:domain.Command):Promise<void>;
 
 export function ExportProject(arg1:string):Promise<void>;
-
-export function GetCommandGroups():Promise<Array<domain.CommandGroup>>;
 
 export function GetCommands():Promise<Array<domain.Command>>;
 
@@ -34,10 +28,6 @@ export function RegisterHandlers():Promise<void>;
 
 export function RemoveCommand(arg1:string):Promise<void>;
 
-export function RemoveCommandFromCommandGroup(arg1:string,arg2:string):Promise<void>;
-
-export function ReorderCommandGroups(arg1:Array<string>):Promise<void>;
-
 export function ReorderCommands(arg1:Array<string>):Promise<void>;
 
 export function RunCommand(arg1:string):Promise<void>;
@@ -45,5 +35,3 @@ export function RunCommand(arg1:string):Promise<void>;
 export function Startup(arg1:context.Context):Promise<void>;
 
 export function StopCommand(arg1:string):Promise<void>;
-
-export function UpdateCommandGroup(arg1:domain.CommandGroup):Promise<void>;

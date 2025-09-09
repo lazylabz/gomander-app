@@ -6,14 +6,6 @@ export function AddCommand(arg1) {
   return window['go']['app']['App']['AddCommand'](arg1);
 }
 
-export function CreateCommandGroup(arg1) {
-  return window['go']['app']['App']['CreateCommandGroup'](arg1);
-}
-
-export function DeleteCommandGroup(arg1) {
-  return window['go']['app']['App']['DeleteCommandGroup'](arg1);
-}
-
 export function DuplicateCommand(arg1, arg2) {
   return window['go']['app']['App']['DuplicateCommand'](arg1, arg2);
 }
@@ -24,10 +16,6 @@ export function EditCommand(arg1) {
 
 export function ExportProject(arg1) {
   return window['go']['app']['App']['ExportProject'](arg1);
-}
-
-export function GetCommandGroups() {
-  return window['go']['app']['App']['GetCommandGroups']();
 }
 
 export function GetCommands() {
@@ -62,14 +50,6 @@ export function RemoveCommand(arg1) {
   return window['go']['app']['App']['RemoveCommand'](arg1);
 }
 
-export function RemoveCommandFromCommandGroup(arg1, arg2) {
-  return window['go']['app']['App']['RemoveCommandFromCommandGroup'](arg1, arg2);
-}
-
-export function ReorderCommandGroups(arg1) {
-  return window['go']['app']['App']['ReorderCommandGroups'](arg1);
-}
-
 export function ReorderCommands(arg1) {
   return window['go']['app']['App']['ReorderCommands'](arg1);
 }
@@ -84,8 +64,4 @@ export function Startup(arg1) {
 
 export function StopCommand(arg1) {
   return window['go']['app']['App']['StopCommand'](arg1);
-}
-
-export function UpdateCommandGroup(arg1) {
-  return window['go']['app']['App']['UpdateCommandGroup'](arg1);
 }

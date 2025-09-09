@@ -6,8 +6,16 @@ export function CloseProjectController() {
   return window['go']['main']['WailsControllers']['CloseProjectController']();
 }
 
+export function CreateCommandGroupController(arg1) {
+  return window['go']['main']['WailsControllers']['CreateCommandGroupController'](arg1);
+}
+
 export function CreateProjectController(arg1) {
   return window['go']['main']['WailsControllers']['CreateProjectController'](arg1);
+}
+
+export function DeleteCommandGroupController(arg1) {
+  return window['go']['main']['WailsControllers']['DeleteCommandGroupController'](arg1);
 }
 
 export function DeleteProjectController(arg1) {
@@ -22,6 +30,10 @@ export function GetAvailableProjectsController() {
   return window['go']['main']['WailsControllers']['GetAvailableProjectsController']();
 }
 
+export function GetCommandGroupsController() {
+  return window['go']['main']['WailsControllers']['GetCommandGroupsController']();
+}
+
 export function GetCurrentProjectController() {
   return window['go']['main']['WailsControllers']['GetCurrentProjectController']();
 }
@@ -34,6 +46,18 @@ export function OpenProjectController(arg1) {
   return window['go']['main']['WailsControllers']['OpenProjectController'](arg1);
 }
 
+export function RemoveCommandFromCommandGroupController(arg1, arg2) {
+  return window['go']['main']['WailsControllers']['RemoveCommandFromCommandGroupController'](arg1, arg2);
+}
+
+export function ReorderCommandGroupsController(arg1) {
+  return window['go']['main']['WailsControllers']['ReorderCommandGroupsController'](arg1);
+}
+
 export function SaveUserConfigController(arg1) {
   return window['go']['main']['WailsControllers']['SaveUserConfigController'](arg1);
+}
+
+export function UpdateCommandGroupController(arg1) {
+  return window['go']['main']['WailsControllers']['UpdateCommandGroupController'](arg1);
 }

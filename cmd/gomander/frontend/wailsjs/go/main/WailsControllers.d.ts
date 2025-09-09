@@ -4,7 +4,11 @@ import {domain} from '../models';
 
 export function CloseProjectController():Promise<void>;
 
+export function CreateCommandGroupController(arg1:domain.CommandGroup):Promise<void>;
+
 export function CreateProjectController(arg1:domain.Project):Promise<void>;
+
+export function DeleteCommandGroupController(arg1:string):Promise<void>;
 
 export function DeleteProjectController(arg1:string):Promise<void>;
 
@@ -12,10 +16,18 @@ export function EditProjectController(arg1:domain.Project):Promise<void>;
 
 export function GetAvailableProjectsController():Promise<Array<domain.Project>>;
 
+export function GetCommandGroupsController():Promise<Array<domain.CommandGroup>>;
+
 export function GetCurrentProjectController():Promise<domain.Project>;
 
 export function GetUserConfigController():Promise<domain.Config>;
 
 export function OpenProjectController(arg1:string):Promise<void>;
 
+export function RemoveCommandFromCommandGroupController(arg1:string,arg2:string):Promise<void>;
+
+export function ReorderCommandGroupsController(arg1:Array<string>):Promise<void>;
+
 export function SaveUserConfigController(arg1:domain.Config):Promise<void>;
+
+export function UpdateCommandGroupController(arg1:domain.CommandGroup):Promise<void>;

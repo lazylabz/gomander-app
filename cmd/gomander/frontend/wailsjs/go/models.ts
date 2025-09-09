@@ -20,6 +20,12 @@ export namespace app {
 	    EditProject: any;
 	    CloseProject: any;
 	    DeleteProject: any;
+	    GetCommandGroups: any;
+	    CreateCommandGroup: any;
+	    UpdateCommandGroup: any;
+	    DeleteCommandGroup: any;
+	    RemoveCommandFromCommandGroup: any;
+	    ReorderCommandGroups: any;
 	}
 	export interface EventHandlers {
 	    CleanCommandGroupsOnCommandDeleted: any;
