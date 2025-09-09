@@ -26,14 +26,15 @@ export const EnvironmentPathsField = () => {
   const removePath = (index: number) => () => {
     remove(index);
   };
+
   return (
     <div className="flex flex-col items-center">
       {fields.length !== 0 && (
         <div className="flex flex-col gap-2 w-full">
-          {fields.map((_, index) => (
+          {fields.map((field, index) => (
             <div
               className="flex flex-row w-full items-center gap-3 justify-between"
-              key={index}
+              key={field.id}
             >
               <FormField
                 control={control}
