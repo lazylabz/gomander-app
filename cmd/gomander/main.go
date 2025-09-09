@@ -25,6 +25,7 @@ import (
 	"gomander/internal/logger"
 	projectusecases "gomander/internal/project/application/usecases"
 	projectinfrastructure "gomander/internal/project/infrastructure"
+	"gomander/internal/releases"
 	"gomander/internal/runner"
 	"gomander/internal/uihelpers/path"
 
@@ -48,6 +49,7 @@ func main() {
 
 	// Create instance of helpers
 	uiPathHelper := path.NewUiPathHelper()
+	releaseHelper := releases.NewReleaseHelper()
 
 	// Create instance of controllers
 	controllers := NewWailsControllers()
@@ -81,6 +83,7 @@ func main() {
 			app,
 			uiPathHelper,
 			controllers,
+			releaseHelper,
 		},
 		OnBeforeClose: app.OnBeforeClose,
 		EnumBind: []interface{}{
@@ -179,6 +182,9 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	editProject := projectusecases.NewEditProject(projectRepo)
 	closeProject := projectusecases.NewCloseProject(configRepo)
 	deleteProject := projectusecases.NewDeleteProject(projectRepo, eventBus, l)
+	exportProject := projectusecases.NewExportProject(ctx, projectRepo, commandRepo, commandGroupRepo, facade.DefaultRuntimeFacade{}, facade.DefaultFsFacade{})
+	importProject := projectusecases.NewImportProject(projectRepo, commandRepo, commandGroupRepo)
+	getProjectToImport := projectusecases.NewGetProjectToImport(ctx, facade.DefaultRuntimeFacade{}, facade.DefaultFsFacade{})
 	getCommandGroups := commandgroupusecases.NewGetCommandGroups(configRepo, commandGroupRepo)
 	createCommandGroup := commandgroupusecases.NewCreateCommandGroup(configRepo, commandGroupRepo)
 	updateCommandGroup := commandgroupusecases.NewUpdateCommandGroup(commandGroupRepo)
@@ -225,6 +231,9 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 			EditProject:                   editProject,
 			CloseProject:                  closeProject,
 			DeleteProject:                 deleteProject,
+			ExportProject:                 exportProject,
+			ImportProject:                 importProject,
+			GetProjectToImport:            getProjectToImport,
 			GetCommandGroups:              getCommandGroups,
 			CreateCommandGroup:            createCommandGroup,
 			UpdateCommandGroup:            updateCommandGroup,

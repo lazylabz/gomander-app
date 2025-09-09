@@ -37,6 +37,9 @@ type UseCases struct {
 	EditProject                   projectusecases.EditProject
 	CloseProject                  projectusecases.CloseProject
 	DeleteProject                 projectusecases.DeleteProject
+	ExportProject                 projectusecases.ExportProject
+	ImportProject                 projectusecases.ImportProject
+	GetProjectToImport            projectusecases.GetProjectToImport
 	GetCommandGroups              commandgroupusecases.GetCommandGroups
 	CreateCommandGroup            commandgroupusecases.CreateCommandGroup
 	UpdateCommandGroup            commandgroupusecases.UpdateCommandGroup

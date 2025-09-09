@@ -1,4 +1,4 @@
-package app_test
+package releases_test
 
 import (
 	"encoding/xml"
@@ -8,17 +8,16 @@ import (
 
 	"github.com/Masterminds/semver"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 
-	"gomander/internal/app"
+	"gomander/internal/releases"
 )
 
 func TestApp_GetCurrentRelease(t *testing.T) {
 	// Arrange
-	a := &app.App{}
+	rh := releases.NewReleaseHelper()
 
 	// Act
-	currentRelease := a.GetCurrentRelease()
+	currentRelease := rh.GetCurrentRelease()
 
 	// Assert
 	assert.Equal(t, "1.0.0", currentRelease)
@@ -31,17 +30,9 @@ func TestApp_GetCurrentRelease(t *testing.T) {
 func TestApp_IsThereANewRelease(t *testing.T) {
 	t.Run("Should return new release when available", func(t *testing.T) {
 		// Arrange
-		a := &app.App{}
+		rh := releases.NewReleaseHelper()
 
-		mockLogger := new(MockLogger)
-
-		mockLogger.On("Info", mock.Anything).Return(nil)
-
-		a.LoadDependencies(app.Dependencies{
-			Logger: mockLogger,
-		})
-
-		xmlResponse := app.ReleasesFeedXML{
+		xmlResponse := releases.ReleasesFeedXML{
 			XMLName: xml.Name{
 				Space: "feed",
 				Local: "feed",
@@ -67,10 +58,10 @@ func TestApp_IsThereANewRelease(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		app.LatestReleaseUrl = ts.URL + "/releases.atom"
+		releases.LatestReleaseUrl = ts.URL + "/releases.atom"
 
 		// Act
-		release, err := a.IsThereANewRelease()
+		release, err := rh.IsThereANewRelease()
 
 		// Assert
 		assert.NoError(t, err)
@@ -79,17 +70,9 @@ func TestApp_IsThereANewRelease(t *testing.T) {
 
 	t.Run("Should return empty string when no new release", func(t *testing.T) {
 		// Arrange
-		a := &app.App{}
+		rh := releases.NewReleaseHelper()
 
-		mockLogger := new(MockLogger)
-
-		mockLogger.On("Info", mock.Anything).Return(nil)
-
-		a.LoadDependencies(app.Dependencies{
-			Logger: mockLogger,
-		})
-
-		xmlResponse := app.ReleasesFeedXML{
+		xmlResponse := releases.ReleasesFeedXML{
 			XMLName: xml.Name{
 				Space: "feed",
 				Local: "feed",
@@ -115,10 +98,10 @@ func TestApp_IsThereANewRelease(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		app.LatestReleaseUrl = ts.URL + "/releases.atom"
+		releases.LatestReleaseUrl = ts.URL + "/releases.atom"
 
 		// Act
-		release, err := a.IsThereANewRelease()
+		release, err := rh.IsThereANewRelease()
 
 		// Assert
 		assert.NoError(t, err)
@@ -127,15 +110,7 @@ func TestApp_IsThereANewRelease(t *testing.T) {
 
 	t.Run("Should return nil when no releases found", func(t *testing.T) {
 		// Arrange
-		a := &app.App{}
-
-		mockLogger := new(MockLogger)
-
-		mockLogger.On("Info", mock.Anything).Return(nil)
-
-		a.LoadDependencies(app.Dependencies{
-			Logger: mockLogger,
-		})
+		rh := releases.NewReleaseHelper()
 
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, "/releases.atom", r.URL.Path)
@@ -147,10 +122,10 @@ func TestApp_IsThereANewRelease(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		app.LatestReleaseUrl = ts.URL + "/releases.atom"
+		releases.LatestReleaseUrl = ts.URL + "/releases.atom"
 
 		// Act
-		release, err := a.IsThereANewRelease()
+		release, err := rh.IsThereANewRelease()
 
 		// Assert
 		assert.NoError(t, err)
@@ -159,16 +134,7 @@ func TestApp_IsThereANewRelease(t *testing.T) {
 
 	t.Run("Should return error when failing to retrieve releases", func(t *testing.T) {
 		// Arrange
-		a := &app.App{}
-
-		mockLogger := new(MockLogger)
-
-		mockLogger.On("Info", mock.Anything).Return(nil)
-		mockLogger.On("Error", mock.Anything).Return(nil)
-
-		a.LoadDependencies(app.Dependencies{
-			Logger: mockLogger,
-		})
+		rh := releases.NewReleaseHelper()
 
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, "/releases.atom", r.URL.Path)
@@ -177,10 +143,10 @@ func TestApp_IsThereANewRelease(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		app.LatestReleaseUrl = ts.URL + "/releases.atom"
+		releases.LatestReleaseUrl = ts.URL + "/releases.atom"
 
 		// Act
-		release, err := a.IsThereANewRelease()
+		release, err := rh.IsThereANewRelease()
 
 		// Assert
 		assert.Error(t, err)

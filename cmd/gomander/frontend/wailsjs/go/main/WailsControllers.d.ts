@@ -20,6 +20,8 @@ export function EditCommandController(arg1:domain.Command):Promise<void>;
 
 export function EditProjectController(arg1:domain.Project):Promise<void>;
 
+export function ExportProjectController(arg1:string):Promise<void>;
+
 export function GetAvailableProjectsController():Promise<Array<domain.Project>>;
 
 export function GetCommandGroupsController():Promise<Array<domain.CommandGroup>>;
@@ -28,7 +30,11 @@ export function GetCommandsController():Promise<Array<domain.Command>>;
 
 export function GetCurrentProjectController():Promise<domain.Project>;
 
+export function GetProjectToImportController():Promise<domain.ProjectExportJSONv1>;
+
 export function GetUserConfigController():Promise<domain.Config>;
+
+export function ImportProjectController(arg1:domain.ProjectExportJSONv1,arg2:string,arg3:string):Promise<void>;
 
 export function OpenProjectController(arg1:string):Promise<void>;
 

@@ -1,11 +1,4 @@
 import {
-  ExportProject,
-  GetCurrentRelease,
-  GetProjectToImport,
-  ImportProject,
-  IsThereANewRelease,
-} from "../../wailsjs/go/app/App";
-import {
   AddCommandController,
   CloseProjectController,
   CreateCommandGroupController,
@@ -15,11 +8,14 @@ import {
   DuplicateCommandController,
   EditCommandController,
   EditProjectController,
+  ExportProjectController,
   GetAvailableProjectsController,
   GetCommandGroupsController,
   GetCommandsController,
   GetCurrentProjectController,
+  GetProjectToImportController,
   GetUserConfigController,
+  ImportProjectController,
   OpenProjectController,
   RemoveCommandController,
   RemoveCommandFromCommandGroupController,
@@ -32,6 +28,10 @@ import {
 } from "../../wailsjs/go/main/WailsControllers";
 import type { domain } from "../../wailsjs/go/models.ts";
 import { GetComputedPath } from "../../wailsjs/go/path/UiPathHelper";
+import {
+  GetCurrentRelease,
+  IsThereANewRelease,
+} from "../../wailsjs/go/releases/ReleaseHelper";
 import { BrowserOpenURL, EventsOff, EventsOn } from "../../wailsjs/runtime";
 
 export const dataService = {
@@ -58,9 +58,9 @@ export const dataService = {
   openProject: OpenProjectController,
   closeProject: CloseProjectController,
   deleteProject: DeleteProjectController,
-  exportProject: ExportProject,
-  importProject: ImportProject,
-  getProjectToImport: GetProjectToImport,
+  exportProject: ExportProjectController,
+  importProject: ImportProjectController,
+  getProjectToImport: GetProjectToImportController,
   editProject: EditProjectController,
 };
 

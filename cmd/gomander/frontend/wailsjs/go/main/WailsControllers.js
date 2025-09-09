@@ -38,6 +38,10 @@ export function EditProjectController(arg1) {
   return window['go']['main']['WailsControllers']['EditProjectController'](arg1);
 }
 
+export function ExportProjectController(arg1) {
+  return window['go']['main']['WailsControllers']['ExportProjectController'](arg1);
+}
+
 export function GetAvailableProjectsController() {
   return window['go']['main']['WailsControllers']['GetAvailableProjectsController']();
 }
@@ -54,8 +58,16 @@ export function GetCurrentProjectController() {
   return window['go']['main']['WailsControllers']['GetCurrentProjectController']();
 }
 
+export function GetProjectToImportController() {
+  return window['go']['main']['WailsControllers']['GetProjectToImportController']();
+}
+
 export function GetUserConfigController() {
   return window['go']['main']['WailsControllers']['GetUserConfigController']();
+}
+
+export function ImportProjectController(arg1, arg2, arg3) {
+  return window['go']['main']['WailsControllers']['ImportProjectController'](arg1, arg2, arg3);
 }
 
 export function OpenProjectController(arg1) {
