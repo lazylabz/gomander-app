@@ -14,7 +14,7 @@ import (
 func TestApp_EditCommand(t *testing.T) {
 	t.Run("Should edit the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 
 		projectId := "project1"
 		sut := usecases.NewEditCommand(mockCommandRepository)
@@ -38,7 +38,7 @@ func TestApp_EditCommand(t *testing.T) {
 
 	t.Run("Should return an error if fails to edit the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 
 		projectId := "project1"
 		sut := usecases.NewEditCommand(mockCommandRepository)

@@ -5,3 +5,4 @@ ignore:
   - "internal/app/app.go"
   - "**/*facade.go"
   - "**/*_testbuilder.go"
+  - "**/*_mock.go"

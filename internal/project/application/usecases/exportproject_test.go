@@ -26,7 +26,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		projectId := "test-project-id"
 
 		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
 		mockFsFacade := new(MockFsFacade)
@@ -100,7 +100,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
@@ -130,7 +130,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
@@ -158,7 +158,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
@@ -186,7 +186,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
@@ -216,7 +216,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
@@ -246,7 +246,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		projectId := "test-project-id"
 
 		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(MockCommandGroupRepository)
 
 		mockFsFacade := new(MockFsFacade)

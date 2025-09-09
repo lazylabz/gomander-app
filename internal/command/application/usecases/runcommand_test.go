@@ -16,7 +16,7 @@ import (
 func TestDefaultRunCommand_Execute(t *testing.T) {
 	t.Run("Should run the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
 		mockRunner := new(MockRunner)
@@ -67,7 +67,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to retrieve the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
 		mockRunner := new(MockRunner)
@@ -91,7 +91,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to retrieve the user config", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
 		mockRunner := new(MockRunner)
@@ -117,7 +117,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to retrieve the project", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
 		mockRunner := new(MockRunner)
@@ -147,7 +147,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to run the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 		mockProjectRepository := new(MockProjectRepository)
 		mockRunner := new(MockRunner)

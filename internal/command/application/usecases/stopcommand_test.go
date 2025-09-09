@@ -14,7 +14,7 @@ import (
 func TestDefaultStopCommand_Execute(t *testing.T) {
 	t.Run("Should stop the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockRunner := new(MockRunner)
 
 		sut := usecases.NewStopCommand(mockCommandRepository, mockRunner)
@@ -38,7 +38,7 @@ func TestDefaultStopCommand_Execute(t *testing.T) {
 
 	t.Run("Should return error if the command does not exist", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockRunner := new(MockRunner)
 
 		sut := usecases.NewStopCommand(mockCommandRepository, mockRunner)
@@ -59,7 +59,7 @@ func TestDefaultStopCommand_Execute(t *testing.T) {
 
 	t.Run("Should return error if fails to stop the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockRunner := new(MockRunner)
 
 		sut := usecases.NewStopCommand(mockCommandRepository, mockRunner)

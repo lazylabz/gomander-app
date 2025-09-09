@@ -16,7 +16,7 @@ import (
 func TestDefaultAddCommand_Execute(t *testing.T) {
 	t.Run("Should add the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 
 		projectId := "project1"
@@ -54,7 +54,7 @@ func TestDefaultAddCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 
 		sut := usecases.NewAddCommand(mockUserConfigRepository, mockCommandRepository)
@@ -76,7 +76,7 @@ func TestDefaultAddCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to get all commands", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 
 		projectId := "project1"
@@ -105,7 +105,7 @@ func TestDefaultAddCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to create commands", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 
 		projectId := "project1"

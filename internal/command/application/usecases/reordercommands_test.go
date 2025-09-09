@@ -16,7 +16,7 @@ import (
 func TestDefaultReorderCommands_Execute(t *testing.T) {
 	t.Run("Should reorder commands", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 
 		projectId := "project1"
@@ -59,7 +59,7 @@ func TestDefaultReorderCommands_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 
 		sut := usecases.NewReorderCommands(mockUserConfigRepository, mockCommandRepository)
@@ -79,7 +79,7 @@ func TestDefaultReorderCommands_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to retrieve commands", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 
 		projectId := "project1"
@@ -104,7 +104,7 @@ func TestDefaultReorderCommands_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to update commands", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 
 		projectId := "project1"

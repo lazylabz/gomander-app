@@ -9,46 +9,6 @@ import (
 	projectdomain "gomander/internal/project/domain"
 )
 
-type MockCommandRepository struct {
-	mock.Mock
-}
-
-func (m *MockCommandRepository) Get(commandId string) (*commanddomain.Command, error) {
-	args := m.Called(commandId)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*commanddomain.Command), args.Error(1)
-}
-
-func (m *MockCommandRepository) GetAll(projectId string) ([]commanddomain.Command, error) {
-	args := m.Called(projectId)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).([]commanddomain.Command), args.Error(1)
-}
-
-func (m *MockCommandRepository) Create(command *commanddomain.Command) error {
-	args := m.Called(command)
-	return args.Error(0)
-}
-
-func (m *MockCommandRepository) Update(command *commanddomain.Command) error {
-	args := m.Called(command)
-	return args.Error(0)
-}
-
-func (m *MockCommandRepository) Delete(commandId string) error {
-	args := m.Called(commandId)
-	return args.Error(0)
-}
-
-func (m *MockCommandRepository) DeleteAll(projectId string) error {
-	args := m.Called(projectId)
-	return args.Error(0)
-}
-
 type MockConfigRepository struct {
 	mock.Mock
 }

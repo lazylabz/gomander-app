@@ -16,7 +16,7 @@ import (
 func TestDefaultGetCommands_Execute(t *testing.T) {
 	t.Run("Should return the commands provided by the repository", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 
 		projectId := "project1"
@@ -53,7 +53,7 @@ func TestDefaultGetCommands_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 
 		sut := usecases.NewGetCommands(mockUserConfigRepository, mockCommandRepository)
