@@ -2,6 +2,7 @@ package runner_test
 
 import (
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -36,6 +37,13 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		mockEmitterLogEntry(emitter, commandId, "a")
 		mockEmitterLogEntry(emitter, commandId, "b")
 		mockEmitterLogEntry(emitter, commandId, "c")
+
+		// Check first line
+		emitter.On("EmitEvent", event.NewLogEntry, mock.MatchedBy(func(
+			data map[string]string) bool {
+			return strings.Contains(data["line"], "echo") && strings.Contains(data["line"], "a") && strings.Contains(data["line"], "b") && strings.Contains(data["line"], "c")
+		})).Return()
+
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
 

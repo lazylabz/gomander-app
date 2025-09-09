@@ -82,6 +82,7 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 		wg:  &wg,
 	}
 
+	c.sendStartingLine(command)
 	if err := cmd.Start(); err != nil {
 		c.sendStreamErrorWhileStartingCommand(command, err)
 		return err
@@ -144,6 +145,13 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	}()
 
 	return nil
+}
+
+func (c *DefaultRunner) sendStartingLine(command *domain.Command) {
+	c.eventEmitter.EmitEvent(event.NewLogEntry, map[string]string{
+		"id":   command.Id,
+		"line": "\033[1;36m" + command.Command + "\033[0m",
+	})
 }
 
 func (c *DefaultRunner) StopRunningCommand(id string) error {
