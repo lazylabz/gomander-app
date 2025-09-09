@@ -102,6 +102,10 @@ func (wc *WailsControllers) RunCommandGroupController(commandGroupId string) err
 	return wc.useCases.RunCommandGroup.Execute(commandGroupId)
 }
 
+func (wc *WailsControllers) StopCommandGroupController(commandGroupId string) error {
+	return wc.useCases.StopCommandGroup.Execute(commandGroupId)
+}
+
 // Command controllers
 
 func (wc *WailsControllers) GetCommandsController() ([]commanddomain.Command, error) {

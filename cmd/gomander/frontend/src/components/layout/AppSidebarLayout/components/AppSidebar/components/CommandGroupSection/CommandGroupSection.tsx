@@ -72,12 +72,16 @@ export const CommandGroupSection = ({
     }
   };
 
-  const stop = (e: SyntheticEvent) => {
+  const stop = async (e: SyntheticEvent) => {
     // Prevent the folder from collapsing when clicking the stop button
     e.stopPropagation();
-
     if (isReorderingGroups) return;
-    stopCommandGroup(commandGroup.id);
+
+    try {
+      await stopCommandGroup(commandGroup.id);
+    } catch (e) {
+      toast.error(parseError(e, "Failed to stop command group"));
+    }
   };
 
   const handleDelete = async () => {

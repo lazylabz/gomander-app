@@ -173,8 +173,11 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	eventBus := eventbus.NewInMemoryEventBus()
 
 	// Initialize use cases
+
+	// Configuration
 	getUserConfig := configusecases.NewGetUserConfig(configRepo)
 	saveUserConfig := configusecases.NewSaveUserConfig(configRepo)
+	// Projects
 	getCurrentProject := projectusecases.NewGetCurrentProject(configRepo, projectRepo)
 	getAvailableProjects := projectusecases.NewGetAvailableProjects(projectRepo)
 	openProject := projectusecases.NewOpenProject(configRepo, projectRepo)
@@ -185,6 +188,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	exportProject := projectusecases.NewExportProject(ctx, projectRepo, commandRepo, commandGroupRepo, facade.DefaultRuntimeFacade{}, facade.DefaultFsFacade{})
 	importProject := projectusecases.NewImportProject(projectRepo, commandRepo, commandGroupRepo)
 	getProjectToImport := projectusecases.NewGetProjectToImport(ctx, facade.DefaultRuntimeFacade{}, facade.DefaultFsFacade{})
+	// Command Groups
 	getCommandGroups := commandgroupusecases.NewGetCommandGroups(configRepo, commandGroupRepo)
 	createCommandGroup := commandgroupusecases.NewCreateCommandGroup(configRepo, commandGroupRepo)
 	updateCommandGroup := commandgroupusecases.NewUpdateCommandGroup(commandGroupRepo)
@@ -192,6 +196,8 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	removeCommandFromCommandGroup := commandgroupusecases.NewRemoveCommandFromCommandGroup(commandGroupRepo)
 	reorderCommandGroups := commandgroupusecases.NewReorderCommandGroups(configRepo, commandGroupRepo)
 	runCommandGroup := commandgroupusecases.NewRunCommandGroup(configRepo, commandRepo, commandGroupRepo, projectRepo, r)
+	stopCommandGroup := commandgroupusecases.NewStopCommandGroup(commandGroupRepo, r)
+	// Commands
 	getCommands := commandusecases.NewGetCommands(configRepo, commandRepo)
 	addCommand := commandusecases.NewAddCommand(configRepo, commandRepo)
 	duplicateCommand := commandusecases.NewDuplicateCommand(configRepo, commandRepo, eventBus)
@@ -223,18 +229,21 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 		},
 
 		UseCases: internalapp.UseCases{
-			GetUserConfig:                 getUserConfig,
-			SaveUserConfig:                saveUserConfig,
-			GetCurrentProject:             getCurrentProject,
-			GetAvailableProjects:          getAvailableProjects,
-			OpenProject:                   openProject,
-			CreateProject:                 createProject,
-			EditProject:                   editProject,
-			CloseProject:                  closeProject,
-			DeleteProject:                 deleteProject,
-			ExportProject:                 exportProject,
-			ImportProject:                 importProject,
-			GetProjectToImport:            getProjectToImport,
+			// Configuration
+			GetUserConfig:  getUserConfig,
+			SaveUserConfig: saveUserConfig,
+			// Projects
+			GetCurrentProject:    getCurrentProject,
+			GetAvailableProjects: getAvailableProjects,
+			OpenProject:          openProject,
+			CreateProject:        createProject,
+			EditProject:          editProject,
+			CloseProject:         closeProject,
+			DeleteProject:        deleteProject,
+			ExportProject:        exportProject,
+			ImportProject:        importProject,
+			GetProjectToImport:   getProjectToImport,
+			// Command Groups
 			GetCommandGroups:              getCommandGroups,
 			CreateCommandGroup:            createCommandGroup,
 			UpdateCommandGroup:            updateCommandGroup,
@@ -242,14 +251,16 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 			RemoveCommandFromCommandGroup: removeCommandFromCommandGroup,
 			ReorderCommandGroups:          reorderCommandGroups,
 			RunCommandGroup:               runCommandGroup,
-			GetCommands:                   getCommands,
-			AddCommand:                    addCommand,
-			DuplicateCommand:              duplicateCommand,
-			RemoveCommand:                 removeCommand,
-			EditCommand:                   editCommand,
-			ReorderCommands:               reorderCommands,
-			RunCommand:                    runCommand,
-			StopCommand:                   stopCommand,
+			StopCommandGroup:              stopCommandGroup,
+			// Commands
+			GetCommands:      getCommands,
+			AddCommand:       addCommand,
+			DuplicateCommand: duplicateCommand,
+			RemoveCommand:    removeCommand,
+			EditCommand:      editCommand,
+			ReorderCommands:  reorderCommands,
+			RunCommand:       runCommand,
+			StopCommand:      stopCommand,
 		},
 	})
 }

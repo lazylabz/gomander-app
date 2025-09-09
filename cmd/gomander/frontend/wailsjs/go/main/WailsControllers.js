@@ -106,6 +106,10 @@ export function StopCommandController(arg1) {
   return window['go']['main']['WailsControllers']['StopCommandController'](arg1);
 }
 
+export function StopCommandGroupController(arg1) {
+  return window['go']['main']['WailsControllers']['StopCommandGroupController'](arg1);
+}
+
 export function UpdateCommandGroupController(arg1) {
   return window['go']['main']['WailsControllers']['UpdateCommandGroupController'](arg1);
 }

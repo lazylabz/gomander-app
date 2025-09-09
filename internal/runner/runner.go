@@ -42,6 +42,7 @@ type Runner interface {
 	RunCommands(commands []domain.Command, environmentPaths []string, baseWorkingDirectory string) error
 	StopRunningCommand(id string) error
 	StopAllRunningCommands() []error
+	StopRunningCommands(commands []domain.Command) error
 }
 
 func NewDefaultRunner(logger logger.Logger, emitter event.EventEmitter) *DefaultRunner {
@@ -60,6 +61,16 @@ func (c *DefaultRunner) RunCommands(commands []domain.Command, environmentPaths 
 		}
 	}
 
+	return nil
+}
+
+func (c *DefaultRunner) StopRunningCommands(commands []domain.Command) error {
+	for _, command := range commands {
+		err := c.StopRunningCommand(command.Id)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
