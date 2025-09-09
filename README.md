@@ -20,6 +20,10 @@ We started building this for ourselves when we got tired of the daily terminal c
 
 ---
 
+## Known Issues
+### TUI support
+Right now commands that use TUI (e.g. ngrok) are not supported, as that require PTY support and the current code relies on commands with stdout
+
 ## macOS Users - Important Notice
 
 **⚠️ Code Signing Disclaimer**
