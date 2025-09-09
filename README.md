@@ -1,6 +1,9 @@
 # Gomander
 
+[![release](https://img.shields.io/github/v/release/lazylabz/gomander-app)](https://github.com/lazylabz/gomander-app/releases/latest)
+[![license](https://img.shields.io/github/license/lazylabz/gomander-app)](https://github.com/lazylabz/gomander-app/blob/main/LICENSE)
 [![codecov](https://codecov.io/gh/lazylabz/gomander-app/branch/main/graph/badge.svg?token=D4LYOARMC5)](https://codecov.io/gh/lazylabz/gomander-app)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/lazylabz/gomander-app)
 
 A simple GUI to launch, monitor and organize your commands. Because nobody should have to juggle 12+ terminal windows just to run their project.
 
