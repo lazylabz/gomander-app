@@ -135,7 +135,6 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 		cmd := commandDataToDomain(cmdData)
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
-		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{}, nil)
 		mockProjectRepository.On("Get", projectId).Return(nil, errors.New("failed to get project"))
 
 		// Act

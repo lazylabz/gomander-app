@@ -44,7 +44,7 @@ func (uc *DefaultRunCommand) Execute(commandId string) error {
 		return err
 	}
 
-	currentProject, err := uc.projectRepository.Get(userConfig.LastOpenedProjectId)
+	currentProject, err := uc.projectRepository.Get(cmd.ProjectId)
 	if err != nil {
 		return err
 	}
