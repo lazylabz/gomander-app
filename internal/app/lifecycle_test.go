@@ -11,6 +11,7 @@ import (
 	"gomander/internal/config/domain"
 	test2 "gomander/internal/config/domain/test"
 	"gomander/internal/project/domain/test"
+	test3 "gomander/internal/runner/test"
 )
 
 func TestApp_Startup(t *testing.T) {
@@ -70,7 +71,7 @@ func TestApp_OnBeforeClose(t *testing.T) {
 		// Arrange
 		a := app.NewApp()
 
-		mockCommandRunner := new(MockRunner)
+		mockCommandRunner := new(test3.MockRunner)
 		mockLogger := new(MockLogger)
 
 		a.LoadDependencies(app.Dependencies{
@@ -92,7 +93,7 @@ func TestApp_OnBeforeClose(t *testing.T) {
 		// Arrange
 		a := app.NewApp()
 
-		mockCommandRunner := new(MockRunner)
+		mockCommandRunner := new(test3.MockRunner)
 		mockLogger := new(MockLogger)
 
 		a.LoadDependencies(app.Dependencies{

@@ -13,6 +13,7 @@ import (
 	test3 "gomander/internal/config/domain/test"
 	projectdomain "gomander/internal/project/domain"
 	test2 "gomander/internal/project/domain/test"
+	test4 "gomander/internal/runner/test"
 )
 
 func TestDefaultRunCommand_Execute(t *testing.T) {
@@ -21,7 +22,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(test3.MockConfigRepository)
 		mockProjectRepository := new(test2.MockProjectRepository)
-		mockRunner := new(MockRunner)
+		mockRunner := new(test4.MockRunner)
 
 		projectId := "project1"
 		sut := usecases.NewRunCommand(mockUserConfigRepository, mockCommandRepository, mockProjectRepository, mockRunner)
@@ -72,7 +73,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(test3.MockConfigRepository)
 		mockProjectRepository := new(test2.MockProjectRepository)
-		mockRunner := new(MockRunner)
+		mockRunner := new(test4.MockRunner)
 
 		sut := usecases.NewRunCommand(mockUserConfigRepository, mockCommandRepository, mockProjectRepository, mockRunner)
 
@@ -96,7 +97,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(test3.MockConfigRepository)
 		mockProjectRepository := new(test2.MockProjectRepository)
-		mockRunner := new(MockRunner)
+		mockRunner := new(test4.MockRunner)
 
 		sut := usecases.NewRunCommand(mockUserConfigRepository, mockCommandRepository, mockProjectRepository, mockRunner)
 
@@ -122,7 +123,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(test3.MockConfigRepository)
 		mockProjectRepository := new(test2.MockProjectRepository)
-		mockRunner := new(MockRunner)
+		mockRunner := new(test4.MockRunner)
 
 		sut := usecases.NewRunCommand(mockUserConfigRepository, mockCommandRepository, mockProjectRepository, mockRunner)
 
@@ -152,7 +153,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(test3.MockConfigRepository)
 		mockProjectRepository := new(test2.MockProjectRepository)
-		mockRunner := new(MockRunner)
+		mockRunner := new(test4.MockRunner)
 
 		projectId := "project1"
 		sut := usecases.NewRunCommand(mockUserConfigRepository, mockCommandRepository, mockProjectRepository, mockRunner)

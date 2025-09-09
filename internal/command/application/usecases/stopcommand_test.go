@@ -9,13 +9,14 @@ import (
 
 	"gomander/internal/command/application/usecases"
 	"gomander/internal/command/domain/test"
+	test2 "gomander/internal/runner/test"
 )
 
 func TestDefaultStopCommand_Execute(t *testing.T) {
 	t.Run("Should stop the command", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockRunner := new(MockRunner)
+		mockRunner := new(test2.MockRunner)
 
 		sut := usecases.NewStopCommand(mockCommandRepository, mockRunner)
 
@@ -39,7 +40,7 @@ func TestDefaultStopCommand_Execute(t *testing.T) {
 	t.Run("Should return error if the command does not exist", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockRunner := new(MockRunner)
+		mockRunner := new(test2.MockRunner)
 
 		sut := usecases.NewStopCommand(mockCommandRepository, mockRunner)
 
@@ -60,7 +61,7 @@ func TestDefaultStopCommand_Execute(t *testing.T) {
 	t.Run("Should return error if fails to stop the command", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockRunner := new(MockRunner)
+		mockRunner := new(test2.MockRunner)
 
 		sut := usecases.NewStopCommand(mockCommandRepository, mockRunner)
 
