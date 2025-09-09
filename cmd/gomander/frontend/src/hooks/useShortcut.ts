@@ -28,13 +28,13 @@ type Key =
   | "Y"
   | "Z";
 
-type Modifier = "Control" | "Shift" | "Alt" | "Meta";
+type Modifier = "Control" | "Shift" | "Alt" | "Mod";
 
-const ModifierMap: Record<Modifier, keyof KeyboardEvent> = {
-  Control: "ctrlKey",
-  Shift: "shiftKey",
-  Alt: "altKey",
-  Meta: "metaKey",
+const ModifierMap: Record<Modifier, (keyof KeyboardEvent)[]> = {
+  Control: ["ctrlKey"],
+  Shift: ["shiftKey"],
+  Alt: ["altKey"],
+  Mod: ["metaKey", "ctrlKey"],
 };
 
 type Shortcut = `${Modifier}-${Key}` | Key;
@@ -49,9 +49,10 @@ export const useShortcut = (shortCut: Shortcut, callback: () => void) => {
     (event: KeyboardEvent) => {
       // Check if the key is a modifier key
       const keyMatches = event.key.toLowerCase() === key.toLowerCase();
-      const modifierMathces = !modifier || event[ModifierMap[modifier]];
+      const modifierMatches =
+        !modifier || ModifierMap[modifier].some((mod) => event[mod]);
 
-      if (keyMatches && modifierMathces) {
+      if (keyMatches && modifierMatches) {
         event.preventDefault();
         callback();
       }

@@ -24,7 +24,13 @@ export const BaseWorkingDirectoryField = <
         <FormItem>
           <FormLabel>Base Working Directory</FormLabel>
           <FormControl>
-            <Input placeholder="/Users/hackerman/Code" {...field} />
+            <Input
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              placeholder="/Users/hackerman/Code"
+              {...field}
+            />
           </FormControl>
           <FormMessage />
         </FormItem>

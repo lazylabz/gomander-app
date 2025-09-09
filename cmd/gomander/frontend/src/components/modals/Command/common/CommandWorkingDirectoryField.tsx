@@ -21,7 +21,12 @@ export const CommandWorkingDirectoryField = () => {
         <FormItem>
           <FormLabel>Working Directory</FormLabel>
           <FormControl>
-            <Input {...field} />
+            <Input
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              {...field}
+            />
           </FormControl>
           <FormMessage />
         </FormItem>

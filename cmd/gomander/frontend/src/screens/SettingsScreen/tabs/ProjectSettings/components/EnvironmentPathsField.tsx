@@ -43,6 +43,9 @@ export const EnvironmentPathsField = () => {
                   <FormItem className="flex-1">
                     <FormControl>
                       <Input
+                        autoComplete="off"
+                        autoCorrect="off"
+                        autoCapitalize="off"
                         placeholder="/Users/hackerman/.nvm/versions/node/v20.18.0/bin"
                         {...field}
                       />

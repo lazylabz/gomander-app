@@ -21,7 +21,13 @@ export const CommandGroupNameField = () => {
         <FormItem>
           <FormLabel>Name</FormLabel>
           <FormControl>
-            <Input placeholder="My awesome command group" {...field} />
+            <Input
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              placeholder="My awesome command group"
+              {...field}
+            />
           </FormControl>
           <FormMessage />
         </FormItem>
