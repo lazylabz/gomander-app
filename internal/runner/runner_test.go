@@ -14,14 +14,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type MockEventEmitter struct {
-	mock.Mock
-}
-
-func (m *MockEventEmitter) EmitEvent(event event.Event, payload interface{}) {
-	m.Called(event, payload)
-}
-
 func validWorkingDirectory() string {
 	if runtime.GOOS == "windows" {
 		return "C:\\"
@@ -35,7 +27,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 	t.Run("Should run command with success and emit events for each line", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(MockEventEmitter)
+		emitter := new(event.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -67,7 +59,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 	t.Run("Should log error when executing an invalid command", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(MockEventEmitter)
+		emitter := new(event.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -102,7 +94,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 	t.Run("Should stop running command", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(MockEventEmitter)
+		emitter := new(event.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -148,7 +140,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 	t.Run("Should return error when stopping non-existing command", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(MockEventEmitter)
+		emitter := new(event.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -165,7 +157,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 	t.Run("Should stop all running commands", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(MockEventEmitter)
+		emitter := new(event.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -222,7 +214,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 	})
 }
 
-func mockEmitterLogEntry(emitter *MockEventEmitter, id string, line string) {
+func mockEmitterLogEntry(emitter *event.MockEventEmitter, id string, line string) {
 	if runtime.GOOS == "windows" {
 		emitter.On("EmitEvent", event.NewLogEntry, map[string]string{
 			"id":   id,

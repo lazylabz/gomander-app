@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/event"
-	"gomander/internal/testutils/mocks"
+	"gomander/internal/facade/test"
 )
 
 func TestDefaultEventEmitter_EmitEvent(t *testing.T) {
@@ -16,7 +16,7 @@ func TestDefaultEventEmitter_EmitEvent(t *testing.T) {
 		eventKey := "test.event"
 		eventPayload := "test payload"
 		ctx := context.Background()
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockRuntimeFacade := new(test.MockRuntimeFacade)
 
 		ee := event.NewDefaultEventEmitter(ctx, mockRuntimeFacade)
 

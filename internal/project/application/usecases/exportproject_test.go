@@ -19,7 +19,6 @@ import (
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
 	test3 "gomander/internal/project/domain/test"
-	"gomander/internal/testutils/mocks"
 )
 
 func TestDefaultExportProject_Execute(t *testing.T) {
@@ -32,7 +31,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		mockFsFacade := new(test4.MockFsFacade)
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 
 		project := projectdomain.Project{
 			Id:   projectId,
@@ -99,7 +98,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem opening the destination file", func(t *testing.T) {
 		// Arrange
 
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 		mockFsFacade := new(test4.MockFsFacade)
 		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
@@ -129,7 +128,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	t.Run("Should return nil if the user cancels the save dialog", func(t *testing.T) {
 		// Arrange
 
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 		mockFsFacade := new(test4.MockFsFacade)
 		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
@@ -157,7 +156,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	})
 	t.Run("Should return error if there is a problem reading the project data", func(t *testing.T) {
 		// Arrange
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 		mockFsFacade := new(test4.MockFsFacade)
 		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
@@ -185,7 +184,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	})
 	t.Run("Should return error if there is a problem reading the commands ", func(t *testing.T) {
 		// Arrange
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 		mockFsFacade := new(test4.MockFsFacade)
 		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
@@ -215,7 +214,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	})
 	t.Run("Should return error if there is a problem reading the command groups", func(t *testing.T) {
 		// Arrange
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 		mockFsFacade := new(test4.MockFsFacade)
 		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
@@ -252,7 +251,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		mockFsFacade := new(test4.MockFsFacade)
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 
 		project := projectdomain.Project{
 			Id:   projectId,
