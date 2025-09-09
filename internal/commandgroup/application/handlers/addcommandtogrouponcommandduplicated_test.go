@@ -7,12 +7,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	commanddomain "gomander/internal/command/domain"
 	commanddomainevent "gomander/internal/command/domain/event"
+	"gomander/internal/command/domain/test"
 	"gomander/internal/commandgroup/application/handlers"
-	commandgroupdomain "gomander/internal/commandgroup/domain"
-	"gomander/internal/helpers/array"
-	"gomander/internal/testutils"
+	test2 "gomander/internal/commandgroup/domain/test"
 )
 
 func TestDefaultAddCommandToGroupOnCommandDuplicated_GetEvent(t *testing.T) {
@@ -57,10 +55,8 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 			InsideGroupId: "group-1",
 		}
 
-		existingGroupData := testutils.NewCommandGroup().Data()
-		existingGroup := commandGroupDataToDomain(existingGroupData)
-		duplicatedCommandData := testutils.NewCommand().WithId("cmd-1").Data()
-		duplicatedCommand := commandDataToDomain(duplicatedCommandData)
+		existingGroup := test2.NewCommandGroupBuilder().Build()
+		duplicatedCommand := test.NewCommandBuilder().WithId("cmd-1").Build()
 
 		expectedUpdatedGroup := existingGroup
 		expectedUpdatedGroup.Commands = append(expectedUpdatedGroup.Commands, duplicatedCommand)
@@ -88,9 +84,8 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 			InsideGroupId: "group-1",
 		}
 
-		duplicatedCommandData := testutils.NewCommand().WithId("cmd-1").Data()
-		existingGroupData := testutils.NewCommandGroup().WithCommands(duplicatedCommandData).Data()
-		existingGroup := commandGroupDataToDomain(existingGroupData)
+		duplicatedCommand := test.NewCommandBuilder().WithId("cmd-1").Build()
+		existingGroup := test2.NewCommandGroupBuilder().WithCommands(duplicatedCommand).Build()
 
 		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(&existingGroup, nil)
 
@@ -149,8 +144,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 			InsideGroupId: "group-1",
 		}
 
-		existingGroupData := testutils.NewCommandGroup().Data()
-		existingGroup := commandGroupDataToDomain(existingGroupData)
+		existingGroup := test2.NewCommandGroupBuilder().Build()
 		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(&existingGroup, nil)
 
 		expectedError := errors.New("command not found")
@@ -175,10 +169,8 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 			InsideGroupId: "group-1",
 		}
 
-		existingGroupData := testutils.NewCommandGroup().Data()
-		existingGroup := commandGroupDataToDomain(existingGroupData)
-		duplicatedCommandData := testutils.NewCommand().WithId("cmd-1").Data()
-		duplicatedCommand := commandDataToDomain(duplicatedCommandData)
+		existingGroup := test2.NewCommandGroupBuilder().Build()
+		duplicatedCommand := test.NewCommandBuilder().WithId("cmd-1").Build()
 
 		expectedUpdatedGroup := existingGroup
 		expectedUpdatedGroup.Commands = append(expectedUpdatedGroup.Commands, duplicatedCommand)
@@ -197,25 +189,4 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t, mockCommandRepo, mockCommandGroupRepo)
 	})
-}
-
-func commandDataToDomain(data testutils.CommandData) commanddomain.Command {
-	return commanddomain.Command{
-		Id:               data.Id,
-		ProjectId:        data.ProjectId,
-		Name:             data.Name,
-		Command:          data.Command,
-		WorkingDirectory: data.WorkingDirectory,
-		Position:         data.Position,
-	}
-}
-
-func commandGroupDataToDomain(data testutils.CommandGroupData) commandgroupdomain.CommandGroup {
-	return commandgroupdomain.CommandGroup{
-		Id:        data.Id,
-		ProjectId: data.ProjectId,
-		Name:      data.Name,
-		Position:  data.Position,
-		Commands:  array.Map(data.Commands, commandDataToDomain),
-	}
 }

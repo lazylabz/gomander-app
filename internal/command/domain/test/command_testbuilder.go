@@ -1,6 +1,10 @@
-package testutils
+package test
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+
+	"gomander/internal/command/domain"
+)
 
 type CommandData struct {
 	Id               string
@@ -15,7 +19,7 @@ type CommandBuilder struct {
 	data *CommandData
 }
 
-func NewCommand() *CommandBuilder {
+func NewCommandBuilder() *CommandBuilder {
 	return &CommandBuilder{
 		data: &CommandData{
 			Id:               uuid.New().String(),
@@ -58,6 +62,13 @@ func (b *CommandBuilder) WithPosition(position int) *CommandBuilder {
 	return b
 }
 
-func (b *CommandBuilder) Data() CommandData {
-	return *b.data
+func (b *CommandBuilder) Build() domain.Command {
+	return domain.Command{
+		Id:               b.data.Id,
+		ProjectId:        b.data.ProjectId,
+		Name:             b.data.Name,
+		Command:          b.data.Command,
+		WorkingDirectory: b.data.WorkingDirectory,
+		Position:         b.data.Position,
+	}
 }

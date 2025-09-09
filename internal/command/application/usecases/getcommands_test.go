@@ -9,8 +9,8 @@ import (
 
 	"gomander/internal/command/application/usecases"
 	commanddomain "gomander/internal/command/domain"
+	"gomander/internal/command/domain/test"
 	configdomain "gomander/internal/config/domain"
-	"gomander/internal/testutils"
 )
 
 func TestDefaultGetCommands_Execute(t *testing.T) {
@@ -24,21 +24,19 @@ func TestDefaultGetCommands_Execute(t *testing.T) {
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		command1Data := testutils.
-			NewCommand().
+		command1 := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithPosition(0).
-			Data()
+			Build()
 
-		command2Data := testutils.
-			NewCommand().
+		command2 := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithPosition(1).
-			Data()
+			Build()
 
 		expectedCommandGroup := []commanddomain.Command{
-			commandDataToDomain(command1Data),
-			commandDataToDomain(command2Data),
+			command1,
+			command2,
 		}
 
 		mockCommandRepository.On("GetAll", projectId).Return(expectedCommandGroup, nil)

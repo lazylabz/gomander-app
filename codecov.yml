@@ -4,3 +4,4 @@ ignore:
   - "cmd/gomander"
   - "internal/app/app.go"
   - "**/*facade.go"
+  - "**/*_testbuilder.go"

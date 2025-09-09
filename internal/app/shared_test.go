@@ -8,9 +8,7 @@ import (
 	"gomander/internal/config/domain"
 	"gomander/internal/event"
 	"gomander/internal/eventbus"
-	"gomander/internal/helpers/array"
 	projectdomain "gomander/internal/project/domain"
-	"gomander/internal/testutils"
 )
 
 type MockLogger struct {
@@ -203,25 +201,4 @@ func (m *MockEventBus) RegisterHandler(handler eventbus.EventHandler) {
 func (m *MockEventBus) PublishSync(e eventbus.Event) []error {
 	args := m.Called(e)
 	return args.Get(0).([]error)
-}
-
-func commandDataToDomain(data testutils.CommandData) commanddomain.Command {
-	return commanddomain.Command{
-		Id:               data.Id,
-		ProjectId:        data.ProjectId,
-		Name:             data.Name,
-		Command:          data.Command,
-		WorkingDirectory: data.WorkingDirectory,
-		Position:         data.Position,
-	}
-}
-
-func commandGroupDataToDomain(data testutils.CommandGroupData) commandgroupdomain.CommandGroup {
-	return commandgroupdomain.CommandGroup{
-		Id:        data.Id,
-		ProjectId: data.ProjectId,
-		Name:      data.Name,
-		Position:  data.Position,
-		Commands:  array.Map(data.Commands, commandDataToDomain),
-	}
 }

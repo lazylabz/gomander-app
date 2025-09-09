@@ -11,11 +11,12 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/command/domain"
+	"gomander/internal/command/domain/test"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
+	test2 "gomander/internal/commandgroup/domain/test"
 	"gomander/internal/helpers/array"
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
-	"gomander/internal/testutils"
 	"gomander/internal/testutils/mocks"
 )
 
@@ -36,19 +37,12 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 			Name: "test",
 		}
 
-		cmd1Data := testutils.NewCommand().WithProjectId(projectId).Data()
-		cmd2Data := testutils.NewCommand().WithProjectId(projectId).Data()
-		cmd3Data := testutils.NewCommand().WithProjectId(projectId).Data()
+		cmd1 := test.NewCommandBuilder().WithProjectId(projectId).Build()
+		cmd2 := test.NewCommandBuilder().WithProjectId(projectId).Build()
+		cmd3 := test.NewCommandBuilder().WithProjectId(projectId).Build()
 
-		cmd1 := commandDataToDomain(cmd1Data)
-		cmd2 := commandDataToDomain(cmd2Data)
-		cmd3 := commandDataToDomain(cmd3Data)
-
-		cmdGroup1Data := testutils.NewCommandGroup().WithProjectId(projectId).WithCommands(cmd1Data, cmd2Data, cmd3Data).Data()
-		cmdGroup2Data := testutils.NewCommandGroup().WithProjectId(projectId).WithCommands(cmd3Data, cmd1Data).Data()
-
-		cmdGroup1 := commandGroupDataToDomain(cmdGroup1Data)
-		cmdGroup2 := commandGroupDataToDomain(cmdGroup2Data)
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithProjectId(projectId).WithCommands(cmd1, cmd2, cmd3).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithProjectId(projectId).WithCommands(cmd3, cmd1).Build()
 
 		sut := usecases.NewExportProject(
 			context.Background(),
@@ -263,19 +257,12 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 			Name: "test",
 		}
 
-		cmd1Data := testutils.NewCommand().WithProjectId(projectId).Data()
-		cmd2Data := testutils.NewCommand().WithProjectId(projectId).Data()
-		cmd3Data := testutils.NewCommand().WithProjectId(projectId).Data()
+		cmd1 := test.NewCommandBuilder().WithProjectId(projectId).Build()
+		cmd2 := test.NewCommandBuilder().WithProjectId(projectId).Build()
+		cmd3 := test.NewCommandBuilder().WithProjectId(projectId).Build()
 
-		cmd1 := commandDataToDomain(cmd1Data)
-		cmd2 := commandDataToDomain(cmd2Data)
-		cmd3 := commandDataToDomain(cmd3Data)
-
-		cmdGroup1Data := testutils.NewCommandGroup().WithProjectId(projectId).WithCommands(cmd1Data, cmd2Data, cmd3Data).Data()
-		cmdGroup2Data := testutils.NewCommandGroup().WithProjectId(projectId).WithCommands(cmd3Data, cmd1Data).Data()
-
-		cmdGroup1 := commandGroupDataToDomain(cmdGroup1Data)
-		cmdGroup2 := commandGroupDataToDomain(cmdGroup2Data)
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithProjectId(projectId).WithCommands(cmd1, cmd2, cmd3).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithProjectId(projectId).WithCommands(cmd3, cmd1).Build()
 
 		sut := usecases.NewExportProject(
 			context.Background(),

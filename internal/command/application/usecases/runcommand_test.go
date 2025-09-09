@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/command/application/usecases"
+	"gomander/internal/command/domain/test"
 	configdomain "gomander/internal/config/domain"
 	projectdomain "gomander/internal/project/domain"
-	"gomander/internal/testutils"
 )
 
 func TestDefaultRunCommand_Execute(t *testing.T) {
@@ -36,13 +36,10 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 			EnvironmentPaths:    envPaths,
 		}, nil)
 
-		cmdData := testutils.
-			NewCommand().
+		cmd := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithPosition(0).
-			Data()
-
-		cmd := commandDataToDomain(cmdData)
+			Build()
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
 		project := projectdomain.Project{
@@ -101,8 +98,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 
 		sut := usecases.NewRunCommand(mockUserConfigRepository, mockCommandRepository, mockProjectRepository, mockRunner)
 
-		cmdData := testutils.NewCommand().Data()
-		cmd := commandDataToDomain(cmdData)
+		cmd := test.NewCommandBuilder().Build()
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
 		mockUserConfigRepository.On("GetOrCreate").Return(nil, errors.New("failed to get user config"))
@@ -131,8 +127,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 		projectId := "project1"
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		cmdData := testutils.NewCommand().WithProjectId(projectId).Data()
-		cmd := commandDataToDomain(cmdData)
+		cmd := test.NewCommandBuilder().WithProjectId(projectId).Build()
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
 		mockProjectRepository.On("Get", projectId).Return(nil, errors.New("failed to get project"))
@@ -172,13 +167,10 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 			EnvironmentPaths:    envPaths,
 		}, nil)
 
-		cmdData := testutils.
-			NewCommand().
+		cmd := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithPosition(0).
-			Data()
-
-		cmd := commandDataToDomain(cmdData)
+			Build()
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
 		project := projectdomain.Project{

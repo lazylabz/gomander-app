@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/command/application/usecases"
-	"gomander/internal/testutils"
+	"gomander/internal/command/domain/test"
 )
 
 func TestApp_EditCommand(t *testing.T) {
@@ -19,12 +19,9 @@ func TestApp_EditCommand(t *testing.T) {
 		projectId := "project1"
 		sut := usecases.NewEditCommand(mockCommandRepository)
 
-		commandData := testutils.
-			NewCommand().
+		commandToEdit := test.NewCommandBuilder().
 			WithProjectId(projectId).
-			Data()
-
-		commandToEdit := commandDataToDomain(commandData)
+			Build()
 
 		mockCommandRepository.On("Update", &commandToEdit).Return(nil)
 
@@ -46,12 +43,9 @@ func TestApp_EditCommand(t *testing.T) {
 		projectId := "project1"
 		sut := usecases.NewEditCommand(mockCommandRepository)
 
-		commandData := testutils.
-			NewCommand().
+		commandToEdit := test.NewCommandBuilder().
 			WithProjectId(projectId).
-			Data()
-
-		commandToEdit := commandDataToDomain(commandData)
+			Build()
 
 		mockCommandRepository.On("Update", &commandToEdit).Return(errors.New("failed to update command"))
 

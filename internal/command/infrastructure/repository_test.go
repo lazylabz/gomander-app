@@ -6,37 +6,15 @@ import (
 
 	"github.com/glebarez/sqlite"
 
-	"gomander/internal/testutils"
-
 	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 
+	"gomander/internal/command/domain/test"
+
 	"gomander/internal/command/domain"
 	_ "gomander/migrations"
 )
-
-func commandDataToDomain(data testutils.CommandData) *domain.Command {
-	return &domain.Command{
-		Id:               data.Id,
-		ProjectId:        data.ProjectId,
-		Name:             data.Name,
-		Command:          data.Command,
-		WorkingDirectory: data.WorkingDirectory,
-		Position:         data.Position,
-	}
-}
-
-func commandDataToModel(data testutils.CommandData) *CommandModel {
-	return &CommandModel{
-		Id:               data.Id,
-		ProjectId:        data.ProjectId,
-		Name:             data.Name,
-		Command:          data.Command,
-		WorkingDirectory: data.WorkingDirectory,
-		Position:         data.Position,
-	}
-}
 
 type testHelper struct {
 	t    *testing.T
@@ -60,22 +38,21 @@ func TestGormCommandRepository_Get(t *testing.T) {
 	t.Parallel()
 	t.Run("Should return command when it exists", func(t *testing.T) {
 		// Arrange
-		cmdData := testutils.NewCommand().Data()
+		cmd := test.NewCommandBuilder().Build()
+		model := ToCommandModel(&cmd)
 
-		preloadedCommandModels := []*CommandModel{
-			commandDataToModel(cmdData),
-		}
+		preloadedCommandModels := []*CommandModel{&model}
 
-		expectedCommand := commandDataToDomain(cmdData)
+		expectedCommand := cmd
 
 		h := newTestHelper(t, preloadedCommandModels)
 
 		// Act
-		cmd, err := h.repo.Get(cmdData.Id)
+		got, err := h.repo.Get(cmd.Id)
 
 		// Assert
 		assert.NoError(t, err)
-		assert.Equal(t, expectedCommand, cmd)
+		assert.Equal(t, &expectedCommand, got)
 	})
 	t.Run("Should return nil when it doesn't exists", func(t *testing.T) {
 		// Arrange
@@ -95,23 +72,25 @@ func TestGormCommandRepository_GetAll(t *testing.T) {
 	t.Run("Should return all commands for a project, sorted", func(t *testing.T) {
 		// Arrange
 		projectId := "proj1"
-		cmd1 := testutils.NewCommand().
+		cmd1 := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithPosition(1).
-			Data()
-		cmd2 := testutils.NewCommand().
+			Build()
+		cmd2 := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithPosition(0).
-			Data()
+			Build()
+		cmd1model := ToCommandModel(&cmd1)
+		cmd2model := ToCommandModel(&cmd2)
 
 		preloadedCommandModels := []*CommandModel{
-			commandDataToModel(cmd2),
-			commandDataToModel(cmd1),
+			&cmd2model,
+			&cmd1model,
 		}
 
 		expectedCommands := []*domain.Command{
-			commandDataToDomain(cmd2),
-			commandDataToDomain(cmd1),
+			&cmd2,
+			&cmd1,
 		}
 
 		h := newTestHelper(t, preloadedCommandModels)
@@ -134,18 +113,17 @@ func TestGormCommandRepository_Save(t *testing.T) {
 		var preloadedCommandModels []*CommandModel
 		h := newTestHelper(t, preloadedCommandModels)
 
-		cmdData := testutils.NewCommand().
+		cmd := test.NewCommandBuilder().
 			WithId("cmd3").
 			WithProjectId("proj1").
 			WithName("New Command").
 			WithCommand("echo 'New Command'").
 			WithWorkingDirectory("/tmp").
 			WithPosition(2).
-			Data()
-		createdCommand := commandDataToDomain(cmdData)
+			Build()
 
 		// Act
-		err := h.repo.Create(createdCommand)
+		err := h.repo.Create(&cmd)
 
 		// Assert
 		assert.NoError(t, err)
@@ -153,7 +131,7 @@ func TestGormCommandRepository_Save(t *testing.T) {
 		// Verify the command was saved
 		actual, err := h.repo.Get("cmd3")
 		assert.NoError(t, err)
-		assert.Equal(t, createdCommand, actual)
+		assert.Equal(t, &cmd, actual)
 	})
 }
 
@@ -161,34 +139,36 @@ func TestGormCommandRepository_Edit(t *testing.T) {
 	t.Parallel()
 	t.Run("Should edit an existing command", func(t *testing.T) {
 		// Arrange
-		existingCommand := testutils.NewCommand().
+		existingCommandBuilder := test.NewCommandBuilder().
 			WithProjectId("proj1").
 			WithName("Old Command").
 			WithCommand("echo 'Old Command'").
 			WithWorkingDirectory("/tmp").
 			WithPosition(0)
+		existingCommand := existingCommandBuilder.Build()
+		existingCommandModel := ToCommandModel(&existingCommand)
+
 		preloadedCommandModels := []*CommandModel{
-			commandDataToModel(existingCommand.Data()),
+			&existingCommandModel,
 		}
 
 		h := newTestHelper(t, preloadedCommandModels)
 
-		editedCommand := existingCommand.
+		editedCommand := existingCommandBuilder.
 			WithName("Edited Command").
 			WithCommand("echo 'Edited Command'").
-			Data()
-		domainEditedCommand := commandDataToDomain(editedCommand)
+			Build()
 
 		// Act
-		err := h.repo.Update(domainEditedCommand)
+		err := h.repo.Update(&editedCommand)
 
 		// Assert
 		assert.NoError(t, err)
 
 		// Verify the command was updated
-		actual, err := h.repo.Get(existingCommand.Data().Id)
+		actual, err := h.repo.Get(existingCommandBuilder.Build().Id)
 		assert.NoError(t, err)
-		assert.Equal(t, domainEditedCommand, actual)
+		assert.Equal(t, &editedCommand, actual)
 	})
 }
 
@@ -196,9 +176,11 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 	t.Parallel()
 	t.Run("Should delete an existing command", func(t *testing.T) {
 		// Arrange
-		cmd := testutils.NewCommand().Data()
+		cmd := test.NewCommandBuilder().Build()
+		cmdModel := ToCommandModel(&cmd)
+
 		preloadedCommandModels := []*CommandModel{
-			commandDataToModel(cmd),
+			&cmdModel,
 		}
 
 		h := newTestHelper(t, preloadedCommandModels)
@@ -217,23 +199,27 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 	t.Run("Should delete an existing command and adjust other commands positions", func(t *testing.T) {
 		// Arrange
 		projectId := "proj1"
-		cmd1 := testutils.NewCommand().
+		cmd1 := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithPosition(0).
-			Data()
-		cmd2 := testutils.NewCommand().
+			Build()
+		cmd2 := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithPosition(1).
-			Data()
-		cmd3 := testutils.NewCommand().
+			Build()
+		cmd3 := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithPosition(2).
-			Data()
+			Build()
+
+		cmd1Model := ToCommandModel(&cmd1)
+		cmd2Model := ToCommandModel(&cmd2)
+		cmd3Model := ToCommandModel(&cmd3)
 
 		preloadedCommandModels := []*CommandModel{
-			commandDataToModel(cmd1),
-			commandDataToModel(cmd2),
-			commandDataToModel(cmd3),
+			&cmd1Model,
+			&cmd2Model,
+			&cmd3Model,
 		}
 
 		h := newTestHelper(t, preloadedCommandModels)
@@ -262,14 +248,18 @@ func TestGormCommandRepository_DeleteAll(t *testing.T) {
 		projectId := "proj1"
 		otherProjectId := "proj2"
 
-		cmd1 := testutils.NewCommand().WithProjectId(projectId).WithPosition(0).Data()
-		cmd2 := testutils.NewCommand().WithProjectId(projectId).WithPosition(1).Data()
-		cmdOther := testutils.NewCommand().WithProjectId(otherProjectId).WithPosition(0).Data()
+		cmd1 := test.NewCommandBuilder().WithProjectId(projectId).WithPosition(0).Build()
+		cmd2 := test.NewCommandBuilder().WithProjectId(projectId).WithPosition(1).Build()
+		cmdOther := test.NewCommandBuilder().WithProjectId(otherProjectId).WithPosition(0).Build()
+
+		cmd1Model := ToCommandModel(&cmd1)
+		cmd2Model := ToCommandModel(&cmd2)
+		cmdOtherModel := ToCommandModel(&cmdOther)
 
 		preloadedCommandModels := []*CommandModel{
-			commandDataToModel(cmd1),
-			commandDataToModel(cmd2),
-			commandDataToModel(cmdOther),
+			&cmd1Model,
+			&cmd2Model,
+			&cmdOtherModel,
 		}
 
 		h := newTestHelper(t, preloadedCommandModels)

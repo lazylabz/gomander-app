@@ -7,10 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"gomander/internal/command/domain/test"
 	"gomander/internal/commandgroup/application/usecases"
 	"gomander/internal/commandgroup/domain"
+	test2 "gomander/internal/commandgroup/domain/test"
 	configdomain "gomander/internal/config/domain"
-	"gomander/internal/testutils"
 )
 
 func TestDefaultGetCommandGroups_Execute(t *testing.T) {
@@ -24,16 +25,12 @@ func TestDefaultGetCommandGroups_Execute(t *testing.T) {
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		commandGroupData := testutils.
-			NewCommandGroup().
+		expectedCommandGroup := test2.NewCommandGroupBuilder().
 			WithProjectId(projectId).
-			WithCommands(testutils.
-				NewCommand().
+			WithCommands(test.NewCommandBuilder().
 				WithProjectId(projectId).
-				Data(),
-			).Data()
-
-		expectedCommandGroup := commandGroupDataToDomain(commandGroupData)
+				Build(),
+			).Build()
 
 		mockCommandGroupRepository.On("GetAll", projectId).Return([]domain.CommandGroup{expectedCommandGroup}, nil)
 

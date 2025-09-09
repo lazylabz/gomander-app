@@ -10,8 +10,8 @@ import (
 	"gomander/internal/command/application/usecases"
 	commanddomain "gomander/internal/command/domain"
 	commanddomainevent "gomander/internal/command/domain/event"
+	"gomander/internal/command/domain/test"
 	configdomain "gomander/internal/config/domain"
-	"gomander/internal/testutils"
 )
 
 func TestDefaultDuplicateCommand_Execute(t *testing.T) {
@@ -26,8 +26,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		originalCmdData := testutils.NewCommand().WithProjectId(projectId).Data()
-		originalCmd := commandDataToDomain(originalCmdData)
+		originalCmd := test.NewCommandBuilder().WithProjectId(projectId).Build()
 
 		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
 		mockCommandRepository.On("GetAll", projectId).Return([]commanddomain.Command{originalCmd}, nil)
@@ -72,8 +71,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		originalCmdData := testutils.NewCommand().WithProjectId(projectId).Data()
-		originalCmd := commandDataToDomain(originalCmdData)
+		originalCmd := test.NewCommandBuilder().WithProjectId(projectId).Build()
 
 		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
 		mockCommandRepository.On("GetAll", projectId).Return([]commanddomain.Command{originalCmd}, nil)
@@ -163,7 +161,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		originalCmd := commandDataToDomain(testutils.NewCommand().Data())
+		originalCmd := test.NewCommandBuilder().Build()
 		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
 
 		expectedErr := errors.New("failed to get commands")
@@ -191,7 +189,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		originalCmd := commandDataToDomain(testutils.NewCommand().Data())
+		originalCmd := test.NewCommandBuilder().Build()
 		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
 		mockCommandRepository.On("GetAll", projectId).Return([]commanddomain.Command{originalCmd}, nil)
 
@@ -220,8 +218,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		originalCmdData := testutils.NewCommand().WithProjectId(projectId).Data()
-		originalCmd := commandDataToDomain(originalCmdData)
+		originalCmd := test.NewCommandBuilder().WithProjectId(projectId).Build()
 
 		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
 		mockCommandRepository.On("GetAll", projectId).Return([]commanddomain.Command{originalCmd}, nil)

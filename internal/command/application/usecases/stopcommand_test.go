@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/command/application/usecases"
-	"gomander/internal/testutils"
+	"gomander/internal/command/domain/test"
 )
 
 func TestDefaultStopCommand_Execute(t *testing.T) {
@@ -19,8 +19,7 @@ func TestDefaultStopCommand_Execute(t *testing.T) {
 
 		sut := usecases.NewStopCommand(mockCommandRepository, mockRunner)
 
-		cmdData := testutils.NewCommand().WithProjectId("project1").Data()
-		cmd := commandDataToDomain(cmdData)
+		cmd := test.NewCommandBuilder().WithProjectId("project1").Build()
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
 
@@ -65,8 +64,7 @@ func TestDefaultStopCommand_Execute(t *testing.T) {
 
 		sut := usecases.NewStopCommand(mockCommandRepository, mockRunner)
 
-		cmdData := testutils.NewCommand().WithProjectId("project1").Data()
-		cmd := commandDataToDomain(cmdData)
+		cmd := test.NewCommandBuilder().WithProjectId("project1").Build()
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
 
