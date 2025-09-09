@@ -106,8 +106,9 @@ export const LogsScreen = () => {
           <div className="flex flex-col bg-background gap-1.5">
             <Input
               ref={searchInput}
-              autoCorrect="off"
               autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
               className="w-64"
               value={searchQuery}
               onChange={handleSearchInputChange}

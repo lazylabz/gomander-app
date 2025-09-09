@@ -22,7 +22,13 @@ export const ProjectNameField = <T extends { name: string }>() => {
         <FormItem>
           <FormLabel>Name</FormLabel>
           <FormControl>
-            <Input placeholder="My awesome project" {...field} />
+            <Input
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              placeholder="My awesome project"
+              {...field}
+            />
           </FormControl>
           <FormMessage />
         </FormItem>

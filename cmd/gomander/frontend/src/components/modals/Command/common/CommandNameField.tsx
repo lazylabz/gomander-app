@@ -21,7 +21,13 @@ export const CommandNameField = () => {
         <FormItem>
           <FormLabel>Name</FormLabel>
           <FormControl>
-            <Input placeholder="My awesome command" {...field} />
+            <Input
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              placeholder="My awesome command"
+              {...field}
+            />
           </FormControl>
           <FormMessage />
         </FormItem>
