@@ -11,12 +11,14 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/command/domain"
+	"gomander/internal/command/domain/test"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
+	test2 "gomander/internal/commandgroup/domain/test"
+	test4 "gomander/internal/facade/test"
 	"gomander/internal/helpers/array"
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
-	"gomander/internal/testutils"
-	"gomander/internal/testutils/mocks"
+	test3 "gomander/internal/project/domain/test"
 )
 
 func TestDefaultExportProject_Execute(t *testing.T) {
@@ -24,31 +26,24 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		// Arrange
 		projectId := "test-project-id"
 
-		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(MockFsFacade)
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockFsFacade := new(test4.MockFsFacade)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 
 		project := projectdomain.Project{
 			Id:   projectId,
 			Name: "test",
 		}
 
-		cmd1Data := testutils.NewCommand().WithProjectId(projectId).Data()
-		cmd2Data := testutils.NewCommand().WithProjectId(projectId).Data()
-		cmd3Data := testutils.NewCommand().WithProjectId(projectId).Data()
+		cmd1 := test.NewCommandBuilder().WithProjectId(projectId).Build()
+		cmd2 := test.NewCommandBuilder().WithProjectId(projectId).Build()
+		cmd3 := test.NewCommandBuilder().WithProjectId(projectId).Build()
 
-		cmd1 := commandDataToDomain(cmd1Data)
-		cmd2 := commandDataToDomain(cmd2Data)
-		cmd3 := commandDataToDomain(cmd3Data)
-
-		cmdGroup1Data := testutils.NewCommandGroup().WithProjectId(projectId).WithCommands(cmd1Data, cmd2Data, cmd3Data).Data()
-		cmdGroup2Data := testutils.NewCommandGroup().WithProjectId(projectId).WithCommands(cmd3Data, cmd1Data).Data()
-
-		cmdGroup1 := commandGroupDataToDomain(cmdGroup1Data)
-		cmdGroup2 := commandGroupDataToDomain(cmdGroup2Data)
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithProjectId(projectId).WithCommands(cmd1, cmd2, cmd3).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithProjectId(projectId).WithCommands(cmd3, cmd1).Build()
 
 		sut := usecases.NewExportProject(
 			context.Background(),
@@ -103,11 +98,11 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem opening the destination file", func(t *testing.T) {
 		// Arrange
 
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
-		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
+		mockFsFacade := new(test4.MockFsFacade)
+		mockProjectRepository := new(test3.MockProjectRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
 			context.Background(),
@@ -133,11 +128,11 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	t.Run("Should return nil if the user cancels the save dialog", func(t *testing.T) {
 		// Arrange
 
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
-		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
+		mockFsFacade := new(test4.MockFsFacade)
+		mockProjectRepository := new(test3.MockProjectRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
 			context.Background(),
@@ -161,11 +156,11 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	})
 	t.Run("Should return error if there is a problem reading the project data", func(t *testing.T) {
 		// Arrange
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
-		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
+		mockFsFacade := new(test4.MockFsFacade)
+		mockProjectRepository := new(test3.MockProjectRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
 			context.Background(),
@@ -189,11 +184,11 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	})
 	t.Run("Should return error if there is a problem reading the commands ", func(t *testing.T) {
 		// Arrange
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
-		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
+		mockFsFacade := new(test4.MockFsFacade)
+		mockProjectRepository := new(test3.MockProjectRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
 			context.Background(),
@@ -219,11 +214,11 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	})
 	t.Run("Should return error if there is a problem reading the command groups", func(t *testing.T) {
 		// Arrange
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
-		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
+		mockFsFacade := new(test4.MockFsFacade)
+		mockProjectRepository := new(test3.MockProjectRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
 			context.Background(),
@@ -251,31 +246,24 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem writing the file", func(t *testing.T) {
 		projectId := "test-project-id"
 
-		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(MockFsFacade)
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockFsFacade := new(test4.MockFsFacade)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 
 		project := projectdomain.Project{
 			Id:   projectId,
 			Name: "test",
 		}
 
-		cmd1Data := testutils.NewCommand().WithProjectId(projectId).Data()
-		cmd2Data := testutils.NewCommand().WithProjectId(projectId).Data()
-		cmd3Data := testutils.NewCommand().WithProjectId(projectId).Data()
+		cmd1 := test.NewCommandBuilder().WithProjectId(projectId).Build()
+		cmd2 := test.NewCommandBuilder().WithProjectId(projectId).Build()
+		cmd3 := test.NewCommandBuilder().WithProjectId(projectId).Build()
 
-		cmd1 := commandDataToDomain(cmd1Data)
-		cmd2 := commandDataToDomain(cmd2Data)
-		cmd3 := commandDataToDomain(cmd3Data)
-
-		cmdGroup1Data := testutils.NewCommandGroup().WithProjectId(projectId).WithCommands(cmd1Data, cmd2Data, cmd3Data).Data()
-		cmdGroup2Data := testutils.NewCommandGroup().WithProjectId(projectId).WithCommands(cmd3Data, cmd1Data).Data()
-
-		cmdGroup1 := commandGroupDataToDomain(cmdGroup1Data)
-		cmdGroup2 := commandGroupDataToDomain(cmdGroup2Data)
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithProjectId(projectId).WithCommands(cmd1, cmd2, cmd3).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithProjectId(projectId).WithCommands(cmd3, cmd1).Build()
 
 		sut := usecases.NewExportProject(
 			context.Background(),

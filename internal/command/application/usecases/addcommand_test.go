@@ -9,37 +9,36 @@ import (
 
 	"gomander/internal/command/application/usecases"
 	commanddomain "gomander/internal/command/domain"
+	"gomander/internal/command/domain/test"
 	configdomain "gomander/internal/config/domain"
-	"gomander/internal/testutils"
+	test2 "gomander/internal/config/domain/test"
 )
 
 func TestDefaultAddCommand_Execute(t *testing.T) {
 	t.Run("Should add the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
 		sut := usecases.NewAddCommand(mockUserConfigRepository, mockCommandRepository)
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		existingCommandData := testutils.
-			NewCommand().
+		existingCommand := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithPosition(0).
-			Data()
+			Build()
 
-		newCommandData := testutils.
-			NewCommand().
+		newCommandBuilder := test.NewCommandBuilder().
 			WithProjectId(projectId)
 
-		parameterCommand := commandDataToDomain(newCommandData.Data())
+		parameterCommand := newCommandBuilder.Build()
 
 		mockCommandRepository.On("GetAll", projectId).Return([]commanddomain.Command{
-			commandDataToDomain(existingCommandData),
+			existingCommand,
 		}, nil)
-		expectedCommandCall := commandDataToDomain(newCommandData.WithPosition(1).Data())
+		expectedCommandCall := newCommandBuilder.WithPosition(1).Build()
 		mockCommandRepository.On("Create", &expectedCommandCall).Return(nil)
 
 		// Act
@@ -56,12 +55,12 @@ func TestDefaultAddCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		sut := usecases.NewAddCommand(mockUserConfigRepository, mockCommandRepository)
-		newCommandData := testutils.NewCommand()
-		parameterCommand := commandDataToDomain(newCommandData.Data())
+		newCommandBuilder := test.NewCommandBuilder()
+		parameterCommand := newCommandBuilder.Build()
 		expectedErr := errors.New("failed to get user config")
 		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedErr)
 
@@ -78,19 +77,18 @@ func TestDefaultAddCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to get all commands", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
 		sut := usecases.NewAddCommand(mockUserConfigRepository, mockCommandRepository)
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		newCommandData := testutils.
-			NewCommand().
+		newCommandBuilder := test.NewCommandBuilder().
 			WithProjectId(projectId)
 
-		parameterCommand := commandDataToDomain(newCommandData.Data())
+		parameterCommand := newCommandBuilder.Build()
 
 		mockCommandRepository.On("GetAll", projectId).Return(make([]commanddomain.Command, 0), errors.New("failed to get commands"))
 
@@ -108,30 +106,28 @@ func TestDefaultAddCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to create commands", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
 		sut := usecases.NewAddCommand(mockUserConfigRepository, mockCommandRepository)
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		existingCommandData := testutils.
-			NewCommand().
+		existingCommand := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithPosition(0).
-			Data()
+			Build()
 
-		newCommandData := testutils.
-			NewCommand().
+		newCommandBuilder := test.NewCommandBuilder().
 			WithProjectId(projectId)
 
-		parameterCommand := commandDataToDomain(newCommandData.Data())
+		parameterCommand := newCommandBuilder.Build()
 
 		mockCommandRepository.On("GetAll", projectId).Return([]commanddomain.Command{
-			commandDataToDomain(existingCommandData),
+			existingCommand,
 		}, nil)
-		expectedCommandCall := commandDataToDomain(newCommandData.WithPosition(1).Data())
+		expectedCommandCall := newCommandBuilder.WithPosition(1).Build()
 		mockCommandRepository.On("Create", &expectedCommandCall).Return(errors.New("failed to create command"))
 
 		// Act

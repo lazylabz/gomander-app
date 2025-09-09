@@ -9,15 +9,16 @@ import (
 
 	"gomander/internal/commandgroup/application/usecases"
 	"gomander/internal/commandgroup/domain"
+	"gomander/internal/commandgroup/domain/test"
 	configdomain "gomander/internal/config/domain"
-	"gomander/internal/testutils"
+	test2 "gomander/internal/config/domain/test"
 )
 
 func TestDefaultReorderCommandGroups_Execute(t *testing.T) {
 	t.Run("Should reorder command groups based on the provided IDs", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandGroupRepository := new(test.MockCommandGroupRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
 
@@ -25,25 +26,25 @@ func TestDefaultReorderCommandGroups_Execute(t *testing.T) {
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		commandGroupData1 := testutils.
-			NewCommandGroup().
+		commandGroup1Builder := test.NewCommandGroupBuilder().
 			WithProjectId(projectId)
 
-		commandGroupData2 := testutils.
-			NewCommandGroup().
+		commandGroup2Builder := test.NewCommandGroupBuilder().
 			WithProjectId(projectId)
 
+		prevCommand1 := commandGroup1Builder.Build()
+		prevCommand2 := commandGroup2Builder.Build()
 		commandGroups := []domain.CommandGroup{
-			commandGroupDataToDomain(commandGroupData1.Data()),
-			commandGroupDataToDomain(commandGroupData2.Data()),
+			prevCommand1,
+			prevCommand2,
 		}
 
-		newOrder := []string{commandGroupData2.Data().Id, commandGroupData1.Data().Id}
+		newOrder := []string{commandGroup2Builder.Build().Id, commandGroup1Builder.Build().Id}
 
 		mockCommandGroupRepository.On("GetAll", projectId).Return(commandGroups, nil)
 
-		expectedCommandGroup2Call := commandGroupDataToDomain(commandGroupData2.WithPosition(0).Data())
-		expectedCommandGroup1Call := commandGroupDataToDomain(commandGroupData1.WithPosition(1).Data())
+		expectedCommandGroup2Call := commandGroup2Builder.WithPosition(0).Build()
+		expectedCommandGroup1Call := commandGroup1Builder.WithPosition(1).Build()
 
 		mockCommandGroupRepository.On("Update", &expectedCommandGroup2Call).Return(nil).Once()
 		mockCommandGroupRepository.On("Update", &expectedCommandGroup1Call).Return(nil).Once()
@@ -62,8 +63,8 @@ func TestDefaultReorderCommandGroups_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to retrieve user config", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandGroupRepository := new(test.MockCommandGroupRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 		sut := usecases.NewReorderCommandGroups(mockUserConfigRepository, mockCommandGroupRepository)
 		expectedError := errors.New("failed to get user config")
 		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedError)
@@ -80,8 +81,8 @@ func TestDefaultReorderCommandGroups_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to retrieve existing command groups", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandGroupRepository := new(test.MockCommandGroupRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
 
@@ -104,8 +105,8 @@ func TestDefaultReorderCommandGroups_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to update a command group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandGroupRepository := new(test.MockCommandGroupRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
 
@@ -113,19 +114,19 @@ func TestDefaultReorderCommandGroups_Execute(t *testing.T) {
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		commandGroupData1 := testutils.
-			NewCommandGroup().
+		commandGroup1Builder := test.NewCommandGroupBuilder().
 			WithProjectId(projectId)
 
+		prevCommandGroup := commandGroup1Builder.Build()
 		commandGroups := []domain.CommandGroup{
-			commandGroupDataToDomain(commandGroupData1.Data()),
+			prevCommandGroup,
 		}
 
-		newOrder := []string{commandGroupData1.Data().Id}
+		newOrder := []string{commandGroup1Builder.Build().Id}
 
 		mockCommandGroupRepository.On("GetAll", projectId).Return(commandGroups, nil)
 
-		expectedCommandGroup1Call := commandGroupDataToDomain(commandGroupData1.WithPosition(0).Data())
+		expectedCommandGroup1Call := commandGroup1Builder.WithPosition(0).Build()
 
 		mockCommandGroupRepository.On("Update", &expectedCommandGroup1Call).Return(errors.New("failed to update command group")).Once()
 

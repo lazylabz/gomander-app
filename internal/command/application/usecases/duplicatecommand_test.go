@@ -10,24 +10,25 @@ import (
 	"gomander/internal/command/application/usecases"
 	commanddomain "gomander/internal/command/domain"
 	commanddomainevent "gomander/internal/command/domain/event"
+	"gomander/internal/command/domain/test"
 	configdomain "gomander/internal/config/domain"
-	"gomander/internal/testutils"
+	test2 "gomander/internal/config/domain/test"
+	test3 "gomander/internal/eventbus/test"
 )
 
 func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 	t.Run("Should duplicate the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
-		mockEventBus := new(MockEventBus)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
+		mockEventBus := new(test3.MockEventBus)
 
 		projectId := "project1"
 		sut := usecases.NewDuplicateCommand(mockUserConfigRepository, mockCommandRepository, mockEventBus)
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		originalCmdData := testutils.NewCommand().WithProjectId(projectId).Data()
-		originalCmd := commandDataToDomain(originalCmdData)
+		originalCmd := test.NewCommandBuilder().WithProjectId(projectId).Build()
 
 		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
 		mockCommandRepository.On("GetAll", projectId).Return([]commanddomain.Command{originalCmd}, nil)
@@ -61,9 +62,9 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 
 	t.Run("Should duplicate the command with a target group", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
-		mockEventBus := new(MockEventBus)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
+		mockEventBus := new(test3.MockEventBus)
 
 		projectId := "project1"
 		targetGroupId := "group1"
@@ -72,8 +73,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		originalCmdData := testutils.NewCommand().WithProjectId(projectId).Data()
-		originalCmd := commandDataToDomain(originalCmdData)
+		originalCmd := test.NewCommandBuilder().WithProjectId(projectId).Build()
 
 		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
 		mockCommandRepository.On("GetAll", projectId).Return([]commanddomain.Command{originalCmd}, nil)
@@ -107,9 +107,9 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
-		mockEventBus := new(MockEventBus)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
+		mockEventBus := new(test3.MockEventBus)
 
 		sut := usecases.NewDuplicateCommand(mockUserConfigRepository, mockCommandRepository, mockEventBus)
 		commandId := "command1"
@@ -129,9 +129,9 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if the command does not exist", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
-		mockEventBus := new(MockEventBus)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
+		mockEventBus := new(test3.MockEventBus)
 
 		sut := usecases.NewDuplicateCommand(mockUserConfigRepository, mockCommandRepository, mockEventBus)
 
@@ -154,20 +154,20 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to get all commands", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
-		mockEventBus := new(MockEventBus)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
+		mockEventBus := new(test3.MockEventBus)
 
 		projectId := "project1"
 		sut := usecases.NewDuplicateCommand(mockUserConfigRepository, mockCommandRepository, mockEventBus)
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		originalCmd := commandDataToDomain(testutils.NewCommand().Data())
+		originalCmd := test.NewCommandBuilder().Build()
 		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
 
 		expectedErr := errors.New("failed to get commands")
-		mockCommandRepository.On("GetAll", projectId).Return(nil, expectedErr)
+		mockCommandRepository.On("GetAll", projectId).Return(make([]commanddomain.Command, 0), expectedErr)
 
 		// Act
 		err := sut.Execute(originalCmd.Id, "")
@@ -182,16 +182,16 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to create the duplicated command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
-		mockEventBus := new(MockEventBus)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
+		mockEventBus := new(test3.MockEventBus)
 
 		projectId := "project1"
 		sut := usecases.NewDuplicateCommand(mockUserConfigRepository, mockCommandRepository, mockEventBus)
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		originalCmd := commandDataToDomain(testutils.NewCommand().Data())
+		originalCmd := test.NewCommandBuilder().Build()
 		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
 		mockCommandRepository.On("GetAll", projectId).Return([]commanddomain.Command{originalCmd}, nil)
 
@@ -211,17 +211,16 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if side effects fail", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
-		mockEventBus := new(MockEventBus)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
+		mockEventBus := new(test3.MockEventBus)
 
 		projectId := "project1"
 		sut := usecases.NewDuplicateCommand(mockUserConfigRepository, mockCommandRepository, mockEventBus)
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		originalCmdData := testutils.NewCommand().WithProjectId(projectId).Data()
-		originalCmd := commandDataToDomain(originalCmdData)
+		originalCmd := test.NewCommandBuilder().WithProjectId(projectId).Build()
 
 		mockCommandRepository.On("Get", originalCmd.Id).Return(&originalCmd, nil)
 		mockCommandRepository.On("GetAll", projectId).Return([]commanddomain.Command{originalCmd}, nil)

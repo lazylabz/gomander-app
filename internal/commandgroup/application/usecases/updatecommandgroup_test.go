@@ -8,24 +8,21 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/commandgroup/application/usecases"
-	"gomander/internal/testutils"
+	"gomander/internal/commandgroup/domain/test"
 )
 
 func TestDefaultUpdateCommandGroup_Execute(t *testing.T) {
 	t.Run("Should update a command group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test.MockCommandGroupRepository)
 
 		projectId := "project1"
 
 		sut := usecases.NewUpdateCommandGroup(mockCommandGroupRepository)
 
-		commandGroupData := testutils.
-			NewCommandGroup().
+		paramCommandGroup := test.NewCommandGroupBuilder().
 			WithProjectId(projectId).
-			Data()
-
-		paramCommandGroup := commandGroupDataToDomain(commandGroupData)
+			Build()
 
 		mockCommandGroupRepository.On("Update", &paramCommandGroup).Return(nil)
 
@@ -42,18 +39,15 @@ func TestDefaultUpdateCommandGroup_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to update the command group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test.MockCommandGroupRepository)
 
 		projectId := "project1"
 
 		sut := usecases.NewUpdateCommandGroup(mockCommandGroupRepository)
 
-		commandGroupData := testutils.
-			NewCommandGroup().
+		paramCommandGroup := test.NewCommandGroupBuilder().
 			WithProjectId(projectId).
-			Data()
-
-		paramCommandGroup := commandGroupDataToDomain(commandGroupData)
+			Build()
 
 		mockCommandGroupRepository.On("Update", &paramCommandGroup).Return(errors.New("failed to update command group"))
 

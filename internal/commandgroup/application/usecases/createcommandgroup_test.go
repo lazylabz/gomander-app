@@ -7,17 +7,19 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"gomander/internal/command/domain/test"
 	"gomander/internal/commandgroup/application/usecases"
 	"gomander/internal/commandgroup/domain"
+	test2 "gomander/internal/commandgroup/domain/test"
 	configdomain "gomander/internal/config/domain"
-	"gomander/internal/testutils"
+	test3 "gomander/internal/config/domain/test"
 )
 
 func TestDefaultCreateCommandGroup_Execute(t *testing.T) {
 	t.Run("Should create a command group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 
 		projectId := "project1"
 
@@ -25,24 +27,21 @@ func TestDefaultCreateCommandGroup_Execute(t *testing.T) {
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		otherCommandGroupData := testutils.
-			NewCommandGroup().
+		otherCommandGroup := test2.NewCommandGroupBuilder().
 			WithProjectId(projectId).
-			Data()
+			Build()
 
-		commandGroupData := testutils.
-			NewCommandGroup().
+		commandGroupBuilder := test2.NewCommandGroupBuilder().
 			WithProjectId(projectId).
 			WithPosition(0).
-			WithCommands(testutils.
-				NewCommand().
-				WithProjectId(projectId).
-				Data(),
+			WithCommands(
+				test.NewCommandBuilder().
+					WithProjectId(projectId).
+					Build(),
 			)
 
-		otherCommandGroup := commandGroupDataToDomain(otherCommandGroupData)
-		paramCommandGroup := commandGroupDataToDomain(commandGroupData.Data())
-		expectedCommandGroupCall := commandGroupDataToDomain(commandGroupData.WithPosition(1).Data())
+		paramCommandGroup := commandGroupBuilder.Build()
+		expectedCommandGroupCall := commandGroupBuilder.WithPosition(1).Build()
 
 		mockCommandGroupRepository.On("GetAll", projectId).Return([]domain.CommandGroup{otherCommandGroup}, nil)
 		mockCommandGroupRepository.On("Create", &expectedCommandGroupCall).Return(nil)
@@ -61,20 +60,17 @@ func TestDefaultCreateCommandGroup_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to retrieve user config", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 
 		sut := usecases.NewCreateCommandGroup(mockUserConfigRepository, mockCommandGroupRepository)
 
 		expectedError := errors.New("failed to get user config")
 		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedError)
 
-		commandGroupData := testutils.
-			NewCommandGroup().
+		paramCommandGroup := test2.NewCommandGroupBuilder().
 			WithProjectId("project1").
-			Data()
-
-		paramCommandGroup := commandGroupDataToDomain(commandGroupData)
+			Build()
 
 		// Act
 		err := sut.Execute(&paramCommandGroup)
@@ -90,8 +86,8 @@ func TestDefaultCreateCommandGroup_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to retrieve existing command groups", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 
 		projectId := "project1"
 
@@ -99,12 +95,9 @@ func TestDefaultCreateCommandGroup_Execute(t *testing.T) {
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		commandGroupData := testutils.
-			NewCommandGroup().
+		paramCommandGroup := test2.NewCommandGroupBuilder().
 			WithProjectId(projectId).
-			Data()
-
-		paramCommandGroup := commandGroupDataToDomain(commandGroupData)
+			Build()
 
 		mockCommandGroupRepository.On("GetAll", projectId).Return(make([]domain.CommandGroup, 0), errors.New("failed to get command groups"))
 
@@ -122,8 +115,8 @@ func TestDefaultCreateCommandGroup_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to save the command group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 
 		projectId := "project1"
 
@@ -131,12 +124,9 @@ func TestDefaultCreateCommandGroup_Execute(t *testing.T) {
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		commandGroupData := testutils.
-			NewCommandGroup().
+		paramCommandGroup := test2.NewCommandGroupBuilder().
 			WithProjectId(projectId).
-			Data()
-
-		paramCommandGroup := commandGroupDataToDomain(commandGroupData)
+			Build()
 
 		mockCommandGroupRepository.On("GetAll", projectId).Return(make([]domain.CommandGroup, 0), nil)
 		mockCommandGroupRepository.On("Create", &paramCommandGroup).Return(errors.New("failed to create command group"))

@@ -8,19 +8,19 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/command/application/usecases"
-	"gomander/internal/testutils"
+	"gomander/internal/command/domain/test"
+	test2 "gomander/internal/runner/test"
 )
 
 func TestDefaultStopCommand_Execute(t *testing.T) {
 	t.Run("Should stop the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockRunner := new(MockRunner)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockRunner := new(test2.MockRunner)
 
 		sut := usecases.NewStopCommand(mockCommandRepository, mockRunner)
 
-		cmdData := testutils.NewCommand().WithProjectId("project1").Data()
-		cmd := commandDataToDomain(cmdData)
+		cmd := test.NewCommandBuilder().WithProjectId("project1").Build()
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
 
@@ -39,8 +39,8 @@ func TestDefaultStopCommand_Execute(t *testing.T) {
 
 	t.Run("Should return error if the command does not exist", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockRunner := new(MockRunner)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockRunner := new(test2.MockRunner)
 
 		sut := usecases.NewStopCommand(mockCommandRepository, mockRunner)
 
@@ -60,13 +60,12 @@ func TestDefaultStopCommand_Execute(t *testing.T) {
 
 	t.Run("Should return error if fails to stop the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockRunner := new(MockRunner)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockRunner := new(test2.MockRunner)
 
 		sut := usecases.NewStopCommand(mockCommandRepository, mockRunner)
 
-		cmdData := testutils.NewCommand().WithProjectId("project1").Data()
-		cmd := commandDataToDomain(cmdData)
+		cmd := test.NewCommandBuilder().WithProjectId("project1").Build()
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
 

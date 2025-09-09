@@ -8,32 +8,31 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	commanddomain "gomander/internal/command/domain"
+	"gomander/internal/command/domain/test"
 	"gomander/internal/commandgroup/application/usecases"
-	"gomander/internal/testutils"
+	test2 "gomander/internal/commandgroup/domain/test"
 )
 
 func TestDefaultRemoveCommandFromCommandGroup_Execute(t *testing.T) {
 	t.Run("Should remove command from group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		projectId := "project1"
 		cmdId := "cmd-1"
 
 		sut := usecases.NewRemoveCommandFromCommandGroup(mockCommandGroupRepository)
 
-		commandGroupData := testutils.
-			NewCommandGroup().
+		commandGroupData := test2.NewCommandGroupBuilder().
 			WithProjectId(projectId)
 
-		commandToBeDeletedData := testutils.NewCommand().WithId(cmdId).Data()
-		anotherCommandData := testutils.NewCommand().WithId("cmd-2").Data()
-		existingCommandGroupData := commandGroupData.WithCommands(commandToBeDeletedData, anotherCommandData).Data()
-		existingCommandGroup := commandGroupDataToDomain(existingCommandGroupData)
+		commandToBeDeletedData := test.NewCommandBuilder().WithId(cmdId).Build()
+		anotherCommand := test.NewCommandBuilder().WithId("cmd-2").Build()
+		existingCommandGroup := commandGroupData.WithCommands(commandToBeDeletedData, anotherCommand).Build()
 
 		expectedUpdatedGroup := existingCommandGroup
 		expectedUpdatedGroup.Commands = []commanddomain.Command{
-			commandDataToDomain(anotherCommandData),
+			anotherCommand,
 		}
 
 		mockCommandGroupRepository.On("Get", existingCommandGroup.Id).Return(&existingCommandGroup, nil)
@@ -50,7 +49,7 @@ func TestDefaultRemoveCommandFromCommandGroup_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to get command group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		sut := usecases.NewRemoveCommandFromCommandGroup(mockCommandGroupRepository)
 
@@ -68,20 +67,18 @@ func TestDefaultRemoveCommandFromCommandGroup_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to update command group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		projectId := "project1"
 		cmdId := "cmd-1"
 
 		sut := usecases.NewRemoveCommandFromCommandGroup(mockCommandGroupRepository)
 
-		commandGroupData := testutils.
-			NewCommandGroup().
+		commandGroupData := test2.NewCommandGroupBuilder().
 			WithProjectId(projectId)
-		commandToBeDeletedData := testutils.NewCommand().WithId(cmdId).Data()
-		anotherCommandData := testutils.NewCommand().WithId("cmd-2").Data()
-		existingCommandGroupData := commandGroupData.WithCommands(commandToBeDeletedData, anotherCommandData).Data()
-		existingCommandGroup := commandGroupDataToDomain(existingCommandGroupData)
+		commandToBeDeletedData := test.NewCommandBuilder().WithId(cmdId).Build()
+		anotherCommandData := test.NewCommandBuilder().WithId("cmd-2").Build()
+		existingCommandGroup := commandGroupData.WithCommands(commandToBeDeletedData, anotherCommandData).Build()
 
 		expectedError := errors.New("failed to update command group")
 		mockCommandGroupRepository.On("Get", existingCommandGroup.Id).Return(&existingCommandGroup, nil)
@@ -98,20 +95,18 @@ func TestDefaultRemoveCommandFromCommandGroup_Execute(t *testing.T) {
 
 	t.Run("Should return an error when trying to remove the last command from the group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		projectId := "project1"
 		cmdId := "cmd-1"
 
 		sut := usecases.NewRemoveCommandFromCommandGroup(mockCommandGroupRepository)
 
-		commandGroupData := testutils.
-			NewCommandGroup().
+		commandGroupData := test2.NewCommandGroupBuilder().
 			WithProjectId(projectId)
 
-		commandToBeDeletedData := testutils.NewCommand().WithId(cmdId).Data()
-		existingCommandGroupData := commandGroupData.WithCommands(commandToBeDeletedData).Data()
-		existingCommandGroup := commandGroupDataToDomain(existingCommandGroupData)
+		commandToBeDeletedData := test.NewCommandBuilder().WithId(cmdId).Build()
+		existingCommandGroup := commandGroupData.WithCommands(commandToBeDeletedData).Build()
 
 		mockCommandGroupRepository.On("Get", existingCommandGroup.Id).Return(&existingCommandGroup, nil)
 

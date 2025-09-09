@@ -9,36 +9,37 @@ import (
 
 	"gomander/internal/command/application/usecases"
 	commanddomain "gomander/internal/command/domain"
+	"gomander/internal/command/domain/test"
 	configdomain "gomander/internal/config/domain"
-	"gomander/internal/testutils"
+	test2 "gomander/internal/config/domain/test"
 )
 
 func TestDefaultReorderCommands_Execute(t *testing.T) {
 	t.Run("Should reorder commands", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
 		sut := usecases.NewReorderCommands(mockUserConfigRepository, mockCommandRepository)
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		cmd1 := testutils.NewCommand().WithProjectId(projectId).WithPosition(0)
-		cmd2 := testutils.NewCommand().WithProjectId(projectId).WithPosition(1)
-		cmd3 := testutils.NewCommand().WithProjectId(projectId).WithPosition(2)
+		cmd1 := test.NewCommandBuilder().WithProjectId(projectId).WithPosition(0)
+		cmd2 := test.NewCommandBuilder().WithProjectId(projectId).WithPosition(1)
+		cmd3 := test.NewCommandBuilder().WithProjectId(projectId).WithPosition(2)
 
-		orderedIds := []string{cmd3.Data().Id, cmd1.Data().Id, cmd2.Data().Id}
+		orderedIds := []string{cmd3.Build().Id, cmd1.Build().Id, cmd2.Build().Id}
 
-		cm1WithUpdatedPosition := commandDataToDomain(cmd1.WithPosition(1).Data())
-		cm2WithUpdatedPosition := commandDataToDomain(cmd2.WithPosition(2).Data())
-		cm3WithUpdatedPosition := commandDataToDomain(cmd3.WithPosition(0).Data())
+		cm1WithUpdatedPosition := cmd1.WithPosition(1).Build()
+		cm2WithUpdatedPosition := cmd2.WithPosition(2).Build()
+		cm3WithUpdatedPosition := cmd3.WithPosition(0).Build()
 
 		mockCommandRepository.On("GetAll", projectId).Return(
 			[]commanddomain.Command{
-				commandDataToDomain(cmd1.Data()),
-				commandDataToDomain(cmd2.Data()),
-				commandDataToDomain(cmd3.Data()),
+				cmd1.Build(),
+				cmd2.Build(),
+				cmd3.Build(),
 			}, nil,
 		)
 
@@ -59,8 +60,8 @@ func TestDefaultReorderCommands_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		sut := usecases.NewReorderCommands(mockUserConfigRepository, mockCommandRepository)
 		expectedErr := errors.New("failed to get user config")
@@ -79,8 +80,8 @@ func TestDefaultReorderCommands_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to retrieve commands", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
 		sut := usecases.NewReorderCommands(mockUserConfigRepository, mockCommandRepository)
@@ -104,29 +105,29 @@ func TestDefaultReorderCommands_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fails to update commands", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
 		sut := usecases.NewReorderCommands(mockUserConfigRepository, mockCommandRepository)
 
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		cmd1 := testutils.NewCommand().WithProjectId(projectId).WithPosition(0)
-		cmd2 := testutils.NewCommand().WithProjectId(projectId).WithPosition(1)
-		cmd3 := testutils.NewCommand().WithProjectId(projectId).WithPosition(2)
+		cmd1 := test.NewCommandBuilder().WithProjectId(projectId).WithPosition(0)
+		cmd2 := test.NewCommandBuilder().WithProjectId(projectId).WithPosition(1)
+		cmd3 := test.NewCommandBuilder().WithProjectId(projectId).WithPosition(2)
 
-		orderedIds := []string{cmd3.Data().Id, cmd1.Data().Id, cmd2.Data().Id}
+		orderedIds := []string{cmd3.Build().Id, cmd1.Build().Id, cmd2.Build().Id}
 
-		cm1WithUpdatedPosition := commandDataToDomain(cmd1.WithPosition(1).Data())
-		cm2WithUpdatedPosition := commandDataToDomain(cmd2.WithPosition(2).Data())
-		cm3WithUpdatedPosition := commandDataToDomain(cmd3.WithPosition(0).Data())
+		cm1WithUpdatedPosition := cmd1.WithPosition(1).Build()
+		cm2WithUpdatedPosition := cmd2.WithPosition(2).Build()
+		cm3WithUpdatedPosition := cmd3.WithPosition(0).Build()
 
 		mockCommandRepository.On("GetAll", projectId).Return(
 			[]commanddomain.Command{
-				commandDataToDomain(cmd1.Data()),
-				commandDataToDomain(cmd2.Data()),
-				commandDataToDomain(cmd3.Data()),
+				cmd1.Build(),
+				cmd2.Build(),
+				cmd3.Build(),
 			}, nil,
 		)
 

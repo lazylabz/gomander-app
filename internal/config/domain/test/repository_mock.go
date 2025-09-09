@@ -1,4 +1,4 @@
-package usecases_test
+package test
 
 import (
 	"github.com/stretchr/testify/mock"
@@ -6,11 +6,11 @@ import (
 	"gomander/internal/config/domain"
 )
 
-type MockUserConfigRepository struct {
+type MockConfigRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserConfigRepository) GetOrCreate() (*domain.Config, error) {
+func (m *MockConfigRepository) GetOrCreate() (*domain.Config, error) {
 	args := m.Called()
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -18,7 +18,7 @@ func (m *MockUserConfigRepository) GetOrCreate() (*domain.Config, error) {
 	return args.Get(0).(*domain.Config), args.Error(1)
 }
 
-func (m *MockUserConfigRepository) Update(config *domain.Config) error {
+func (m *MockConfigRepository) Update(config *domain.Config) error {
 	args := m.Called(config)
 	return args.Error(0)
 }

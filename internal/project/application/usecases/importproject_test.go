@@ -7,12 +7,14 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/command/domain"
+	"gomander/internal/command/domain/test"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
+	test2 "gomander/internal/commandgroup/domain/test"
+	test4 "gomander/internal/facade/test"
 	"gomander/internal/helpers/array"
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
-	"gomander/internal/testutils"
-	"gomander/internal/testutils/mocks"
+	test3 "gomander/internal/project/domain/test"
 )
 
 func TestDefaultImportProject_Execute(t *testing.T) {
@@ -20,43 +22,33 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 		// Arrange
 		projectId := "test-project-id"
 
-		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(MockFsFacade)
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockFsFacade := new(test4.MockFsFacade)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 
-		cmd1Data := testutils.
-			NewCommand().
+		cmd1 := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithName("Name 1").
 			WithCommand("echo 1").
 			WithWorkingDirectory("/1").
-			Data()
-		cmd2Data := testutils.
-			NewCommand().
+			Build()
+		cmd2 := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithName("Name 2").
 			WithCommand("echo 2").
 			WithWorkingDirectory("/2").
-			Data()
-		cmd3Data := testutils.
-			NewCommand().
+			Build()
+		cmd3 := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithName("Name 3").
 			WithCommand("echo 3").
-			WithWorkingDirectory("/3").Data()
+			WithWorkingDirectory("/3").Build()
 
-		cmd1 := commandDataToDomain(cmd1Data)
-		cmd2 := commandDataToDomain(cmd2Data)
-		cmd3 := commandDataToDomain(cmd3Data)
-
-		cmdGroup1Data := testutils.NewCommandGroup().WithProjectId(projectId).WithCommands(cmd1Data, cmd2Data, cmd3Data).Data()
-		cmdGroup2Data := testutils.NewCommandGroup().WithProjectId(projectId).WithCommands(cmd3Data, cmd1Data).Data()
-
-		cmdGroup1 := commandGroupDataToDomain(cmdGroup1Data)
-		cmdGroup2 := commandGroupDataToDomain(cmdGroup2Data)
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithProjectId(projectId).WithCommands(cmd1, cmd2, cmd3).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithProjectId(projectId).WithCommands(cmd3, cmd1).Build()
 
 		newName := "Imported Project"
 		newWorkingDirectory := "/imported/project/dir"
@@ -142,12 +134,12 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem saving the project", func(t *testing.T) {
 		// Arrange
 
-		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(MockFsFacade)
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockFsFacade := new(test4.MockFsFacade)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 
 		projectJSON := projectdomain.ProjectExportJSONv1{
 			Version: 1,
@@ -183,12 +175,12 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem saving the commands", func(t *testing.T) {
 		// Arrange
 
-		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(MockFsFacade)
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockFsFacade := new(test4.MockFsFacade)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 
 		projectJSON := projectdomain.ProjectExportJSONv1{
 			Version: 1,
@@ -225,12 +217,12 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem saving the command groups", func(t *testing.T) {
 		// Arrange
 
-		mockProjectRepository := new(MockProjectRepository)
-		mockCommandRepository := new(MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(MockFsFacade)
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockFsFacade := new(test4.MockFsFacade)
+		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 
 		projectJSON := projectdomain.ProjectExportJSONv1{
 			Version: 1,

@@ -8,17 +8,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"gomander/internal/facade/test"
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
-	"gomander/internal/testutils/mocks"
 )
 
 func TestDefaultGetProjectToImport_Execute(t *testing.T) {
 	t.Run("Should return project import", func(t *testing.T) {
 		// Arrange
 
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
+		mockRuntimeFacade := new(test.MockRuntimeFacade)
+		mockFsFacade := new(test.MockFsFacade)
 
 		sut := usecases.NewGetProjectToImport(context.Background(), mockRuntimeFacade, mockFsFacade)
 
@@ -47,8 +47,8 @@ func TestDefaultGetProjectToImport_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem opening the file dialog", func(t *testing.T) {
 		// Arrange
 
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
+		mockRuntimeFacade := new(test.MockRuntimeFacade)
+		mockFsFacade := new(test.MockFsFacade)
 
 		sut := usecases.NewGetProjectToImport(context.Background(), mockRuntimeFacade, mockFsFacade)
 
@@ -66,8 +66,8 @@ func TestDefaultGetProjectToImport_Execute(t *testing.T) {
 	t.Run("Should return nil if the user cancels the file dialog", func(t *testing.T) {
 		// Arrange
 
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
+		mockRuntimeFacade := new(test.MockRuntimeFacade)
+		mockFsFacade := new(test.MockFsFacade)
 
 		sut := usecases.NewGetProjectToImport(context.Background(), mockRuntimeFacade, mockFsFacade)
 
@@ -85,8 +85,8 @@ func TestDefaultGetProjectToImport_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem reading the file", func(t *testing.T) {
 		// Arrange
 
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
+		mockRuntimeFacade := new(test.MockRuntimeFacade)
+		mockFsFacade := new(test.MockFsFacade)
 
 		sut := usecases.NewGetProjectToImport(context.Background(), mockRuntimeFacade, mockFsFacade)
 

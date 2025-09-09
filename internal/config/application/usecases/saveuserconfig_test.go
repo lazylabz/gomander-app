@@ -9,13 +9,14 @@ import (
 
 	"gomander/internal/config/application/usecases"
 	"gomander/internal/config/domain"
+	"gomander/internal/config/domain/test"
 )
 
 func TestDefaultSaveUserConfig_Execute(t *testing.T) {
 	t.Parallel()
 	t.Run("Should save user configuration successfully", func(t *testing.T) {
 		// Arrange
-		mockRepository := new(MockUserConfigRepository)
+		mockRepository := new(test.MockConfigRepository)
 
 		sut := usecases.NewSaveUserConfig(mockRepository)
 
@@ -43,7 +44,7 @@ func TestDefaultSaveUserConfig_Execute(t *testing.T) {
 
 	t.Run("Should fail to save user configuration", func(t *testing.T) {
 		// Arrange
-		mockRepository := new(MockUserConfigRepository)
+		mockRepository := new(test.MockConfigRepository)
 
 		sut := usecases.NewSaveUserConfig(mockRepository)
 

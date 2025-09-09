@@ -8,6 +8,7 @@ import (
 
 	commanddomainevent "gomander/internal/command/domain/event"
 	"gomander/internal/commandgroup/application/handlers"
+	"gomander/internal/commandgroup/domain/test"
 )
 
 var cmdId = "cmd-123"
@@ -15,7 +16,7 @@ var cmdId = "cmd-123"
 func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
 	t.Run("Should remove command from command groups and delete empty groups", func(t *testing.T) {
 		// Arrange
-		mockRepo := new(MockCommandGroupRepository)
+		mockRepo := new(test.MockCommandGroupRepository)
 		handler := handlers.NewCleanCommandGroupsOnCommandDeleted(mockRepo)
 		event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
 
@@ -32,7 +33,7 @@ func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
 
 	t.Run("Should return error if failing to remove command from command groups", func(t *testing.T) {
 		// Arrange
-		mockRepo := new(MockCommandGroupRepository)
+		mockRepo := new(test.MockCommandGroupRepository)
 		handler := handlers.NewCleanCommandGroupsOnCommandDeleted(mockRepo)
 		event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
 
@@ -49,7 +50,7 @@ func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
 
 	t.Run("Should return error if failing to remove empty groups", func(t *testing.T) {
 		// Arrange
-		mockRepo := new(MockCommandGroupRepository)
+		mockRepo := new(test.MockCommandGroupRepository)
 		handler := handlers.NewCleanCommandGroupsOnCommandDeleted(mockRepo)
 		event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
 
@@ -67,7 +68,7 @@ func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
 
 	t.Run("Should do nothing if command is the wrong type", func(t *testing.T) {
 		// Arrange
-		mockRepo := new(MockCommandGroupRepository)
+		mockRepo := new(test.MockCommandGroupRepository)
 		handler := handlers.NewCleanCommandGroupsOnCommandDeleted(mockRepo)
 
 		// Act

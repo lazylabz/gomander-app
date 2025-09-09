@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"gomander/internal/commandgroup/application/handlers"
+	"gomander/internal/commandgroup/domain/test"
 	projectdomainevent "gomander/internal/project/domain/event"
 )
 
@@ -15,7 +16,7 @@ var pjId = "pj-123"
 func TestDefaultCleanCommandGroupsOnProjectDeleted(t *testing.T) {
 	t.Run("Should remove command from command groups and delete empty groups", func(t *testing.T) {
 		// Arrange
-		mockRepo := new(MockCommandGroupRepository)
+		mockRepo := new(test.MockCommandGroupRepository)
 		handler := handlers.NewCleanCommandGroupsOnProjectDeleted(mockRepo)
 		event := projectdomainevent.ProjectDeletedEvent{ProjectId: pjId}
 
@@ -31,7 +32,7 @@ func TestDefaultCleanCommandGroupsOnProjectDeleted(t *testing.T) {
 
 	t.Run("Should return error if failing to remove command from command groups", func(t *testing.T) {
 		// Arrange
-		mockRepo := new(MockCommandGroupRepository)
+		mockRepo := new(test.MockCommandGroupRepository)
 		handler := handlers.NewCleanCommandGroupsOnProjectDeleted(mockRepo)
 		event := projectdomainevent.ProjectDeletedEvent{ProjectId: pjId}
 
@@ -48,7 +49,7 @@ func TestDefaultCleanCommandGroupsOnProjectDeleted(t *testing.T) {
 
 	t.Run("Should do nothing if command is the wrong type", func(t *testing.T) {
 		// Arrange
-		mockRepo := new(MockCommandGroupRepository)
+		mockRepo := new(test.MockCommandGroupRepository)
 		handler := handlers.NewCleanCommandGroupsOnProjectDeleted(mockRepo)
 
 		// Act

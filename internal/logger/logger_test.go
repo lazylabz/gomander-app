@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
+	"gomander/internal/facade/test"
 	"gomander/internal/logger"
-	"gomander/internal/testutils/mocks"
 )
 
 func TestDefaultLogger_Info(t *testing.T) {
@@ -15,7 +15,7 @@ func TestDefaultLogger_Info(t *testing.T) {
 		// Arrange
 		message := "test info message"
 		ctx := context.Background()
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockRuntimeFacade := new(test.MockRuntimeFacade)
 
 		l := logger.NewDefaultLogger(ctx, mockRuntimeFacade)
 
@@ -34,7 +34,7 @@ func TestDefaultLogger_Debug(t *testing.T) {
 		// Arrange
 		message := "test debug message"
 		ctx := context.Background()
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockRuntimeFacade := new(test.MockRuntimeFacade)
 
 		l := logger.NewDefaultLogger(ctx, mockRuntimeFacade)
 
@@ -53,7 +53,7 @@ func TestDefaultLogger_Error(t *testing.T) {
 		// Arrange
 		message := "test error message"
 		ctx := context.Background()
-		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
+		mockRuntimeFacade := new(test.MockRuntimeFacade)
 
 		l := logger.NewDefaultLogger(ctx, mockRuntimeFacade)
 

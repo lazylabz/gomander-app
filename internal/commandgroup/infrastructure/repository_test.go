@@ -2,7 +2,6 @@ package infrastructure_test
 
 import (
 	"context"
-	"slices"
 	"testing"
 
 	"github.com/glebarez/sqlite"
@@ -11,12 +10,11 @@ import (
 	"gorm.io/gorm"
 
 	commanddomain "gomander/internal/command/domain"
+	"gomander/internal/command/domain/test"
 	commandinfrastructure "gomander/internal/command/infrastructure"
 	"gomander/internal/commandgroup/domain"
+	test2 "gomander/internal/commandgroup/domain/test"
 	"gomander/internal/commandgroup/infrastructure"
-	"gomander/internal/helpers/array"
-	"gomander/internal/testutils"
-
 	_ "gomander/migrations" // Import migrations to ensure they are executed
 )
 
@@ -52,21 +50,60 @@ func TestGormCommandGroupRepository_GetAll(t *testing.T) {
 		// Arrange
 		projectId := "project1"
 
-		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
-		cmd2 := testutils.NewCommand().WithName("Command 2").WithProjectId(projectId).Data()
-		cmd3 := testutils.NewCommand().WithName("Command 3").WithProjectId(projectId).Data()
+		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
+		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
+		cmd3 := test.NewCommandBuilder().WithName("Command 3").WithProjectId(projectId).Build()
 
-		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3).Data()
-		cmdGroup2 := testutils.NewCommandGroup().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd1, cmd3, cmd2).Data()
+		cmd1Model := commandinfrastructure.ToCommandModel(&cmd1)
+		cmd2Model := commandinfrastructure.ToCommandModel(&cmd2)
+		cmd3Model := commandinfrastructure.ToCommandModel(&cmd3)
 
-		groupModel, commandToCommandGroupModels, commandModels := commandGroupDataToModel(cmdGroup1)
-		groupModel2, commandToCommandGroupModels2, _ := commandGroupDataToModel(cmdGroup2)
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd1, cmd3, cmd2).Build()
+
+		cmdGroup1Model := infrastructure.ToCommandGroupModel(&cmdGroup1)
+		cmdGroup2Model := infrastructure.ToCommandGroupModel(&cmdGroup2)
+
+		cmdToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{
+			// CommandGroup 1 associations
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd2.Id,
+				Position:       0,
+			},
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd1.Id,
+				Position:       1,
+			},
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd3.Id,
+				Position:       2,
+			},
+			// CommandGroup 2 associations
+			{
+				CommandGroupId: cmdGroup2.Id,
+				CommandId:      cmd1.Id,
+				Position:       0,
+			},
+			{
+				CommandGroupId: cmdGroup2.Id,
+				CommandId:      cmd3.Id,
+				Position:       1,
+			},
+			{
+				CommandGroupId: cmdGroup2.Id,
+				CommandId:      cmd2.Id,
+				Position:       2,
+			},
+		}
 
 		helper := newTestHelper(
 			t,
-			commandModels,
-			[]infrastructure.CommandGroupModel{groupModel, groupModel2},
-			slices.Concat(commandToCommandGroupModels, commandToCommandGroupModels2),
+			[]commandinfrastructure.CommandModel{cmd1Model, cmd2Model, cmd3Model},
+			[]infrastructure.CommandGroupModel{cmdGroup1Model, cmdGroup2Model},
+			cmdToCommandGroupModels,
 		)
 
 		// Act
@@ -74,8 +111,8 @@ func TestGormCommandGroupRepository_GetAll(t *testing.T) {
 
 		// Assert
 		expectedCommandGroups := []domain.CommandGroup{
-			commandGroupDataToDomain(cmdGroup1),
-			commandGroupDataToDomain(cmdGroup2),
+			cmdGroup1,
+			cmdGroup2,
 		}
 
 		assert.Nil(t, err)
@@ -90,21 +127,60 @@ func TestGormCommandGroupRepository_Get(t *testing.T) {
 		// Arrange
 		projectId := "project1"
 
-		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
-		cmd2 := testutils.NewCommand().WithName("Command 2").WithProjectId(projectId).Data()
-		cmd3 := testutils.NewCommand().WithName("Command 3").WithProjectId(projectId).Data()
+		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
+		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
+		cmd3 := test.NewCommandBuilder().WithName("Command 3").WithProjectId(projectId).Build()
 
-		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3).Data()
-		cmdGroup2 := testutils.NewCommandGroup().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd1, cmd3, cmd2).Data()
+		cmd1Model := commandinfrastructure.ToCommandModel(&cmd1)
+		cmd2Model := commandinfrastructure.ToCommandModel(&cmd2)
+		cmd3Model := commandinfrastructure.ToCommandModel(&cmd3)
 
-		groupModel, commandToCommandGroupModels, commandModels := commandGroupDataToModel(cmdGroup1)
-		groupModel2, commandToCommandGroupModels2, _ := commandGroupDataToModel(cmdGroup2)
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd1, cmd3, cmd2).Build()
+
+		cmdGroup1Model := infrastructure.ToCommandGroupModel(&cmdGroup1)
+		cmdGroup2Model := infrastructure.ToCommandGroupModel(&cmdGroup2)
+
+		commandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{
+			// CommandGroup 1 associations
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd2.Id,
+				Position:       0,
+			},
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd1.Id,
+				Position:       1,
+			},
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd3.Id,
+				Position:       2,
+			},
+			// CommandGroup 2 associations
+			{
+				CommandGroupId: cmdGroup2.Id,
+				CommandId:      cmd1.Id,
+				Position:       0,
+			},
+			{
+				CommandGroupId: cmdGroup2.Id,
+				CommandId:      cmd3.Id,
+				Position:       1,
+			},
+			{
+				CommandGroupId: cmdGroup2.Id,
+				CommandId:      cmd2.Id,
+				Position:       2,
+			},
+		}
 
 		helper := newTestHelper(
 			t,
-			commandModels,
-			[]infrastructure.CommandGroupModel{groupModel, groupModel2},
-			slices.Concat(commandToCommandGroupModels, commandToCommandGroupModels2),
+			[]commandinfrastructure.CommandModel{cmd1Model, cmd2Model, cmd3Model},
+			[]infrastructure.CommandGroupModel{cmdGroup1Model, cmdGroup2Model},
+			commandToCommandGroupModels,
 		)
 
 		// Act
@@ -113,9 +189,7 @@ func TestGormCommandGroupRepository_Get(t *testing.T) {
 		// Assert
 		assert.Nil(t, err)
 
-		expectedCommandGroup := commandGroupDataToDomain(cmdGroup1)
-
-		assert.Equal(t, &expectedCommandGroup, result)
+		assert.Equal(t, &cmdGroup1, result)
 	})
 	t.Run("Should return nil if command group does not exist", func(t *testing.T) {
 		// Arrange
@@ -135,33 +209,33 @@ func TestGormCommandGroupRepository_Create(t *testing.T) {
 		// Arrange
 		projectId := "project1"
 
-		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
-		cmd2 := testutils.NewCommand().WithName("Command 2").WithProjectId(projectId).Data()
-		cmd3 := testutils.NewCommand().WithName("Command 3").WithProjectId(projectId).Data()
+		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
+		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
+		cmd3 := test.NewCommandBuilder().WithName("Command 3").WithProjectId(projectId).Build()
 
-		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3).Data()
+		cmd1Model := commandinfrastructure.ToCommandModel(&cmd1)
+		cmd2Model := commandinfrastructure.ToCommandModel(&cmd2)
+		cmd3Model := commandinfrastructure.ToCommandModel(&cmd3)
 
-		_, _, commandModels := commandGroupDataToModel(cmdGroup1)
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3).Build()
 
 		helper := newTestHelper(
 			t,
-			commandModels,
+			[]commandinfrastructure.CommandModel{cmd1Model, cmd2Model, cmd3Model},
 			nil,
 			nil,
 		)
 
-		newGroup := commandGroupDataToDomain(cmdGroup1)
-
 		// Act
-		err := helper.repo.Create(&newGroup)
+		err := helper.repo.Create(&cmdGroup1)
 
 		// Assert
 		assert.Nil(t, err)
 
 		// Verify the group was created correctly
-		result, err := helper.repo.Get(newGroup.Id)
+		result, err := helper.repo.Get(cmdGroup1.Id)
 		assert.Nil(t, err)
-		assert.Equal(t, &newGroup, result)
+		assert.Equal(t, &cmdGroup1, result)
 	})
 }
 
@@ -169,13 +243,38 @@ func TestGormCommandGroupRepository_Update(t *testing.T) {
 	t.Run("Should update an existing command group and its associations", func(t *testing.T) {
 		projectId := "project1"
 
-		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
-		cmd2 := testutils.NewCommand().WithName("Command 2").WithProjectId(projectId).Data()
-		cmd3 := testutils.NewCommand().WithName("Command 3").WithProjectId(projectId).Data()
+		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
+		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
+		cmd3 := test.NewCommandBuilder().WithName("Command 3").WithProjectId(projectId).Build()
 
-		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3)
+		commandModels := []commandinfrastructure.CommandModel{
+			commandinfrastructure.ToCommandModel(&cmd1),
+			commandinfrastructure.ToCommandModel(&cmd2),
+			commandinfrastructure.ToCommandModel(&cmd3),
+		}
 
-		groupModel, commandToCommandGroupModels, commandModels := commandGroupDataToModel(cmdGroup1.Data())
+		cmdGroup1Builder := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3)
+		cmdGroup1 := cmdGroup1Builder.Build()
+
+		groupModel := infrastructure.ToCommandGroupModel(&cmdGroup1)
+
+		commandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd2.Id,
+				Position:       0,
+			},
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd1.Id,
+				Position:       1,
+			},
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd3.Id,
+				Position:       2,
+			},
+		}
 
 		helper := newTestHelper(
 			t,
@@ -184,16 +283,14 @@ func TestGormCommandGroupRepository_Update(t *testing.T) {
 			commandToCommandGroupModels,
 		)
 
-		updatedGroup := cmdGroup1.WithName("Updated Group 1").WithCommands(cmd1, cmd2, cmd3).Data()
+		updatedGroup := cmdGroup1Builder.WithName("Updated Group 1").WithCommands(cmd1, cmd2, cmd3).Build()
 
-		groupToUpdate := commandGroupDataToDomain(updatedGroup)
-
-		err := helper.repo.Update(&groupToUpdate)
+		err := helper.repo.Update(&updatedGroup)
 		assert.Nil(t, err)
 
-		result, err := helper.repo.Get(groupToUpdate.Id)
+		result, err := helper.repo.Get(updatedGroup.Id)
 		assert.Nil(t, err)
-		assert.Equal(t, &groupToUpdate, result)
+		assert.Equal(t, &updatedGroup, result)
 	})
 }
 
@@ -201,11 +298,23 @@ func TestGormCommandGroupRepository_Delete(t *testing.T) {
 	t.Run("Should delete an existing command group and its associations", func(t *testing.T) {
 		projectId := "project1"
 
-		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
+		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
 
-		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1).Data()
+		commandModels := []commandinfrastructure.CommandModel{
+			commandinfrastructure.ToCommandModel(&cmd1),
+		}
 
-		groupModel, commandToCommandGroupModels, commandModels := commandGroupDataToModel(cmdGroup1)
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1).Build()
+
+		groupModel := infrastructure.ToCommandGroupModel(&cmdGroup1)
+
+		commandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd1.Id,
+				Position:       0,
+			},
+		}
 
 		helper := newTestHelper(
 			t,
@@ -232,13 +341,13 @@ func TestGormCommandGroupRepository_Delete(t *testing.T) {
 	t.Run("Should delete an existing command groups and correctly update positions of other command groups", func(t *testing.T) {
 		projectId := "project1"
 
-		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).Data()
-		cmdGroup2 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(1).Data()
-		cmdGroup3 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(2).Data()
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(1).Build()
+		cmdGroup3 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(2).Build()
 
-		group1Model, _, _ := commandGroupDataToModel(cmdGroup1)
-		group2Model, _, _ := commandGroupDataToModel(cmdGroup2)
-		group3Model, _, _ := commandGroupDataToModel(cmdGroup3)
+		group1Model := infrastructure.ToCommandGroupModel(&cmdGroup1)
+		group2Model := infrastructure.ToCommandGroupModel(&cmdGroup2)
+		group3Model := infrastructure.ToCommandGroupModel(&cmdGroup3)
 
 		helper := newTestHelper(
 			t,
@@ -265,21 +374,57 @@ func TestGormCommandGroupRepository_Delete(t *testing.T) {
 func TestGormCommandGroupRepository_RemoveCommandFromCommandGroups(t *testing.T) {
 	t.Run("Should remove a command from all groups and update positions", func(t *testing.T) {
 		projectId := "project1"
-		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
-		cmd2 := testutils.NewCommand().WithName("Command 2").WithProjectId(projectId).Data()
-		cmd3 := testutils.NewCommand().WithName("Command 3").WithProjectId(projectId).Data()
+		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
+		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
+		cmd3 := test.NewCommandBuilder().WithName("Command 3").WithProjectId(projectId).Build()
 
-		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1, cmd2, cmd3).Data()
-		cmdGroup2 := testutils.NewCommandGroup().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd2, cmd1).Data()
+		commandModels := []commandinfrastructure.CommandModel{
+			commandinfrastructure.ToCommandModel(&cmd1),
+			commandinfrastructure.ToCommandModel(&cmd2),
+			commandinfrastructure.ToCommandModel(&cmd3),
+		}
 
-		groupModel1, commandToCommandGroupModels1, commandModels := commandGroupDataToModel(cmdGroup1)
-		groupModel2, commandToCommandGroupModels2, _ := commandGroupDataToModel(cmdGroup2)
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1, cmd2, cmd3).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd2, cmd1).Build()
+
+		groupModel1 := infrastructure.ToCommandGroupModel(&cmdGroup1)
+		groupModel2 := infrastructure.ToCommandGroupModel(&cmdGroup2)
+
+		commandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{
+			// CommandGroup 1 associations
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd1.Id,
+				Position:       0,
+			},
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd2.Id,
+				Position:       1,
+			},
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd3.Id,
+				Position:       2,
+			},
+			// CommandGroup 2 associations
+			{
+				CommandGroupId: cmdGroup2.Id,
+				CommandId:      cmd2.Id,
+				Position:       0,
+			},
+			{
+				CommandGroupId: cmdGroup2.Id,
+				CommandId:      cmd1.Id,
+				Position:       1,
+			},
+		}
 
 		helper := newTestHelper(
 			t,
 			commandModels,
 			[]infrastructure.CommandGroupModel{groupModel1, groupModel2},
-			slices.Concat(commandToCommandGroupModels1, commandToCommandGroupModels2),
+			commandToCommandGroupModels,
 		)
 
 		err := helper.repo.RemoveCommandFromCommandGroups(cmd1.Id)
@@ -288,8 +433,8 @@ func TestGormCommandGroupRepository_RemoveCommandFromCommandGroups(t *testing.T)
 		group1, _ := helper.repo.Get(cmdGroup1.Id)
 		group2, _ := helper.repo.Get(cmdGroup2.Id)
 
-		expectedGroup1Commands := []commanddomain.Command{commandDataToDomain(cmd2), commandDataToDomain(cmd3)}
-		expectedGroup2Commands := []commanddomain.Command{commandDataToDomain(cmd2)}
+		expectedGroup1Commands := []commanddomain.Command{cmd2, cmd3}
+		expectedGroup2Commands := []commanddomain.Command{cmd2}
 
 		assert.Equal(t, expectedGroup1Commands, group1.Commands)
 		assert.Equal(t, expectedGroup2Commands, group2.Commands)
@@ -299,14 +444,32 @@ func TestGormCommandGroupRepository_RemoveCommandFromCommandGroups(t *testing.T)
 func TestGormCommandGroupRepository_DeleteEmpty(t *testing.T) {
 	t.Run("Should delete only empty command groups", func(t *testing.T) {
 		projectId := "project1"
-		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
-		cmd2 := testutils.NewCommand().WithName("Command 2").WithProjectId(projectId).Data()
+		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
+		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
 
-		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1, cmd2).Data()
-		cmdGroup2 := testutils.NewCommandGroup().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands().Data()
+		commandModels := []commandinfrastructure.CommandModel{
+			commandinfrastructure.ToCommandModel(&cmd1),
+			commandinfrastructure.ToCommandModel(&cmd2),
+		}
 
-		groupModel1, commandToCommandGroupModels1, commandModels := commandGroupDataToModel(cmdGroup1)
-		groupModel2, _, _ := commandGroupDataToModel(cmdGroup2)
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1, cmd2).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands().Build()
+
+		groupModel1 := infrastructure.ToCommandGroupModel(&cmdGroup1)
+		groupModel2 := infrastructure.ToCommandGroupModel(&cmdGroup2)
+
+		commandToCommandGroupModels1 := []infrastructure.CommandToCommandGroupModel{
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd1.Id,
+				Position:       0,
+			},
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd2.Id,
+				Position:       1,
+			},
+		}
 
 		helper := newTestHelper(
 			t,
@@ -330,23 +493,55 @@ func TestGormCommandGroupRepository_DeleteAll(t *testing.T) {
 		projectId := "project1"
 		otherProjectId := "project2"
 
-		cmd1 := testutils.NewCommand().WithName("Command 1").WithProjectId(projectId).Data()
-		cmd2 := testutils.NewCommand().WithName("Command 2").WithProjectId(projectId).Data()
-		cmd3 := testutils.NewCommand().WithName("Command 3").WithProjectId(otherProjectId).Data()
+		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
+		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
+		cmd3 := test.NewCommandBuilder().WithName("Command 3").WithProjectId(otherProjectId).Build()
 
-		cmdGroup1 := testutils.NewCommandGroup().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1, cmd2).Data()
-		cmdGroup2 := testutils.NewCommandGroup().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd2).Data()
-		cmdGroupOther := testutils.NewCommandGroup().WithName("Other Group").WithProjectId(otherProjectId).WithPosition(0).WithCommands(cmd3).Data()
+		commandModels := []commandinfrastructure.CommandModel{
+			commandinfrastructure.ToCommandModel(&cmd1),
+			commandinfrastructure.ToCommandModel(&cmd2),
+			commandinfrastructure.ToCommandModel(&cmd3),
+		}
 
-		groupModel1, commandToCommandGroupModels1, commandModels := commandGroupDataToModel(cmdGroup1)
-		groupModel2, commandToCommandGroupModels2, _ := commandGroupDataToModel(cmdGroup2)
-		groupModelOther, commandToCommandGroupModelsOther, commandModelsOther := commandGroupDataToModel(cmdGroupOther)
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1, cmd2).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd2).Build()
+		cmdGroupOther := test2.NewCommandGroupBuilder().WithName("Other Group").WithProjectId(otherProjectId).WithPosition(0).WithCommands(cmd3).Build()
+
+		groupModel1 := infrastructure.ToCommandGroupModel(&cmdGroup1)
+		groupModel2 := infrastructure.ToCommandGroupModel(&cmdGroup2)
+		groupModelOther := infrastructure.ToCommandGroupModel(&cmdGroupOther)
+
+		commandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{
+			// CommandGroup 1 associations
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd1.Id,
+				Position:       0,
+			},
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd2.Id,
+				Position:       1,
+			},
+			// CommandGroup 2 associations
+			{
+				CommandGroupId: cmdGroup2.Id,
+				CommandId:      cmd2.Id,
+				Position:       0,
+			},
+			// Other CommandGroup associations
+			{
+				CommandGroupId: cmdGroupOther.Id,
+				CommandId:      cmd3.Id,
+				Position:       0,
+			},
+		}
 
 		helper := newTestHelper(
 			t,
-			append(commandModels, commandModelsOther...),
+			commandModels,
 			[]infrastructure.CommandGroupModel{groupModel1, groupModel2, groupModelOther},
-			slices.Concat(commandToCommandGroupModels1, commandToCommandGroupModels2, commandToCommandGroupModelsOther),
+			commandToCommandGroupModels,
 		)
 
 		err := helper.repo.DeleteAll(projectId)
@@ -430,57 +625,4 @@ func arrange(
 	)
 
 	return
-}
-
-func commandDataToModel(data testutils.CommandData) commandinfrastructure.CommandModel {
-	return commandinfrastructure.CommandModel{
-		Id:               data.Id,
-		ProjectId:        data.ProjectId,
-		Name:             data.Name,
-		Command:          data.Command,
-		WorkingDirectory: data.WorkingDirectory,
-		Position:         data.Position,
-	}
-}
-
-func commandDataToDomain(data testutils.CommandData) commanddomain.Command {
-	return commanddomain.Command{
-		Id:               data.Id,
-		ProjectId:        data.ProjectId,
-		Name:             data.Name,
-		Command:          data.Command,
-		WorkingDirectory: data.WorkingDirectory,
-		Position:         data.Position,
-	}
-}
-
-func commandGroupDataToModel(data testutils.CommandGroupData) (infrastructure.CommandGroupModel, []infrastructure.CommandToCommandGroupModel, []commandinfrastructure.CommandModel) {
-	groupModel := infrastructure.CommandGroupModel{
-		Id:        data.Id,
-		ProjectId: data.ProjectId,
-		Name:      data.Name,
-		Position:  data.Position,
-	}
-
-	commandRelations := make([]infrastructure.CommandToCommandGroupModel, len(data.Commands))
-	commandModels := make([]commandinfrastructure.CommandModel, len(data.Commands))
-	for i, cmd := range data.Commands {
-		commandModels[i] = commandDataToModel(cmd)
-		commandRelations[i] = infrastructure.CommandToCommandGroupModel{
-			CommandId:      cmd.Id,
-			CommandGroupId: data.Id,
-			Position:       i,
-		}
-	}
-	return groupModel, commandRelations, commandModels
-}
-
-func commandGroupDataToDomain(data testutils.CommandGroupData) domain.CommandGroup {
-	return domain.CommandGroup{
-		Id:        data.Id,
-		ProjectId: data.ProjectId,
-		Name:      data.Name,
-		Position:  data.Position,
-		Commands:  array.Map(data.Commands, commandDataToDomain),
-	}
 }

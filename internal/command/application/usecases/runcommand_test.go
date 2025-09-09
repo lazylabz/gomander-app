@@ -8,18 +8,21 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/command/application/usecases"
+	"gomander/internal/command/domain/test"
 	configdomain "gomander/internal/config/domain"
+	test3 "gomander/internal/config/domain/test"
 	projectdomain "gomander/internal/project/domain"
-	"gomander/internal/testutils"
+	test2 "gomander/internal/project/domain/test"
+	test4 "gomander/internal/runner/test"
 )
 
 func TestDefaultRunCommand_Execute(t *testing.T) {
 	t.Run("Should run the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
-		mockProjectRepository := new(MockProjectRepository)
-		mockRunner := new(MockRunner)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
+		mockProjectRepository := new(test2.MockProjectRepository)
+		mockRunner := new(test4.MockRunner)
 
 		projectId := "project1"
 		sut := usecases.NewRunCommand(mockUserConfigRepository, mockCommandRepository, mockProjectRepository, mockRunner)
@@ -36,13 +39,10 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 			EnvironmentPaths:    envPaths,
 		}, nil)
 
-		cmdData := testutils.
-			NewCommand().
+		cmd := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithPosition(0).
-			Data()
-
-		cmd := commandDataToDomain(cmdData)
+			Build()
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
 		project := projectdomain.Project{
@@ -70,10 +70,10 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to retrieve the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
-		mockProjectRepository := new(MockProjectRepository)
-		mockRunner := new(MockRunner)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
+		mockProjectRepository := new(test2.MockProjectRepository)
+		mockRunner := new(test4.MockRunner)
 
 		sut := usecases.NewRunCommand(mockUserConfigRepository, mockCommandRepository, mockProjectRepository, mockRunner)
 
@@ -94,15 +94,14 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to retrieve the user config", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
-		mockProjectRepository := new(MockProjectRepository)
-		mockRunner := new(MockRunner)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
+		mockProjectRepository := new(test2.MockProjectRepository)
+		mockRunner := new(test4.MockRunner)
 
 		sut := usecases.NewRunCommand(mockUserConfigRepository, mockCommandRepository, mockProjectRepository, mockRunner)
 
-		cmdData := testutils.NewCommand().Data()
-		cmd := commandDataToDomain(cmdData)
+		cmd := test.NewCommandBuilder().Build()
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
 		mockUserConfigRepository.On("GetOrCreate").Return(nil, errors.New("failed to get user config"))
@@ -121,18 +120,17 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to retrieve the project", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
-		mockProjectRepository := new(MockProjectRepository)
-		mockRunner := new(MockRunner)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
+		mockProjectRepository := new(test2.MockProjectRepository)
+		mockRunner := new(test4.MockRunner)
 
 		sut := usecases.NewRunCommand(mockUserConfigRepository, mockCommandRepository, mockProjectRepository, mockRunner)
 
 		projectId := "project1"
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
 
-		cmdData := testutils.NewCommand().WithProjectId(projectId).Data()
-		cmd := commandDataToDomain(cmdData)
+		cmd := test.NewCommandBuilder().WithProjectId(projectId).Build()
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
 		mockProjectRepository.On("Get", projectId).Return(nil, errors.New("failed to get project"))
@@ -152,10 +150,10 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to run the command", func(t *testing.T) {
 		// Arrange
-		mockCommandRepository := new(MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
-		mockProjectRepository := new(MockProjectRepository)
-		mockRunner := new(MockRunner)
+		mockCommandRepository := new(test.MockCommandRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
+		mockProjectRepository := new(test2.MockProjectRepository)
+		mockRunner := new(test4.MockRunner)
 
 		projectId := "project1"
 		sut := usecases.NewRunCommand(mockUserConfigRepository, mockCommandRepository, mockProjectRepository, mockRunner)
@@ -172,13 +170,10 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 			EnvironmentPaths:    envPaths,
 		}, nil)
 
-		cmdData := testutils.
-			NewCommand().
+		cmd := test.NewCommandBuilder().
 			WithProjectId(projectId).
 			WithPosition(0).
-			Data()
-
-		cmd := commandDataToDomain(cmdData)
+			Build()
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
 		project := projectdomain.Project{
