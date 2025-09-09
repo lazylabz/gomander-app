@@ -17,6 +17,7 @@ import (
 	"gomander/internal/helpers/array"
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
+	test3 "gomander/internal/project/domain/test"
 	"gomander/internal/testutils/mocks"
 )
 
@@ -25,7 +26,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		// Arrange
 		projectId := "test-project-id"
 
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
@@ -99,7 +100,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
@@ -129,7 +130,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
@@ -157,7 +158,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		// Arrange
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
@@ -185,7 +186,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		// Arrange
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
@@ -215,7 +216,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		// Arrange
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 		mockFsFacade := new(MockFsFacade)
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
@@ -245,7 +246,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem writing the file", func(t *testing.T) {
 		projectId := "test-project-id"
 
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 

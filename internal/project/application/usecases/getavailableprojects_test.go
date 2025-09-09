@@ -9,12 +9,13 @@ import (
 
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
+	"gomander/internal/project/domain/test"
 )
 
 func TestDefaultGetAvailableProjects_Execute(t *testing.T) {
 	t.Run("Should return available projects", func(t *testing.T) {
 		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test.MockProjectRepository)
 
 		sut := usecases.NewGetAvailableProjects(mockProjectRepository)
 
@@ -32,7 +33,7 @@ func TestDefaultGetAvailableProjects_Execute(t *testing.T) {
 
 	t.Run("Should return an error if fetching projects fails", func(t *testing.T) {
 		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test.MockProjectRepository)
 
 		sut := usecases.NewGetAvailableProjects(mockProjectRepository)
 

@@ -13,6 +13,7 @@ import (
 	"gomander/internal/helpers/array"
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
+	test3 "gomander/internal/project/domain/test"
 	"gomander/internal/testutils/mocks"
 )
 
@@ -21,7 +22,7 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 		// Arrange
 		projectId := "test-project-id"
 
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
@@ -133,7 +134,7 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem saving the project", func(t *testing.T) {
 		// Arrange
 
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
@@ -174,7 +175,7 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem saving the commands", func(t *testing.T) {
 		// Arrange
 
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
@@ -216,7 +217,7 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem saving the command groups", func(t *testing.T) {
 		// Arrange
 
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 

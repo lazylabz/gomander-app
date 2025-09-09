@@ -10,12 +10,13 @@ import (
 	"gomander/internal/config/domain"
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
+	"gomander/internal/project/domain/test"
 )
 
 func TestDefaultGetCurrentProject_Execute(t *testing.T) {
 	t.Run("Should return the current project", func(t *testing.T) {
 		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test.MockProjectRepository)
 		mockConfigRepository := new(MockConfigRepository)
 
 		projectId := "project1"
@@ -53,7 +54,7 @@ func TestDefaultGetCurrentProject_Execute(t *testing.T) {
 
 	t.Run("Should return an error if project does not exist", func(t *testing.T) {
 		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test.MockProjectRepository)
 		mockConfigRepository := new(MockConfigRepository)
 
 		sut := usecases.NewGetCurrentProject(mockConfigRepository, mockProjectRepository)

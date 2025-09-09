@@ -9,6 +9,7 @@ import (
 
 	"gomander/internal/app"
 	"gomander/internal/config/domain"
+	"gomander/internal/project/domain/test"
 )
 
 func TestApp_Startup(t *testing.T) {
@@ -19,7 +20,7 @@ func TestApp_Startup(t *testing.T) {
 
 		mockLogger := new(MockLogger)
 		mockUserConfigRepository := new(MockUserConfigRepository)
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test.MockProjectRepository)
 
 		a.LoadDependencies(app.Dependencies{
 			Logger:            mockLogger,

@@ -9,12 +9,13 @@ import (
 
 	"gomander/internal/project/application/usecases"
 	"gomander/internal/project/domain/event"
+	"gomander/internal/project/domain/test"
 )
 
 func TestDefaultDeleteProject_Execute(t *testing.T) {
 	t.Run("Should delete a project and all its commands", func(t *testing.T) {
 		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test.MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventBus := new(MockEventBus)
 
@@ -39,7 +40,7 @@ func TestDefaultDeleteProject_Execute(t *testing.T) {
 
 	t.Run("Should return an error if deleting the project fails", func(t *testing.T) {
 		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test.MockProjectRepository)
 		mockEventBus := new(MockEventBus)
 		mockLogger := new(MockLogger)
 
@@ -63,7 +64,7 @@ func TestDefaultDeleteProject_Execute(t *testing.T) {
 
 	t.Run("Should return an error if an async event handler fails", func(t *testing.T) {
 		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test.MockProjectRepository)
 		mockLogger := new(MockLogger)
 		mockEventBus := new(MockEventBus)
 

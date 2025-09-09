@@ -10,13 +10,14 @@ import (
 	"gomander/internal/config/domain"
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
+	"gomander/internal/project/domain/test"
 )
 
 func TestDefaultOpenProject_Execute(t *testing.T) {
 	t.Run("Should open a project successfully", func(t *testing.T) {
 		// Arrange
 		mockConfigRepository := new(MockConfigRepository)
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test.MockProjectRepository)
 
 		sut := usecases.NewOpenProject(mockConfigRepository, mockProjectRepository)
 
@@ -54,7 +55,7 @@ func TestDefaultOpenProject_Execute(t *testing.T) {
 
 	t.Run("Should return an error if project does not exist", func(t *testing.T) {
 		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test.MockProjectRepository)
 
 		sut := usecases.NewOpenProject(nil, mockProjectRepository)
 
@@ -72,7 +73,7 @@ func TestDefaultOpenProject_Execute(t *testing.T) {
 	t.Run("Should return an error if getting the config fails", func(t *testing.T) {
 		// Arrange
 		mockConfigRepository := new(MockConfigRepository)
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test.MockProjectRepository)
 
 		sut := usecases.NewOpenProject(mockConfigRepository, mockProjectRepository)
 
@@ -91,7 +92,7 @@ func TestDefaultOpenProject_Execute(t *testing.T) {
 	t.Run("Should return an error if updating the config fails", func(t *testing.T) {
 		// Arrange
 		mockConfigRepository := new(MockConfigRepository)
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test.MockProjectRepository)
 
 		sut := usecases.NewOpenProject(mockConfigRepository, mockProjectRepository)
 

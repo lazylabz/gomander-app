@@ -9,12 +9,13 @@ import (
 
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
+	"gomander/internal/project/domain/test"
 )
 
 func TestDefaultCreateProject_Execute(t *testing.T) {
 	t.Run("Should create a project successfully", func(t *testing.T) {
 		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test.MockProjectRepository)
 
 		sut := usecases.NewCreateProject(mockProjectRepository)
 
@@ -31,7 +32,7 @@ func TestDefaultCreateProject_Execute(t *testing.T) {
 
 	t.Run("Should return an error if project creation fails", func(t *testing.T) {
 		// Arrange
-		mockProjectRepository := new(MockProjectRepository)
+		mockProjectRepository := new(test.MockProjectRepository)
 
 		sut := usecases.NewCreateProject(mockProjectRepository)
 
