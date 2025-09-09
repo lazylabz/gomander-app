@@ -48,8 +48,12 @@ export function ReorderCommandsController(arg1:Array<string>):Promise<void>;
 
 export function RunCommandController(arg1:string):Promise<void>;
 
+export function RunCommandGroupController(arg1:string):Promise<void>;
+
 export function SaveUserConfigController(arg1:domain.Config):Promise<void>;
 
 export function StopCommandController(arg1:string):Promise<void>;
+
+export function StopCommandGroupController(arg1:string):Promise<void>;
 
 export function UpdateCommandGroupController(arg1:domain.CommandGroup):Promise<void>;

@@ -194,8 +194,6 @@ func (r GormCommandGroupRepository) RemoveCommandFromCommandGroups(commandId str
 			Where("command_id = ?", commandId).
 			Find(r.ctx)
 
-		println("Relations found:", len(relations))
-
 		if err != nil {
 			return err
 		}

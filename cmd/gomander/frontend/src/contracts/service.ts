@@ -22,8 +22,10 @@ import {
   ReorderCommandGroupsController,
   ReorderCommandsController,
   RunCommandController,
+  RunCommandGroupController,
   SaveUserConfigController,
   StopCommandController,
+  StopCommandGroupController,
   UpdateCommandGroupController,
 } from "../../wailsjs/go/main/WailsControllers";
 import type { domain } from "../../wailsjs/go/models.ts";
@@ -45,6 +47,8 @@ export const dataService = {
   deleteCommandGroup: DeleteCommandGroupController,
   reorderCommandGroups: ReorderCommandGroupsController,
   removeCommandFromGroup: RemoveCommandFromCommandGroupController,
+  runCommandGroup: RunCommandGroupController,
+  stopCommandGroup: StopCommandGroupController,
   getCommandGroups: GetCommandGroupsController,
   getCommands: GetCommandsController,
   getCurrentProject:

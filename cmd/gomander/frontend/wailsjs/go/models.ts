@@ -19,6 +19,8 @@ export namespace app {
 	    DeleteCommandGroup: any;
 	    RemoveCommandFromCommandGroup: any;
 	    ReorderCommandGroups: any;
+	    RunCommandGroup: any;
+	    StopCommandGroup: any;
 	    GetCommands: any;
 	    AddCommand: any;
 	    DuplicateCommand: any;
