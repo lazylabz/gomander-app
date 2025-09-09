@@ -8,13 +8,14 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/config/domain"
+	"gomander/internal/config/domain/test"
 	"gomander/internal/project/application/usecases"
 )
 
 func TestDefaultCloseProject_Execute(t *testing.T) {
 	t.Run("Should close the current project", func(t *testing.T) {
 		// Arrange
-		mockConfigRepository := new(MockConfigRepository)
+		mockConfigRepository := new(test.MockConfigRepository)
 
 		sut := usecases.NewCloseProject(mockConfigRepository)
 
@@ -38,7 +39,7 @@ func TestDefaultCloseProject_Execute(t *testing.T) {
 
 	t.Run("Should return an error if getting the config fails", func(t *testing.T) {
 		// Arrange
-		mockConfigRepository := new(MockConfigRepository)
+		mockConfigRepository := new(test.MockConfigRepository)
 
 		sut := usecases.NewCloseProject(mockConfigRepository)
 
@@ -54,7 +55,7 @@ func TestDefaultCloseProject_Execute(t *testing.T) {
 
 	t.Run("Should return an error if updating the config fails", func(t *testing.T) {
 		// Arrange
-		mockConfigRepository := new(MockConfigRepository)
+		mockConfigRepository := new(test.MockConfigRepository)
 
 		sut := usecases.NewCloseProject(mockConfigRepository)
 

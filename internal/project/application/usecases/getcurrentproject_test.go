@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/config/domain"
+	test2 "gomander/internal/config/domain/test"
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
 	"gomander/internal/project/domain/test"
@@ -17,7 +18,7 @@ func TestDefaultGetCurrentProject_Execute(t *testing.T) {
 	t.Run("Should return the current project", func(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)
-		mockConfigRepository := new(MockConfigRepository)
+		mockConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
 		project := &projectdomain.Project{Id: projectId, Name: "Test", WorkingDirectory: "/tmp"}
@@ -38,7 +39,7 @@ func TestDefaultGetCurrentProject_Execute(t *testing.T) {
 
 	t.Run("Should return an error if getting the config fails", func(t *testing.T) {
 		// Arrange
-		mockConfigRepository := new(MockConfigRepository)
+		mockConfigRepository := new(test2.MockConfigRepository)
 
 		sut := usecases.NewGetCurrentProject(mockConfigRepository, nil)
 		mockConfigRepository.On("GetOrCreate").Return(nil, errors.New("config error"))
@@ -55,7 +56,7 @@ func TestDefaultGetCurrentProject_Execute(t *testing.T) {
 	t.Run("Should return an error if project does not exist", func(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)
-		mockConfigRepository := new(MockConfigRepository)
+		mockConfigRepository := new(test2.MockConfigRepository)
 
 		sut := usecases.NewGetCurrentProject(mockConfigRepository, mockProjectRepository)
 

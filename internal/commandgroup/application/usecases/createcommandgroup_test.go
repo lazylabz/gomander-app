@@ -12,13 +12,14 @@ import (
 	"gomander/internal/commandgroup/domain"
 	test2 "gomander/internal/commandgroup/domain/test"
 	configdomain "gomander/internal/config/domain"
+	test3 "gomander/internal/config/domain/test"
 )
 
 func TestDefaultCreateCommandGroup_Execute(t *testing.T) {
 	t.Run("Should create a command group", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 
 		projectId := "project1"
 
@@ -60,7 +61,7 @@ func TestDefaultCreateCommandGroup_Execute(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve user config", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 
 		sut := usecases.NewCreateCommandGroup(mockUserConfigRepository, mockCommandGroupRepository)
 
@@ -86,7 +87,7 @@ func TestDefaultCreateCommandGroup_Execute(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve existing command groups", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 
 		projectId := "project1"
 
@@ -115,7 +116,7 @@ func TestDefaultCreateCommandGroup_Execute(t *testing.T) {
 	t.Run("Should return an error if failing to save the command group", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 
 		projectId := "project1"
 

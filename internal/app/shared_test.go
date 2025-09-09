@@ -4,7 +4,6 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	commanddomain "gomander/internal/command/domain"
-	"gomander/internal/config/domain"
 	"gomander/internal/event"
 	"gomander/internal/eventbus"
 )
@@ -31,23 +30,6 @@ type MockEventEmitter struct {
 
 func (m *MockEventEmitter) EmitEvent(event event.Event, payload interface{}) {
 	m.Called(event, payload)
-}
-
-type MockUserConfigRepository struct {
-	mock.Mock
-}
-
-func (m *MockUserConfigRepository) GetOrCreate() (*domain.Config, error) {
-	args := m.Called()
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*domain.Config), args.Error(1)
-}
-
-func (m *MockUserConfigRepository) Update(config *domain.Config) error {
-	args := m.Called(config)
-	return args.Error(0)
 }
 
 type MockRunner struct {

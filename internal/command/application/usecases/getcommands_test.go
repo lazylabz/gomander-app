@@ -11,13 +11,14 @@ import (
 	commanddomain "gomander/internal/command/domain"
 	"gomander/internal/command/domain/test"
 	configdomain "gomander/internal/config/domain"
+	test2 "gomander/internal/config/domain/test"
 )
 
 func TestDefaultGetCommands_Execute(t *testing.T) {
 	t.Run("Should return the commands provided by the repository", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
 		sut := usecases.NewGetCommands(mockUserConfigRepository, mockCommandRepository)
@@ -54,7 +55,7 @@ func TestDefaultGetCommands_Execute(t *testing.T) {
 	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		sut := usecases.NewGetCommands(mockUserConfigRepository, mockCommandRepository)
 		expectedErr := errors.New("failed to get user config")

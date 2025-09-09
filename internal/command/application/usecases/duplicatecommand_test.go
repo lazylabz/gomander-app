@@ -12,13 +12,14 @@ import (
 	commanddomainevent "gomander/internal/command/domain/event"
 	"gomander/internal/command/domain/test"
 	configdomain "gomander/internal/config/domain"
+	test2 "gomander/internal/config/domain/test"
 )
 
 func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 	t.Run("Should duplicate the command", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 		mockEventBus := new(MockEventBus)
 
 		projectId := "project1"
@@ -61,7 +62,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 	t.Run("Should duplicate the command with a target group", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 		mockEventBus := new(MockEventBus)
 
 		projectId := "project1"
@@ -106,7 +107,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 	t.Run("Should return an error if fails to get the user config", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 		mockEventBus := new(MockEventBus)
 
 		sut := usecases.NewDuplicateCommand(mockUserConfigRepository, mockCommandRepository, mockEventBus)
@@ -128,7 +129,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 	t.Run("Should return an error if the command does not exist", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 		mockEventBus := new(MockEventBus)
 
 		sut := usecases.NewDuplicateCommand(mockUserConfigRepository, mockCommandRepository, mockEventBus)
@@ -153,7 +154,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 	t.Run("Should return an error if fails to get all commands", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 		mockEventBus := new(MockEventBus)
 
 		projectId := "project1"
@@ -181,7 +182,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 	t.Run("Should return an error if fails to create the duplicated command", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 		mockEventBus := new(MockEventBus)
 
 		projectId := "project1"
@@ -210,7 +211,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 	t.Run("Should return an error if side effects fail", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 		mockEventBus := new(MockEventBus)
 
 		projectId := "project1"

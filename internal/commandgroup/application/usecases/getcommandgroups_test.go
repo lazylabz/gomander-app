@@ -12,13 +12,14 @@ import (
 	"gomander/internal/commandgroup/domain"
 	test2 "gomander/internal/commandgroup/domain/test"
 	configdomain "gomander/internal/config/domain"
+	test3 "gomander/internal/config/domain/test"
 )
 
 func TestDefaultGetCommandGroups_Execute(t *testing.T) {
 	t.Run("Should return the command groups provided by the command group repository", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 
 		projectId := "project1"
 		sut := usecases.NewGetCommandGroups(mockUserConfigRepository, mockCommandGroupRepository)
@@ -47,7 +48,7 @@ func TestDefaultGetCommandGroups_Execute(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve user config", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 
 		sut := usecases.NewGetCommandGroups(mockUserConfigRepository, mockCommandGroupRepository)
 

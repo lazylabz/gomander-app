@@ -10,6 +10,7 @@ import (
 	"gomander/internal/command/application/usecases"
 	"gomander/internal/command/domain/test"
 	configdomain "gomander/internal/config/domain"
+	test3 "gomander/internal/config/domain/test"
 	projectdomain "gomander/internal/project/domain"
 	test2 "gomander/internal/project/domain/test"
 )
@@ -18,7 +19,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 	t.Run("Should run the command", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 		mockProjectRepository := new(test2.MockProjectRepository)
 		mockRunner := new(MockRunner)
 
@@ -69,7 +70,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve the command", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 		mockProjectRepository := new(test2.MockProjectRepository)
 		mockRunner := new(MockRunner)
 
@@ -93,7 +94,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve the user config", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 		mockProjectRepository := new(test2.MockProjectRepository)
 		mockRunner := new(MockRunner)
 
@@ -119,7 +120,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve the project", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 		mockProjectRepository := new(test2.MockProjectRepository)
 		mockRunner := new(MockRunner)
 
@@ -149,7 +150,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 	t.Run("Should return an error if failing to run the command", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test3.MockConfigRepository)
 		mockProjectRepository := new(test2.MockProjectRepository)
 		mockRunner := new(MockRunner)
 

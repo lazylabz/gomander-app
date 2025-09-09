@@ -11,13 +11,14 @@ import (
 	"gomander/internal/commandgroup/domain"
 	"gomander/internal/commandgroup/domain/test"
 	configdomain "gomander/internal/config/domain"
+	test2 "gomander/internal/config/domain/test"
 )
 
 func TestDefaultReorderCommandGroups_Execute(t *testing.T) {
 	t.Run("Should reorder command groups based on the provided IDs", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(test.MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
 
@@ -63,7 +64,7 @@ func TestDefaultReorderCommandGroups_Execute(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve user config", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(test.MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 		sut := usecases.NewReorderCommandGroups(mockUserConfigRepository, mockCommandGroupRepository)
 		expectedError := errors.New("failed to get user config")
 		mockUserConfigRepository.On("GetOrCreate").Return(nil, expectedError)
@@ -81,7 +82,7 @@ func TestDefaultReorderCommandGroups_Execute(t *testing.T) {
 	t.Run("Should return an error if failing to retrieve existing command groups", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(test.MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
 
@@ -105,7 +106,7 @@ func TestDefaultReorderCommandGroups_Execute(t *testing.T) {
 	t.Run("Should return an error if failing to update a command group", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(test.MockCommandGroupRepository)
-		mockUserConfigRepository := new(MockConfigRepository)
+		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
 

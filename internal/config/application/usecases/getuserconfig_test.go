@@ -7,11 +7,12 @@ import (
 
 	"gomander/internal/config/application/usecases"
 	"gomander/internal/config/domain"
+	"gomander/internal/config/domain/test"
 )
 
 func TestDefaultGetUserConfig_Execute(t *testing.T) {
 	// Arrange
-	mockRepository := new(MockUserConfigRepository)
+	mockRepository := new(test.MockConfigRepository)
 
 	sut := usecases.NewGetUserConfig(mockRepository)
 
