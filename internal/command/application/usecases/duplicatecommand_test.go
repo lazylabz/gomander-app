@@ -13,6 +13,7 @@ import (
 	"gomander/internal/command/domain/test"
 	configdomain "gomander/internal/config/domain"
 	test2 "gomander/internal/config/domain/test"
+	test3 "gomander/internal/eventbus/test"
 )
 
 func TestDefaultDuplicateCommand_Execute(t *testing.T) {
@@ -20,7 +21,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(test2.MockConfigRepository)
-		mockEventBus := new(MockEventBus)
+		mockEventBus := new(test3.MockEventBus)
 
 		projectId := "project1"
 		sut := usecases.NewDuplicateCommand(mockUserConfigRepository, mockCommandRepository, mockEventBus)
@@ -63,7 +64,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(test2.MockConfigRepository)
-		mockEventBus := new(MockEventBus)
+		mockEventBus := new(test3.MockEventBus)
 
 		projectId := "project1"
 		targetGroupId := "group1"
@@ -108,7 +109,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(test2.MockConfigRepository)
-		mockEventBus := new(MockEventBus)
+		mockEventBus := new(test3.MockEventBus)
 
 		sut := usecases.NewDuplicateCommand(mockUserConfigRepository, mockCommandRepository, mockEventBus)
 		commandId := "command1"
@@ -130,7 +131,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(test2.MockConfigRepository)
-		mockEventBus := new(MockEventBus)
+		mockEventBus := new(test3.MockEventBus)
 
 		sut := usecases.NewDuplicateCommand(mockUserConfigRepository, mockCommandRepository, mockEventBus)
 
@@ -155,7 +156,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(test2.MockConfigRepository)
-		mockEventBus := new(MockEventBus)
+		mockEventBus := new(test3.MockEventBus)
 
 		projectId := "project1"
 		sut := usecases.NewDuplicateCommand(mockUserConfigRepository, mockCommandRepository, mockEventBus)
@@ -183,7 +184,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(test2.MockConfigRepository)
-		mockEventBus := new(MockEventBus)
+		mockEventBus := new(test3.MockEventBus)
 
 		projectId := "project1"
 		sut := usecases.NewDuplicateCommand(mockUserConfigRepository, mockCommandRepository, mockEventBus)
@@ -212,7 +213,7 @@ func TestDefaultDuplicateCommand_Execute(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockUserConfigRepository := new(test2.MockConfigRepository)
-		mockEventBus := new(MockEventBus)
+		mockEventBus := new(test3.MockEventBus)
 
 		projectId := "project1"
 		sut := usecases.NewDuplicateCommand(mockUserConfigRepository, mockCommandRepository, mockEventBus)

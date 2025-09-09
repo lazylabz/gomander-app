@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"gomander/internal/facade/test"
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
 	"gomander/internal/testutils/mocks"
@@ -18,7 +19,7 @@ func TestDefaultGetProjectToImport_Execute(t *testing.T) {
 		// Arrange
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test.MockFsFacade)
 
 		sut := usecases.NewGetProjectToImport(context.Background(), mockRuntimeFacade, mockFsFacade)
 
@@ -48,7 +49,7 @@ func TestDefaultGetProjectToImport_Execute(t *testing.T) {
 		// Arrange
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test.MockFsFacade)
 
 		sut := usecases.NewGetProjectToImport(context.Background(), mockRuntimeFacade, mockFsFacade)
 
@@ -67,7 +68,7 @@ func TestDefaultGetProjectToImport_Execute(t *testing.T) {
 		// Arrange
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test.MockFsFacade)
 
 		sut := usecases.NewGetProjectToImport(context.Background(), mockRuntimeFacade, mockFsFacade)
 
@@ -86,7 +87,7 @@ func TestDefaultGetProjectToImport_Execute(t *testing.T) {
 		// Arrange
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test.MockFsFacade)
 
 		sut := usecases.NewGetProjectToImport(context.Background(), mockRuntimeFacade, mockFsFacade)
 

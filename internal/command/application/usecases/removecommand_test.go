@@ -10,13 +10,14 @@ import (
 	"gomander/internal/command/application/usecases"
 	commanddomainevent "gomander/internal/command/domain/event"
 	"gomander/internal/command/domain/test"
+	test2 "gomander/internal/eventbus/test"
 )
 
 func TestDefaultRemoveCommand_Execute(t *testing.T) {
 	t.Run("Should remove the command", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockEventBus := new(MockEventBus)
+		mockEventBus := new(test2.MockEventBus)
 
 		sut := usecases.NewRemoveCommand(mockCommandRepository, mockEventBus)
 
@@ -40,7 +41,7 @@ func TestDefaultRemoveCommand_Execute(t *testing.T) {
 	t.Run("Should return an error if fails to remove the command", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockEventBus := new(MockEventBus)
+		mockEventBus := new(test2.MockEventBus)
 
 		sut := usecases.NewRemoveCommand(mockCommandRepository, mockEventBus)
 
@@ -62,7 +63,7 @@ func TestDefaultRemoveCommand_Execute(t *testing.T) {
 	t.Run("Should return an error if side effect fail", func(t *testing.T) {
 		// Arrange
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockEventBus := new(MockEventBus)
+		mockEventBus := new(test2.MockEventBus)
 
 		sut := usecases.NewRemoveCommand(mockCommandRepository, mockEventBus)
 

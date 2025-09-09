@@ -10,6 +10,7 @@ import (
 	"gomander/internal/command/domain/test"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	test2 "gomander/internal/commandgroup/domain/test"
+	test4 "gomander/internal/facade/test"
 	"gomander/internal/helpers/array"
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
@@ -26,7 +27,7 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test4.MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 
 		cmd1 := test.NewCommandBuilder().
@@ -138,7 +139,7 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test4.MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 
 		projectJSON := projectdomain.ProjectExportJSONv1{
@@ -179,7 +180,7 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test4.MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 
 		projectJSON := projectdomain.ProjectExportJSONv1{
@@ -221,7 +222,7 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test4.MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 
 		projectJSON := projectdomain.ProjectExportJSONv1{

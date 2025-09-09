@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	test3 "gomander/internal/eventbus/test"
 	test2 "gomander/internal/logger/test"
 	"gomander/internal/project/application/usecases"
 	"gomander/internal/project/domain/event"
@@ -18,7 +19,7 @@ func TestDefaultDeleteProject_Execute(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)
 		mockLogger := new(test2.MockLogger)
-		mockEventBus := new(MockEventBus)
+		mockEventBus := new(test3.MockEventBus)
 
 		sut := usecases.NewDeleteProject(
 			mockProjectRepository,
@@ -42,7 +43,7 @@ func TestDefaultDeleteProject_Execute(t *testing.T) {
 	t.Run("Should return an error if deleting the project fails", func(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)
-		mockEventBus := new(MockEventBus)
+		mockEventBus := new(test3.MockEventBus)
 		mockLogger := new(test2.MockLogger)
 
 		sut := usecases.NewDeleteProject(
@@ -67,7 +68,7 @@ func TestDefaultDeleteProject_Execute(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)
 		mockLogger := new(test2.MockLogger)
-		mockEventBus := new(MockEventBus)
+		mockEventBus := new(test3.MockEventBus)
 
 		sut := usecases.NewDeleteProject(
 			mockProjectRepository,

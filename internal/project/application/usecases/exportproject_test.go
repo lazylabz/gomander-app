@@ -14,6 +14,7 @@ import (
 	"gomander/internal/command/domain/test"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	test2 "gomander/internal/commandgroup/domain/test"
+	test4 "gomander/internal/facade/test"
 	"gomander/internal/helpers/array"
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
@@ -30,7 +31,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test4.MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 
 		project := projectdomain.Project{
@@ -99,7 +100,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		// Arrange
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test4.MockFsFacade)
 		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
@@ -129,7 +130,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		// Arrange
 
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test4.MockFsFacade)
 		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
@@ -157,7 +158,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem reading the project data", func(t *testing.T) {
 		// Arrange
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test4.MockFsFacade)
 		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
@@ -185,7 +186,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem reading the commands ", func(t *testing.T) {
 		// Arrange
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test4.MockFsFacade)
 		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
@@ -215,7 +216,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 	t.Run("Should return error if there is a problem reading the command groups", func(t *testing.T) {
 		// Arrange
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test4.MockFsFacade)
 		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
@@ -250,7 +251,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(MockFsFacade)
+		mockFsFacade := new(test4.MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
 
 		project := projectdomain.Project{
