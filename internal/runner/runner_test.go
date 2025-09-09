@@ -7,27 +7,12 @@ import (
 
 	commanddomain "gomander/internal/command/domain"
 	"gomander/internal/event"
+	"gomander/internal/logger/test"
 	"gomander/internal/runner"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
-
-type MockLogger struct {
-	mock.Mock
-}
-
-func (m *MockLogger) Info(message string) {
-	m.Called(message)
-}
-
-func (m *MockLogger) Debug(message string) {
-	m.Called(message)
-}
-
-func (m *MockLogger) Error(message string) {
-	m.Called(message)
-}
 
 type MockEventEmitter struct {
 	mock.Mock
@@ -49,7 +34,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 
 	t.Run("Should run command with success and emit events for each line", func(t *testing.T) {
 		// Arrange
-		logger := new(MockLogger)
+		logger := new(test.MockLogger)
 		emitter := new(MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
@@ -81,7 +66,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 
 	t.Run("Should log error when executing an invalid command", func(t *testing.T) {
 		// Arrange
-		logger := new(MockLogger)
+		logger := new(test.MockLogger)
 		emitter := new(MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
@@ -116,7 +101,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 	t.Run("Should stop running command", func(t *testing.T) {
 		// Arrange
-		logger := new(MockLogger)
+		logger := new(test.MockLogger)
 		emitter := new(MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
@@ -162,7 +147,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 
 	t.Run("Should return error when stopping non-existing command", func(t *testing.T) {
 		// Arrange
-		logger := new(MockLogger)
+		logger := new(test.MockLogger)
 		emitter := new(MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
@@ -179,7 +164,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 	t.Run("Should stop all running commands", func(t *testing.T) {
 		// Arrange
-		logger := new(MockLogger)
+		logger := new(test.MockLogger)
 		emitter := new(MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)

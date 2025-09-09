@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	test2 "gomander/internal/logger/test"
 	"gomander/internal/project/application/usecases"
 	"gomander/internal/project/domain/event"
 	"gomander/internal/project/domain/test"
@@ -16,7 +17,7 @@ func TestDefaultDeleteProject_Execute(t *testing.T) {
 	t.Run("Should delete a project and all its commands", func(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)
-		mockLogger := new(MockLogger)
+		mockLogger := new(test2.MockLogger)
 		mockEventBus := new(MockEventBus)
 
 		sut := usecases.NewDeleteProject(
@@ -42,7 +43,7 @@ func TestDefaultDeleteProject_Execute(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)
 		mockEventBus := new(MockEventBus)
-		mockLogger := new(MockLogger)
+		mockLogger := new(test2.MockLogger)
 
 		sut := usecases.NewDeleteProject(
 			mockProjectRepository,
@@ -65,7 +66,7 @@ func TestDefaultDeleteProject_Execute(t *testing.T) {
 	t.Run("Should return an error if an async event handler fails", func(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)
-		mockLogger := new(MockLogger)
+		mockLogger := new(test2.MockLogger)
 		mockEventBus := new(MockEventBus)
 
 		sut := usecases.NewDeleteProject(

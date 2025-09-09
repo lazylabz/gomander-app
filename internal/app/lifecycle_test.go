@@ -10,6 +10,7 @@ import (
 	"gomander/internal/app"
 	"gomander/internal/config/domain"
 	test2 "gomander/internal/config/domain/test"
+	test4 "gomander/internal/logger/test"
 	"gomander/internal/project/domain/test"
 	test3 "gomander/internal/runner/test"
 )
@@ -20,7 +21,7 @@ func TestApp_Startup(t *testing.T) {
 		a := app.NewApp()
 		ctx := context.Background()
 
-		mockLogger := new(MockLogger)
+		mockLogger := new(test4.MockLogger)
 		mockUserConfigRepository := new(test2.MockConfigRepository)
 		mockProjectRepository := new(test.MockProjectRepository)
 
@@ -46,7 +47,7 @@ func TestApp_Startup(t *testing.T) {
 		a := app.NewApp()
 		ctx := context.Background()
 
-		mockLogger := new(MockLogger)
+		mockLogger := new(test4.MockLogger)
 		mockUserConfigRepository := new(test2.MockConfigRepository)
 
 		a.LoadDependencies(app.Dependencies{
@@ -72,7 +73,7 @@ func TestApp_OnBeforeClose(t *testing.T) {
 		a := app.NewApp()
 
 		mockCommandRunner := new(test3.MockRunner)
-		mockLogger := new(MockLogger)
+		mockLogger := new(test4.MockLogger)
 
 		a.LoadDependencies(app.Dependencies{
 			Runner: mockCommandRunner,
@@ -94,7 +95,7 @@ func TestApp_OnBeforeClose(t *testing.T) {
 		a := app.NewApp()
 
 		mockCommandRunner := new(test3.MockRunner)
-		mockLogger := new(MockLogger)
+		mockLogger := new(test4.MockLogger)
 
 		a.LoadDependencies(app.Dependencies{
 			Runner: mockCommandRunner,

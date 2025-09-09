@@ -1,8 +1,6 @@
-package app_test
+package test
 
-import (
-	"github.com/stretchr/testify/mock"
-)
+import "github.com/stretchr/testify/mock"
 
 type MockLogger struct {
 	mock.Mock
