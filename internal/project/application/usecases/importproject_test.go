@@ -23,7 +23,7 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		mockFsFacade := new(MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -135,7 +135,7 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		mockFsFacade := new(MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -176,7 +176,7 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		mockFsFacade := new(MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -218,7 +218,7 @@ func TestDefaultImportProject_Execute(t *testing.T) {
 
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		mockFsFacade := new(MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)

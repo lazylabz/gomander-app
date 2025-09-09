@@ -16,7 +16,7 @@ import (
 func TestDefaultRemoveCommandFromCommandGroup_Execute(t *testing.T) {
 	t.Run("Should remove command from group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		projectId := "project1"
 		cmdId := "cmd-1"
@@ -49,7 +49,7 @@ func TestDefaultRemoveCommandFromCommandGroup_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to get command group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		sut := usecases.NewRemoveCommandFromCommandGroup(mockCommandGroupRepository)
 
@@ -67,7 +67,7 @@ func TestDefaultRemoveCommandFromCommandGroup_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to update command group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		projectId := "project1"
 		cmdId := "cmd-1"
@@ -95,7 +95,7 @@ func TestDefaultRemoveCommandFromCommandGroup_Execute(t *testing.T) {
 
 	t.Run("Should return an error when trying to remove the last command from the group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		projectId := "project1"
 		cmdId := "cmd-1"

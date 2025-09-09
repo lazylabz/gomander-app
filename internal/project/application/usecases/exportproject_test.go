@@ -27,7 +27,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		mockFsFacade := new(MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)
@@ -101,7 +101,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
 			context.Background(),
@@ -131,7 +131,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
 			context.Background(),
@@ -159,7 +159,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
 			context.Background(),
@@ -187,7 +187,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
 			context.Background(),
@@ -217,7 +217,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockFsFacade := new(MockFsFacade)
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		sut := usecases.NewExportProject(
 			context.Background(),
@@ -247,7 +247,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 
 		mockProjectRepository := new(MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		mockFsFacade := new(MockFsFacade)
 		mockRuntimeFacade := new(mocks.MockRuntimeFacade)

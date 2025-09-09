@@ -14,7 +14,7 @@ import (
 func TestDefaultUpdateCommandGroup_Execute(t *testing.T) {
 	t.Run("Should update a command group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test.MockCommandGroupRepository)
 
 		projectId := "project1"
 
@@ -39,7 +39,7 @@ func TestDefaultUpdateCommandGroup_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to update the command group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test.MockCommandGroupRepository)
 
 		projectId := "project1"
 

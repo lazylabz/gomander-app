@@ -14,7 +14,7 @@ import (
 func TestDefaultDeleteCommandGroup_Execute(t *testing.T) {
 	t.Run("Should delete a command group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test.MockCommandGroupRepository)
 
 		projectId := "project1"
 
@@ -39,7 +39,7 @@ func TestDefaultDeleteCommandGroup_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to delete the command group", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test.MockCommandGroupRepository)
 
 		projectId := "project1"
 

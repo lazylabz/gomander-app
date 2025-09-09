@@ -17,7 +17,7 @@ import (
 func TestDefaultGetCommandGroups_Execute(t *testing.T) {
 	t.Run("Should return the command groups provided by the command group repository", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 
 		projectId := "project1"
@@ -46,7 +46,7 @@ func TestDefaultGetCommandGroups_Execute(t *testing.T) {
 
 	t.Run("Should return an error if failing to retrieve user config", func(t *testing.T) {
 		// Arrange
-		mockCommandGroupRepository := new(MockCommandGroupRepository)
+		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 		mockUserConfigRepository := new(MockConfigRepository)
 
 		sut := usecases.NewGetCommandGroups(mockUserConfigRepository, mockCommandGroupRepository)
