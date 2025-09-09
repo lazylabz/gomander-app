@@ -13,6 +13,7 @@ import (
 	gormlogger "gorm.io/gorm/logger"
 
 	"gomander/internal/command/application/handlers"
+	commandusecases "gomander/internal/command/application/usecases"
 	commmandinfrastructure "gomander/internal/command/infrastructure"
 	commandgrouphandlers "gomander/internal/commandgroup/application/handlers"
 	commandgroupusecases "gomander/internal/commandgroup/application/usecases"
@@ -184,6 +185,14 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	deleteCommandGroup := commandgroupusecases.NewDeleteCommandGroup(commandGroupRepo)
 	removeCommandFromCommandGroup := commandgroupusecases.NewRemoveCommandFromCommandGroup(commandGroupRepo)
 	reorderCommandGroups := commandgroupusecases.NewReorderCommandGroups(configRepo, commandGroupRepo)
+	getCommands := commandusecases.NewGetCommands(configRepo, commandRepo)
+	addCommand := commandusecases.NewAddCommand(configRepo, commandRepo)
+	duplicateCommand := commandusecases.NewDuplicateCommand(configRepo, commandRepo, eventBus)
+	removeCommand := commandusecases.NewRemoveCommand(commandRepo, eventBus)
+	editCommand := commandusecases.NewEditCommand(commandRepo)
+	reorderCommands := commandusecases.NewReorderCommands(configRepo, commandRepo)
+	runCommand := commandusecases.NewRunCommand(configRepo, commandRepo, projectRepo, r)
+	stopCommand := commandusecases.NewStopCommand(commandRepo, r)
 
 	app.LoadDependencies(internalapp.Dependencies{
 		Logger:       l,
@@ -222,6 +231,14 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 			DeleteCommandGroup:            deleteCommandGroup,
 			RemoveCommandFromCommandGroup: removeCommandFromCommandGroup,
 			ReorderCommandGroups:          reorderCommandGroups,
+			GetCommands:                   getCommands,
+			AddCommand:                    addCommand,
+			DuplicateCommand:              duplicateCommand,
+			RemoveCommand:                 removeCommand,
+			EditCommand:                   editCommand,
+			ReorderCommands:               reorderCommands,
+			RunCommand:                    runCommand,
+			StopCommand:                   stopCommand,
 		},
 	})
 }

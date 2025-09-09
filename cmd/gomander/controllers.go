@@ -2,6 +2,7 @@ package main
 
 import (
 	"gomander/internal/app"
+	commanddomain "gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	configdomain "gomander/internal/config/domain"
 	projectdomain "gomander/internal/project/domain"
@@ -83,4 +84,38 @@ func (wc *WailsControllers) RemoveCommandFromCommandGroupController(commandId st
 
 func (wc *WailsControllers) ReorderCommandGroupsController(newOrderedIds []string) error {
 	return wc.useCases.ReorderCommandGroups.Execute(newOrderedIds)
+}
+
+// Command controllers
+
+func (wc *WailsControllers) GetCommandsController() ([]commanddomain.Command, error) {
+	return wc.useCases.GetCommands.Execute()
+}
+
+func (wc *WailsControllers) AddCommandController(command commanddomain.Command) error {
+	return wc.useCases.AddCommand.Execute(command)
+}
+
+func (wc *WailsControllers) DuplicateCommandController(commandId string, targetGroupId string) error {
+	return wc.useCases.DuplicateCommand.Execute(commandId, targetGroupId)
+}
+
+func (wc *WailsControllers) RemoveCommandController(commandId string) error {
+	return wc.useCases.RemoveCommand.Execute(commandId)
+}
+
+func (wc *WailsControllers) EditCommandController(command commanddomain.Command) error {
+	return wc.useCases.EditCommand.Execute(command)
+}
+
+func (wc *WailsControllers) ReorderCommandsController(orderedIds []string) error {
+	return wc.useCases.ReorderCommands.Execute(orderedIds)
+}
+
+func (wc *WailsControllers) RunCommandController(commandId string) error {
+	return wc.useCases.RunCommand.Execute(commandId)
+}
+
+func (wc *WailsControllers) StopCommandController(commandId string) error {
+	return wc.useCases.StopCommand.Execute(commandId)
 }

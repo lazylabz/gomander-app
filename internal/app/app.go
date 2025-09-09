@@ -4,6 +4,7 @@ import (
 	"context"
 
 	commandhandlers "gomander/internal/command/application/handlers"
+	commandusecases "gomander/internal/command/application/usecases"
 	commanddomain "gomander/internal/command/domain"
 	commandgrouphandlers "gomander/internal/commandgroup/application/handlers"
 	commandgroupusecases "gomander/internal/commandgroup/application/usecases"
@@ -42,6 +43,14 @@ type UseCases struct {
 	DeleteCommandGroup            commandgroupusecases.DeleteCommandGroup
 	RemoveCommandFromCommandGroup commandgroupusecases.RemoveCommandFromCommandGroup
 	ReorderCommandGroups          commandgroupusecases.ReorderCommandGroups
+	GetCommands                   commandusecases.GetCommands
+	AddCommand                    commandusecases.AddCommand
+	DuplicateCommand              commandusecases.DuplicateCommand
+	RemoveCommand                 commandusecases.RemoveCommand
+	EditCommand                   commandusecases.EditCommand
+	ReorderCommands               commandusecases.ReorderCommands
+	RunCommand                    commandusecases.RunCommand
+	StopCommand                   commandusecases.StopCommand
 }
 
 // App struct
