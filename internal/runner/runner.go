@@ -78,7 +78,7 @@ func (c *DefaultRunner) StopRunningCommands(commands []domain.Command) error {
 func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string) error {
 	c.mutex.Lock()
 
-	if c.runningCommands[command.Id].cmd != nil {
+	if _, exists := c.runningCommands[command.Id]; exists {
 		// Command is already running, skip it
 		c.mutex.Unlock()
 		return nil
