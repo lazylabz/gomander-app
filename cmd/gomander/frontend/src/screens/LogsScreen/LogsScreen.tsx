@@ -52,7 +52,7 @@ export const LogsScreen = () => {
   const matchesIds =
     searchQuery && searchOpen ? parsedLogs.flatMap(extractMatchesIds) : [];
 
-  useShortcut("Meta-F", () => {
+  useShortcut("Mod-F", () => {
     openSearch();
   });
 
