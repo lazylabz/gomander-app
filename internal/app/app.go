@@ -46,6 +46,7 @@ type UseCases struct {
 	DeleteCommandGroup            commandgroupusecases.DeleteCommandGroup
 	RemoveCommandFromCommandGroup commandgroupusecases.RemoveCommandFromCommandGroup
 	ReorderCommandGroups          commandgroupusecases.ReorderCommandGroups
+	RunCommandGroup               commandgroupusecases.RunCommandGroup
 	GetCommands                   commandusecases.GetCommands
 	AddCommand                    commandusecases.AddCommand
 	DuplicateCommand              commandusecases.DuplicateCommand

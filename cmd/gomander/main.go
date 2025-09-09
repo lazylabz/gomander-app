@@ -191,6 +191,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	deleteCommandGroup := commandgroupusecases.NewDeleteCommandGroup(commandGroupRepo)
 	removeCommandFromCommandGroup := commandgroupusecases.NewRemoveCommandFromCommandGroup(commandGroupRepo)
 	reorderCommandGroups := commandgroupusecases.NewReorderCommandGroups(configRepo, commandGroupRepo)
+	runCommandGroup := commandgroupusecases.NewRunCommandGroup(configRepo, commandRepo, commandGroupRepo, projectRepo, r)
 	getCommands := commandusecases.NewGetCommands(configRepo, commandRepo)
 	addCommand := commandusecases.NewAddCommand(configRepo, commandRepo)
 	duplicateCommand := commandusecases.NewDuplicateCommand(configRepo, commandRepo, eventBus)
@@ -240,6 +241,7 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 			DeleteCommandGroup:            deleteCommandGroup,
 			RemoveCommandFromCommandGroup: removeCommandFromCommandGroup,
 			ReorderCommandGroups:          reorderCommandGroups,
+			RunCommandGroup:               runCommandGroup,
 			GetCommands:                   getCommands,
 			AddCommand:                    addCommand,
 			DuplicateCommand:              duplicateCommand,

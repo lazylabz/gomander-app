@@ -39,6 +39,7 @@ type DefaultRunner struct {
 
 type Runner interface {
 	RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string) error
+	RunCommands(commands []domain.Command, environmentPaths []string, baseWorkingDirectory string) error
 	StopRunningCommand(id string) error
 	StopAllRunningCommands() []error
 }
@@ -51,9 +52,28 @@ func NewDefaultRunner(logger logger.Logger, emitter event.EventEmitter) *Default
 	}
 }
 
+func (c *DefaultRunner) RunCommands(commands []domain.Command, environmentPaths []string, baseWorkingDirectory string) error {
+	for _, command := range commands {
+		err := c.RunCommand(&command, environmentPaths, baseWorkingDirectory)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // RunCommand executes a command and streams its output.
 func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string) error {
-	// Get the project object based on the project string and OS
+	c.mutex.Lock()
+
+	if c.runningCommands[command.Id].cmd != nil {
+		// Command is already running, skip it
+		c.mutex.Unlock()
+		return nil
+	}
+
+	// Get the command object based on the project string and OS
 	cmd := GetCommand(command.Command)
 
 	// Enable color output and set terminal type
@@ -67,12 +87,14 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		c.sendStreamErrorWhileStartingCommand(command, err)
+		c.mutex.Unlock()
 		return err
 	}
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		c.sendStreamErrorWhileStartingCommand(command, err)
+		c.mutex.Unlock()
 		return err
 	}
 
@@ -84,13 +106,13 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 
 	if err := cmd.Start(); err != nil {
 		c.sendStreamErrorWhileStartingCommand(command, err)
+		c.mutex.Unlock()
 		return err
 	}
 
 	c.eventEmitter.EmitEvent(event.ProcessStarted, command.Id)
 
-	// Save the project in the runningCommands map
-	c.mutex.Lock()
+	// Save the command in the runningCommands map
 	c.runningCommands[command.Id] = runningCommand
 	c.mutex.Unlock()
 

@@ -59,12 +59,17 @@ export const CommandGroupSection = ({
     (command: Command) => commandsStatus[command.id] === CommandStatus.IDLE,
   );
 
-  const run = (e: SyntheticEvent) => {
+  const run = async (e: SyntheticEvent) => {
     // Prevent the folder from collapsing when clicking the play button
     e.stopPropagation();
 
     if (isReorderingGroups) return;
-    runCommandGroup(commandGroup.id);
+
+    try {
+      await runCommandGroup(commandGroup.id);
+    } catch (e) {
+      toast.error(parseError(e, "Failed to run command group"));
+    }
   };
 
   const stop = (e: SyntheticEvent) => {

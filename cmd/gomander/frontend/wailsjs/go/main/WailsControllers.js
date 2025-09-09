@@ -94,6 +94,10 @@ export function RunCommandController(arg1) {
   return window['go']['main']['WailsControllers']['RunCommandController'](arg1);
 }
 
+export function RunCommandGroupController(arg1) {
+  return window['go']['main']['WailsControllers']['RunCommandGroupController'](arg1);
+}
+
 export function SaveUserConfigController(arg1) {
   return window['go']['main']['WailsControllers']['SaveUserConfigController'](arg1);
 }

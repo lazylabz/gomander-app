@@ -22,6 +22,7 @@ import {
   ReorderCommandGroupsController,
   ReorderCommandsController,
   RunCommandController,
+  RunCommandGroupController,
   SaveUserConfigController,
   StopCommandController,
   UpdateCommandGroupController,
@@ -45,6 +46,7 @@ export const dataService = {
   deleteCommandGroup: DeleteCommandGroupController,
   reorderCommandGroups: ReorderCommandGroupsController,
   removeCommandFromGroup: RemoveCommandFromCommandGroupController,
+  runCommandGroup: RunCommandGroupController,
   getCommandGroups: GetCommandGroupsController,
   getCommands: GetCommandsController,
   getCurrentProject:
