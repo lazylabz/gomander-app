@@ -34,7 +34,7 @@ const ModifierMap: Record<Modifier, (keyof KeyboardEvent)[]> = {
   Control: ["ctrlKey"],
   Shift: ["shiftKey"],
   Alt: ["altKey"],
-  Mod: ["metaKey", "ctrlKey"], // Meta is Command on Mac, Ctrl on Windows
+  Mod: ["metaKey", "ctrlKey"],
 };
 
 type Shortcut = `${Modifier}-${Key}` | Key;
