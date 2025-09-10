@@ -188,7 +188,9 @@ func (c *DefaultRunner) sendStartingLine(command *domain.Command) {
 }
 
 func (c *DefaultRunner) StopRunningCommand(id string) error {
+	c.mutex.Lock()
 	runningCommand, exists := c.runningCommands[id]
+	c.mutex.Unlock()
 
 	if !exists {
 		return errors.New("No running command with id: " + id)
@@ -261,7 +263,11 @@ func (c *DefaultRunner) GetRunningCommands() map[string]RunningCommand {
 }
 
 func (c *DefaultRunner) WaitForCommand(commandId string) {
-	if runningCommand, exists := c.runningCommands[commandId]; exists {
+	c.mutex.Lock()
+	runningCommand, exists := c.runningCommands[commandId]
+	c.mutex.Unlock()
+
+	if exists {
 		runningCommand.wg.Wait()
 	} else {
 		return
