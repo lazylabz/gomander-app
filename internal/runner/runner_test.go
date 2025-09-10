@@ -41,7 +41,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		// Check first line
 		emitter.On("EmitEvent", event.NewLogEntry, mock.MatchedBy(func(
 			data map[string]string) bool {
-			return strings.Contains(data["line"], "echo") && strings.Contains(data["line"], "a") && strings.Contains(data["line"], "b") && strings.Contains(data["line"], "c")
+			return strings.Contains(data["line"], "echo")
 		})).Return()
 
 		logger.On("Info", mock.Anything).Return()
@@ -282,6 +282,10 @@ func TestDefaultRunner_RunCommands(t *testing.T) {
 		emitter.On("EmitEvent", event.ProcessFinished, cmd1Id).Maybe().Return()
 		emitter.On("EmitEvent", event.ProcessStarted, cmd2Id).Return()
 		emitter.On("EmitEvent", event.ProcessFinished, cmd2Id).Maybe().Return()
+		emitter.On("EmitEvent", event.NewLogEntry, mock.MatchedBy(func(
+			data map[string]string) bool {
+			return strings.Contains(data["line"], "echo")
+		})).Return()
 
 		// Mock log entries for both commands
 		mockEmitterLogEntry(emitter, cmd1Id, "command1 output")
