@@ -2,7 +2,6 @@ package runner
 
 import (
 	"bufio"
-	"errors"
 	"io"
 	"os"
 	"os/exec"
@@ -193,7 +192,7 @@ func (c *DefaultRunner) StopRunningCommand(id string) error {
 	c.mutex.Unlock()
 
 	if !exists {
-		return errors.New("No running command with id: " + id)
+		return nil
 	}
 
 	return StopProcessGracefully(runningCommand.cmd)

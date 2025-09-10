@@ -189,21 +189,6 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		assert.NoError(t, err)
 		r.WaitForCommand(commandId)
 	})
-
-	t.Run("Should return error when stopping non-existing command", func(t *testing.T) {
-		// Arrange
-		logger := new(test.MockLogger)
-		emitter := new(event.MockEventEmitter)
-
-		r := runner.NewDefaultRunner(logger, emitter)
-
-		// Act
-		err := r.StopRunningCommand("non-existing-command")
-
-		// Assert
-		assert.Error(t, err)
-		assert.Equal(t, "No running command with id: non-existing-command", err.Error())
-	})
 }
 
 func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
@@ -454,69 +439,6 @@ func TestDefaultRunner_StopRunningCommands(t *testing.T) {
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
 
-	t.Run("Should return error if any command fails to stop", func(t *testing.T) {
-		// Arrange
-		logger := new(test.MockLogger)
-		emitter := new(event.MockEventEmitter)
-
-		r := runner.NewDefaultRunner(logger, emitter)
-
-		cmd1Id := "1"
-		nonExistingCmdId := "non-existing"
-
-		emitter.On("EmitEvent", event.ProcessStarted, cmd1Id).Return()
-		emitter.On("EmitEvent", event.ProcessFinished, cmd1Id).Maybe().Return()
-		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
-
-		logger.On("Info", mock.Anything).Return()
-		logger.On("Debug", mock.Anything).Return()
-		// Depends on OS
-		logger.On("Error", mock.Anything).Maybe().Return()
-
-		// Start one command
-		cmd1 := commanddomain.Command{
-			Id:               cmd1Id,
-			ProjectId:        "project1",
-			Name:             "Test 1",
-			Command:          infiniteCmd(),
-			WorkingDirectory: validWorkingDirectory(),
-			Position:         0,
-		}
-
-		err := r.RunCommand(&cmd1, []string{}, "")
-		assert.NoError(t, err)
-
-		assert.Eventually(t, func() bool {
-			return len(r.GetRunningCommands()) == 1
-		}, 1*time.Second, 20*time.Millisecond)
-
-		time.Sleep(500 * time.Millisecond) // Give some time for the command to start
-
-		// Include a non-existent command that should cause an error
-		nonExistingCmd := commanddomain.Command{
-			Id:               nonExistingCmdId,
-			ProjectId:        "project1",
-			Name:             "Non-existing command",
-			Command:          "echo test",
-			WorkingDirectory: validWorkingDirectory(),
-			Position:         1,
-		}
-
-		// Act
-		commands := []commanddomain.Command{cmd1, nonExistingCmd}
-		err = r.StopRunningCommands(commands)
-
-		// Assert
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "No running command with id: non-existing")
-
-		// Clean up
-		r.StopAllRunningCommands()
-		r.WaitForCommand(cmd1Id)
-
-		mock.AssertExpectationsForObjects(t, emitter, logger)
-	})
-
 	t.Run("Should not error when stopping non-running commands", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
@@ -546,9 +468,8 @@ func TestDefaultRunner_StopRunningCommands(t *testing.T) {
 		commands := []commanddomain.Command{cmd1, cmd2}
 		err := r.StopRunningCommands(commands)
 
-		// Assert - should return an error since commands aren't running
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "No running command with id")
+		// Assert
+		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
