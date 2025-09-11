@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"sync"
-	"time"
 
 	"gomander/internal/command/domain"
 	"gomander/internal/event"
@@ -239,8 +238,6 @@ func (c *DefaultRunner) streamOutput(commandId string, pipeReader io.ReadCloser)
 		c.logger.Debug(line)
 
 		c.sendStreamLine(commandId, line)
-
-		time.Sleep(time.Millisecond * 5) // Throttle output to avoid overwhelming the UI
 	}
 }
 
