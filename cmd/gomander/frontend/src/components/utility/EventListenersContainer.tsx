@@ -1,4 +1,4 @@
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useRef } from "react";
 
 import { eventService } from "@/contracts/service.ts";
 import { Event, type EventData } from "@/contracts/types.ts";
@@ -7,7 +7,20 @@ import { CommandStatus } from "@/types/CommandStatus.ts";
 import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
 
 export const EventListenersContainer = () => {
-  const addLog = useCommandStore((state) => state.addLog);
+  const addLogs = useCommandStore((state) => state.addLogs);
+
+  const logsBuffer = useRef(new Map<string, string[]>());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (logsBuffer.current.size > 0) {
+        addLogs(logsBuffer.current);
+        logsBuffer.current.clear();
+      }
+    }, 30); // Flush every 30ms
+
+    return () => clearInterval(interval);
+  }, [addLogs]);
 
   // Register events listeners
   useEffect(() => {
@@ -15,7 +28,10 @@ export const EventListenersContainer = () => {
       Event.NEW_LOG_ENTRY,
       (data: EventData[Event.NEW_LOG_ENTRY]) => {
         const { id, line } = data;
-        addLog(id, line);
+        if (!logsBuffer.current.has(id)) {
+          logsBuffer.current.set(id, []);
+        }
+        logsBuffer.current.get(id)!.push(line);
       },
     );
 

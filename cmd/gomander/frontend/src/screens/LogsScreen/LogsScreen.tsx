@@ -161,8 +161,8 @@ export const LogsScreen = () => {
                 <span
                   data-match={dataMatch}
                   className={cn(
-                    "match bg-yellow-100",
-                    isMatch && "bg-yellow-300",
+                    "match bg-yellow-100 dark:bg-yellow-800",
+                    isMatch && "bg-yellow-300 dark:bg-yellow-600",
                   )}
                 >
                   {domToReact(domNode.children as DOMNode[])}
