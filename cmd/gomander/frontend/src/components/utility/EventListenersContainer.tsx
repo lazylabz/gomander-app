@@ -14,7 +14,8 @@ export const EventListenersContainer = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       if (logsBuffer.current.size > 0) {
-        addLogs(logsBuffer.current);
+        const bufferCopy = new Map(logsBuffer.current);
+        addLogs(bufferCopy);
         logsBuffer.current.clear();
       }
     }, 30); // Flush every 30ms
@@ -31,7 +32,7 @@ export const EventListenersContainer = () => {
         if (!logsBuffer.current.has(id)) {
           logsBuffer.current.set(id, []);
         }
-        logsBuffer.current.get(id)!.push(line);
+        logsBuffer.current.get(id)?.push(line);
       },
     );
 
