@@ -28,8 +28,10 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
+import { ALL_COMMANDS_SECTION_OPEN } from "@/constants/localStorage.ts";
 import type { Command } from "@/contracts/types.ts";
 import { parseError } from "@/helpers/errorHelpers.ts";
+import { useLocalStorageState } from "@/hooks/useLocalStorageState.ts";
 import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { reorderCommands } from "@/useCases/command/reorderCommands.ts";
@@ -39,6 +41,11 @@ export const AllCommandsSection = () => {
   const setCommands = useCommandStore((state) => state.setCommands);
 
   const [modalOpen, setModalOpen] = useState(false);
+
+  const [sectionOpen, setSectionOpen] = useLocalStorageState(
+    ALL_COMMANDS_SECTION_OPEN,
+    false,
+  );
 
   const openCreateCommandModal = () => {
     setModalOpen(true);
@@ -86,7 +93,11 @@ export const AllCommandsSection = () => {
   return (
     <>
       <CreateCommandModal open={modalOpen} setOpen={setModalOpen} />
-      <Collapsible className="group/collapsible">
+      <Collapsible
+        className="group/collapsible"
+        open={sectionOpen}
+        onOpenChange={setSectionOpen}
+      >
         <SidebarGroup className="py-0">
           <ContextMenu>
             <ContextMenuTrigger>
