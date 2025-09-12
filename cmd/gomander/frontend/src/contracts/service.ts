@@ -1,3 +1,4 @@
+import { GetDirPath } from "../../wailsjs/go/fs/UIFsHelper";
 import {
   AddCommandController,
   CloseProjectController,
@@ -72,6 +73,7 @@ export const helpersService = {
   getComputedPath: GetComputedPath,
   isThereANewRelease: IsThereANewRelease,
   getCurrentRelease: GetCurrentRelease,
+  getFolderPath: GetDirPath,
 };
 
 export const eventService = {
