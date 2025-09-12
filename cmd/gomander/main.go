@@ -27,6 +27,7 @@ import (
 	projectinfrastructure "gomander/internal/project/infrastructure"
 	"gomander/internal/releases"
 	"gomander/internal/runner"
+	"gomander/internal/uihelpers/fs"
 	"gomander/internal/uihelpers/path"
 
 	"github.com/wailsapp/wails/v2"
@@ -49,6 +50,7 @@ func main() {
 
 	// Create instance of helpers
 	uiPathHelper := path.NewUiPathHelper()
+	uiFsHelper := fs.NewUIFsHelper(facade.DefaultRuntimeFacade{})
 	releaseHelper := releases.NewReleaseHelper()
 
 	// Create instance of controllers
@@ -78,12 +80,16 @@ func main() {
 
 			// Initialize controllers
 			controllers.loadUseCases(app.UseCases)
+
+			// Load context into helpers
+			uiFsHelper.SetContext(ctx)
 		},
 		Bind: []interface{}{
 			app,
 			uiPathHelper,
 			controllers,
 			releaseHelper,
+			uiFsHelper,
 		},
 		OnBeforeClose: app.OnBeforeClose,
 		EnumBind: []interface{}{
