@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Folder, FolderOpen, Play, Square } from "lucide-react";
-import { type SyntheticEvent, useState } from "react";
+import { type SyntheticEvent } from "react";
 import { toast } from "sonner";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
@@ -19,8 +19,10 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
+import { getCommandGroupSectionOpenLocalStorageKey } from "@/constants/localStorage.ts";
 import type { Command, CommandGroup } from "@/contracts/types.ts";
 import { parseError } from "@/helpers/errorHelpers.ts";
+import { useLocalStorageState } from "@/hooks/useLocalStorageState.ts";
 import { cn } from "@/lib/utils.ts";
 import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
@@ -38,7 +40,11 @@ export const CommandGroupSection = ({
 
   const { startEditingCommandGroup, isReorderingGroups } = useSidebarContext();
 
-  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useLocalStorageState(
+    getCommandGroupSectionOpenLocalStorageKey(commandGroup.id),
+    false,
+  );
+
   const isOpen = internalIsOpen && !isReorderingGroups;
 
   const { attributes, listeners, setNodeRef, transform, transition } =

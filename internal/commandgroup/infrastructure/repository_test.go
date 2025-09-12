@@ -478,8 +478,9 @@ func TestGormCommandGroupRepository_DeleteEmpty(t *testing.T) {
 			commandToCommandGroupModels1,
 		)
 
-		err := helper.repo.DeleteEmpty()
+		ids, err := helper.repo.DeleteEmpty()
 		assert.Nil(t, err)
+		assert.Equal(t, []string{cmdGroup2.Id}, ids)
 
 		group1, _ := helper.repo.Get(cmdGroup1.Id)
 		group2, _ := helper.repo.Get(cmdGroup2.Id)
@@ -544,8 +545,9 @@ func TestGormCommandGroupRepository_DeleteAll(t *testing.T) {
 			commandToCommandGroupModels,
 		)
 
-		err := helper.repo.DeleteAll(projectId)
+		ids, err := helper.repo.DeleteAll(projectId)
 		assert.Nil(t, err)
+		assert.Equal(t, []string{cmdGroup1.Id, cmdGroup2.Id}, ids)
 
 		// Command groups from the specified project should be deleted
 		result1, _ := helper.repo.Get(cmdGroup1.Id)
@@ -594,6 +596,20 @@ func arrange(
 	}
 
 	err = goose.UpContext(ctx, db, ".")
+	if err != nil {
+		panic(err)
+	}
+
+	// Clean all tables
+	_, err = gorm.G[commandinfrastructure.CommandModel](gormDb).Where("true").Delete(ctx)
+	if err != nil {
+		panic(err)
+	}
+	_, err = gorm.G[infrastructure.CommandToCommandGroupModel](gormDb).Where("true").Delete(ctx)
+	if err != nil {
+		panic(err)
+	}
+	_, err = gorm.G[infrastructure.CommandGroupModel](gormDb).Where("true").Delete(ctx)
 	if err != nil {
 		panic(err)
 	}

@@ -3,6 +3,7 @@ package handlers
 import (
 	commanddomainevent "gomander/internal/command/domain/event"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
+	internalEvent "gomander/internal/event"
 	"gomander/internal/eventbus"
 )
 
@@ -13,15 +14,20 @@ type CleanCommandGroupsOnCommandDeleted interface {
 
 type DefaultCleanCommandGroupsOnCommandDeleted struct {
 	commandGroupRepository commandgroupdomain.Repository
+	eventEmitter           internalEvent.EventEmitter
 }
 
 func (h *DefaultCleanCommandGroupsOnCommandDeleted) GetEvent() eventbus.Event {
 	return commanddomainevent.CommandDeletedEvent{}
 }
 
-func NewCleanCommandGroupsOnCommandDeleted(commandGroupRepository commandgroupdomain.Repository) *DefaultCleanCommandGroupsOnCommandDeleted {
+func NewCleanCommandGroupsOnCommandDeleted(
+	commandGroupRepository commandgroupdomain.Repository,
+	eventEmitter internalEvent.EventEmitter,
+) *DefaultCleanCommandGroupsOnCommandDeleted {
 	return &DefaultCleanCommandGroupsOnCommandDeleted{
 		commandGroupRepository: commandGroupRepository,
+		eventEmitter:           eventEmitter,
 	}
 }
 
@@ -36,9 +42,13 @@ func (h *DefaultCleanCommandGroupsOnCommandDeleted) Execute(e eventbus.Event) er
 		return err
 	}
 
-	err = h.commandGroupRepository.DeleteEmpty()
+	deletedIds, err := h.commandGroupRepository.DeleteEmpty()
 	if err != nil {
 		return err
+	}
+
+	for _, id := range deletedIds {
+		h.eventEmitter.EmitEvent(internalEvent.CommandGroupDeleted, id)
 	}
 
 	return nil

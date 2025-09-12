@@ -1,7 +1,9 @@
 import { Fragment, useEffect, useRef } from "react";
 
+import { getCommandGroupSectionOpenLocalStorageKey } from "@/constants/localStorage.ts";
 import { eventService } from "@/contracts/service.ts";
 import { Event, type EventData } from "@/contracts/types.ts";
+import { removeKeyFromLocalStorage } from "@/helpers/localStorage.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
@@ -46,6 +48,14 @@ export const EventListenersContainer = () => {
       Event.PROCESS_STARTED,
       (data: EventData[Event.PROCESS_STARTED]) =>
         updateCommandStatus(data, CommandStatus.RUNNING),
+    );
+
+    eventService.eventsOn(
+      Event.COMMAND_GROUP_DELETED,
+      (data: EventData[Event.COMMAND_GROUP_DELETED]) =>
+        removeKeyFromLocalStorage(
+          getCommandGroupSectionOpenLocalStorageKey(data),
+        ),
     );
 
     // Clean listeners on all events
