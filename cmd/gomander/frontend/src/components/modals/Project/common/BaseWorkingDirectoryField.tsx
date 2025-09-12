@@ -1,5 +1,6 @@
 import { type Path, useFormContext } from "react-hook-form";
 
+import { FSInput } from "@/components/inputs/FSInput.tsx";
 import {
   FormControl,
   FormField,
@@ -7,7 +8,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form.tsx";
-import { Input } from "@/components/ui/input.tsx";
 
 export const BaseWorkingDirectoryField = <
   T extends { baseWorkingDirectory: string },
@@ -24,7 +24,7 @@ export const BaseWorkingDirectoryField = <
         <FormItem>
           <FormLabel>Base Working Directory</FormLabel>
           <FormControl>
-            <Input
+            <FSInput
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
