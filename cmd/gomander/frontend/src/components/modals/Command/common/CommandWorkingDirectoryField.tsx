@@ -1,5 +1,6 @@
 import { useFormContext } from "react-hook-form";
 
+import { FSInput } from "@/components/inputs/FSInput.tsx";
 import type { FormSchemaType } from "@/components/modals/Command/common/formSchema.ts";
 import {
   FormControl,
@@ -8,7 +9,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form.tsx";
-import { Input } from "@/components/ui/input.tsx";
 
 export const CommandWorkingDirectoryField = () => {
   const form = useFormContext<FormSchemaType>();
@@ -21,7 +21,7 @@ export const CommandWorkingDirectoryField = () => {
         <FormItem>
           <FormLabel>Working Directory</FormLabel>
           <FormControl>
-            <Input
+            <FSInput
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
