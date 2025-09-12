@@ -234,6 +234,10 @@ func (r GormCommandGroupRepository) DeleteEmpty() ([]string, error) {
 		Where(query).
 		Find(r.ctx)
 
+	if err != nil {
+		return nil, err
+	}
+
 	_, err = gorm.G[CommandGroupModel](r.db).
 		Where(query).
 		Delete(r.ctx)
