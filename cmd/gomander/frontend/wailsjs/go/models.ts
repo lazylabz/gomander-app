@@ -110,6 +110,7 @@ export namespace event {
 	    PROCESS_FINISHED = "process_finished",
 	    PROCESS_STARTED = "process_started",
 	    NEW_LOG_ENTRY = "new_log_entry",
+	    COMMAND_GROUP_DELETED = "command_group_deleted",
 	}
 
 }

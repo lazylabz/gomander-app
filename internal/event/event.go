@@ -7,9 +7,10 @@ import (
 type Event string
 
 const (
-	ProcessStarted  Event = "process_started"
-	ProcessFinished Event = "process_finished"
-	NewLogEntry     Event = "new_log_entry"
+	ProcessStarted      Event = "process_started"
+	ProcessFinished     Event = "process_finished"
+	NewLogEntry         Event = "new_log_entry"
+	CommandGroupDeleted Event = "command_group_deleted"
 )
 
 var Events = []struct {
@@ -19,4 +20,5 @@ var Events = []struct {
 	{Value: ProcessFinished, TSName: strings.ToUpper(string(ProcessFinished))},
 	{Value: ProcessStarted, TSName: strings.ToUpper(string(ProcessStarted))},
 	{Value: NewLogEntry, TSName: strings.ToUpper(string(NewLogEntry))},
+	{Value: CommandGroupDeleted, TSName: strings.ToUpper(string(CommandGroupDeleted))},
 }
