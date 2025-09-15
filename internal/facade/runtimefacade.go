@@ -9,6 +9,7 @@ import (
 type RuntimeFacade interface {
 	SaveFileDialog(ctx context.Context, dialogOptions runtime.SaveDialogOptions) (string, error)
 	OpenFileDialog(ctx context.Context, dialogOptions runtime.OpenDialogOptions) (string, error)
+	OpenDirectoryDialog(ctx context.Context, dialogOptions runtime.OpenDialogOptions) (string, error)
 	EventsEmit(ctx context.Context, eventName string, payload interface{})
 	LogInfo(ctx context.Context, message string)
 	LogDebug(ctx context.Context, message string)
@@ -39,4 +40,8 @@ func (d DefaultRuntimeFacade) LogDebug(ctx context.Context, message string) {
 
 func (d DefaultRuntimeFacade) LogError(ctx context.Context, message string) {
 	runtime.LogError(ctx, message)
+}
+
+func (d DefaultRuntimeFacade) OpenDirectoryDialog(ctx context.Context, dialogOptions runtime.OpenDialogOptions) (string, error) {
+	return runtime.OpenDirectoryDialog(ctx, dialogOptions)
 }

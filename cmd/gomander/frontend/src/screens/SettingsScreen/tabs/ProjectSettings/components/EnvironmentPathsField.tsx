@@ -1,6 +1,7 @@
 import { Plus, Trash } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 
+import { FSInput } from "@/components/inputs/FSInput.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import {
   FormControl,
@@ -8,7 +9,6 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form.tsx";
-import { Input } from "@/components/ui/input.tsx";
 import type { SettingsFormType } from "@/screens/SettingsScreen/contexts/settingsFormSchema.ts";
 
 export const EnvironmentPathsField = () => {
@@ -42,7 +42,7 @@ export const EnvironmentPathsField = () => {
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormControl>
-                      <Input
+                      <FSInput
                         autoComplete="off"
                         autoCorrect="off"
                         autoCapitalize="off"
