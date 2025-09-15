@@ -3,6 +3,7 @@ import type { ChangeEvent } from "react";
 
 import { Input } from "@/components/ui/input.tsx";
 import { helpersService } from "@/contracts/service.ts";
+import { cn } from "@/lib/utils.ts";
 
 export const FSInput = (props: React.ComponentProps<typeof Input>) => {
   const handleAskForDirPath = async () => {
@@ -16,7 +17,7 @@ export const FSInput = (props: React.ComponentProps<typeof Input>) => {
 
   return (
     <div className="w-full relative">
-      <Input {...props} />
+      <Input {...props} className={cn("pr-8", props.className)} />
       <button
         onClick={handleAskForDirPath}
         className="absolute right-2 top-2 z-10 bg-background"
