@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input.tsx";
 import { helpersService } from "@/contracts/service.ts";
 
 export const FSInput = (props: React.ComponentProps<typeof Input>) => {
-  const handleExploreFs = async () => {
-    const path = await helpersService.getFolderPath();
+  const handleAskForDirPath = async () => {
+    const path = await helpersService.askForDirPath();
     if (path) {
       props.onChange?.({
         target: { value: path },
@@ -18,7 +18,7 @@ export const FSInput = (props: React.ComponentProps<typeof Input>) => {
     <div className="w-full relative">
       <Input {...props} />
       <button
-        onClick={handleExploreFs}
+        onClick={handleAskForDirPath}
         className="absolute right-2 top-2 z-10 bg-background"
       >
         <FolderIcon

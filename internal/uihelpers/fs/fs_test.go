@@ -36,7 +36,7 @@ func TestUIFsHelper_SetContext(t *testing.T) {
 	// The method doesn't return anything and just sets an internal field
 }
 
-func TestUIFsHelper_GetDirPath(t *testing.T) {
+func TestUIFsHelper_AskForDirPath(t *testing.T) {
 	t.Run("Should return directory path when successful", func(t *testing.T) {
 		// Arrange
 		mockRuntime := new(test.MockRuntimeFacade)
@@ -48,7 +48,7 @@ func TestUIFsHelper_GetDirPath(t *testing.T) {
 		mockRuntime.On("OpenDirectoryDialog", ctx, runtime.OpenDialogOptions{}).Return(expectedPath, nil)
 
 		// Act
-		path, err := helper.GetDirPath()
+		path, err := helper.AskForDirPath()
 
 		// Assert
 		assert.NoError(t, err)
@@ -67,7 +67,7 @@ func TestUIFsHelper_GetDirPath(t *testing.T) {
 		mockRuntime.On("OpenDirectoryDialog", ctx, runtime.OpenDialogOptions{}).Return("", expectedError)
 
 		// Act
-		path, err := helper.GetDirPath()
+		path, err := helper.AskForDirPath()
 
 		// Assert
 		assert.Error(t, err)

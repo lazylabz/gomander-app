@@ -23,6 +23,6 @@ func (h *UIFsHelper) SetContext(ctx context.Context) {
 	h.ctx = ctx
 }
 
-func (h *UIFsHelper) GetDirPath() (string, error) {
+func (h *UIFsHelper) AskForDirPath() (string, error) {
 	return h.runtime.OpenDirectoryDialog(h.ctx, runtime.OpenDialogOptions{})
 }
