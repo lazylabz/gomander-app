@@ -17,13 +17,15 @@ export const FSInput = (props: React.ComponentProps<typeof Input>) => {
   return (
     <div className="w-full relative">
       <Input {...props} />
-      <div className="absolute right-2 top-2 z-10 bg-background">
+      <button
+        onClick={handleExploreFs}
+        className="absolute right-2 top-2 z-10 bg-background"
+      >
         <FolderIcon
-          onClick={handleExploreFs}
           size={20}
           className="text-foreground opacity-75 hover:opacity-100 transition-opacity cursor-pointer"
         />
-      </div>
+      </button>
     </div>
   );
 };
