@@ -41,3 +41,7 @@ func (m *MockRuntimeFacade) OpenDirectoryDialog(ctx context.Context, dialogOptio
 	args := m.Called(ctx, dialogOptions)
 	return args.String(0), args.Error(1)
 }
+
+func (m *MockRuntimeFacade) BrowserOpenURL(ctx context.Context, url string) {
+	m.Called(ctx, url)
+}

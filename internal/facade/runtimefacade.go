@@ -14,6 +14,7 @@ type RuntimeFacade interface {
 	LogInfo(ctx context.Context, message string)
 	LogDebug(ctx context.Context, message string)
 	LogError(ctx context.Context, message string)
+	BrowserOpenURL(ctx context.Context, url string)
 }
 
 type DefaultRuntimeFacade struct{}
@@ -44,4 +45,8 @@ func (d DefaultRuntimeFacade) LogError(ctx context.Context, message string) {
 
 func (d DefaultRuntimeFacade) OpenDirectoryDialog(ctx context.Context, dialogOptions runtime.OpenDialogOptions) (string, error) {
 	return runtime.OpenDirectoryDialog(ctx, dialogOptions)
+}
+
+func (d DefaultRuntimeFacade) BrowserOpenURL(ctx context.Context, url string) {
+	runtime.BrowserOpenURL(ctx, url)
 }

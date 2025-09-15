@@ -2,6 +2,7 @@ package fs
 
 import (
 	"context"
+	"path/filepath"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
@@ -25,4 +26,11 @@ func (h *UIFsHelper) SetContext(ctx context.Context) {
 
 func (h *UIFsHelper) AskForDirPath() (string, error) {
 	return h.runtime.OpenDirectoryDialog(h.ctx, runtime.OpenDialogOptions{})
+}
+
+func (h *UIFsHelper) OpenFileFolder(filePath string) {
+	cleanPath := filepath.Clean(filePath)
+	folderPath := filepath.Dir(cleanPath)
+
+	h.runtime.BrowserOpenURL(h.ctx, "file://"+folderPath)
 }

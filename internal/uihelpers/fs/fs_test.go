@@ -76,3 +76,22 @@ func TestUIFsHelper_AskForDirPath(t *testing.T) {
 		mockRuntime.AssertExpectations(t)
 	})
 }
+
+func TestUIFsHelper_OpenDirectoryDialog(t *testing.T) {
+	// Arrange
+	mockRuntime := new(test.MockRuntimeFacade)
+	helper := fs.NewUIFsHelper(mockRuntime)
+	ctx := context.Background()
+	helper.SetContext(ctx)
+
+	filePath := "/some/directory/file.txt"
+	expectedFolderPath := "file:///some/directory"
+
+	mockRuntime.On("BrowserOpenURL", ctx, expectedFolderPath).Return()
+
+	// Act
+	helper.OpenFileFolder(filePath)
+
+	// Assert
+	mockRuntime.AssertExpectations(t)
+}

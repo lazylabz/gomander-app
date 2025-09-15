@@ -4,4 +4,6 @@ import {context} from '../models';
 
 export function AskForDirPath():Promise<string>;
 
+export function OpenFileFolder(arg1:string):Promise<void>;
+
 export function SetContext(arg1:context.Context):Promise<void>;

@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 
-import { externalBrowserService } from "@/contracts/service.ts";
+import { helpersService } from "@/contracts/service.ts";
 
 export const ProjectExportSuccessToast = ({
   exportFilePath,
@@ -10,12 +10,7 @@ export const ProjectExportSuccessToast = ({
   toastId: string;
 }) => {
   const handleOpenExportPath = async () => {
-    const exportFolderPath = exportFilePath.substring(
-      0,
-      exportFilePath.lastIndexOf("/"),
-    );
-
-    externalBrowserService.browserOpenURL("file://" + exportFolderPath);
+    await helpersService.openFileFolder(exportFilePath);
 
     toast.dismiss(toastId);
   };
