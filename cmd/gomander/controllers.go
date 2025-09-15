@@ -60,7 +60,7 @@ func (wc *WailsControllers) DeleteProjectController(projectId string) error {
 	return wc.useCases.DeleteProject.Execute(projectId)
 }
 
-func (wc *WailsControllers) ExportProjectController(projectId string) error {
+func (wc *WailsControllers) ExportProjectController(projectId string) (string, error) {
 	return wc.useCases.ExportProject.Execute(projectId)
 }
 

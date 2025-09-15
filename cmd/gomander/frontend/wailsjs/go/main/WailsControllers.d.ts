@@ -20,7 +20,7 @@ export function EditCommandController(arg1:domain.Command):Promise<void>;
 
 export function EditProjectController(arg1:domain.Project):Promise<void>;
 
-export function ExportProjectController(arg1:string):Promise<void>;
+export function ExportProjectController(arg1:string):Promise<string>;
 
 export function GetAvailableProjectsController():Promise<Array<domain.Project>>;
 

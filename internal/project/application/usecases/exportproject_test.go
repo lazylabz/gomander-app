@@ -58,7 +58,8 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockCommandRepository.On("GetAll", projectId).Return([]domain.Command{cmd1, cmd2, cmd3}, nil)
 		mockCommandGroupRepository.On("GetAll", projectId).Return([]commandgroupdomain.CommandGroup{cmdGroup1, cmdGroup2}, nil)
 
-		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("/somedir/file.json", nil)
+		selectedPath := "/somedir/file.json"
+		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return(selectedPath, nil)
 
 		expectedExportJSON := projectdomain.ProjectExportJSONv1{
 			Version: 1,
@@ -84,10 +85,11 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockFsFacade.On("WriteFile", "/somedir/file.json", expectedBytes, os.FileMode(0644)).Return(nil)
 
 		// Act
-		err = sut.Execute(projectId)
+		exportPath, err := sut.Execute(projectId)
 
 		// Assert
 		assert.NoError(t, err)
+		assert.Equal(t, selectedPath, exportPath)
 
 		mock.AssertExpectationsForObjects(t,
 			mockProjectRepository,
@@ -117,7 +119,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("", assert.AnError)
 
 		// Act
-		err := sut.Execute("test-project-id")
+		_, err := sut.Execute("test-project-id")
 
 		// Assert
 		assert.Error(t, err)
@@ -147,7 +149,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("", nil)
 
 		// Act
-		err := sut.Execute("test-project-id")
+		_, err := sut.Execute("test-project-id")
 
 		// Assert
 		assert.NoError(t, err)
@@ -174,7 +176,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockProjectRepository.On("Get", "test-project-id").Return(nil, assert.AnError)
 
 		// Act
-		err := sut.Execute("test-project-id")
+		_, err := sut.Execute("test-project-id")
 
 		// Assert
 		assert.Error(t, err)
@@ -204,7 +206,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("/somedir/file.json", nil)
 
 		// Act
-		err := sut.Execute("test-project-id")
+		_, err := sut.Execute("test-project-id")
 
 		// Assert
 		assert.Error(t, err)
@@ -235,7 +237,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("/somedir/file.json", nil)
 
 		// Act
-		err := sut.Execute("test-project-id")
+		_, err := sut.Execute("test-project-id")
 
 		// Assert
 		assert.Error(t, err)
@@ -303,7 +305,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 
 		mockFsFacade.On("WriteFile", "/somedir/file.json", expectedBytes, os.FileMode(0644)).Return(errors.New("problem writing file"))
 
-		err = sut.Execute(projectId)
+		_, err = sut.Execute(projectId)
 		assert.Error(t, err)
 
 		mock.AssertExpectationsForObjects(t,
