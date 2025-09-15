@@ -227,26 +227,38 @@ func (r GormCommandGroupRepository) RemoveCommandFromCommandGroups(commandId str
 	return nil
 }
 
-func (r GormCommandGroupRepository) DeleteEmpty() error {
-	_, err := gorm.G[CommandGroupModel](r.db).
-		Where("id NOT IN (SELECT DISTINCT command_group_id FROM command_group_command)").
+func (r GormCommandGroupRepository) DeleteEmpty() ([]string, error) {
+	query := "id NOT IN (SELECT DISTINCT command_group_id FROM command_group_command)"
+
+	entriesToDelete, err := gorm.G[CommandGroupModel](r.db).
+		Where(query).
+		Find(r.ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = gorm.G[CommandGroupModel](r.db).
+		Where(query).
 		Delete(r.ctx)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return array.Map(entriesToDelete, func(entry CommandGroupModel) string { return entry.Id }), nil
 }
 
-func (r GormCommandGroupRepository) DeleteAll(projectId string) error {
+func (r GormCommandGroupRepository) DeleteAll(projectId string) ([]string, error) {
+	var commandGroupIds []string
+
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		commandGroups, err := gorm.G[CommandGroupModel](tx).Where("project_id = ?", projectId).Find(r.ctx)
 		if err != nil {
 			return err
 		}
 
-		commandGroupIds := array.Map(commandGroups, func(commandGroup CommandGroupModel) string {
+		commandGroupIds = array.Map(commandGroups, func(commandGroup CommandGroupModel) string {
 			return commandGroup.Id
 		})
 
@@ -264,8 +276,8 @@ func (r GormCommandGroupRepository) DeleteAll(projectId string) error {
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return commandGroupIds, nil
 }
