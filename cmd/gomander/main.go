@@ -83,6 +83,16 @@ func main() {
 
 			// Load context into helpers
 			uiFsHelper.SetContext(ctx)
+
+			// Start http server for 3rd party integrations
+			server := NewThirdPartyIntegrationsServer(app.UseCases)
+
+			go func() {
+				err := server.Start()
+				if err != nil {
+					panic(err)
+				}
+			}()
 		},
 		Bind: []interface{}{
 			app,
