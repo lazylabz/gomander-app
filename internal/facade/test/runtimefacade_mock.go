@@ -41,3 +41,8 @@ func (m *MockRuntimeFacade) OpenDirectoryDialog(ctx context.Context, dialogOptio
 	args := m.Called(ctx, dialogOptions)
 	return args.String(0), args.Error(1)
 }
+
+func (m *MockRuntimeFacade) OpenFolderInFileManager(path string) error {
+	args := m.Called(path)
+	return args.Error(0)
+}

@@ -3,6 +3,7 @@ package fs_test
 import (
 	"context"
 	"errors"
+	stdruntime "runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -75,4 +76,29 @@ func TestUIFsHelper_AskForDirPath(t *testing.T) {
 		assert.Empty(t, path)
 		mockRuntime.AssertExpectations(t)
 	})
+}
+
+func TestUIFsHelper_OpenDirectoryDialog(t *testing.T) {
+	// Arrange
+	mockRuntime := new(test.MockRuntimeFacade)
+	helper := fs.NewUIFsHelper(mockRuntime)
+	ctx := context.Background()
+	helper.SetContext(ctx)
+
+	filePath := "/some/directory/file.txt"
+	expectedFolderPath := "/some/directory"
+
+	if stdruntime.GOOS == "windows" {
+		filePath = "C:\\some\\directory\\file.txt"
+		expectedFolderPath = "C:\\some\\directory"
+	}
+
+	mockRuntime.On("OpenFolderInFileManager", expectedFolderPath).Return(nil)
+
+	// Act
+	err := helper.OpenFileFolder(filePath)
+	assert.NoError(t, err)
+
+	// Assert
+	mockRuntime.AssertExpectations(t)
 }

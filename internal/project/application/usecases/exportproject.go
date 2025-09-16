@@ -14,7 +14,7 @@ import (
 )
 
 type ExportProject interface {
-	Execute(projectId string) error
+	Execute(projectId string) (string, error)
 }
 
 type DefaultExportProject struct {
@@ -37,10 +37,10 @@ func NewExportProject(ctx context.Context, projectRepo projectdomain.Repository,
 	}
 }
 
-func (uc *DefaultExportProject) Execute(projectId string) error {
+func (uc *DefaultExportProject) Execute(projectId string) (string, error) {
 	project, err := uc.projectRepository.Get(projectId)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	filePath, err := uc.runtimeFacade.SaveFileDialog(uc.ctx, runtime.SaveDialogOptions{
@@ -49,22 +49,22 @@ func (uc *DefaultExportProject) Execute(projectId string) error {
 		DefaultFilename:      project.Name + ".json",
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if filePath == "" {
 		// User canceled the dialog
-		return nil
+		return "", nil
 	}
 
 	commands, err := uc.commandRepository.GetAll(projectId)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	commandGroups, err := uc.commandGroupRepository.GetAll(projectId)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	exportData := projectdomain.ProjectExportJSONv1{
@@ -93,14 +93,14 @@ func (uc *DefaultExportProject) Execute(projectId string) error {
 	// Marshal to JSON with indentation for readability
 	jsonData, err := json.MarshalIndent(exportData, "", "  ")
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Write to file
 	err = uc.fsFacade.WriteFile(filePath, jsonData, 0644)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return filePath, nil
 }

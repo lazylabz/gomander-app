@@ -11,6 +11,7 @@ import { dataService } from "@/contracts/service.ts";
 import type { Project } from "@/contracts/types.ts";
 import { parseError } from "@/helpers/errorHelpers.ts";
 import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
+import { ProjectExportSuccessToast } from "@/screens/ProjectSelectionScreen/components/ProjectExportSuccessToast.tsx";
 import { exportProject } from "@/useCases/project/exportProject.ts";
 
 export const ProjectCard = ({
@@ -27,8 +28,19 @@ export const ProjectCard = ({
 
   const handleExportProject = async () => {
     try {
-      await exportProject(project.id);
-      toast.success("Project exported successfully!");
+      const uniqueToastId = crypto.randomUUID();
+
+      const exportFilePath = await exportProject(project.id);
+
+      toast.success(
+        <ProjectExportSuccessToast
+          exportFilePath={exportFilePath}
+          toastId={uniqueToastId}
+        />,
+        {
+          id: uniqueToastId,
+        },
+      );
     } catch (e) {
       toast.error(parseError(e, "Failed to export the project"));
     }
