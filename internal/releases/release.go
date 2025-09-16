@@ -10,7 +10,7 @@ import (
 	"github.com/Masterminds/semver"
 )
 
-const CurrentRelease = "v1.0.0"
+const CurrentRelease = "v1.1.0"
 
 const RepoOwnerAndName = "Lazylabz/gomander-app"
 

@@ -20,7 +20,7 @@ func TestApp_GetCurrentRelease(t *testing.T) {
 	currentRelease := rh.GetCurrentRelease()
 
 	// Assert
-	assert.Equal(t, "1.0.0", currentRelease)
+	assert.Equal(t, "1.1.0", currentRelease)
 
 	// Verify it's a valid semver
 	_, err := semver.NewVersion(currentRelease)
