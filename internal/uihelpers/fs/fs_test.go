@@ -86,17 +86,18 @@ func TestUIFsHelper_OpenDirectoryDialog(t *testing.T) {
 	helper.SetContext(ctx)
 
 	filePath := "/some/directory/file.txt"
-	expectedFolderPath := "file:///some/directory"
+	expectedFolderPath := "/some/directory"
 
 	if stdruntime.GOOS == "windows" {
 		filePath = "C:\\some\\directory\\file.txt"
-		expectedFolderPath = "file:///C:/some/directory"
+		expectedFolderPath = "C:\\some\\directory"
 	}
 
-	mockRuntime.On("BrowserOpenURL", ctx, expectedFolderPath).Return()
+	mockRuntime.On("OpenFolderInFileManager", expectedFolderPath).Return(nil)
 
 	// Act
-	helper.OpenFileFolder(filePath)
+	err := helper.OpenFileFolder(filePath)
+	assert.NoError(t, err)
 
 	// Assert
 	mockRuntime.AssertExpectations(t)
