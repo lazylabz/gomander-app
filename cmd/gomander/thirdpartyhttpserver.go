@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"net"
 	"net/http"
 	"sync"
 
@@ -10,6 +12,9 @@ import (
 	"gomander/internal/commandgroup/domain"
 	"gomander/internal/helpers/array"
 )
+
+var StartPort = 9001
+var EndPort = 9100
 
 type ThirdPartyIntegrationsServer struct {
 	useCases app.UseCases
@@ -26,6 +31,11 @@ func NewThirdPartyIntegrationsServer(useCases app.UseCases) *ThirdPartyIntegrati
 func (s *ThirdPartyIntegrationsServer) Start() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
+	port, err := findAvailablePort()
+	if err != nil {
+		return err
+	}
 
 	if s.server != nil {
 		return nil // Server is already running
@@ -46,7 +56,7 @@ func (s *ThirdPartyIntegrationsServer) Start() error {
 	mux.HandleFunc("/command-group/stop/{id}", s.handleStopCommandGroup)
 
 	s.server = &http.Server{
-		Addr:    ":9001",
+		Addr:    fmt.Sprintf(":%d", port),
 		Handler: mux,
 	}
 
@@ -190,4 +200,16 @@ func (s *ThirdPartyIntegrationsServer) handleStopCommandGroup(w http.ResponseWri
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func findAvailablePort() (int, error) {
+	for port := StartPort; port <= EndPort; port++ {
+		ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+		if err != nil {
+			continue // Port is in use
+		}
+		_ = ln.Close() // Close the listener immediately
+		return port, nil
+	}
+	return 0, fmt.Errorf("no available ports found in range %d-%d", StartPort, EndPort)
 }
