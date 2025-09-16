@@ -3,6 +3,7 @@ package fs_test
 import (
 	"context"
 	"errors"
+	stdruntime "runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -86,6 +87,11 @@ func TestUIFsHelper_OpenDirectoryDialog(t *testing.T) {
 
 	filePath := "/some/directory/file.txt"
 	expectedFolderPath := "file:///some/directory"
+
+	if stdruntime.GOOS == "windows" {
+		filePath = "C:\\some\\directory\\file.txt"
+		expectedFolderPath = "file:///C:/some/directory"
+	}
 
 	mockRuntime.On("BrowserOpenURL", ctx, expectedFolderPath).Return()
 
