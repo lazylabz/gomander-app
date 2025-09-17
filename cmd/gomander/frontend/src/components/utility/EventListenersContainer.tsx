@@ -1,13 +1,13 @@
-import {Fragment, useEffect, useRef} from "react";
+import { Fragment, useEffect, useRef } from "react";
 
-import {getCommandGroupSectionOpenLocalStorageKey} from "@/constants/localStorage.ts";
-import {eventService} from "@/contracts/service.ts";
-import {Event, type EventData} from "@/contracts/types.ts";
-import {removeKeyFromLocalStorage} from "@/helpers/localStorage.ts";
-import {useCommandStore} from "@/store/commandStore.ts";
-import {CommandStatus} from "@/types/CommandStatus.ts";
-import {cleanCommandLogs} from "@/useCases/command/cleanCommandLogs.ts";
-import {updateCommandStatus} from "@/useCases/command/updateCommandStatus.ts";
+import { getCommandGroupSectionOpenLocalStorageKey } from "@/constants/localStorage.ts";
+import { eventService } from "@/contracts/service.ts";
+import { Event, type EventData } from "@/contracts/types.ts";
+import { removeKeyFromLocalStorage } from "@/helpers/localStorage.ts";
+import { useCommandStore } from "@/store/commandStore.ts";
+import { CommandStatus } from "@/types/CommandStatus.ts";
+import { cleanCommandLogs } from "@/useCases/command/cleanCommandLogs.ts";
+import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
 
 export const EventListenersContainer = () => {
   const addLogs = useCommandStore((state) => state.addLogs);
@@ -47,11 +47,10 @@ export const EventListenersContainer = () => {
 
     eventService.eventsOn(
       Event.PROCESS_STARTED,
-      (data: EventData[Event.PROCESS_STARTED]) =>
-        {
-          updateCommandStatus(data, CommandStatus.RUNNING);
-          cleanCommandLogs(data);
-        }
+      (data: EventData[Event.PROCESS_STARTED]) => {
+        updateCommandStatus(data, CommandStatus.RUNNING);
+        cleanCommandLogs(data);
+      },
     );
 
     eventService.eventsOn(
