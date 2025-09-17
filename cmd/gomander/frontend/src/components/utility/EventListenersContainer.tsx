@@ -6,6 +6,7 @@ import { Event, type EventData } from "@/contracts/types.ts";
 import { removeKeyFromLocalStorage } from "@/helpers/localStorage.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
+import { cleanCommandLogs } from "@/useCases/command/cleanCommandLogs.ts";
 import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
 
 export const EventListenersContainer = () => {
@@ -47,7 +48,10 @@ export const EventListenersContainer = () => {
     eventService.eventsOn(
       Event.PROCESS_STARTED,
       (data: EventData[Event.PROCESS_STARTED]) =>
-        updateCommandStatus(data, CommandStatus.RUNNING),
+        {
+          updateCommandStatus(data, CommandStatus.RUNNING)
+          cleanCommandLogs(data)
+        }
     );
 
     eventService.eventsOn(
