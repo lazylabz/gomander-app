@@ -90,3 +90,40 @@ Want to see more specific build options? Check them out with:
 ```bash
 make help
 ```
+
+## Third-Party API Integration
+
+Gomander provides a REST API that enables integration with third-party applications and tools. This API allows you to interact with commands and command groups programmatically.
+
+### API Discovery
+
+When Gomander starts, it automatically launches the API server on an available port in the range 9001-9100. To discover the API:
+
+1. Send a GET request to any port in this range with the path `/discovery`
+2. The first port that responds with a 200 OK status and the following JSON payload is the active Gomander API endpoint:
+   ```json
+   {
+     "app": "Gomander"
+   }
+   ```
+
+### Available Endpoints
+
+The API provides the following main endpoints:
+
+- **GET /commands** - List all commands with their status (running/stopped)
+- **POST /command/run/{id}** - Run a specific command
+- **POST /command/stop/{id}** - Stop a running command
+- **GET /command-groups** - List all command groups with information about running commands
+- **POST /command-group/run/{id}** - Run all commands in a group
+- **POST /command-group/stop/{id}** - Stop all running commands in a group
+
+### OpenAPI Specification
+
+For complete API documentation, refer to the OpenAPI specification file located at:
+
+```
+/cmd/gomander/thirdpartyserver/openapi.yaml
+```
+
+This specification provides detailed information about all endpoints, request parameters, response formats, and possible error codes.
