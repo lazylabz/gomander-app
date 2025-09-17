@@ -51,7 +51,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /command/run/{id}:
+  /commands/{id}/run:
     post:
       summary: Run a command
       description: Executes a command by its ID
@@ -73,7 +73,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /command/stop/{id}:
+  /commands/{id}/stop:
     post:
       summary: Stop a command
       description: Stops a running command by its ID
@@ -114,7 +114,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /command-group/run/{id}:
+  /command-groups/{id}/run:
     post:
       summary: Run a command group
       description: Executes all commands in a command group by its ID
@@ -136,7 +136,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /command-group/stop/{id}:
+  /command-groups/{id}/stop:
     post:
       summary: Stop a command group
       description: Stops all running commands in a command group by its ID

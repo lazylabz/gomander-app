@@ -44,12 +44,12 @@ func (s *ThirdPartyIntegrationsServer) RegisterHandlers() error {
 
 	// Commands and Command Groups endpoints
 	mux.HandleFunc("/commands", s.handleGetCommands)
-	mux.HandleFunc("/command/run/{id}", s.handleRunCommand)
-	mux.HandleFunc("/command/stop/{id}", s.handleStopCommand)
+	mux.HandleFunc("/commands/{id}/run", s.handleRunCommand)
+	mux.HandleFunc("/commands/{id}/stop", s.handleStopCommand)
 	//
 	mux.HandleFunc("/command-groups", s.handleGetCommandGroups)
-	mux.HandleFunc("/command-group/run/{id}", s.handleRunCommandGroup)
-	mux.HandleFunc("/command-group/stop/{id}", s.handleStopCommandGroup)
+	mux.HandleFunc("/command-groups/{id}/run", s.handleRunCommandGroup)
+	mux.HandleFunc("/command-groups/{id}/stop", s.handleStopCommandGroup)
 
 	s.Server = &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),

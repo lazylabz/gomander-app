@@ -174,7 +174,7 @@ func TestNewThirdPartyIntegrationsServer_GetCommandsHandler(t *testing.T) {
 
 // Test Run Command Handler
 func TestNewThirdPartyIntegrationsServer_RunCommandHandler(t *testing.T) {
-	t.Run("POST /command/run/{id} should run the command", func(t *testing.T) {
+	t.Run("POST /commands/{id}/run should run the command", func(t *testing.T) {
 		// Arrange
 		mockRunCommand := new(commandusecasestest.MockRunCommands)
 		commandId := "cmd-1"
@@ -193,7 +193,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandHandler(t *testing.T) {
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/command/run/"+commandId, "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/commands/"+commandId+"/run", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
@@ -202,7 +202,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandHandler(t *testing.T) {
 		mock.AssertExpectationsForObjects(t, mockRunCommand)
 	})
 
-	t.Run("GET /command/run/{id} should return 405 Method Not Allowed", func(t *testing.T) {
+	t.Run("GET /commands/{id}/run should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
 		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
 		err := server.RegisterHandlers()
@@ -212,7 +212,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandHandler(t *testing.T) {
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Get(testServer.URL + "/command/run/cmd-1")
+		resp, err := http.Get(testServer.URL + "/commands/cmd-1/run")
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
@@ -240,7 +240,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandHandler(t *testing.T) {
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/command/run/"+commandId, "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/commands/"+commandId+"/run", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
@@ -252,7 +252,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandHandler(t *testing.T) {
 
 // Test Stop Command Handler
 func TestNewThirdPartyIntegrationsServer_StopCommandHandler(t *testing.T) {
-	t.Run("POST /command/stop/{id} should stop the command", func(t *testing.T) {
+	t.Run("POST /commands/{id}/stop should stop the command", func(t *testing.T) {
 		// Arrange
 		mockStopCommand := new(commandusecasestest.MockStopCommand)
 		commandId := "cmd-1"
@@ -271,7 +271,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandHandler(t *testing.T) {
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/command/stop/"+commandId, "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/commands/"+commandId+"/stop", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
@@ -280,7 +280,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandHandler(t *testing.T) {
 		mock.AssertExpectationsForObjects(t, mockStopCommand)
 	})
 
-	t.Run("GET /command/stop/{id} should return 405 Method Not Allowed", func(t *testing.T) {
+	t.Run("GET /commands/{id}/stop should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
 		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
 		err := server.RegisterHandlers()
@@ -290,7 +290,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandHandler(t *testing.T) {
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Get(testServer.URL + "/command/stop/cmd-1")
+		resp, err := http.Get(testServer.URL + "/commands/cmd-1/stop")
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
@@ -318,7 +318,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandHandler(t *testing.T) {
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/command/stop/"+commandId, "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/commands/"+commandId+"/stop", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
@@ -330,7 +330,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandHandler(t *testing.T) {
 
 // Test Run Command Group Handler
 func TestNewThirdPartyIntegrationsServer_RunCommandGroupHandler(t *testing.T) {
-	t.Run("POST /command-group/run/{id} should run the command group", func(t *testing.T) {
+	t.Run("POST /command-groups/{id}/run should run the command group", func(t *testing.T) {
 		// Arrange
 		mockRunCommandGroup := new(commandgroupusecasestest.MockRunCommandGroup)
 		groupId := "group-1"
@@ -349,7 +349,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandGroupHandler(t *testing.T) {
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/command-group/run/"+groupId, "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/command-groups/"+groupId+"/run", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
@@ -358,7 +358,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandGroupHandler(t *testing.T) {
 		mock.AssertExpectationsForObjects(t, mockRunCommandGroup)
 	})
 
-	t.Run("GET /command-group/run/{id} should return 405 Method Not Allowed", func(t *testing.T) {
+	t.Run("GET /command-groups/{id}/run should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
 		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
 		err := server.RegisterHandlers()
@@ -368,7 +368,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandGroupHandler(t *testing.T) {
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Get(testServer.URL + "/command-group/run/group-1")
+		resp, err := http.Get(testServer.URL + "/command-groups/group-1/run")
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
@@ -396,7 +396,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandGroupHandler(t *testing.T) {
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/command-group/run/"+groupId, "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/command-groups/"+groupId+"/run", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
@@ -408,7 +408,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandGroupHandler(t *testing.T) {
 
 // Test Stop Command Group Handler
 func TestNewThirdPartyIntegrationsServer_StopCommandGroupHandler(t *testing.T) {
-	t.Run("POST /command-group/stop/{id} should stop the command group", func(t *testing.T) {
+	t.Run("POST /command-groups/{id}/stop should stop the command group", func(t *testing.T) {
 		// Arrange
 		mockStopCommandGroup := new(commandgroupusecasestest.MockStopCommandGroup)
 		groupId := "group-1"
@@ -427,7 +427,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandGroupHandler(t *testing.T) {
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/command-group/stop/"+groupId, "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/command-groups/"+groupId+"/stop", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
@@ -436,7 +436,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandGroupHandler(t *testing.T) {
 		mock.AssertExpectationsForObjects(t, mockStopCommandGroup)
 	})
 
-	t.Run("GET /command-group/stop/{id} should return 405 Method Not Allowed", func(t *testing.T) {
+	t.Run("GET /command-groups/{id}/stop should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
 		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
 		err := server.RegisterHandlers()
@@ -446,7 +446,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandGroupHandler(t *testing.T) {
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Get(testServer.URL + "/command-group/stop/group-1")
+		resp, err := http.Get(testServer.URL + "/command-groups/group-1/stop")
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
@@ -474,7 +474,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandGroupHandler(t *testing.T) {
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/command-group/stop/"+groupId, "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/command-groups/"+groupId+"/stop", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 

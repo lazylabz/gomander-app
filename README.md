@@ -112,11 +112,11 @@ When Gomander starts, it automatically launches the API server on an available p
 The API provides the following main endpoints:
 
 - **GET /commands** - List all commands with their status (running/stopped)
-- **POST /command/run/{id}** - Run a specific command
-- **POST /command/stop/{id}** - Stop a running command
+- **POST /commands/{id}/run** - Run a specific command
+- **POST /commands/{id}/stop** - Stop a running command
 - **GET /command-groups** - List all command groups with information about running commands
-- **POST /command-group/run/{id}** - Run all commands in a group
-- **POST /command-group/stop/{id}** - Stop all running commands in a group
+- **POST /command-groups/{id}/run** - Run all commands in a group
+- **POST /command-groups/{id}/stop** - Stop all running commands in a group
 
 ### OpenAPI Specification
 
