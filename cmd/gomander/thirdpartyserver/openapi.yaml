@@ -1,0 +1,232 @@
+openapi: 3.0.3
+info:
+  title: Gomander Third-Party Integration API
+  description: API for interacting with Gomander commands and command groups
+  version: 1.0.0
+
+servers:
+  - url: 'http://localhost:{port}'
+    description: Local Gomander server
+    variables:
+      port:
+        default: '9001'
+        description: The port ranges from 9001 to 9100, first available port will be used
+
+paths:
+  /discovery:
+    get:
+      summary: Discover Gomander API
+      description: Returns basic information about the Gomander API
+      operationId: getDiscovery
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  app:
+                    type: string
+                    example: "Gomander"
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /commands:
+    get:
+      summary: Get all commands
+      description: Returns a list of all commands with their status (running/stopped)
+      operationId: getCommands
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommandWithStatus'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /command/run/{id}:
+    post:
+      summary: Run a command
+      description: Executes a command by its ID
+      operationId: runCommand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Command ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Command started successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /command/stop/{id}:
+    post:
+      summary: Stop a command
+      description: Stops a running command by its ID
+      operationId: stopCommand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Command ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Command stopped successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /command-groups:
+    get:
+      summary: Get all command groups
+      description: Returns a list of all command groups with information about running commands
+      operationId: getCommandGroups
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommandGroupWithStatus'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /command-group/run/{id}:
+    post:
+      summary: Run a command group
+      description: Executes all commands in a command group by its ID
+      operationId: runCommandGroup
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Command Group ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Command group started successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /command-group/stop/{id}:
+    post:
+      summary: Stop a command group
+      description: Stops all running commands in a command group by its ID
+      operationId: stopCommandGroup
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Command Group ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Command group stopped successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    CommandWithStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the command
+          example: "cmd-1"
+        name:
+          type: string
+          description: Display name of the command
+          example: "Start Backend Server"
+        status:
+          type: string
+          enum: [running, stopped]
+          description: Current status of the command
+          example: "running"
+      required:
+        - id
+        - name
+        - status
+
+    CommandGroupWithStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the command group
+          example: "group-1"
+        name:
+          type: string
+          description: Display name of the command group
+          example: "Full Stack Development"
+        commands:
+          type: integer
+          description: Total number of commands in the group
+          example: 3
+        runningCommands:
+          type: integer
+          description: Number of currently running commands in the group
+          example: 1
+      required:
+        - id
+        - name
+        - commands
+        - runningCommands
+
+  responses:
+    BadRequest:
+      description: Bad request - missing or invalid parameters
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: "Command ID is required"
+
+    MethodNotAllowed:
+      description: Method not allowed
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: "Method not allowed"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: "Failed to get commands"
