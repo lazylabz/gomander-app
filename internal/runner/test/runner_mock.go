@@ -34,3 +34,8 @@ func (m *MockRunner) StopAllRunningCommands() []error {
 	args := m.Called()
 	return args.Get(0).([]error)
 }
+
+func (m *MockRunner) GetRunningCommandIds() []string {
+	args := m.Called()
+	return args.Get(0).([]string)
+}

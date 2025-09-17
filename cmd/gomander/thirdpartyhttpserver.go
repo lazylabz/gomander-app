@@ -99,12 +99,19 @@ func (s *ThirdPartyIntegrationsServer) handleGetCommands(w http.ResponseWriter, 
 		http.Error(w, "Failed to get commands", http.StatusInternalServerError)
 		return
 	}
+	runningCommandsIds := s.useCases.GetRunningCommandIds.Execute()
 
 	mappedCommands := array.Map(commands, func(cmd commanddomain.Command) map[string]interface{} {
+		status := "stopped"
+		if array.Contains(runningCommandsIds, cmd.Id) {
+			status = "running"
+		}
+
 		return map[string]interface{}{
 			"id":      cmd.Id,
 			"name":    cmd.Name,
 			"command": cmd.Command,
+			"status":  status,
 		}
 	})
 
@@ -154,11 +161,16 @@ func (s *ThirdPartyIntegrationsServer) handleGetCommandGroups(w http.ResponseWri
 		http.Error(w, "Failed to get command groups", http.StatusInternalServerError)
 		return
 	}
+	runningGroupsIds := s.useCases.GetRunningCommandIds.Execute()
 
 	mappedGroups := array.Map(groups, func(group domain.CommandGroup) map[string]interface{} {
 		return map[string]interface{}{
-			"id":   group.Id,
-			"name": group.Name,
+			"id":       group.Id,
+			"name":     group.Name,
+			"commands": len(group.Commands),
+			"runningCommands": len(array.Filter(group.Commands, func(cmd commanddomain.Command) bool {
+				return array.Contains(runningGroupsIds, cmd.Id)
+			})),
 		}
 	})
 
