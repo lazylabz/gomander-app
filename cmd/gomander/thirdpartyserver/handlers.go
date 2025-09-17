@@ -48,12 +48,12 @@ func (s *ThirdPartyIntegrationsServer) handleGetCommands(w http.ResponseWriter, 
 		}
 	})
 
+	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(mappedCommands)
 	if err != nil {
 		http.Error(w, "Failed to encode commands", http.StatusInternalServerError)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 }
 
 func (s *ThirdPartyIntegrationsServer) handleRunCommand(w http.ResponseWriter, r *http.Request) {
@@ -64,9 +64,6 @@ func (s *ThirdPartyIntegrationsServer) handleRunCommand(w http.ResponseWriter, r
 
 	// Extract command ID from URL
 	id := r.PathValue("id")
-	if id == "" {
-		http.Error(w, "Command ID is required", http.StatusBadRequest)
-	}
 
 	err := s.useCases.RunCommand.Execute(id)
 	if err != nil {
@@ -83,9 +80,6 @@ func (s *ThirdPartyIntegrationsServer) handleStopCommand(w http.ResponseWriter, 
 
 	// Extract command ID from URL
 	id := r.PathValue("id")
-	if id == "" {
-		http.Error(w, "Command ID is required", http.StatusBadRequest)
-	}
 
 	err := s.useCases.StopCommand.Execute(id)
 	if err != nil {
@@ -118,12 +112,11 @@ func (s *ThirdPartyIntegrationsServer) handleGetCommandGroups(w http.ResponseWri
 		}
 	})
 
+	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(mappedGroups)
 	if err != nil {
 		http.Error(w, "Failed to encode command groups", http.StatusInternalServerError)
 	}
-
-	w.Header().Set("Content-Type", "application/json")
 }
 
 func (s *ThirdPartyIntegrationsServer) handleRunCommandGroup(w http.ResponseWriter, r *http.Request) {
@@ -134,9 +127,6 @@ func (s *ThirdPartyIntegrationsServer) handleRunCommandGroup(w http.ResponseWrit
 
 	// Extract command group ID from URL
 	id := r.PathValue("id")
-	if id == "" {
-		http.Error(w, "Command Group ID is required", http.StatusBadRequest)
-	}
 
 	err := s.useCases.RunCommandGroup.Execute(id)
 	if err != nil {
@@ -153,9 +143,6 @@ func (s *ThirdPartyIntegrationsServer) handleStopCommandGroup(w http.ResponseWri
 
 	// Extract command group ID from URL
 	id := r.PathValue("id")
-	if id == "" {
-		http.Error(w, "Command Group ID is required", http.StatusBadRequest)
-	}
 
 	err := s.useCases.StopCommandGroup.Execute(id)
 	if err != nil {

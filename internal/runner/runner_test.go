@@ -494,7 +494,6 @@ func TestDefaultRunner_GetRunningCommandIds(t *testing.T) {
 
 		// Assert
 		assert.Empty(t, result)
-		assert.Equal(t, 0, len(result))
 	})
 
 	t.Run("Should return list of running command ids", func(t *testing.T) {
