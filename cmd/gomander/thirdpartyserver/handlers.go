@@ -42,10 +42,9 @@ func (s *ThirdPartyIntegrationsServer) handleGetCommands(w http.ResponseWriter, 
 		}
 
 		return map[string]interface{}{
-			"id":      cmd.Id,
-			"name":    cmd.Name,
-			"command": cmd.Command,
-			"status":  status,
+			"id":     cmd.Id,
+			"name":   cmd.Name,
+			"status": status,
 		}
 	})
 

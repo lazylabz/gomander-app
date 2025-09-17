@@ -69,14 +69,12 @@ func TestNewThirdPartyIntegrationsServer_GetCommandsHandler(t *testing.T) {
 
 		commands := []commanddomain.Command{
 			{
-				Id:      "cmd-1",
-				Name:    "Command 1",
-				Command: "echo 1",
+				Id:   "cmd-1",
+				Name: "Command 1",
 			},
 			{
-				Id:      "cmd-2",
-				Name:    "Command 2",
-				Command: "echo 2",
+				Id:   "cmd-2",
+				Name: "Command 2",
 			},
 		}
 
@@ -113,16 +111,14 @@ func TestNewThirdPartyIntegrationsServer_GetCommandsHandler(t *testing.T) {
 
 		assert.Equal(t, result, []map[string]interface{}{
 			{
-				"id":      "cmd-1",
-				"name":    "Command 1",
-				"command": "echo 1",
-				"status":  "running",
+				"id":     "cmd-1",
+				"name":   "Command 1",
+				"status": "running",
 			},
 			{
-				"id":      "cmd-2",
-				"name":    "Command 2",
-				"command": "echo 2",
-				"status":  "stopped",
+				"id":     "cmd-2",
+				"name":   "Command 2",
+				"status": "stopped",
 			},
 		})
 
@@ -543,19 +539,21 @@ func TestNewThirdPartyIntegrationsServer_GetCommandGroupsHandler(t *testing.T) {
 		err = json.Unmarshal(body, &result)
 		assert.NoError(t, err)
 
-		assert.Equal(t, 2, len(result))
-
 		// First group should have 2 commands with 1 running
-		assert.Equal(t, "group-1", result[0]["id"])
-		assert.Equal(t, "Group 1", result[0]["name"])
-		assert.Equal(t, float64(2), result[0]["commands"])
-		assert.Equal(t, float64(1), result[0]["runningCommands"])
-
-		// Second group should have 2 commands with 1 running
-		assert.Equal(t, "group-2", result[1]["id"])
-		assert.Equal(t, "Group 2", result[1]["name"])
-		assert.Equal(t, float64(2), result[1]["commands"])
-		assert.Equal(t, float64(1), result[1]["runningCommands"])
+		assert.Equal(t, result, []map[string]interface{}{
+			{
+				"id":              "group-1",
+				"name":            "Group 1",
+				"commands":        float64(2),
+				"runningCommands": float64(1),
+			},
+			{
+				"id":              "group-2",
+				"name":            "Group 2",
+				"commands":        float64(2),
+				"runningCommands": float64(1),
+			},
+		})
 
 		mock.AssertExpectationsForObjects(t, mockGetCommandGroups, mockGetRunningCommandIds)
 	})
