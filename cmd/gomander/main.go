@@ -12,6 +12,7 @@ import (
 
 	gormlogger "gorm.io/gorm/logger"
 
+	"gomander/cmd/gomander/thirdpartyserver"
 	"gomander/internal/command/application/handlers"
 	commandusecases "gomander/internal/command/application/usecases"
 	commmandinfrastructure "gomander/internal/command/infrastructure"
@@ -85,13 +86,14 @@ func main() {
 			uiFsHelper.SetContext(ctx)
 
 			// Start http server for 3rd party integrations
-			server := NewThirdPartyIntegrationsServer(app.UseCases)
+			server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases)
 
 			go func() {
-				err := server.Start()
+				err := server.RegisterHandlers()
 				if err != nil {
 					panic(err)
 				}
+				server.Start()
 			}()
 		},
 		Bind: []interface{}{

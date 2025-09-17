@@ -1,90 +1,19 @@
-package main
+package thirdpartyserver
 
 import (
 	"encoding/json"
-	"fmt"
-	"net"
 	"net/http"
-	"sync"
 
-	"gomander/internal/app"
-	commanddomain "gomander/internal/command/domain"
-	"gomander/internal/commandgroup/domain"
+	"gomander/internal/command/domain"
+	domain2 "gomander/internal/commandgroup/domain"
 	"gomander/internal/helpers/array"
 )
 
-var StartPort = 9001
-var EndPort = 9100
-
-type ThirdPartyIntegrationsServer struct {
-	useCases app.UseCases
-	mu       sync.RWMutex
-	server   *http.Server
-}
-
-func NewThirdPartyIntegrationsServer(useCases app.UseCases) *ThirdPartyIntegrationsServer {
-	return &ThirdPartyIntegrationsServer{
-		useCases: useCases,
-	}
-}
-
-func (s *ThirdPartyIntegrationsServer) Start() error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	port, err := findAvailablePort()
-	if err != nil {
-		return err
-	}
-
-	if s.server != nil {
-		return nil // Server is already running
-	}
-
-	mux := http.NewServeMux()
-
-	// Discovery endpoint
-	mux.HandleFunc("/discovery", s.handleDiscovery)
-
-	// Commands and Command Groups endpoints
-	mux.HandleFunc("/commands", s.handleGetCommands)
-	mux.HandleFunc("/command/run/{id}", s.handleRunCommand)
-	mux.HandleFunc("/command/stop/{id}", s.handleStopCommand)
-	//
-	mux.HandleFunc("/command-groups", s.handleGetCommandGroups)
-	mux.HandleFunc("/command-group/run/{id}", s.handleRunCommandGroup)
-	mux.HandleFunc("/command-group/stop/{id}", s.handleStopCommandGroup)
-
-	s.server = &http.Server{
-		Addr:    fmt.Sprintf(":%d", port),
-		Handler: mux,
-	}
-
-	go func() {
-		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			// Handle error (log it, etc.)
-			println(err.Error())
-		}
-	}()
-
-	return nil
-}
-
-func (s *ThirdPartyIntegrationsServer) Stop() error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	if s.server == nil {
-		return nil // Server is not running
-	}
-
-	err := s.server.Close()
-	s.server = nil
-	return err
-}
-
 func (s *ThirdPartyIntegrationsServer) handleDiscovery(w http.ResponseWriter, r *http.Request) {
-	// Example response for discovery endpoint
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, err := w.Write([]byte(`{"app": "Gomander"}`))
@@ -94,6 +23,11 @@ func (s *ThirdPartyIntegrationsServer) handleDiscovery(w http.ResponseWriter, r 
 }
 
 func (s *ThirdPartyIntegrationsServer) handleGetCommands(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	commands, err := s.useCases.GetCommands.Execute()
 	if err != nil {
 		http.Error(w, "Failed to get commands", http.StatusInternalServerError)
@@ -101,7 +35,7 @@ func (s *ThirdPartyIntegrationsServer) handleGetCommands(w http.ResponseWriter, 
 	}
 	runningCommandsIds := s.useCases.GetRunningCommandIds.Execute()
 
-	mappedCommands := array.Map(commands, func(cmd commanddomain.Command) map[string]interface{} {
+	mappedCommands := array.Map(commands, func(cmd domain.Command) map[string]interface{} {
 		status := "stopped"
 		if array.Contains(runningCommandsIds, cmd.Id) {
 			status = "running"
@@ -124,6 +58,11 @@ func (s *ThirdPartyIntegrationsServer) handleGetCommands(w http.ResponseWriter, 
 }
 
 func (s *ThirdPartyIntegrationsServer) handleRunCommand(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	// Extract command ID from URL
 	id := r.PathValue("id")
 	if id == "" {
@@ -135,11 +74,14 @@ func (s *ThirdPartyIntegrationsServer) handleRunCommand(w http.ResponseWriter, r
 		http.Error(w, "Failed to run command", http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func (s *ThirdPartyIntegrationsServer) handleStopCommand(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	// Extract command ID from URL
 	id := r.PathValue("id")
 	if id == "" {
@@ -151,11 +93,14 @@ func (s *ThirdPartyIntegrationsServer) handleStopCommand(w http.ResponseWriter, 
 		http.Error(w, "Failed to stop command", http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func (s *ThirdPartyIntegrationsServer) handleGetCommandGroups(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	groups, err := s.useCases.GetCommandGroups.Execute()
 	if err != nil {
 		http.Error(w, "Failed to get command groups", http.StatusInternalServerError)
@@ -163,12 +108,12 @@ func (s *ThirdPartyIntegrationsServer) handleGetCommandGroups(w http.ResponseWri
 	}
 	runningGroupsIds := s.useCases.GetRunningCommandIds.Execute()
 
-	mappedGroups := array.Map(groups, func(group domain.CommandGroup) map[string]interface{} {
+	mappedGroups := array.Map(groups, func(group domain2.CommandGroup) map[string]interface{} {
 		return map[string]interface{}{
 			"id":       group.Id,
 			"name":     group.Name,
 			"commands": len(group.Commands),
-			"runningCommands": len(array.Filter(group.Commands, func(cmd commanddomain.Command) bool {
+			"runningCommands": len(array.Filter(group.Commands, func(cmd domain.Command) bool {
 				return array.Contains(runningGroupsIds, cmd.Id)
 			})),
 		}
@@ -183,6 +128,11 @@ func (s *ThirdPartyIntegrationsServer) handleGetCommandGroups(w http.ResponseWri
 }
 
 func (s *ThirdPartyIntegrationsServer) handleRunCommandGroup(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	// Extract command group ID from URL
 	id := r.PathValue("id")
 	if id == "" {
@@ -194,11 +144,14 @@ func (s *ThirdPartyIntegrationsServer) handleRunCommandGroup(w http.ResponseWrit
 		http.Error(w, "Failed to run command group", http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func (s *ThirdPartyIntegrationsServer) handleStopCommandGroup(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	// Extract command group ID from URL
 	id := r.PathValue("id")
 	if id == "" {
@@ -210,18 +163,4 @@ func (s *ThirdPartyIntegrationsServer) handleStopCommandGroup(w http.ResponseWri
 		http.Error(w, "Failed to stop command group", http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
-}
-
-func findAvailablePort() (int, error) {
-	for port := StartPort; port <= EndPort; port++ {
-		ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-		if err != nil {
-			continue // Port is in use
-		}
-		_ = ln.Close() // Close the listener immediately
-		return port, nil
-	}
-	return 0, fmt.Errorf("no available ports found in range %d-%d", StartPort, EndPort)
 }
