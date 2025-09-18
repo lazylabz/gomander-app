@@ -18,7 +18,7 @@ func (s *ThirdPartyIntegrationsServer) handleDiscovery(w http.ResponseWriter, r 
 	w.WriteHeader(http.StatusOK)
 	_, err := w.Write([]byte(`{"app": "Gomander"}`))
 	if err != nil {
-		println("Error writing response:", err.Error())
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
 	}
 }
 
