@@ -10,7 +10,8 @@ coverage:
 ignore:
   - "internal/testutils"
   - "migrations/*.go"
-  - "cmd/gomander"
+  - "cmd/gomander/controllers.go"
+  - "cmd/gomander/main.go"
   - "internal/app/app.go"
   - "**/*facade.go"
   - "**/*_testbuilder.go"

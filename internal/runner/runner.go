@@ -41,6 +41,7 @@ type Runner interface {
 	StopRunningCommand(id string) error
 	StopAllRunningCommands() []error
 	StopRunningCommands(commands []domain.Command) error
+	GetRunningCommandIds() []string
 }
 
 func NewDefaultRunner(logger logger.Logger, emitter event.EventEmitter) *DefaultRunner {
@@ -268,4 +269,15 @@ func (c *DefaultRunner) WaitForCommand(commandId string) {
 	} else {
 		return
 	}
+}
+
+func (c *DefaultRunner) GetRunningCommandIds() []string {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	ids := make([]string, 0, len(c.runningCommands))
+	for id := range c.runningCommands {
+		ids = append(ids, id)
+	}
+	return ids
 }

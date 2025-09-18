@@ -52,14 +52,15 @@ type UseCases struct {
 	RunCommandGroup               commandgroupusecases.RunCommandGroup
 	StopCommandGroup              commandgroupusecases.StopCommandGroup
 	// Commands
-	GetCommands      commandusecases.GetCommands
-	AddCommand       commandusecases.AddCommand
-	DuplicateCommand commandusecases.DuplicateCommand
-	RemoveCommand    commandusecases.RemoveCommand
-	EditCommand      commandusecases.EditCommand
-	ReorderCommands  commandusecases.ReorderCommands
-	RunCommand       commandusecases.RunCommand
-	StopCommand      commandusecases.StopCommand
+	GetCommands          commandusecases.GetCommands
+	AddCommand           commandusecases.AddCommand
+	DuplicateCommand     commandusecases.DuplicateCommand
+	RemoveCommand        commandusecases.RemoveCommand
+	EditCommand          commandusecases.EditCommand
+	ReorderCommands      commandusecases.ReorderCommands
+	RunCommand           commandusecases.RunCommand
+	StopCommand          commandusecases.StopCommand
+	GetRunningCommandIds commandusecases.GetRunningCommandIds
 }
 
 // App struct

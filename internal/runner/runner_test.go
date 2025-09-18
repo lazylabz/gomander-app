@@ -476,6 +476,68 @@ func TestDefaultRunner_StopRunningCommands(t *testing.T) {
 	})
 }
 
+func TestDefaultRunner_GetRunningCommandIds(t *testing.T) {
+	t.Run("Should return empty list when no commands are running", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Debug", mock.Anything).Return()
+		logger.On("Error", mock.Anything).Return()
+
+		emitter := new(test2.MockEventEmitter)
+		emitter.On("EmitEvent", mock.Anything, mock.Anything).Return()
+
+		sut := runner.NewDefaultRunner(logger, emitter)
+
+		// Act
+		result := sut.GetRunningCommandIds()
+
+		// Assert
+		assert.Empty(t, result)
+	})
+
+	t.Run("Should return list of running command ids", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Debug", mock.Anything).Return()
+		logger.On("Error", mock.Anything).Return()
+
+		emitter := new(test2.MockEventEmitter)
+		emitter.On("EmitEvent", mock.Anything, mock.Anything).Return()
+
+		sut := runner.NewDefaultRunner(logger, emitter)
+
+		// Create a few commands that will run for a short time
+		command1 := &commanddomain.Command{
+			Id:      "cmd-1",
+			Command: infiniteCmd(),
+		}
+		command2 := &commanddomain.Command{
+			Id:      "cmd-2",
+			Command: infiniteCmd(),
+		}
+
+		// Start the commands
+		_ = sut.RunCommand(command1, []string{}, validWorkingDirectory())
+		_ = sut.RunCommand(command2, []string{}, validWorkingDirectory())
+
+		// Give them a moment to start
+		time.Sleep(10 * time.Millisecond)
+
+		// Act
+		result := sut.GetRunningCommandIds()
+
+		// Assert
+		assert.Len(t, result, 2)
+		assert.Contains(t, result, "cmd-1")
+		assert.Contains(t, result, "cmd-2")
+
+		// Wait for the commands to finish so we don't affect other tests
+		time.Sleep(200 * time.Millisecond)
+	})
+}
+
 func mockEmitterLogEntry(emitter *test2.MockEventEmitter, id string, line string) {
 	if runtime.GOOS == "windows" {
 		emitter.On("EmitEvent", event.NewLogEntry, map[string]string{
