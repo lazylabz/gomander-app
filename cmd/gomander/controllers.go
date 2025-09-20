@@ -5,6 +5,7 @@ import (
 	commanddomain "gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	configdomain "gomander/internal/config/domain"
+	localizationdomain "gomander/internal/localization/domain"
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
 )
@@ -143,4 +144,14 @@ func (wc *WailsControllers) RunCommandController(commandId string) error {
 
 func (wc *WailsControllers) StopCommandController(commandId string) error {
 	return wc.useCases.StopCommand.Execute(commandId)
+}
+
+// Localization controllers
+
+func (wc *WailsControllers) GetTranslationController(locale string) (*localizationdomain.Localization, error) {
+	return wc.useCases.GetTranslation.Execute(locale)
+}
+
+func (wc *WailsControllers) GetSupportedLanguagesController() ([]string, error) {
+	return wc.useCases.GetSupportedLanguages.Execute()
 }
