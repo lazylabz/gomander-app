@@ -97,6 +97,7 @@ export const SettingsContextProvider = ({
           lastOpenedProjectId: userConfig.lastOpenedProjectId,
           environmentPaths: formData.environmentPaths,
           logLineLimit: formData.logLineLimit,
+          locale: 'en-GB', // TODO: add this to formData
         });
         toast.success("User settings saved successfully");
       } catch (e) {
