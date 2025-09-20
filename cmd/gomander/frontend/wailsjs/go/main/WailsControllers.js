@@ -62,6 +62,14 @@ export function GetProjectToImportController() {
   return window['go']['main']['WailsControllers']['GetProjectToImportController']();
 }
 
+export function GetSupportedLanguagesController() {
+  return window['go']['main']['WailsControllers']['GetSupportedLanguagesController']();
+}
+
+export function GetTranslationController(arg1) {
+  return window['go']['main']['WailsControllers']['GetTranslationController'](arg1);
+}
+
 export function GetUserConfigController() {
   return window['go']['main']['WailsControllers']['GetUserConfigController']();
 }
