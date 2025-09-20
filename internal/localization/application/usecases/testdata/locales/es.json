@@ -1,0 +1,8 @@
+{
+  "sidebar.title": "Comandos",
+  "sidebar.minimize": "Minimizar",
+  "actions.cancel": "Cancelar",
+  "actions.save": "Guardar",
+  "toast.test.success": "Operación de prueba completada exitosamente",
+  "toast.test.error": "La operación de prueba falló"
+}

@@ -14,7 +14,7 @@ func init() {
 func upAddLocaleToUserConfig(ctx context.Context, tx *sql.Tx) error {
 	// This code is executed when the migration is applied.
 	_, err := tx.ExecContext(ctx, `
-		ALTER TABLE user_config ADD COLUMN locale TEXT DEFAULT 'en-GB';
+		ALTER TABLE user_config ADD COLUMN locale TEXT DEFAULT 'en';
 	`)
 
 	return err

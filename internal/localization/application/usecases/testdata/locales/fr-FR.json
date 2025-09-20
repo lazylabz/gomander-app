@@ -1,8 +1,0 @@
-{
-  "sidebar.title": "Commandes",
-  "sidebar.minimize": "Réduire",
-  "actions.cancel": "Annuler",
-  "actions.save": "Sauvegarder",
-  "toast.test.success": "Opération de test terminée avec succès",
-  "toast.test.error": "L'opération de test a échoué"
-}

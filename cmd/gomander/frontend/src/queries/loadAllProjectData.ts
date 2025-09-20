@@ -11,7 +11,7 @@ export const loadAllProjectData = async () => {
   const languages = await translationsService.getSupportedLanguages();
   console.log("languages: ", languages);
 
-  const translations = await translationsService.getTranslation('es-ES');
+  const translations = await translationsService.getTranslation('es');
   console.log("translations: ", translations)
   console.log("sidebar title: ", translations["sidebar.title"])
 };
