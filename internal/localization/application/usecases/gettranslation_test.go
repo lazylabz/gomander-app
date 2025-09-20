@@ -20,7 +20,7 @@ func TestDefaultGetTranslation_Execute(t *testing.T) {
 		sut := usecases.NewGetTranslation(testFs)
 
 		// Act
-		translation, err := sut.Execute("en-US")
+		translation, err := sut.Execute("en")
 
 		// Assert
 		assert.NoError(t, err)

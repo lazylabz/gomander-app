@@ -26,8 +26,8 @@ func TestDefaultGetSupportedLanguages_Execute(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 		assert.Len(t, languages, 3)
-		assert.Contains(t, languages, "en-US")
-		assert.Contains(t, languages, "fr-FR")
+		assert.Contains(t, languages, "en")
+		assert.Contains(t, languages, "es")
 		assert.Contains(t, languages, "invalid")
 	})
 
