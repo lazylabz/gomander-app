@@ -4,6 +4,7 @@ type ConfigModel struct {
 	Id                  int    `gorm:"primaryKey;column:id"`
 	LastOpenedProjectId string `gorm:"column:last_opened_project_id"`
 	LogLineLimit        int    `gorm:"column:log_line_limit"`
+	Locale              string `gorm:"column:locale"`
 }
 
 func (ConfigModel) TableName() string {
