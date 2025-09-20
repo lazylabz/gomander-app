@@ -4,6 +4,7 @@ import (
 	"embed"
 	"io/fs"
 	"testing"
+	"testing/fstest"
 
 	"github.com/stretchr/testify/assert"
 
@@ -28,5 +29,19 @@ func TestDefaultGetSupportedLanguages_Execute(t *testing.T) {
 		assert.Contains(t, languages, "en-US")
 		assert.Contains(t, languages, "fr-FR")
 		assert.Contains(t, languages, "invalid")
+	})
+
+	t.Run("Should return error when locales directory does not exist", func(t *testing.T) {
+		// Arrange
+		emptyFs := make(fstest.MapFS)
+		sut := usecases.NewGetSupportedLanguages(emptyFs)
+
+		// Act
+		languages, err := sut.Execute()
+
+		// Assert
+		assert.Error(t, err)
+		assert.Nil(t, languages)
+		assert.Contains(t, err.Error(), "read locales directory")
 	})
 }
