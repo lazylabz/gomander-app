@@ -10,6 +10,7 @@ func ToDomainConfig(model *ConfigModel, paths []EnvironmentPathModel) *domain.Co
 	config := &domain.Config{
 		LastOpenedProjectId: model.LastOpenedProjectId,
 		EnvironmentPaths:    make([]domain.EnvironmentPath, 0),
+		Locale:              model.Locale,
 	}
 
 	for _, pathModel := range paths {
@@ -30,6 +31,7 @@ func ToModelConfig(config *domain.Config) (*ConfigModel, []EnvironmentPathModel)
 	model := &ConfigModel{
 		Id:                  1,
 		LastOpenedProjectId: config.LastOpenedProjectId,
+		Locale:              config.Locale,
 	}
 
 	var pathModels []EnvironmentPathModel
