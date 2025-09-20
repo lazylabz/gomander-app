@@ -31,7 +31,7 @@ function App() {
   }, []);
 
   if (!i18nReady) {
-    return <div>Loading...</div>;
+    return null;
   }
 
   return (
