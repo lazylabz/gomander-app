@@ -2,6 +2,16 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import { dataService, translationsService } from '@/contracts/service';
+import type { Localization } from '@/contracts/types';
+
+// Type i18next to use our Localization interface
+declare module 'i18next' {
+  interface CustomTypeOptions {
+    resources: {
+      translation: Localization;
+    };
+  }
+}
 
 export const initI18n = async () => {
   // Get supported languages and user's current locale from backend
