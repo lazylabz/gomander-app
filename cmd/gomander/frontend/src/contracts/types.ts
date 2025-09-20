@@ -7,6 +7,7 @@ export type UserConfig = domain.Config;
 export type CommandGroup = domain.CommandGroup;
 export type Project = domain.Project;
 export type ProjectExport = domain.ProjectExportJSONv1;
+export type Localization = domain.Localization;
 
 // Enums
 export enum Event {
