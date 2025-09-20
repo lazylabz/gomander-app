@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Route, Routes } from "react-router";
 
 import { AppSidebarLayout } from "@/components/layout/AppSidebarLayout/AppSidebarLayout.tsx";
@@ -6,6 +6,7 @@ import { EventListenersContainer } from "@/components/utility/EventListenersCont
 import { ThemeProvider } from "@/contexts/theme.tsx";
 import { VersionProvider } from "@/contexts/version.tsx";
 import { Toaster } from "@/design-system/components/ui/sonner.tsx";
+import { initI18n } from "@/lib/i18n.ts";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
 import { ScreenRoutes } from "@/routes.ts";
@@ -16,10 +17,22 @@ import { SettingsScreen } from "@/screens/SettingsScreen/SettingsScreen.tsx";
 import { LogsScreen } from "./screens/LogsScreen/LogsScreen.tsx";
 
 function App() {
+  const [i18nReady, setI18nReady] = useState(false);
+
   useEffect(() => {
-    loadAllProjectData();
-    fetchUserConfig();
+    const initializeApp = async () => {
+      await initI18n();
+      setI18nReady(true);
+      loadAllProjectData();
+      fetchUserConfig();
+    };
+
+    initializeApp();
   }, []);
+
+  if (!i18nReady) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <VersionProvider>
