@@ -1,7 +1,6 @@
 package usecases
 
 import (
-	"embed"
 	"fmt"
 	"io/fs"
 	"strings"
@@ -12,10 +11,10 @@ type GetSupportedLanguages interface {
 }
 
 type DefaultGetSupportedLanguages struct {
-	localeFs embed.FS
+	localeFs fs.FS
 }
 
-func NewGetSupportedLanguages(localeFs embed.FS) *DefaultGetSupportedLanguages {
+func NewGetSupportedLanguages(localeFs fs.FS) *DefaultGetSupportedLanguages {
 	return &DefaultGetSupportedLanguages{
 		localeFs: localeFs,
 	}

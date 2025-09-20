@@ -1,9 +1,9 @@
 package usecases
 
 import (
-	"embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 
 	"gomander/internal/localization/domain"
 )
@@ -13,17 +13,17 @@ type GetTranslation interface {
 }
 
 type DefaultGetTranslation struct {
-	localeFs embed.FS
+	localeFs fs.FS
 }
 
-func NewGetTranslation(localeFs embed.FS) *DefaultGetTranslation {
+func NewGetTranslation(localeFs fs.FS) *DefaultGetTranslation {
 	return &DefaultGetTranslation{
 		localeFs: localeFs,
 	}
 }
 
 func (uc *DefaultGetTranslation) Execute(locale string) (*domain.Localization, error) {
-	localeJson, err := uc.localeFs.ReadFile(fmt.Sprintf("locales/%s.json", locale))
+	localeJson, err := fs.ReadFile(uc.localeFs, fmt.Sprintf("locales/%s.json", locale))
 	if err != nil {
 		return nil, fmt.Errorf("read locale json: %w", err)
 	}
