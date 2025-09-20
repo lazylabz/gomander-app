@@ -6,6 +6,7 @@ import {
 } from "@dnd-kit/sortable";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
@@ -37,6 +38,7 @@ import { useCommandStore } from "@/store/commandStore.ts";
 import { reorderCommands } from "@/useCases/command/reorderCommands.ts";
 
 export const AllCommandsSection = () => {
+  const { t } = useTranslation();
   const commands = useCommandStore((state) => state.commands);
   const setCommands = useCommandStore((state) => state.setCommands);
 
@@ -108,7 +110,7 @@ export const AllCommandsSection = () => {
                 <CollapsibleTrigger className="group flex items-center gap-2 p-2 pl-1 w-full">
                   <ChevronDown className="hidden group-data-[state=open]:block" />
                   <ChevronRight className="block group-data-[state=open]:hidden" />
-                  <p>All commands</p>
+                  <p>{t('sidebar.commands.title')}</p>
                 </CollapsibleTrigger>
               </SidebarGroupLabel>
             </ContextMenuTrigger>
