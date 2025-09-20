@@ -16,6 +16,8 @@ import {
   GetCurrentProjectController,
   GetProjectToImportController,
   GetProjectToImportFromPackageJsonController,
+  GetSupportedLanguagesController,
+  GetTranslationController,
   GetUserConfigController,
   ImportProjectController,
   OpenProjectController,
@@ -87,4 +89,9 @@ export const eventService = {
 
 export const externalBrowserService = {
   browserOpenURL: BrowserOpenURL,
+};
+
+export const translationsService = {
+  getTranslation: GetTranslationController,
+  getSupportedLanguages: GetSupportedLanguagesController,
 };
