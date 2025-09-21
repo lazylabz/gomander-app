@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router";
@@ -31,11 +31,22 @@ type SettingsUseFormReturn = UseFormReturn<
   SettingsFormType
 >;
 
+type SupportedLanguage = {
+  value: string;
+  label: string;
+};
+
+const languageValueToLabelMap: Record<string, string> = {
+  en: "English",
+  es: "Español",
+};
+
 // Define context
 export interface SettingsContextData {
   settingsForm: SettingsUseFormReturn;
   hasUnsavedChanges: boolean;
   initialTab: SettingsTab;
+  supportedLanguages: SupportedLanguage[];
   saveSettings: (formData: SettingsFormType) => Promise<void>;
   closeSettings: () => void;
 }
@@ -44,6 +55,7 @@ export const settingsContext = createContext<SettingsContextData>({
   settingsForm: {} as SettingsUseFormReturn,
   hasUnsavedChanges: false,
   initialTab: SettingsTab.User,
+  supportedLanguages: [],
   saveSettings: async () => {},
   closeSettings: () => {},
 });
@@ -59,10 +71,33 @@ export const SettingsContextProvider = ({
   const { rawTheme, setRawTheme } = useTheme();
   const { i18n } = useTranslation();
 
+  const [supportedLanguages, setSupportedLanguages] = useState<
+    SupportedLanguage[]
+  >([]);
+
   const navigate = useNavigate();
   const { state } = useLocation();
 
   const initialTab = state?.tab || SettingsTab.User;
+
+  useEffect(() => {
+    const loadSupportedLanguages = async () => {
+      try {
+        const languages = await translationsService.getSupportedLanguages();
+        const languageOptions = languages.map(
+          (lang): SupportedLanguage => ({
+            value: lang,
+            label: languageValueToLabelMap[lang] || lang,
+          }),
+        );
+        setSupportedLanguages(languageOptions);
+      } catch (error) {
+        console.error("Failed to load supported languages:", error);
+      }
+    };
+
+    loadSupportedLanguages();
+  }, []);
 
   const settingsForm = useForm<SettingsFormType>({
     resolver: zodResolver(settingsFormSchema),
@@ -148,6 +183,7 @@ export const SettingsContextProvider = ({
     settingsForm,
     hasUnsavedChanges: settingsForm.formState.isDirty,
     initialTab,
+    supportedLanguages,
     saveSettings,
     closeSettings,
   };
