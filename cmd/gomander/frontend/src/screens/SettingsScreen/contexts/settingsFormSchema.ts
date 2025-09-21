@@ -11,6 +11,7 @@ export const settingsFormSchema = z.object({
     }),
   ),
   theme: z.enum(availableThemes),
+  locale: z.string(),
   // Project settings schema
   name: z.string().min(1, "Project name is required"),
   baseWorkingDirectory: z.string().min(1, "Base working directory is required"),

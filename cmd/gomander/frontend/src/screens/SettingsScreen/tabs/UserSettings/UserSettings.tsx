@@ -1,4 +1,5 @@
 import { Route, Save, WandSparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button.tsx";
 import {
@@ -29,7 +30,9 @@ import { EnvironmentPathsField } from "@/screens/SettingsScreen/tabs/ProjectSett
 import { EnvironmentPathsInfoDialog } from "@/screens/SettingsScreen/tabs/UserSettings/components/EnvironmentPathsInfoDialog.tsx";
 
 export const UserSettings = () => {
-  const { settingsForm, saveSettings, hasUnsavedChanges } =
+  const { t } = useTranslation();
+
+  const { settingsForm, saveSettings, hasUnsavedChanges, supportedLanguages } =
     useSettingsContext();
 
   return (
@@ -62,7 +65,39 @@ export const UserSettings = () => {
               </CardTitle>
               <CardDescription>Make gomander your own!</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
+              <FormField
+                control={settingsForm.control}
+                name="locale"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Language</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select your preferred language" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {supportedLanguages.map((language) => (
+                            <SelectItem
+                              key={language.value}
+                              value={language.value}
+                            >
+                              {language.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={settingsForm.control}
                 name="theme"
@@ -103,7 +138,7 @@ export const UserSettings = () => {
           disabled={!hasUnsavedChanges}
         >
           <Save />
-          Save
+          {t("actions.save")}
         </Button>
       </form>
     </Form>
