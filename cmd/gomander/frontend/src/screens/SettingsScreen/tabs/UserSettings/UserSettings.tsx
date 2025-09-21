@@ -1,5 +1,4 @@
 import { Route, Save, WandSparkles } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button.tsx";
@@ -26,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { translationsService } from "@/contracts/service";
 import { useSettingsContext } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import { EnvironmentPathsField } from "@/screens/SettingsScreen/tabs/ProjectSettings/components/EnvironmentPathsField.tsx";
 import { EnvironmentPathsInfoDialog } from "@/screens/SettingsScreen/tabs/UserSettings/components/EnvironmentPathsInfoDialog.tsx";
@@ -34,22 +32,8 @@ import { EnvironmentPathsInfoDialog } from "@/screens/SettingsScreen/tabs/UserSe
 export const UserSettings = () => {
   const { t } = useTranslation();
 
-  const { settingsForm, saveSettings, hasUnsavedChanges } =
+  const { settingsForm, saveSettings, hasUnsavedChanges, supportedLanguages } =
     useSettingsContext();
-  const [supportedLanguages, setSupportedLanguages] = useState<string[]>([]);
-
-  useEffect(() => {
-    const loadSupportedLanguages = async () => {
-      try {
-        const languages = await translationsService.getSupportedLanguages();
-        setSupportedLanguages(languages);
-      } catch (error) {
-        console.error("Failed to load supported languages:", error);
-      }
-    };
-
-    loadSupportedLanguages();
-  }, []);
 
   return (
     <Form {...settingsForm}>
@@ -100,12 +84,11 @@ export const UserSettings = () => {
                         </FormControl>
                         <SelectContent>
                           {supportedLanguages.map((language) => (
-                            <SelectItem key={language} value={language}>
-                              {language === "en"
-                                ? "English"
-                                : language === "es"
-                                  ? "Español"
-                                  : language}
+                            <SelectItem
+                              key={language.value}
+                              value={language.value}
+                            >
+                              {language.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
