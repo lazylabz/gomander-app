@@ -1,4 +1,6 @@
 import { Route, Save, WandSparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button.tsx";
 import {
@@ -24,13 +26,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { translationsService } from "@/contracts/service";
 import { useSettingsContext } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import { EnvironmentPathsField } from "@/screens/SettingsScreen/tabs/ProjectSettings/components/EnvironmentPathsField.tsx";
 import { EnvironmentPathsInfoDialog } from "@/screens/SettingsScreen/tabs/UserSettings/components/EnvironmentPathsInfoDialog.tsx";
 
 export const UserSettings = () => {
+  const { t } = useTranslation();
+
   const { settingsForm, saveSettings, hasUnsavedChanges } =
     useSettingsContext();
+  const [supportedLanguages, setSupportedLanguages] = useState<string[]>([]);
+
+  useEffect(() => {
+    const loadSupportedLanguages = async () => {
+      try {
+        const languages = await translationsService.getSupportedLanguages();
+        setSupportedLanguages(languages);
+      } catch (error) {
+        console.error("Failed to load supported languages:", error);
+      }
+    };
+
+    loadSupportedLanguages();
+  }, []);
 
   return (
     <Form {...settingsForm}>
@@ -62,7 +81,40 @@ export const UserSettings = () => {
               </CardTitle>
               <CardDescription>Make gomander your own!</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
+              <FormField
+                control={settingsForm.control}
+                name="locale"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Language</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select your preferred language" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {supportedLanguages.map((language) => (
+                            <SelectItem key={language} value={language}>
+                              {language === "en"
+                                ? "English"
+                                : language === "es"
+                                  ? "Español"
+                                  : language}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={settingsForm.control}
                 name="theme"
@@ -103,7 +155,7 @@ export const UserSettings = () => {
           disabled={!hasUnsavedChanges}
         >
           <Save />
-          Save
+          {t("actions.save")}
         </Button>
       </form>
     </Form>
