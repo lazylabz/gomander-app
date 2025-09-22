@@ -73,6 +73,7 @@ export namespace domain {
 	    position: number;
 	}
 	export interface CommandGroupJSONv1 {
+	    id: string;
 	    name: string;
 	    commandIds: string[];
 	}
