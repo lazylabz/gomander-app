@@ -1,14 +1,21 @@
-import {useFormContext} from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
-import type {FormSchemaType} from "@/components/modals/Project/common/importAndExportSchema.ts";
-import {Checkbox} from "@/components/ui/checkbox.tsx";
-import {FormControl, FormField, FormItem, FormLabel,} from "@/components/ui/form.tsx";
-import type {ProjectExport} from "@/contracts/types.ts";
+import type { FormSchemaType } from "@/components/modals/Project/common/importAndExportSchema.ts";
+import { Checkbox } from "@/components/ui/checkbox.tsx";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form.tsx";
+import type { ProjectExport } from "@/contracts/types.ts";
 
 export const ProjectCommandsField = ({
   commands,
+  onChange,
 }: {
   commands: ProjectExport["commands"];
+  onChange?: (selectedCommandIds: string[]) => void;
 }) => {
   const form = useFormContext<FormSchemaType>();
 
@@ -22,16 +29,21 @@ export const ProjectCommandsField = ({
             control={form.control}
             name="commands"
             render={({ field }) => (
-              <FormItem key={command.id} className="flex flex-row items-center gap-2">
+              <FormItem
+                key={command.id}
+                className="flex flex-row items-center gap-2"
+              >
                 <FormControl>
                   <Checkbox
                     checked={field.value?.includes(command.id)}
                     onCheckedChange={(checked) => {
-                      return checked
-                        ? field.onChange([...field.value, command.id])
-                        : field.onChange(
-                            field.value?.filter((value) => value !== command.id),
-                          );
+                      const newValue = checked
+                        ? [...field.value, command.id]
+                        : field.value?.filter((value) => value !== command.id);
+
+                      onChange?.(newValue);
+
+                      return field.onChange(newValue);
                     }}
                   />
                 </FormControl>
