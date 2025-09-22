@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -41,7 +40,7 @@ export const ImportProjectModal = ({
       name: project?.name || "",
       baseWorkingDirectory: "",
       commands: project?.commands.map((c) => c.id) || [],
-      commandGroups: project?.commandGroups.map((c) => c.id) || [],
+      commandGroups: project?.commandGroups.map((cg) => cg.id) || [],
     },
   });
 
@@ -82,27 +81,22 @@ export const ImportProjectModal = ({
 
   const commandIdsWatcher = form.watch("commands");
 
-  useEffect(() => {
-    if (!project) return;
-
+  const handleCommandIdsChange = (selectedCommandIds: string[]) => {
     const currentCommandGroups = form.getValues("commandGroups");
 
     const updatedCommandGroups = currentCommandGroups.filter((groupId) => {
-      const group = project.commandGroups.find((cg) => cg.id === groupId);
+      const group = project?.commandGroups.find((cg) => cg.id === groupId);
       // Keep the group checked only if at least one of its commands is selected
       return (
         group &&
         group.commandIds.some((commandId) =>
-          commandIdsWatcher.includes(commandId),
+          selectedCommandIds.includes(commandId),
         )
       );
     });
 
-    // Only update if there's a difference to avoid infinite loops
-    if (currentCommandGroups.length !== updatedCommandGroups.length) {
-      form.setValue("commandGroups", updatedCommandGroups);
-    }
-  }, [commandIdsWatcher, project, form]);
+    form.setValue("commandGroups", updatedCommandGroups);
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -120,7 +114,10 @@ export const ImportProjectModal = ({
               <ProjectNameField<FormSchemaType> />
               <BaseWorkingDirectoryField<FormSchemaType> />
               <div className="flex items-start flex-wrap flex-col sm:flex-row gap-4 justify-between">
-                <ProjectCommandsField commands={project?.commands || []} />
+                <ProjectCommandsField
+                  onChange={handleCommandIdsChange}
+                  commands={project?.commands || []}
+                />
                 <ProjectCommandGroupsField
                   commandGroups={project?.commandGroups || []}
                   selectedCommandIds={commandIdsWatcher}
