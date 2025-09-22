@@ -100,7 +100,7 @@ export const ImportProjectModal = ({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="min-w-[600px]">
+      <DialogContent className="w-full sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>Import project</DialogTitle>
           <DialogDescription>
