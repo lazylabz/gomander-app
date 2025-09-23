@@ -19,6 +19,9 @@ export const settingsFormSchema = z.object({
   // Project settings schema
   name: z.string().min(1, "Project name is required"),
   baseWorkingDirectory: z.string().min(1, "Base working directory is required"),
+
+  // failure pattern of Regex
+  failurePatterns: z.array(z.string()).optional()
 });
 
 export type SettingsFormType = z.infer<typeof settingsFormSchema>;

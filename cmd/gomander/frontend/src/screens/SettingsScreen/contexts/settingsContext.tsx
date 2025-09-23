@@ -61,6 +61,7 @@ export const SettingsContextProvider = ({
 
   const initialTab = state?.tab || SettingsTab.User;
 
+  // Initialize form including failurePatterns
   const settingsForm = useForm<SettingsFormType>({
     resolver: zodResolver(settingsFormSchema),
     values: {
@@ -69,6 +70,7 @@ export const SettingsContextProvider = ({
       logLineLimit: userConfig.logLineLimit,
       name: projectInfo?.name || "",
       baseWorkingDirectory: projectInfo?.workingDirectory || "",
+      failurePatterns: projectInfo?.failurePatterns || [], 
     },
   });
 
@@ -84,11 +86,10 @@ export const SettingsContextProvider = ({
 
   const hasUserChanges = !!dirtyFields.environmentPaths || !!dirtyFields.logLineLimit;
   const hasProjectChanges =
-    dirtyFields.name || dirtyFields.baseWorkingDirectory;
+    dirtyFields.name || dirtyFields.baseWorkingDirectory || dirtyFields.failurePatterns; // UPDATED
+
   const saveSettings = async (formData: SettingsFormType) => {
-    if (!projectInfo) {
-      return;
-    }
+    if (!projectInfo) return;
 
     // Save user settings
     if (hasUserChanges) {
@@ -112,6 +113,7 @@ export const SettingsContextProvider = ({
           ...projectInfo,
           name: formData.name,
           workingDirectory: formData.baseWorkingDirectory,
+          failurePatterns: formData.failurePatterns, 
         });
         toast.success("Project settings saved successfully");
       } catch (e) {

@@ -13,6 +13,7 @@ import {
 import { Form } from "@/design-system/components/ui/form.tsx";
 import { useSettingsContext } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import type { SettingsFormType } from "@/screens/SettingsScreen/contexts/settingsFormSchema.ts";
+import { ProjectFailurePatternsField } from "./ProjectFailurePatterns";
 
 export const ProjectSettings = () => {
   const { settingsForm, saveSettings, hasUnsavedChanges } =
@@ -38,6 +39,7 @@ export const ProjectSettings = () => {
             <div className="flex flex-col gap-4">
               <ProjectNameField<SettingsFormType> />
               <BaseWorkingDirectoryField<SettingsFormType> />
+              <ProjectFailurePatternsField />  {/* New regex field */}
             </div>
           </CardContent>
         </Card>
