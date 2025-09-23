@@ -14,7 +14,9 @@ export const ProjectFailurePatternsField: FC = () => {
         render={({ field }) => (
           <textarea
             value={(field.value || []).join("\n")}
-            onChange={(e) => field.onChange(e.target.value.split("\n").filter(Boolean))}
+            onChange={(e) =>
+              field.onChange(e.target.value.split("\n").map((line) => line.trim()).filter(Boolean))
+            }
             placeholder="One regex per line, e.g., nodemon.*app crashed"
             className="w-full h-24 border rounded p-2"
           />
