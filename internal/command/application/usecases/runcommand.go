@@ -53,7 +53,7 @@ func (uc *DefaultRunCommand) Execute(commandId string) error {
 		return ep.Path
 	})
 
-	err = uc.commandRunner.RunCommand(cmd, environmentPathsStrings, currentProject.WorkingDirectory)
+	err = uc.commandRunner.RunCommand(cmd, environmentPathsStrings, currentProject.WorkingDirectory, currentProject.FailurePatterns)
 	if err != nil {
 		return err
 	}

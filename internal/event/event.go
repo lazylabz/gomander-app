@@ -11,6 +11,7 @@ const (
 	ProcessFinished     Event = "process_finished"
 	NewLogEntry         Event = "new_log_entry"
 	CommandGroupDeleted Event = "command_group_deleted"
+	CommandFailed       Event = "command_failed"
 )
 
 var Events = []struct {
@@ -21,4 +22,5 @@ var Events = []struct {
 	{Value: ProcessStarted, TSName: strings.ToUpper(string(ProcessStarted))},
 	{Value: NewLogEntry, TSName: strings.ToUpper(string(NewLogEntry))},
 	{Value: CommandGroupDeleted, TSName: strings.ToUpper(string(CommandGroupDeleted))},
+	{Value: CommandFailed, TSName: strings.ToUpper(string(CommandFailed))},
 }
