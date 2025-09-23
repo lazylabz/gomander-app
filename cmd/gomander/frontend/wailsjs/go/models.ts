@@ -97,7 +97,7 @@ export namespace domain {
 	    id: string;
 	    name: string;
 	    workingDirectory: string;
-		failurePatterns?: string[];
+	    failurePatterns?: string[];
 	}
 	export interface ProjectExportJSONv1 {
 	    version: number;
