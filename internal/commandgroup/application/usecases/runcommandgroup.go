@@ -57,7 +57,7 @@ func (uc *DefaultRunCommandGroup) Execute(commandGroupId string) error {
 		return ep.Path
 	})
 
-	err = uc.commandRunner.RunCommands(cmdGroup.Commands, environmentPathsStrings, currentProject.WorkingDirectory)
+	err = uc.commandRunner.RunCommands(cmdGroup.Commands, environmentPathsStrings, currentProject.WorkingDirectory, currentProject.FailurePatterns)
 	if err != nil {
 		return err
 	}

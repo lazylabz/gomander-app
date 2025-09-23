@@ -105,6 +105,7 @@ export namespace domain {
 	    workingDirectory: string;
 	    commands: CommandJSONv1[];
 	    commandGroups: CommandGroupJSONv1[];
+	    failurePatterns?: string[];
 	}
 
 }
@@ -116,6 +117,7 @@ export namespace event {
 	    PROCESS_STARTED = "process_started",
 	    NEW_LOG_ENTRY = "new_log_entry",
 	    COMMAND_GROUP_DELETED = "command_group_deleted",
+	    COMMAND_FAILED = "command_failed",
 	}
 
 }

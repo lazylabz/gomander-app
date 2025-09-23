@@ -63,6 +63,23 @@ export const EventListenersContainer = () => {
         ),
     );
 
+
+    eventService.eventsOn(
+    Event.COMMAND_FAILED,
+    (data: EventData[Event.COMMAND_FAILED]) => {
+      const { id, line}  = data;
+
+      if (!logsBuffer.current.has(id)) {
+        logsBuffer.current.set(id, []);
+      }
+
+      const formattedLine = `[ X ] ${line}`;
+
+      logsBuffer.current.get(id)?.push(formattedLine);
+    }
+  );
+
+   
     // Clean listeners on all events
     return () =>
       eventService.eventsOff(

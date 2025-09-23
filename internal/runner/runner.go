@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"regexp"
 	"sync"
 
 	"gomander/internal/command/domain"
@@ -36,8 +37,8 @@ type DefaultRunner struct {
 }
 
 type Runner interface {
-	RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string) error
-	RunCommands(commands []domain.Command, environmentPaths []string, baseWorkingDirectory string) error
+	RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string, failurePatterns []string) error
+	RunCommands(commands []domain.Command, environmentPaths []string, baseWorkingDirectory string, failurePattern []string) error
 	StopRunningCommand(id string) error
 	StopAllRunningCommands() []error
 	StopRunningCommands(commands []domain.Command) error
@@ -52,9 +53,9 @@ func NewDefaultRunner(logger logger.Logger, emitter event.EventEmitter) *Default
 	}
 }
 
-func (c *DefaultRunner) RunCommands(commands []domain.Command, environmentPaths []string, baseWorkingDirectory string) error {
+func (c *DefaultRunner) RunCommands(commands []domain.Command, environmentPaths []string, baseWorkingDirectory string, failurePatterns []string) error {
 	for _, command := range commands {
-		err := c.RunCommand(&command, environmentPaths, baseWorkingDirectory)
+		err := c.RunCommand(&command, environmentPaths, baseWorkingDirectory, failurePatterns)
 		if err != nil {
 			return err
 		}
@@ -74,7 +75,7 @@ func (c *DefaultRunner) StopRunningCommands(commands []domain.Command) error {
 }
 
 // RunCommand executes a command and streams its output.
-func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string) error {
+func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string, failurePatterns []string) error {
 	c.mutex.Lock()
 
 	if _, exists := c.runningCommands[command.Id]; exists {
@@ -138,13 +139,13 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	go func() {
 		defer scanWg.Done()
 		defer wg.Done()
-		c.streamOutput(command.Id, stdout)
+		c.streamOutput(command.Id, stdout, failurePatterns)
 	}()
 	// Stream stderr
 	go func() {
 		defer scanWg.Done()
 		defer wg.Done()
-		c.streamOutput(command.Id, stderr)
+		c.streamOutput(command.Id, stderr, failurePatterns)
 	}()
 
 	// Wait in background until the command finishes, because it ends naturally or because it is stopped.
@@ -230,7 +231,7 @@ func isExpectedError(err error) bool {
 	return false
 }
 
-func (c *DefaultRunner) streamOutput(commandId string, pipeReader io.ReadCloser) {
+func (c *DefaultRunner) streamOutput(commandId string, pipeReader io.ReadCloser, failurePatterns []string) {
 	scanner := bufio.NewScanner(pipeReader)
 	scanner.Buffer(make([]byte, 1024), 1024*1024) // Set buffer size to 1MB
 
@@ -239,6 +240,8 @@ func (c *DefaultRunner) streamOutput(commandId string, pipeReader io.ReadCloser)
 		c.logger.Debug(line)
 
 		c.sendStreamLine(commandId, line)
+
+		c.checkFailurePatterns(commandId, line, failurePatterns)
 	}
 }
 
@@ -280,4 +283,26 @@ func (c *DefaultRunner) GetRunningCommandIds() []string {
 		ids = append(ids, id)
 	}
 	return ids
+}
+
+func (c *DefaultRunner) checkFailurePatterns(commandId string, line string, patterns []string) bool {
+	for _, pattern := range patterns {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			c.logger.Error("Invalid regex in project settings: " + pattern)
+			continue
+		}
+
+		if re.MatchString(line) {
+			c.logger.Info("Command failed due to regex match: " + pattern)
+			c.eventEmitter.EmitEvent(event.CommandFailed, map[string]string{
+				"id":      commandId,
+				"line":    line,
+				"pattern": pattern,
+			})
+			return true
+		}
+	}
+
+	return false
 }
