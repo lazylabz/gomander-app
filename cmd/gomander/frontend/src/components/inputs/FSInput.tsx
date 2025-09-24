@@ -19,6 +19,7 @@ export const FSInput = (props: React.ComponentProps<typeof Input>) => {
     <div className="w-full relative">
       <Input {...props} className={cn("pr-8", props.className)} />
       <button
+        type="button"
         onClick={handleAskForDirPath}
         className="absolute right-2 top-2 z-10 bg-background"
       >
