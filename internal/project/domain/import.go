@@ -1,6 +1,7 @@
 package domain
 
 type CommandGroupJSONv1 struct {
+	Id         string   `json:"id"`
 	Name       string   `json:"name"`
 	CommandIds []string `json:"commandIds"`
 }
