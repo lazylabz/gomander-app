@@ -1,5 +1,5 @@
 # Gomander Build Makefile
-.PHONY: all clean windows darwin linux dmg docker-build help
+.PHONY: all clean windows darwin linux dmg docker-build dev help
 
 # Variables
 BUILD_DIR = build/bin
@@ -14,6 +14,7 @@ help:
 	@echo "Available targets:"
 	@echo "  all          - Build all platforms (darwin, windows, linux)"
 	@echo "  clean        - Clean build directory"
+	@echo "  dev          - Start development server with Wails"
 	@echo "  darwin       - Build macOS binaries and create DMG installers"
 	@echo "  darwin-amd64 - Build macOS AMD64 binary only"
 	@echo "  darwin-arm64 - Build macOS ARM64 binary only"
@@ -27,6 +28,10 @@ help:
 	@echo "  linux-amd64  - Build Linux AMD64 binary"
 	@echo "  linux-arm64  - Build Linux ARM64 binary"
 	@echo "  docker-build - Build Docker image for Linux builds"
+
+# Development target
+dev:
+	cd $(CMD_DIR) && wails dev
 
 # Clean build directory
 clean:
