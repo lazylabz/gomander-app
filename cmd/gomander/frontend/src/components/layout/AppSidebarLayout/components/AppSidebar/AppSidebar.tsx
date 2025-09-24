@@ -1,34 +1,19 @@
-import { DndContext, type DragEndEvent } from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { ArrowUpDown, ChevronDown, Settings } from "lucide-react";
+import { ChevronDown, Settings } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { toast } from "sonner";
 
 import { AllCommandsSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/AllCommandsSection/AllCommandsSection.tsx";
-import { CommandGroupSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandGroupSection/CommandGroupSection.tsx";
+import { CommandGroupsSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandGroupsSection/CommandGroupsSection.tsx";
 import { CreateMenu } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CreateMenu/CreateMenu.tsx";
 import { VersionSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/VersionSection/VersionSection.tsx";
 import { sidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import { AboutModal } from "@/components/modals/About/AboutModal.tsx";
 import { EditCommandModal } from "@/components/modals/Command/EditCommandModal.tsx";
-import { CreateCommandGroupModal } from "@/components/modals/CommandGroup/CreateCommandGroupModal.tsx";
-import { EditCommandGroupModal } from "@/components/modals/CommandGroup/EditCommandGroupModal.tsx";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar.tsx";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,66 +26,27 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar.tsx";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip.tsx";
-import type { Command, CommandGroup } from "@/contracts/types.ts";
-import { parseError } from "@/helpers/errorHelpers.ts";
-import { cn } from "@/lib/utils";
-import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
+import type { Command } from "@/contracts/types.ts";
 import { ScreenRoutes } from "@/routes.ts";
 import { SettingsTab } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
-import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
-import { reorderCommandGroups } from "@/useCases/commandGroup/reorderCommandGroups.ts";
 import { closeProject } from "@/useCases/project/closeProject.ts";
 
 export const AppSidebar = () => {
-  const commandGroups = useCommandGroupStore((state) => state.commandGroups);
-  const setCommandGroups = useCommandGroupStore(
-    (state) => state.setCommandGroups,
-  );
   const project = useProjectStore((state) => state.projectInfo);
 
   const navigate = useNavigate();
 
   const [editingCommand, setEditingCommand] = useState<Command | null>(null);
-  const [editingCommandGroup, setEditingCommandGroup] =
-    useState<CommandGroup | null>(null);
 
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
-  const [createCommandGroupModalOpen, setCreateCommandGroupModalOpen] =
-    useState(false);
-
-  const [isReorderingGroups, setIsReorderingGroups] = useState(false);
 
   const closeEditCommandModal = () => {
     setEditingCommand(null);
   };
 
-  const closeEditCommandGroupModal = () => {
-    setEditingCommandGroup(null);
-  };
-
-  const openCreateCommandGroupModal = () => {
-    setCreateCommandGroupModalOpen(true);
-  };
-
   const goToSettings = (tab: SettingsTab) => {
     navigate(ScreenRoutes.Settings, { state: { tab } });
-  };
-
-  const handleCommandGroupDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (active.id && over?.id && active.id !== over.id) {
-      const oldIndex = commandGroups.findIndex((cg) => cg.id === active.id);
-      const newIndex = commandGroups.findIndex((cg) => cg.id === over.id);
-      const newCommandGroups = arrayMove(commandGroups, oldIndex, newIndex);
-      setCommandGroups(newCommandGroups);
-    }
   };
 
   const handleCloseProject = async () => {
@@ -108,49 +54,16 @@ export const AppSidebar = () => {
     navigate(ScreenRoutes.ProjectSelection);
   };
 
-  const handleSaveCommandGroupsOrder = async () => {
-    const reorderedCommandGroupIds = commandGroups.map((cg) => cg.id);
-    try {
-      await reorderCommandGroups(reorderedCommandGroupIds);
-      toast.success("Reordered command groups successfully");
-    } catch (e) {
-      toast.error(parseError(e, "Failed to reorder command groups"));
-    } finally {
-      fetchCommandGroups();
-    }
-  };
-
-  const toggleReorderingMode = () => {
-    setIsReorderingGroups((wasReordering) => {
-      if (wasReordering) {
-        handleSaveCommandGroupsOrder();
-      }
-      return !wasReordering;
-    });
-  };
-
   return (
     <sidebarContext.Provider
       value={{
         startEditingCommand: (command: Command) => setEditingCommand(command),
-        startEditingCommandGroup: (commandGroup: CommandGroup) =>
-          setEditingCommandGroup(commandGroup),
-        isReorderingGroups,
       }}
     >
       <EditCommandModal
         command={editingCommand}
         open={!!editingCommand}
         setOpen={closeEditCommandModal}
-      />
-      <CreateCommandGroupModal
-        open={createCommandGroupModalOpen}
-        setOpen={setCreateCommandGroupModalOpen}
-      />
-      <EditCommandGroupModal
-        commandGroup={editingCommandGroup}
-        open={!!editingCommandGroup}
-        setOpen={closeEditCommandGroupModal}
       />
       <AboutModal open={aboutModalOpen} setOpen={setAboutModalOpen} />
       <Sidebar collapsible="offcanvas">
@@ -183,44 +96,7 @@ export const AppSidebar = () => {
         </SidebarHeader>
         <SidebarContent className="gap-1">
           <AllCommandsSection />
-          <ContextMenu>
-            <ContextMenuTrigger>
-              <div className="flex items-center pl-4 pr-2 mt-2 mb-1 gap-2">
-                <h3 className="text-sm text-muted-foreground">Command groups</h3>
-                <Tooltip delayDuration={1000}>
-                  <TooltipContent>
-                    {isReorderingGroups ? "Apply reordering" : "Start reordering"}
-                  </TooltipContent>
-                  <TooltipTrigger
-                    onClick={toggleReorderingMode}
-                    className={cn(
-                      "p-1 rounded hover:bg-sidebar-accent transition-colors border border-transparent",
-                      isReorderingGroups
-                        ? "text-primary bg-sidebar-accent border-muted-foreground"
-                        : "text-muted-foreground hover:text-primary",
-                    )}
-                  >
-                    <ArrowUpDown size={14} />
-                  </TooltipTrigger>
-                </Tooltip>
-              </div>
-            </ContextMenuTrigger>
-            <ContextMenuContent>
-              <ContextMenuItem onClick={openCreateCommandGroupModal}>
-                Add command group
-              </ContextMenuItem>
-            </ContextMenuContent>
-          </ContextMenu>
-          <DndContext onDragEnd={handleCommandGroupDragEnd}>
-            <SortableContext
-              items={commandGroups.map((cg) => cg.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              {commandGroups.map((cg) => (
-                <CommandGroupSection commandGroup={cg} key={cg.id} />
-              ))}
-            </SortableContext>
-          </DndContext>
+          <CommandGroupsSection />
         </SidebarContent>
         <SidebarFooter className="flex flex-row items-center justify-between p-2">
           <Settings

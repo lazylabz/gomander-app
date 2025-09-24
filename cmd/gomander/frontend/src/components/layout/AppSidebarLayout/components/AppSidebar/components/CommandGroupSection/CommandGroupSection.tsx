@@ -5,7 +5,6 @@ import { type SyntheticEvent } from "react";
 import { toast } from "sonner";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
-import { useSidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -33,12 +32,14 @@ import { stopCommandGroup } from "@/useCases/commandGroup/stopCommandGroup.ts";
 
 export const CommandGroupSection = ({
   commandGroup,
+  startEditingCommandGroup,
+  isReorderingGroups,
 }: {
   commandGroup: CommandGroup;
+  startEditingCommandGroup: (commandGroup: CommandGroup) => void;
+  isReorderingGroups: boolean;
 }) => {
   const commandsStatus = useCommandStore((state) => state.commandsStatus);
-
-  const { startEditingCommandGroup, isReorderingGroups } = useSidebarContext();
 
   const [internalIsOpen, setInternalIsOpen] = useLocalStorageState(
     getCommandGroupSectionOpenLocalStorageKey(commandGroup.id),
