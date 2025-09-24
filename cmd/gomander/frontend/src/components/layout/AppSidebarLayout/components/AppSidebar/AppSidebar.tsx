@@ -16,12 +16,19 @@ import { VersionSection } from "@/components/layout/AppSidebarLayout/components/
 import { sidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import { AboutModal } from "@/components/modals/About/AboutModal.tsx";
 import { EditCommandModal } from "@/components/modals/Command/EditCommandModal.tsx";
+import { CreateCommandGroupModal } from "@/components/modals/CommandGroup/CreateCommandGroupModal.tsx";
 import { EditCommandGroupModal } from "@/components/modals/CommandGroup/EditCommandGroupModal.tsx";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar.tsx";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,6 +71,8 @@ export const AppSidebar = () => {
     useState<CommandGroup | null>(null);
 
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [createCommandGroupModalOpen, setCreateCommandGroupModalOpen] =
+    useState(false);
 
   const [isReorderingGroups, setIsReorderingGroups] = useState(false);
 
@@ -73,6 +82,10 @@ export const AppSidebar = () => {
 
   const closeEditCommandGroupModal = () => {
     setEditingCommandGroup(null);
+  };
+
+  const openCreateCommandGroupModal = () => {
+    setCreateCommandGroupModalOpen(true);
   };
 
   const goToSettings = (tab: SettingsTab) => {
@@ -130,6 +143,10 @@ export const AppSidebar = () => {
         open={!!editingCommand}
         setOpen={closeEditCommandModal}
       />
+      <CreateCommandGroupModal
+        open={createCommandGroupModalOpen}
+        setOpen={setCreateCommandGroupModalOpen}
+      />
       <EditCommandGroupModal
         commandGroup={editingCommandGroup}
         open={!!editingCommandGroup}
@@ -166,25 +183,34 @@ export const AppSidebar = () => {
         </SidebarHeader>
         <SidebarContent className="gap-1">
           <AllCommandsSection />
-          <div className="flex items-center pl-4 pr-2 mt-2 mb-1 gap-2">
-            <h3 className="text-sm text-muted-foreground">Command groups</h3>
-            <Tooltip delayDuration={1000}>
-              <TooltipContent>
-                {isReorderingGroups ? "Apply reordering" : "Start reordering"}
-              </TooltipContent>
-              <TooltipTrigger
-                onClick={toggleReorderingMode}
-                className={cn(
-                  "p-1 rounded hover:bg-sidebar-accent transition-colors border border-transparent",
-                  isReorderingGroups
-                    ? "text-primary bg-sidebar-accent border-muted-foreground"
-                    : "text-muted-foreground hover:text-primary",
-                )}
-              >
-                <ArrowUpDown size={14} />
-              </TooltipTrigger>
-            </Tooltip>
-          </div>
+          <ContextMenu>
+            <ContextMenuTrigger>
+              <div className="flex items-center pl-4 pr-2 mt-2 mb-1 gap-2">
+                <h3 className="text-sm text-muted-foreground">Command groups</h3>
+                <Tooltip delayDuration={1000}>
+                  <TooltipContent>
+                    {isReorderingGroups ? "Apply reordering" : "Start reordering"}
+                  </TooltipContent>
+                  <TooltipTrigger
+                    onClick={toggleReorderingMode}
+                    className={cn(
+                      "p-1 rounded hover:bg-sidebar-accent transition-colors border border-transparent",
+                      isReorderingGroups
+                        ? "text-primary bg-sidebar-accent border-muted-foreground"
+                        : "text-muted-foreground hover:text-primary",
+                    )}
+                  >
+                    <ArrowUpDown size={14} />
+                  </TooltipTrigger>
+                </Tooltip>
+              </div>
+            </ContextMenuTrigger>
+            <ContextMenuContent>
+              <ContextMenuItem onClick={openCreateCommandGroupModal}>
+                Add command group
+              </ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
           <DndContext onDragEnd={handleCommandGroupDragEnd}>
             <SortableContext
               items={commandGroups.map((cg) => cg.id)}
