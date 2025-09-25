@@ -14,6 +14,7 @@ export enum Event {
   PROCESS_FINISHED = event.Event.PROCESS_FINISHED,
   PROCESS_STARTED = event.Event.PROCESS_STARTED,
   COMMAND_GROUP_DELETED = event.Event.COMMAND_GROUP_DELETED,
+  COMMAND_FAILED = event.Event.COMMAND_FAILED
 }
 
 export type EventData = {
@@ -24,4 +25,9 @@ export type EventData = {
   [Event.PROCESS_FINISHED]: string;
   [Event.PROCESS_STARTED]: string;
   [Event.COMMAND_GROUP_DELETED]: string;
+  [Event.COMMAND_FAILED]: {
+    id: string;
+    line: string;
+    pattern: string[];
+  };
 };

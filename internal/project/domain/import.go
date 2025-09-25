@@ -13,8 +13,9 @@ type CommandJSONv1 struct {
 }
 
 type ProjectExportJSONv1 struct {
-	Version       int                  `json:"version"`
-	Name          string               `json:"name"`
-	Commands      []CommandJSONv1      `json:"commands"`
-	CommandGroups []CommandGroupJSONv1 `json:"commandGroups"`
+	Version         int                  `json:"version"`
+	Name            string               `json:"name"`
+	Commands        []CommandJSONv1      `json:"commands"`
+	CommandGroups   []CommandGroupJSONv1 `json:"commandGroups"`
+	FailurePatterns []string             `json:"failurePatterns,omitempty"`
 }

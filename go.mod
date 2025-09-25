@@ -8,6 +8,7 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/google/uuid v1.6.0
+	github.com/lib/pq v1.10.9
 	github.com/pressly/goose/v3 v3.24.3
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/stretchr/testify v1.10.0
