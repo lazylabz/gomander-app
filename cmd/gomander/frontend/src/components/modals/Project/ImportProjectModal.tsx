@@ -10,6 +10,12 @@ import {
 import { ProjectCommandGroupsField } from "@/components/modals/Project/common/ProjectCommandGroupsField.tsx";
 import { ProjectCommandsField } from "@/components/modals/Project/common/ProjectCommandsField.tsx";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import {
   Dialog,
@@ -113,18 +119,24 @@ export const ImportProjectModal = ({
             >
               <ProjectNameField<FormSchemaType> />
               <BaseWorkingDirectoryField<FormSchemaType> />
-              <div className="flex sm:items-start flex-wrap flex-col items-stretch sm:flex-row gap-4 justify-between">
-                <ProjectCommandsField
-                  onChange={handleCommandIdsChange}
-                  commands={project?.commands || []}
-                />
-                <ProjectCommandGroupsField
-                  commandGroups={project?.commandGroups || []}
-                  selectedCommandIds={commandIdsWatcher}
-                  commands={project?.commands || []}
-                />
-              </div>
-
+              <Accordion type="single" collapsible>
+                <AccordionItem value="1">
+                  <AccordionTrigger>Advanced import</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="flex sm:items-start flex-wrap flex-col items-stretch sm:flex-row gap-4 justify-between">
+                      <ProjectCommandsField
+                        onChange={handleCommandIdsChange}
+                        commands={project?.commands || []}
+                      />
+                      <ProjectCommandGroupsField
+                        commandGroups={project?.commandGroups || []}
+                        selectedCommandIds={commandIdsWatcher}
+                        commands={project?.commands || []}
+                      />
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
               <Button className="self-end" type="submit">
                 Save
               </Button>
