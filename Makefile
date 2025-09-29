@@ -1,5 +1,5 @@
 # Gomander Build Makefile
-.PHONY: all clean windows darwin linux dmg docker-build dev help
+.PHONY: all clean windows darwin linux dmg docker-build dev help lint
 
 # Variables
 BUILD_DIR = build/bin
@@ -15,6 +15,7 @@ help:
 	@echo "  all          - Build all platforms (darwin, windows, linux)"
 	@echo "  clean        - Clean build directory"
 	@echo "  dev          - Start development server with Wails"
+	@echo "  lint         - Run linting and formatting checks"
 	@echo "  darwin       - Build macOS binaries and create DMG installers"
 	@echo "  darwin-amd64 - Build macOS AMD64 binary only"
 	@echo "  darwin-arm64 - Build macOS ARM64 binary only"
@@ -32,6 +33,15 @@ help:
 # Development target
 dev:
 	cd $(CMD_DIR) && wails dev
+
+# Lint target
+lint:
+	@echo "Running Go formatting checks..."
+	gofmt -l .
+	@echo "Running frontend TypeScript checks..."
+	cd $(CMD_DIR)/frontend && pnpm run typecheck
+	@echo "Running frontend ESLint checks..."
+	cd $(CMD_DIR)/frontend && pnpm run lint
 
 # Clean build directory
 clean:

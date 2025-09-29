@@ -53,6 +53,8 @@ We'd love your help making Gomander better! Whether you've found a bug, have an 
 - **Have a feature idea?** We're always curious to hear what would make your workflow smoother
 - **Want to contribute code?** Pull requests are always appreciated
 
+For detailed guidelines on coding standards, commit conventions, and testing requirements, please see our [Contributing Guide](CONTRIBUTING.md).
+
 Don't hesitate to jump in, even if it's your first contribution to an open source project.
 
 ## License
