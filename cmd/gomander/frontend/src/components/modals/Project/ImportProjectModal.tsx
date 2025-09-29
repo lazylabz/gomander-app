@@ -7,7 +7,15 @@ import {
   formSchema,
   type FormSchemaType,
 } from "@/components/modals/Project/common/importAndExportSchema.ts";
+import { ProjectCommandGroupsField } from "@/components/modals/Project/common/ProjectCommandGroupsField.tsx";
+import { ProjectCommandsField } from "@/components/modals/Project/common/ProjectCommandsField.tsx";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import {
   Dialog,
@@ -37,6 +45,8 @@ export const ImportProjectModal = ({
     values: {
       name: project?.name || "",
       baseWorkingDirectory: "",
+      commands: project?.commands.map((c) => c.id) || [],
+      commandGroups: project?.commandGroups.map((cg) => cg.id) || [],
     },
   });
 
@@ -52,8 +62,20 @@ export const ImportProjectModal = ({
       return;
     }
 
+    const projectWithSelectedCommandsAndCommandGroups: ProjectExport = {
+      ...project,
+      commands: project.commands.filter((c) => values.commands.includes(c.id)),
+      commandGroups: project.commandGroups.filter((cg) =>
+        values.commandGroups.includes(cg.id),
+      ),
+    };
+
     try {
-      await importProject(project, values.name, values.baseWorkingDirectory);
+      await importProject(
+        projectWithSelectedCommandsAndCommandGroups,
+        values.name,
+        values.baseWorkingDirectory,
+      );
 
       await onSuccess();
       handleOpenChange(false);
@@ -63,9 +85,28 @@ export const ImportProjectModal = ({
     }
   };
 
+  const commandIdsWatcher = form.watch("commands");
+
+  const handleCommandIdsChange = (selectedCommandIds: string[]) => {
+    const currentCommandGroups = form.getValues("commandGroups");
+
+    const updatedCommandGroups = currentCommandGroups.filter((groupId) => {
+      const group = project?.commandGroups.find((cg) => cg.id === groupId);
+      // Keep the group checked only if at least one of its commands is selected
+      return (
+        group &&
+        group.commandIds.some((commandId) =>
+          selectedCommandIds.includes(commandId),
+        )
+      );
+    });
+
+    form.setValue("commandGroups", updatedCommandGroups);
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
+      <DialogContent className="w-full sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>Import project</DialogTitle>
           <DialogDescription>
@@ -78,6 +119,24 @@ export const ImportProjectModal = ({
             >
               <ProjectNameField<FormSchemaType> />
               <BaseWorkingDirectoryField<FormSchemaType> />
+              <Accordion type="single" collapsible>
+                <AccordionItem value="1">
+                  <AccordionTrigger>Advanced import</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="flex sm:items-start flex-wrap flex-col items-stretch sm:flex-row gap-4 justify-between">
+                      <ProjectCommandsField
+                        onChange={handleCommandIdsChange}
+                        commands={project?.commands || []}
+                      />
+                      <ProjectCommandGroupsField
+                        commandGroups={project?.commandGroups || []}
+                        selectedCommandIds={commandIdsWatcher}
+                        commands={project?.commands || []}
+                      />
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
               <Button className="self-end" type="submit">
                 Save
               </Button>

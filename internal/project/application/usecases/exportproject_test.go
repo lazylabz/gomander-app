@@ -74,6 +74,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 			}),
 			CommandGroups: array.Map([]commandgroupdomain.CommandGroup{cmdGroup1, cmdGroup2}, func(group commandgroupdomain.CommandGroup) projectdomain.CommandGroupJSONv1 {
 				return projectdomain.CommandGroupJSONv1{
+					Id:         group.Id,
 					Name:       group.Name,
 					CommandIds: array.Map(group.Commands, func(cmd domain.Command) string { return cmd.Id }),
 				}
@@ -295,6 +296,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 			}),
 			CommandGroups: array.Map([]commandgroupdomain.CommandGroup{cmdGroup1, cmdGroup2}, func(group commandgroupdomain.CommandGroup) projectdomain.CommandGroupJSONv1 {
 				return projectdomain.CommandGroupJSONv1{
+					Id:         group.Id,
 					Name:       group.Name,
 					CommandIds: array.Map(group.Commands, func(cmd domain.Command) string { return cmd.Id }),
 				}

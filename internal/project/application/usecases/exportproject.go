@@ -85,6 +85,7 @@ func (uc *DefaultExportProject) Execute(projectId string) (string, error) {
 	// Prepare command groups for export
 	for _, group := range commandGroups {
 		exportData.CommandGroups = append(exportData.CommandGroups, projectdomain.CommandGroupJSONv1{
+			Id:         group.Id,
 			Name:       group.Name,
 			CommandIds: array.Map(group.Commands, func(cmd domain.Command) string { return cmd.Id }),
 		})
