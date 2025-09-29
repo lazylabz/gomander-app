@@ -121,6 +121,7 @@ export const ImportProjectModal = ({
                 <ProjectCommandGroupsField
                   commandGroups={project?.commandGroups || []}
                   selectedCommandIds={commandIdsWatcher}
+                  commands={project?.commands || []}
                 />
               </div>
 
