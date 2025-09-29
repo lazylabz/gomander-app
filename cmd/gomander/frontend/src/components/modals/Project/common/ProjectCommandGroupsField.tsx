@@ -83,7 +83,7 @@ export const ProjectCommandGroupsField = ({
                         )}
                       </Tooltip>
                     </FormItem>
-                    <ul className="mb-2">
+                    <ul className="mb-2 text-start">
                       {commandGroup.commandIds.map((commandId) => {
                         const command = commands.find(
                           (c) => c.id === commandId,

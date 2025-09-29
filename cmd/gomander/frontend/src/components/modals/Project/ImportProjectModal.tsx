@@ -113,7 +113,7 @@ export const ImportProjectModal = ({
             >
               <ProjectNameField<FormSchemaType> />
               <BaseWorkingDirectoryField<FormSchemaType> />
-              <div className="flex items-start flex-wrap flex-col sm:flex-row gap-4 justify-between">
+              <div className="flex sm:items-start flex-wrap flex-col items-stretch sm:flex-row gap-4 justify-between">
                 <ProjectCommandsField
                   onChange={handleCommandIdsChange}
                   commands={project?.commands || []}
