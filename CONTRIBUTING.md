@@ -2,6 +2,11 @@
 
 We welcome contributions to Gomander! This guide will help you get started with contributing to the project.
 
+> [!IMPORTANT]
+> Before starting work on an issue:
+>  - Verify it's in the main project (if not, it probably means that the core maintainers haven't checked it yet)
+>  - Comment on the issue to claim it, allowing maintainers to confirm it's prioritized and fully refined before you begin
+
 ## Getting Started
 
 ### Prerequisites
