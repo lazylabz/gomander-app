@@ -5,12 +5,14 @@ import { eventService } from "@/contracts/service.ts";
 import { Event, type EventData } from "@/contracts/types.ts";
 import { removeKeyFromLocalStorage } from "@/helpers/localStorage.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
+import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { cleanCommandLogs } from "@/useCases/command/cleanCommandLogs.ts";
 import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
 
 export const EventListenersContainer = () => {
   const addLogs = useCommandStore((state) => state.addLogs);
+  const userConfig = useUserConfigurationStore((state) => state.userConfig);
 
   const logsBuffer = useRef(new Map<string, string[]>());
 
@@ -18,13 +20,13 @@ export const EventListenersContainer = () => {
     const interval = setInterval(() => {
       if (logsBuffer.current.size > 0) {
         const bufferCopy = new Map(logsBuffer.current);
-        addLogs(bufferCopy);
+        addLogs(bufferCopy, userConfig.logLineLimit);
         logsBuffer.current.clear();
       }
     }, 30); // Flush every 30ms
 
     return () => clearInterval(interval);
-  }, [addLogs]);
+  }, [addLogs, userConfig.logLineLimit]);
 
   // Register events listeners
   useEffect(() => {
