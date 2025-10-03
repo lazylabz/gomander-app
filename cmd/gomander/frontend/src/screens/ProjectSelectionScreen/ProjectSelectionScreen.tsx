@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
+import { SplitButton } from "@/components/components/SplitButton/SplitButton.tsx";
 import { CreateProjectModal } from "@/components/modals/Project/CreateProjectModal.tsx";
 import { DeleteProjectModal } from "@/components/modals/Project/DeleteProjectModal.tsx";
 import { ImportProjectModal } from "@/components/modals/Project/ImportProjectModal.tsx";
@@ -111,9 +112,19 @@ export const ProjectSelectionScreen = () => {
           <Button onClick={openCreateProjectModal} variant="ghost">
             <Plus /> Create a new project
           </Button>
-          <Button onClick={handleImportProject} variant="ghost">
-            <Import /> Import an existing project
-          </Button>
+          <SplitButton
+            variant="ghost"
+            handleDefaultAction={handleImportProject}
+            extraActions={[
+              {
+                label: "Import from package.json",
+                handleClick: handleImportProject,
+              },
+            ]}
+          >
+            <Import />
+            Import an existing project
+          </SplitButton>
         </div>
       </div>
     </>
