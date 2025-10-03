@@ -3,6 +3,8 @@ package usecases
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
@@ -10,8 +12,15 @@ import (
 	projectdomain "gomander/internal/project/domain"
 )
 
+type FileType string
+
+const (
+	FileTypeGomander FileType = "gomander_export"
+	PackageJSON      FileType = "package_json"
+)
+
 type GetProjectToImport interface {
-	Execute() (*projectdomain.ProjectExportJSONv1, error)
+	Execute(fileType FileType) (*projectdomain.ProjectExportJSONv1, error)
 }
 
 type DefaultGetProjectToImport struct {
@@ -32,13 +41,10 @@ func NewGetProjectToImport(
 	}
 }
 
-func (uc *DefaultGetProjectToImport) Execute() (*projectdomain.ProjectExportJSONv1, error) {
+func (uc *DefaultGetProjectToImport) Execute(fileType FileType) (*projectdomain.ProjectExportJSONv1, error) {
 	var projectJSON *projectdomain.ProjectExportJSONv1
 
-	filePath, err := uc.runtimeFacade.OpenFileDialog(uc.ctx, runtime.OpenDialogOptions{
-		Title:   "Select a project file",
-		Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}},
-	})
+	filePath, err := uc.runtimeFacade.OpenFileDialog(uc.ctx, OpenDialogOptionsByFileType[fileType])
 	if err != nil {
 		return nil, err
 	}
@@ -53,11 +59,45 @@ func (uc *DefaultGetProjectToImport) Execute() (*projectdomain.ProjectExportJSON
 		return nil, err
 	}
 
-	// Unmarshal JSON data
-	err = json.Unmarshal(fileData, &projectJSON)
+	processor, exists := ProcessorsByFileType[fileType]
+	if !exists {
+		return nil, errors.New(fmt.Sprintf("file type %s is not supported", fileType))
+	}
+
+	projectJSON, err = processor(fileData)
 	if err != nil {
 		return nil, err
 	}
 
 	return projectJSON, nil
+}
+
+var OpenDialogOptionsByFileType = map[FileType]runtime.OpenDialogOptions{
+	FileTypeGomander: {
+		Title:   "Select a exported Gomander project file",
+		Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}},
+	},
+	PackageJSON: {
+		Title:   "Select a package.json file",
+		Filters: []runtime.FileFilter{{DisplayName: "package.json", Pattern: "package.json"}},
+	},
+}
+
+var ProcessorsByFileType = map[FileType]func([]byte) (*projectdomain.ProjectExportJSONv1, error){
+	FileTypeGomander: parseGomanderExportedProject,
+	PackageJSON:      parsePackageJSON,
+}
+
+func parseGomanderExportedProject(data []byte) (*projectdomain.ProjectExportJSONv1, error) {
+	var projectJSON *projectdomain.ProjectExportJSONv1
+	err := json.Unmarshal(data, &projectJSON)
+	if err != nil {
+		return nil, err
+	}
+	return projectJSON, nil
+}
+
+func parsePackageJSON(data []byte) (*projectdomain.ProjectExportJSONv1, error) {
+	// Placeholder for actual package.json processing logic
+	return nil, nil
 }

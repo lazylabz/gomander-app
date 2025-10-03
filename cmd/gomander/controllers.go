@@ -5,6 +5,7 @@ import (
 	commanddomain "gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	configdomain "gomander/internal/config/domain"
+	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
 )
 
@@ -69,7 +70,7 @@ func (wc *WailsControllers) ImportProjectController(projectJSON projectdomain.Pr
 }
 
 func (wc *WailsControllers) GetProjectToImportController() (*projectdomain.ProjectExportJSONv1, error) {
-	return wc.useCases.GetProjectToImport.Execute()
+	return wc.useCases.GetProjectToImport.Execute(usecases.FileTypeGomander)
 }
 
 // CommandGroup controllers

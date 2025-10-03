@@ -36,7 +36,7 @@ func TestDefaultGetProjectToImport_Execute(t *testing.T) {
 		mockFsFacade.On("ReadFile", "/path/to/project.json").Return(basicProjectJsonBytes, nil)
 
 		// Act
-		toImport, err := sut.Execute()
+		toImport, err := sut.Execute(usecases.FileTypeGomander)
 
 		// Assert
 		assert.NoError(t, err)
@@ -55,7 +55,7 @@ func TestDefaultGetProjectToImport_Execute(t *testing.T) {
 		mockRuntimeFacade.On("OpenFileDialog", mock.Anything, mock.Anything).Return("", assert.AnError)
 
 		// Act
-		toImport, err := sut.Execute()
+		toImport, err := sut.Execute(usecases.FileTypeGomander)
 
 		// Assert
 		assert.Error(t, err)
@@ -74,7 +74,7 @@ func TestDefaultGetProjectToImport_Execute(t *testing.T) {
 		mockRuntimeFacade.On("OpenFileDialog", mock.Anything, mock.Anything).Return("", nil)
 
 		// Act
-		toImport, err := sut.Execute()
+		toImport, err := sut.Execute(usecases.FileTypeGomander)
 
 		// Assert
 		assert.NoError(t, err)
@@ -94,7 +94,7 @@ func TestDefaultGetProjectToImport_Execute(t *testing.T) {
 		mockFsFacade.On("ReadFile", "/path/to/project.json").Return([]byte{}, assert.AnError)
 
 		// Act
-		toImport, err := sut.Execute()
+		toImport, err := sut.Execute(usecases.FileTypeGomander)
 
 		// Assert
 		assert.Error(t, err)
