@@ -62,6 +62,10 @@ export function GetProjectToImportController() {
   return window['go']['main']['WailsControllers']['GetProjectToImportController']();
 }
 
+export function GetProjectToImportFromPackageJsonController() {
+  return window['go']['main']['WailsControllers']['GetProjectToImportFromPackageJsonController']();
+}
+
 export function GetUserConfigController() {
   return window['go']['main']['WailsControllers']['GetUserConfigController']();
 }

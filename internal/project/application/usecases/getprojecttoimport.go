@@ -16,8 +16,8 @@ import (
 type FileType string
 
 const (
-	FileTypeGomander FileType = "gomander_export"
-	PackageJSON      FileType = "package_json"
+	FileTypeGomander    FileType = "gomander_export"
+	FileTypePackageJSON FileType = "package_json"
 )
 
 type GetProjectToImport interface {
@@ -78,15 +78,15 @@ var OpenDialogOptionsByFileType = map[FileType]runtime.OpenDialogOptions{
 		Title:   "Select a exported Gomander project file",
 		Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}},
 	},
-	PackageJSON: {
+	FileTypePackageJSON: {
 		Title:   "Select a package.json file",
 		Filters: []runtime.FileFilter{{DisplayName: "package.json", Pattern: "package.json"}},
 	},
 }
 
 var ProcessorsByFileType = map[FileType]func([]byte, string) (*projectdomain.ProjectExportJSONv1, error){
-	FileTypeGomander: parseGomanderExportedProject,
-	PackageJSON:      parsePackageJSON,
+	FileTypeGomander:    parseGomanderExportedProject,
+	FileTypePackageJSON: parsePackageJSON,
 }
 
 func parseGomanderExportedProject(data []byte, _ string) (*projectdomain.ProjectExportJSONv1, error) {

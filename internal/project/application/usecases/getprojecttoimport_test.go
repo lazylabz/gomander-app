@@ -36,7 +36,7 @@ var testCases = []struct {
 		},
 	},
 	{
-		fileType:   usecases.PackageJSON,
+		fileType:   usecases.FileTypePackageJSON,
 		dialogPath: "/path/to/package.json",
 		fileData: map[string]interface{}{
 			"name": "My NPM Project",
