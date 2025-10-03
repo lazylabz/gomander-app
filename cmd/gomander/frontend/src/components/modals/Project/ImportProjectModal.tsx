@@ -44,7 +44,7 @@ export const ImportProjectModal = ({
     resolver: zodResolver(formSchema),
     values: {
       name: project?.name || "",
-      baseWorkingDirectory: "",
+      baseWorkingDirectory: project?.workingDirectory || "",
       commands: project?.commands.map((c) => c.id) || [],
       commandGroups: project?.commandGroups.map((cg) => cg.id) || [],
     },
