@@ -43,7 +43,7 @@ export const commandStore = createStore<CommandStore>()((set) => ({
         newCommandsLogs[commandId] = [
           ...newCommandsLogs[commandId],
           ...lines,
-        ].slice(-linesLimit); // Keep only the last 100 logs
+        ].slice(-linesLimit); // Keep only the last `linesLimit` lines
       });
       return {
         ...state,
