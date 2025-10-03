@@ -101,6 +101,7 @@ export namespace domain {
 	export interface ProjectExportJSONv1 {
 	    version: number;
 	    name: string;
+	    workingDirectory: string;
 	    commands: CommandJSONv1[];
 	    commandGroups: CommandGroupJSONv1[];
 	}

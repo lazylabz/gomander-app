@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"gomander/internal/facade"
@@ -64,7 +65,7 @@ func (uc *DefaultGetProjectToImport) Execute(fileType FileType) (*projectdomain.
 		return nil, errors.New(fmt.Sprintf("file type %s is not supported", fileType))
 	}
 
-	projectJSON, err = processor(fileData)
+	projectJSON, err = processor(fileData, filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -83,12 +84,12 @@ var OpenDialogOptionsByFileType = map[FileType]runtime.OpenDialogOptions{
 	},
 }
 
-var ProcessorsByFileType = map[FileType]func([]byte) (*projectdomain.ProjectExportJSONv1, error){
+var ProcessorsByFileType = map[FileType]func([]byte, string) (*projectdomain.ProjectExportJSONv1, error){
 	FileTypeGomander: parseGomanderExportedProject,
 	PackageJSON:      parsePackageJSON,
 }
 
-func parseGomanderExportedProject(data []byte) (*projectdomain.ProjectExportJSONv1, error) {
+func parseGomanderExportedProject(data []byte, _ string) (*projectdomain.ProjectExportJSONv1, error) {
 	var projectJSON *projectdomain.ProjectExportJSONv1
 	err := json.Unmarshal(data, &projectJSON)
 	if err != nil {
@@ -97,7 +98,33 @@ func parseGomanderExportedProject(data []byte) (*projectdomain.ProjectExportJSON
 	return projectJSON, nil
 }
 
-func parsePackageJSON(data []byte) (*projectdomain.ProjectExportJSONv1, error) {
-	// Placeholder for actual package.json processing logic
-	return nil, nil
+func parsePackageJSON(data []byte, filePath string) (*projectdomain.ProjectExportJSONv1, error) {
+	var packageJSON struct {
+		Name    string            `json:"name"`
+		Scripts map[string]string `json:"scripts"`
+	}
+	err := json.Unmarshal(data, &packageJSON)
+	if err != nil {
+		return nil, err
+	}
+
+	var projectExport = &projectdomain.ProjectExportJSONv1{
+		Version:          1,
+		Name:             packageJSON.Name,
+		Commands:         make([]projectdomain.CommandJSONv1, 0),
+		CommandGroups:    make([]projectdomain.CommandGroupJSONv1, 0),
+		WorkingDirectory: filePath,
+	}
+
+	for scriptName, scriptCmd := range packageJSON.Scripts {
+		command := projectdomain.CommandJSONv1{
+			Id:               uuid.NewString(),
+			Name:             scriptName,
+			Command:          scriptCmd,
+			WorkingDirectory: "",
+		}
+		projectExport.Commands = append(projectExport.Commands, command)
+	}
+
+	return projectExport, nil
 }
