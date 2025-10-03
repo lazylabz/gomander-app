@@ -66,6 +66,7 @@ export const SettingsContextProvider = ({
     values: {
       environmentPaths: userConfig.environmentPaths,
       theme: rawTheme,
+      logLineLimit: userConfig.logLineLimit,
       name: projectInfo?.name || "",
       baseWorkingDirectory: projectInfo?.workingDirectory || "",
     },
@@ -81,7 +82,7 @@ export const SettingsContextProvider = ({
 
   const { dirtyFields } = settingsForm.formState;
 
-  const hasUserChanges = !!dirtyFields.environmentPaths;
+  const hasUserChanges = !!dirtyFields.environmentPaths || !!dirtyFields.logLineLimit;
   const hasProjectChanges =
     dirtyFields.name || dirtyFields.baseWorkingDirectory;
   const saveSettings = async (formData: SettingsFormType) => {
@@ -95,6 +96,7 @@ export const SettingsContextProvider = ({
         await saveUserConfig({
           lastOpenedProjectId: userConfig.lastOpenedProjectId,
           environmentPaths: formData.environmentPaths,
+          logLineLimit: formData.logLineLimit,
         });
         toast.success("User settings saved successfully");
       } catch (e) {

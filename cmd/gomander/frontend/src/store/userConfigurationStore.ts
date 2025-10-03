@@ -13,6 +13,7 @@ export const userConfigurationStore = createStore<UserConfigurationStore>()(
     userConfig: {
       environmentPaths: [],
       lastOpenedProjectId: "",
+      logLineLimit: 100,
     },
     setUserConfig: (config: UserConfig) => {
       set({ userConfig: config });
