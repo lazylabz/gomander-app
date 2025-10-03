@@ -31,6 +31,7 @@ func (g GormConfigRepository) GetOrCreate() (*domain.Config, error) {
 			configModel = ConfigModel{
 				Id:                  1,
 				LastOpenedProjectId: "",
+				LogLineLimit:        100,
 			}
 			if err := gorm.G[ConfigModel](g.db).Create(g.ctx, &configModel); err != nil {
 				return nil, err
