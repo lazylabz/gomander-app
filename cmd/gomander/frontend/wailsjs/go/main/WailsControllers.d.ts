@@ -32,6 +32,10 @@ export function GetCurrentProjectController():Promise<domain.Project>;
 
 export function GetProjectToImportController():Promise<domain.ProjectExportJSONv1>;
 
+export function GetSupportedLanguagesController():Promise<Array<string>>;
+
+export function GetTranslationController(arg1:string):Promise<domain.Localization>;
+
 export function GetUserConfigController():Promise<domain.Config>;
 
 export function ImportProjectController(arg1:domain.ProjectExportJSONv1,arg2:string,arg3:string):Promise<void>;

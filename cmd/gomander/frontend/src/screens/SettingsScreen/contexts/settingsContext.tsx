@@ -95,6 +95,7 @@ export const SettingsContextProvider = ({
         await saveUserConfig({
           lastOpenedProjectId: userConfig.lastOpenedProjectId,
           environmentPaths: formData.environmentPaths,
+          locale: 'en-GB', // TODO: add this to formData
         });
         toast.success("User settings saved successfully");
       } catch (e) {
