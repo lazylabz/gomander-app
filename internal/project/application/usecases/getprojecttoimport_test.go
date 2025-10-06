@@ -156,4 +156,113 @@ func TestDefaultGetProjectToImport_Execute(t *testing.T) {
 
 		mock.AssertExpectationsForObjects(t, mockRuntimeFacade, mockFsFacade)
 	})
+
+	t.Run("Should return error for malformed Gomander JSON file", func(t *testing.T) {
+		// Arrange
+
+		mockRuntimeFacade := new(test.MockRuntimeFacade)
+		mockFsFacade := new(test.MockFsFacade)
+
+		sut := usecases.NewGetProjectToImport(context.Background(), mockRuntimeFacade, mockFsFacade)
+
+		malformedJSON := []byte(`{"version": 1, "name": "Test", "commands": [`)
+
+		mockRuntimeFacade.On("OpenFileDialog", mock.Anything, mock.Anything).Return("/path/to/malformed.json", nil)
+		mockFsFacade.On("ReadFile", "/path/to/malformed.json").Return(malformedJSON, nil)
+
+		// Act
+		toImport, err := sut.Execute(usecases.FileTypeGomander)
+
+		// Assert
+		assert.Error(t, err)
+		assert.Nil(t, toImport)
+
+		mock.AssertExpectationsForObjects(t, mockRuntimeFacade, mockFsFacade)
+	})
+
+	t.Run("Should return error for malformed package.json file", func(t *testing.T) {
+		// Arrange
+
+		mockRuntimeFacade := new(test.MockRuntimeFacade)
+		mockFsFacade := new(test.MockFsFacade)
+
+		sut := usecases.NewGetProjectToImport(context.Background(), mockRuntimeFacade, mockFsFacade)
+
+		malformedJSON := []byte(`{"name": "Test", "scripts": {`)
+
+		mockRuntimeFacade.On("OpenFileDialog", mock.Anything, mock.Anything).Return("/path/to/package.json", nil)
+		mockFsFacade.On("ReadFile", "/path/to/package.json").Return(malformedJSON, nil)
+
+		// Act
+		toImport, err := sut.Execute(usecases.FileTypePackageJSON)
+
+		// Assert
+		assert.Error(t, err)
+		assert.Nil(t, toImport)
+
+		mock.AssertExpectationsForObjects(t, mockRuntimeFacade, mockFsFacade)
+	})
+
+	t.Run("Should handle package.json with no scripts", func(t *testing.T) {
+		// Arrange
+
+		mockRuntimeFacade := new(test.MockRuntimeFacade)
+		mockFsFacade := new(test.MockFsFacade)
+
+		sut := usecases.NewGetProjectToImport(context.Background(), mockRuntimeFacade, mockFsFacade)
+
+		packageJSON := map[string]interface{}{
+			"name":    "Test Project",
+			"version": "1.0.0",
+		}
+		dataBytes, err := json.Marshal(packageJSON)
+		assert.NoError(t, err)
+
+		mockRuntimeFacade.On("OpenFileDialog", mock.Anything, mock.Anything).Return("/path/to/package.json", nil)
+		mockFsFacade.On("ReadFile", "/path/to/package.json").Return(dataBytes, nil)
+
+		// Act
+		toImport, err := sut.Execute(usecases.FileTypePackageJSON)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.NotNil(t, toImport)
+		assert.Equal(t, "Test Project", toImport.Name)
+		assert.Equal(t, "/path/to", toImport.WorkingDirectory)
+		assert.Equal(t, 0, len(toImport.Commands))
+
+		mock.AssertExpectationsForObjects(t, mockRuntimeFacade, mockFsFacade)
+	})
+
+	t.Run("Should handle package.json with missing name field", func(t *testing.T) {
+		// Arrange
+
+		mockRuntimeFacade := new(test.MockRuntimeFacade)
+		mockFsFacade := new(test.MockFsFacade)
+
+		sut := usecases.NewGetProjectToImport(context.Background(), mockRuntimeFacade, mockFsFacade)
+
+		packageJSON := map[string]interface{}{
+			"scripts": map[string]interface{}{
+				"test": "jest",
+			},
+		}
+		dataBytes, err := json.Marshal(packageJSON)
+		assert.NoError(t, err)
+
+		mockRuntimeFacade.On("OpenFileDialog", mock.Anything, mock.Anything).Return("/path/to/package.json", nil)
+		mockFsFacade.On("ReadFile", "/path/to/package.json").Return(dataBytes, nil)
+
+		// Act
+		toImport, err := sut.Execute(usecases.FileTypePackageJSON)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.NotNil(t, toImport)
+		assert.Equal(t, "", toImport.Name)
+		assert.Equal(t, 1, len(toImport.Commands))
+		assert.Equal(t, "test", toImport.Commands[0].Name)
+
+		mock.AssertExpectationsForObjects(t, mockRuntimeFacade, mockFsFacade)
+	})
 }
