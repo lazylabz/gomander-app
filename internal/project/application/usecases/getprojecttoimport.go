@@ -3,8 +3,6 @@ package usecases
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"path"
 
 	"github.com/google/uuid"
@@ -46,10 +44,7 @@ func NewGetProjectToImport(
 func (uc *DefaultGetProjectToImport) Execute(fileType FileType) (*projectdomain.ProjectExportJSONv1, error) {
 	var projectJSON *projectdomain.ProjectExportJSONv1
 
-	options, exists := OpenDialogOptionsByFileType[fileType]
-	if !exists {
-		return nil, errors.New(fmt.Sprintf("file type %s is not supported", fileType))
-	}
+	options := OpenDialogOptionsByFileType[fileType]
 
 	filePath, err := uc.runtimeFacade.OpenFileDialog(uc.ctx, options)
 	if err != nil {
@@ -66,10 +61,7 @@ func (uc *DefaultGetProjectToImport) Execute(fileType FileType) (*projectdomain.
 		return nil, err
 	}
 
-	processor, exists := ProcessorsByFileType[fileType]
-	if !exists {
-		return nil, errors.New(fmt.Sprintf("file type %s is not supported", fileType))
-	}
+	processor := ProcessorsByFileType[fileType]
 
 	projectJSON, err = processor(fileData, filePath)
 	if err != nil {
