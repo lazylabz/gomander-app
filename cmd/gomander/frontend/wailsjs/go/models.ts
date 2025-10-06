@@ -90,6 +90,7 @@ export namespace domain {
 	export interface Config {
 	    lastOpenedProjectId: string;
 	    environmentPaths: EnvironmentPath[];
+	    logLineLimit: number;
 	}
 	
 	export interface Project {

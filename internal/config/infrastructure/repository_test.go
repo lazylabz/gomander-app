@@ -52,10 +52,11 @@ func TestGormConfigRepository_GetOrCreate(t *testing.T) {
 		assert.NotNil(t, config)
 		assert.Equal(t, "", config.LastOpenedProjectId)
 		assert.Empty(t, config.EnvironmentPaths)
+		assert.Equal(t, 100, config.LogLineLimit)
 	})
 	t.Run("Should return existing config with environment paths", func(t *testing.T) {
 		// Arrange
-		preloadedConfig := &ConfigModel{Id: 1, LastOpenedProjectId: "proj-123"}
+		preloadedConfig := &ConfigModel{Id: 1, LastOpenedProjectId: "proj-123", LogLineLimit: 200}
 		preloadedPaths := []*EnvironmentPathModel{
 			{Id: "path1", Path: "/usr/bin"},
 			{Id: "path2", Path: "/usr/local/bin"},
@@ -72,14 +73,16 @@ func TestGormConfigRepository_GetOrCreate(t *testing.T) {
 			EnvironmentPaths: []domain.EnvironmentPath{
 				{Id: "path1", Path: "/usr/bin"},
 				{Id: "path2", Path: "/usr/local/bin"},
-			}}, config)
+			},
+			LogLineLimit: 200,
+		}, config)
 	})
 }
 
 func TestGormConfigRepository_Update(t *testing.T) {
 	t.Run("Should save config and environment paths", func(t *testing.T) {
 		// Arrange
-		preloadedConfig := &ConfigModel{Id: 1, LastOpenedProjectId: "proj-123"}
+		preloadedConfig := &ConfigModel{Id: 1, LastOpenedProjectId: "proj-123", LogLineLimit: 100}
 		preloadedPaths := []*EnvironmentPathModel{
 			{Id: "path1", Path: "/usr/bin"},
 			{Id: "path2", Path: "/usr/local/bin"},
@@ -93,6 +96,7 @@ func TestGormConfigRepository_Update(t *testing.T) {
 				{Id: "path1", Path: "/bin2"},
 				{Id: "path2", Path: "/usr/local/bin2"},
 			},
+			LogLineLimit: 500,
 		}
 
 		// Act
@@ -109,7 +113,9 @@ func TestGormConfigRepository_Update(t *testing.T) {
 			EnvironmentPaths: []domain.EnvironmentPath{
 				{Id: "path1", Path: "/bin2"},
 				{Id: "path2", Path: "/usr/local/bin2"},
-			}}, got)
+			},
+			LogLineLimit: 500,
+		}, got)
 	})
 }
 
