@@ -73,7 +73,7 @@ func (uc *DefaultGetProjectToImport) Execute(fileType FileType) (*projectdomain.
 
 var OpenDialogOptionsByFileType = map[FileType]runtime.OpenDialogOptions{
 	FileTypeGomander: {
-		Title:   "Select a exported Gomander project file",
+		Title:   "Select an exported Gomander project file",
 		Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}},
 	},
 	FileTypePackageJSON: {
