@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"path"
 
 	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -45,7 +46,12 @@ func NewGetProjectToImport(
 func (uc *DefaultGetProjectToImport) Execute(fileType FileType) (*projectdomain.ProjectExportJSONv1, error) {
 	var projectJSON *projectdomain.ProjectExportJSONv1
 
-	filePath, err := uc.runtimeFacade.OpenFileDialog(uc.ctx, OpenDialogOptionsByFileType[fileType])
+	options, exists := OpenDialogOptionsByFileType[fileType]
+	if !exists {
+		return nil, errors.New(fmt.Sprintf("file type %s is not supported", fileType))
+	}
+
+	filePath, err := uc.runtimeFacade.OpenFileDialog(uc.ctx, options)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +86,7 @@ var OpenDialogOptionsByFileType = map[FileType]runtime.OpenDialogOptions{
 	},
 	FileTypePackageJSON: {
 		Title:   "Select a package.json file",
-		Filters: []runtime.FileFilter{{DisplayName: "package.json", Pattern: "package.json"}},
+		Filters: []runtime.FileFilter{{DisplayName: "package.json", Pattern: "*.json"}},
 	},
 }
 
@@ -108,12 +114,14 @@ func parsePackageJSON(data []byte, filePath string) (*projectdomain.ProjectExpor
 		return nil, err
 	}
 
+	folderPath := path.Dir(filePath)
+
 	var projectExport = &projectdomain.ProjectExportJSONv1{
 		Version:          1,
 		Name:             packageJSON.Name,
 		Commands:         make([]projectdomain.CommandJSONv1, 0),
 		CommandGroups:    make([]projectdomain.CommandGroupJSONv1, 0),
-		WorkingDirectory: filePath,
+		WorkingDirectory: folderPath,
 	}
 
 	for scriptName, scriptCmd := range packageJSON.Scripts {

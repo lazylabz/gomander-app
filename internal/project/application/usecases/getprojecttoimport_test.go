@@ -47,7 +47,7 @@ var testCases = []struct {
 		expectedData: &projectdomain.ProjectExportJSONv1{
 			Version:          1,
 			Name:             "My NPM Project",
-			WorkingDirectory: "/path/to/package.json",
+			WorkingDirectory: "/path/to",
 			Commands: []projectdomain.CommandJSONv1{
 				{
 					Id:               "cmd-1",
