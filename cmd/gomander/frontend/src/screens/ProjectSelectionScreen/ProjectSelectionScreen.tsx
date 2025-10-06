@@ -1,13 +1,19 @@
-import { Import, Plus } from "lucide-react";
+import { ChevronDownIcon, Import, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
-import { SplitButton } from "@/components/components/SplitButton/SplitButton.tsx";
 import { CreateProjectModal } from "@/components/modals/Project/CreateProjectModal.tsx";
 import { DeleteProjectModal } from "@/components/modals/Project/DeleteProjectModal.tsx";
 import { ImportProjectModal } from "@/components/modals/Project/ImportProjectModal.tsx";
 import { Button } from "@/components/ui/button.tsx";
+import { ButtonGroup } from "@/components/ui/button-group.tsx";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu.tsx";
 import { dataService } from "@/contracts/service.ts";
 import type { ProjectExport } from "@/contracts/types.ts";
 import { parseError } from "@/helpers/errorHelpers.ts";
@@ -54,6 +60,16 @@ export const ProjectSelectionScreen = () => {
   const handleImportProject = async () => {
     try {
       const projectToImport = await dataService.getProjectToImport();
+      setProjectBeingImported(projectToImport);
+    } catch (e) {
+      toast.error(parseError(e, "Failed to select project"));
+    }
+  };
+
+  const handleImportProjectFromPackageJson = async () => {
+    try {
+      const projectToImport =
+        await dataService.getProjectToImportFromPackageJson();
       setProjectBeingImported(projectToImport);
     } catch (e) {
       toast.error(parseError(e, "Failed to select project"));
@@ -112,19 +128,24 @@ export const ProjectSelectionScreen = () => {
           <Button onClick={openCreateProjectModal} variant="ghost">
             <Plus /> Create a new project
           </Button>
-          <SplitButton
-            variant="ghost"
-            handleDefaultAction={handleImportProject}
-            extraActions={[
-              {
-                label: "Import from package.json",
-                handleClick: handleImportProject,
-              },
-            ]}
-          >
-            <Import />
-            Import an existing project
-          </SplitButton>
+          <ButtonGroup>
+            <Button variant="ghost" onClick={handleImportProject}>
+              <Import />
+              Import an existing project
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="More Options">
+                  <ChevronDownIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem onClick={handleImportProjectFromPackageJson}>
+                  From a package.json
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </ButtonGroup>
         </div>
       </div>
     </>
