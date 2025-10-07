@@ -6,8 +6,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form.tsx";
-import { Input } from "@/components/ui/input.tsx";
+} from "@/design-system/components/ui/form.tsx";
+import { Input } from "@/design-system/components/ui/input.tsx";
 
 export const ProjectNameField = <T extends { name: string }>() => {
   const form = useFormContext<T>();

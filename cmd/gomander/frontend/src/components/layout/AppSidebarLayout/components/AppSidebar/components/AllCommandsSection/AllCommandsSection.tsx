@@ -10,26 +10,26 @@ import { toast } from "sonner";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
 import { CreateCommandModal } from "@/components/modals/Command/CreateCommandModal.tsx";
+import { ALL_COMMANDS_SECTION_OPEN } from "@/constants/localStorage.ts";
+import type { Command } from "@/contracts/types.ts";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible.tsx";
+} from "@/design-system/components/ui/collapsible.tsx";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "@/components/ui/context-menu.tsx";
+} from "@/design-system/components/ui/context-menu.tsx";
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
-} from "@/components/ui/sidebar.tsx";
-import { ALL_COMMANDS_SECTION_OPEN } from "@/constants/localStorage.ts";
-import type { Command } from "@/contracts/types.ts";
+} from "@/design-system/components/ui/sidebar.tsx";
 import { parseError } from "@/helpers/errorHelpers.ts";
 import { useLocalStorageState } from "@/hooks/useLocalStorageState.ts";
 import { fetchCommands } from "@/queries/fetchCommands.ts";

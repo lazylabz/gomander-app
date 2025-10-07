@@ -2,10 +2,10 @@ import { useEffect } from "react";
 import { Route, Routes } from "react-router";
 
 import { AppSidebarLayout } from "@/components/layout/AppSidebarLayout/AppSidebarLayout.tsx";
-import { Toaster } from "@/components/ui/sonner.tsx";
 import { EventListenersContainer } from "@/components/utility/EventListenersContainer.tsx";
 import { ThemeProvider } from "@/contexts/theme.tsx";
 import { VersionProvider } from "@/contexts/version.tsx";
+import { Toaster } from "@/design-system/components/ui/sonner.tsx";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
 import { ScreenRoutes } from "@/routes.ts";

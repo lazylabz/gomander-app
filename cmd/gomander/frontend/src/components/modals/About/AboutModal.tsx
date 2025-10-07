@@ -1,16 +1,19 @@
 import { Download, ExternalLink, Heart } from "lucide-react";
 
+import { useVersionContext } from "@/contexts/version.tsx";
+import { externalBrowserService } from "@/contracts/service.ts";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@/components/ui/avatar.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import { Dialog, DialogContent } from "@/components/ui/dialog.tsx";
-import { useVersionContext } from "@/contexts/version.tsx";
-import { externalBrowserService } from "@/contracts/service.ts";
+} from "@/design-system/components/ui/avatar.tsx";
+import { Button } from "@/design-system/components/ui/button.tsx";
+import {
+  Dialog,
+  DialogContent,
+} from "@/design-system/components/ui/dialog.tsx";
+import { cn } from "@/design-system/lib/utils.ts";
 import { GithubIcon } from "@/icons/GithubIcon.tsx";
-import { cn } from "@/lib/utils.ts";
 
 export const AboutModal = ({
   open,

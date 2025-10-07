@@ -1,14 +1,14 @@
 import { useFormContext } from "react-hook-form";
 
 import type { FormSchemaType } from "@/components/modals/Project/common/importAndExportSchema.ts";
-import { Checkbox } from "@/components/ui/checkbox.tsx";
+import type { ProjectExport } from "@/contracts/types.ts";
+import { Checkbox } from "@/design-system/components/ui/checkbox.tsx";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/ui/form.tsx";
-import type { ProjectExport } from "@/contracts/types.ts";
+} from "@/design-system/components/ui/form.tsx";
 
 export const ProjectCommandsField = ({
   commands,

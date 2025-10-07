@@ -10,22 +10,22 @@ import {
 import { ProjectCommandGroupsField } from "@/components/modals/Project/common/ProjectCommandGroupsField.tsx";
 import { ProjectCommandsField } from "@/components/modals/Project/common/ProjectCommandsField.tsx";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
+import type { ProjectExport } from "@/contracts/types.ts";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion.tsx";
-import { Button } from "@/components/ui/button.tsx";
+} from "@/design-system/components/ui/accordion.tsx";
+import { Button } from "@/design-system/components/ui/button.tsx";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog.tsx";
-import { Form } from "@/components/ui/form.tsx";
-import type { ProjectExport } from "@/contracts/types.ts";
+} from "@/design-system/components/ui/dialog.tsx";
+import { Form } from "@/design-system/components/ui/form.tsx";
 import { parseError } from "@/helpers/errorHelpers.ts";
 import { importProject } from "@/useCases/project/importProject.ts";
 

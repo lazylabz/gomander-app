@@ -1,19 +1,19 @@
 import { useFormContext } from "react-hook-form";
 
 import type { FormSchemaType } from "@/components/modals/Project/common/importAndExportSchema.ts";
-import { Checkbox } from "@/components/ui/checkbox.tsx";
+import type { ProjectExport } from "@/contracts/types.ts";
+import { Checkbox } from "@/design-system/components/ui/checkbox.tsx";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/ui/form.tsx";
+} from "@/design-system/components/ui/form.tsx";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip.tsx";
-import type { ProjectExport } from "@/contracts/types.ts";
+} from "@/design-system/components/ui/tooltip.tsx";
 
 export const ProjectCommandGroupsField = ({
   commandGroups,

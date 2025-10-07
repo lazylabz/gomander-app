@@ -11,20 +11,20 @@ import { toast } from "sonner";
 import { CommandGroupSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandGroupsSection/components/CommandGroupSection/CommandGroupSection.tsx";
 import { CreateCommandGroupModal } from "@/components/modals/CommandGroup/CreateCommandGroupModal.tsx";
 import { EditCommandGroupModal } from "@/components/modals/CommandGroup/EditCommandGroupModal.tsx";
+import type { CommandGroup } from "@/contracts/types.ts";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "@/components/ui/context-menu.tsx";
+} from "@/design-system/components/ui/context-menu.tsx";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip.tsx";
-import type { CommandGroup } from "@/contracts/types.ts";
+} from "@/design-system/components/ui/tooltip.tsx";
+import { cn } from "@/design-system/lib/utils.ts";
 import { parseError } from "@/helpers/errorHelpers.ts";
-import { cn } from "@/lib/utils.ts";
 import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
 import { reorderCommandGroups } from "@/useCases/commandGroup/reorderCommandGroups.ts";

@@ -7,8 +7,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form.tsx";
-import { Input } from "@/components/ui/input.tsx";
+} from "@/design-system/components/ui/form.tsx";
+import { Input } from "@/design-system/components/ui/input.tsx";
 
 export const CommandGroupNameField = () => {
   const form = useFormContext<FormSchemaType>();

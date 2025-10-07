@@ -1,14 +1,14 @@
 import { EllipsisVertical } from "lucide-react";
 import { toast } from "sonner";
 
+import { dataService } from "@/contracts/service.ts";
+import type { Project } from "@/contracts/types.ts";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu.tsx";
-import { dataService } from "@/contracts/service.ts";
-import type { Project } from "@/contracts/types.ts";
+} from "@/design-system/components/ui/dropdown-menu.tsx";
 import { parseError } from "@/helpers/errorHelpers.ts";
 import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
 import { ProjectExportSuccessToast } from "@/screens/ProjectSelectionScreen/components/ProjectExportSuccessToast.tsx";

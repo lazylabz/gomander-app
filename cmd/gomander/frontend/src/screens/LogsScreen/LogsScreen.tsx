@@ -8,12 +8,15 @@ import {
   useState,
 } from "react";
 
-import { Input } from "@/components/ui/input.tsx";
-import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar.tsx";
 import { useTheme } from "@/contexts/theme.tsx";
+import { Input } from "@/design-system/components/ui/input.tsx";
+import {
+  SidebarTrigger,
+  useSidebar,
+} from "@/design-system/components/ui/sidebar.tsx";
+import { cn } from "@/design-system/lib/utils.ts";
 import { useCurrentLogs } from "@/hooks/useCurrentLogs.ts";
 import { useShortcut } from "@/hooks/useShortcut.ts";
-import { cn } from "@/lib/utils.ts";
 import { extractMatchesIds, parseLog } from "@/screens/LogsScreen/helpers.ts";
 import { clearCurrentLogs } from "@/useCases/logging/clearCurrentLogs.ts";
 

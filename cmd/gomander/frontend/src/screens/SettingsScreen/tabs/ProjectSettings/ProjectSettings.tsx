@@ -2,15 +2,15 @@ import { ChartNoAxesGantt, Save } from "lucide-react";
 
 import { BaseWorkingDirectoryField } from "@/components/modals/Project/common/BaseWorkingDirectoryField.tsx";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
-import { Button } from "@/components/ui/button.tsx";
+import { Button } from "@/design-system/components/ui/button.tsx";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card.tsx";
-import { Form } from "@/components/ui/form.tsx";
+} from "@/design-system/components/ui/card.tsx";
+import { Form } from "@/design-system/components/ui/form.tsx";
 import { useSettingsContext } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import type { SettingsFormType } from "@/screens/SettingsScreen/contexts/settingsFormSchema.ts";
 

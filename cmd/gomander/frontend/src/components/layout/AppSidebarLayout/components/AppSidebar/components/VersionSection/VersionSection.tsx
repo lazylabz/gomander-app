@@ -1,11 +1,11 @@
 import { Info } from "lucide-react";
 
+import { useVersionContext } from "@/contexts/version.tsx";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip.tsx";
-import { useVersionContext } from "@/contexts/version.tsx";
+} from "@/design-system/components/ui/tooltip.tsx";
 
 export const VersionSection = ({
   openAboutModal,
