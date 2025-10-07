@@ -15,6 +15,7 @@ import {
   GetCommandsController,
   GetCurrentProjectController,
   GetProjectToImportController,
+  GetProjectToImportFromPackageJsonController,
   GetUserConfigController,
   ImportProjectController,
   OpenProjectController,
@@ -66,6 +67,8 @@ export const dataService = {
   exportProject: ExportProjectController,
   importProject: ImportProjectController,
   getProjectToImport: GetProjectToImportController,
+  getProjectToImportFromPackageJson:
+    GetProjectToImportFromPackageJsonController,
   editProject: EditProjectController,
 };
 
