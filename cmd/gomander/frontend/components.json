@@ -11,11 +11,11 @@
     "prefix": ""
   },
   "aliases": {
-    "components": "@/ds/components",
-    "utils": "@/ds/lib/utils",
-    "ui": "@/ds/components/ui",
-    "lib": "@/ds/lib",
-    "hooks": "@/ds/hooks"
+    "components": "@/design-system/components",
+    "utils": "@/design-system/lib/utils",
+    "ui": "@/design-system/components/ui",
+    "lib": "@/design-system/lib",
+    "hooks": "@/design-system/hooks"
   },
   "iconLibrary": "lucide"
 }
