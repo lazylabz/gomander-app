@@ -4,17 +4,17 @@ import { GripVertical, Play, Square } from "lucide-react";
 import { toast } from "sonner";
 
 import { useSidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
+import { useTheme } from "@/contexts/theme.tsx";
+import type { Command } from "@/contracts/types.ts";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "@/components/ui/context-menu.tsx";
-import { SidebarMenuButton } from "@/components/ui/sidebar.tsx";
-import { useTheme } from "@/contexts/theme.tsx";
-import type { Command } from "@/contracts/types.ts";
+} from "@/design-system/components/ui/context-menu.tsx";
+import { SidebarMenuButton } from "@/design-system/components/ui/sidebar.tsx";
+import { cn } from "@/design-system/lib/utils.ts";
 import { parseError } from "@/helpers/errorHelpers.ts";
-import { cn } from "@/lib/utils.ts";
 import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { useCommandStore } from "@/store/commandStore.ts";

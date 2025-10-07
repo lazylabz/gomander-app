@@ -2,7 +2,7 @@ import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@/components/ui/hover-card.tsx";
+} from "@/design-system/components/ui/hover-card.tsx";
 
 export const EnvironmentPathsInfoDialog = () => {
   return (

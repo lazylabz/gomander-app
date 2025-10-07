@@ -5,7 +5,7 @@ import {
   ADDED_COMMANDS,
   AVAILABLE_COMMANDS,
 } from "@/components/modals/CommandGroup/common/CommandGroupCommandsField/constants.ts";
-import { FormLabel } from "@/components/ui/form.tsx";
+import { FormLabel } from "@/design-system/components/ui/form.tsx";
 
 export const DroppableContainer = ({
   variant,

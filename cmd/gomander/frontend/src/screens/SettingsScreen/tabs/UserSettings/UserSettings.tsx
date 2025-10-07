@@ -1,13 +1,13 @@
 import { Route, Save, WandSparkles } from "lucide-react";
 
-import { Button } from "@/components/ui/button.tsx";
+import { Button } from "@/design-system/components/ui/button.tsx";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card.tsx";
+} from "@/design-system/components/ui/card.tsx";
 import {
   Form,
   FormControl,
@@ -16,15 +16,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form.tsx";
-import { Input } from "@/components/ui/input.tsx";
+} from "@/design-system/components/ui/form.tsx";
+import { Input } from "@/design-system/components/ui/input.tsx";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/design-system/components/ui/select";
 import { useSettingsContext } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import { EnvironmentPathsField } from "@/screens/SettingsScreen/tabs/ProjectSettings/components/EnvironmentPathsField.tsx";
 import { EnvironmentPathsInfoDialog } from "@/screens/SettingsScreen/tabs/UserSettings/components/EnvironmentPathsInfoDialog.tsx";

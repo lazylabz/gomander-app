@@ -1,12 +1,12 @@
 import { ArrowLeft, PanelsTopLeft, Settings, User } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/design-system/components/ui/button";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/ui/tabs.tsx";
+} from "@/design-system/components/ui/tabs.tsx";
 import {
   SettingsTab,
   useSettingsContext,

@@ -1,5 +1,5 @@
 import { AppSidebar } from "@/components/layout/AppSidebarLayout/components/AppSidebar/AppSidebar.tsx";
-import { SidebarProvider } from "@/components/ui/sidebar.tsx";
+import { SidebarProvider } from "@/design-system/components/ui/sidebar.tsx";
 
 export const AppSidebarLayout = ({
   children,

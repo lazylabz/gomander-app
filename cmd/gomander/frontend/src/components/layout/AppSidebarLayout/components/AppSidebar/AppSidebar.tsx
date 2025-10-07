@@ -9,24 +9,24 @@ import { VersionSection } from "@/components/layout/AppSidebarLayout/components/
 import { sidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import { AboutModal } from "@/components/modals/About/AboutModal.tsx";
 import { EditCommandModal } from "@/components/modals/Command/EditCommandModal.tsx";
+import type { Command } from "@/contracts/types.ts";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@/components/ui/avatar.tsx";
+} from "@/design-system/components/ui/avatar.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu.tsx";
+} from "@/design-system/components/ui/dropdown-menu.tsx";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-} from "@/components/ui/sidebar.tsx";
-import type { Command } from "@/contracts/types.ts";
+} from "@/design-system/components/ui/sidebar.tsx";
 import { ScreenRoutes } from "@/routes.ts";
 import { SettingsTab } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import { useProjectStore } from "@/store/projectStore.ts";

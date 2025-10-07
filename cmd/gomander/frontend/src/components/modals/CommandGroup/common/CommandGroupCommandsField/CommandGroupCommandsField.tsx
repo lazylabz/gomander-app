@@ -28,7 +28,7 @@ import {
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form.tsx";
+} from "@/design-system/components/ui/form.tsx";
 import { isDefined } from "@/helpers/mapHelpers.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 

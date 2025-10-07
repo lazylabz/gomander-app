@@ -1,9 +1,9 @@
 import { FolderIcon } from "lucide-react";
 import type { ChangeEvent } from "react";
 
-import { Input } from "@/components/ui/input.tsx";
 import { helpersService } from "@/contracts/service.ts";
-import { cn } from "@/lib/utils.ts";
+import { Input } from "@/design-system/components/ui/input.tsx";
+import { cn } from "@/design-system/lib/utils.ts";
 
 export const FSInput = (props: React.ComponentProps<typeof Input>) => {
   const handleAskForDirPath = async () => {

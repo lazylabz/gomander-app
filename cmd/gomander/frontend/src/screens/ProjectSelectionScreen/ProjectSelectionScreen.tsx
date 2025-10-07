@@ -6,16 +6,16 @@ import { toast } from "sonner";
 import { CreateProjectModal } from "@/components/modals/Project/CreateProjectModal.tsx";
 import { DeleteProjectModal } from "@/components/modals/Project/DeleteProjectModal.tsx";
 import { ImportProjectModal } from "@/components/modals/Project/ImportProjectModal.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import { ButtonGroup } from "@/components/ui/button-group.tsx";
+import { dataService } from "@/contracts/service.ts";
+import type { ProjectExport } from "@/contracts/types.ts";
+import { Button } from "@/design-system/components/ui/button.tsx";
+import { ButtonGroup } from "@/design-system/components/ui/button-group.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu.tsx";
-import { dataService } from "@/contracts/service.ts";
-import type { ProjectExport } from "@/contracts/types.ts";
+} from "@/design-system/components/ui/dropdown-menu.tsx";
 import { parseError } from "@/helpers/errorHelpers.ts";
 import { ScreenRoutes } from "@/routes.ts";
 import { ProjectCard } from "@/screens/ProjectSelectionScreen/components/ProjectCard.tsx";

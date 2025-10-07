@@ -8,11 +8,15 @@ import {
   type FormSchemaType,
 } from "@/components/modals/Project/common/createSchema.ts";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import { Dialog, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DialogContent } from "@/components/ui/dialog.tsx";
-import { Form } from "@/components/ui/form.tsx";
 import { dataService } from "@/contracts/service";
+import { Button } from "@/design-system/components/ui/button.tsx";
+import {
+  Dialog,
+  DialogHeader,
+  DialogTitle,
+} from "@/design-system/components/ui/dialog";
+import { DialogContent } from "@/design-system/components/ui/dialog.tsx";
+import { Form } from "@/design-system/components/ui/form.tsx";
 
 export const CreateProjectModal = ({
   open,

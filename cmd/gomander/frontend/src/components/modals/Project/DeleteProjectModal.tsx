@@ -7,7 +7,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog.tsx";
+} from "@/design-system/components/ui/alert-dialog.tsx";
 
 export const DeleteProjectModal = ({
   open,

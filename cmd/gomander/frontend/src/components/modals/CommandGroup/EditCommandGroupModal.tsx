@@ -9,7 +9,8 @@ import {
   formSchema,
   type FormSchemaType,
 } from "@/components/modals/CommandGroup/common/formSchema.ts";
-import { Button } from "@/components/ui/button.tsx";
+import type { CommandGroup } from "@/contracts/types.ts";
+import { Button } from "@/design-system/components/ui/button.tsx";
 import {
   Dialog,
   DialogClose,
@@ -17,9 +18,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog.tsx";
-import { Form } from "@/components/ui/form.tsx";
-import type { CommandGroup } from "@/contracts/types.ts";
+} from "@/design-system/components/ui/dialog.tsx";
+import { Form } from "@/design-system/components/ui/form.tsx";
 import { parseError } from "@/helpers/errorHelpers.ts";
 import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { editCommandGroup } from "@/useCases/commandGroup/editCommandGroup.ts";

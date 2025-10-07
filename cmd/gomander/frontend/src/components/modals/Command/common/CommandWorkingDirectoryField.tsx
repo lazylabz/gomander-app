@@ -8,7 +8,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form.tsx";
+} from "@/design-system/components/ui/form.tsx";
 
 export const CommandWorkingDirectoryField = () => {
   const form = useFormContext<FormSchemaType>();

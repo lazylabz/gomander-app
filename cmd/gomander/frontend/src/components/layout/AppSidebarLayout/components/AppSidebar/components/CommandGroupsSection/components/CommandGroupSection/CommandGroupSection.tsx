@@ -5,24 +5,24 @@ import { type SyntheticEvent } from "react";
 import { toast } from "sonner";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
+import { getCommandGroupSectionOpenLocalStorageKey } from "@/constants/localStorage.ts";
+import type { Command, CommandGroup } from "@/contracts/types.ts";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "@/components/ui/context-menu.tsx";
+} from "@/design-system/components/ui/context-menu.tsx";
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
-} from "@/components/ui/sidebar.tsx";
-import { getCommandGroupSectionOpenLocalStorageKey } from "@/constants/localStorage.ts";
-import type { Command, CommandGroup } from "@/contracts/types.ts";
+} from "@/design-system/components/ui/sidebar.tsx";
+import { cn } from "@/design-system/lib/utils.ts";
 import { parseError } from "@/helpers/errorHelpers.ts";
 import { useLocalStorageState } from "@/hooks/useLocalStorageState.ts";
-import { cn } from "@/lib/utils.ts";
 import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
