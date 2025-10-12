@@ -47,6 +47,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
+		// logger.On("Error", mock.Anything).Return()
 
 		// Act
 		err := r.RunCommand(&commanddomain.Command{
@@ -56,7 +57,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 			Command:          "echo 'a'&& echo 'b'&& echo 'c'",
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
-		}, []string{"/test"}, "/test")
+		}, []string{"/test"}, "/test", []string{"Error:.*"})
 		r.WaitForCommand(commandId)
 
 		// Assert
@@ -89,7 +90,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 			Command:          "definitely-not-a-real-command-12345",
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
-		}, []string{}, "")
+		}, []string{}, "", []string{"Error:.*"})
 		r.WaitForCommand(commandId)
 
 		// Assert
@@ -97,6 +98,51 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		assert.Empty(t, r.GetRunningCommands())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
+
+	t.Run("Should detect failure patterns and emit appropriate events", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test2.MockEventEmitter)
+
+		r := runner.NewDefaultRunner(logger, emitter)
+		commandId := "2"
+
+		mockEmitterLogEntry(emitter, commandId, "Error: something went wrong")
+
+		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
+		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
+		emitter.On("EmitEvent", event.NewLogEntry, mock.MatchedBy(func(
+			data map[string]string) bool {
+			return strings.Contains(data["line"], "echo")
+		})).Return()
+		emitter.On("EmitEvent", event.CommandFailed, mock.MatchedBy(func(
+			data map[string]string) bool {
+			return data["id"] == commandId &&
+				strings.Contains(data["line"], "Error: something went wrong") &&
+				data["pattern"] == "Error:.*"
+		})).Return()
+
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Error", mock.Anything).Maybe()
+		logger.On("Debug", mock.Anything).Return()
+
+		// Act
+		err := r.RunCommand(&commanddomain.Command{
+			Id:               commandId,
+			ProjectId:        commandId,
+			Name:             "TestFailure",
+			Command:          "echo 'Error: something went wrong'",
+			WorkingDirectory: validWorkingDirectory(),
+			Position:         0,
+		}, []string{"/test"}, "/test", []string{"Error*"})
+		r.WaitForCommand(commandId)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Empty(t, r.GetRunningCommands())
+		mock.AssertExpectationsForObjects(t, emitter, logger)
+	})
+
 }
 
 func TestDefaultRunner_StopRunningCommand(t *testing.T) {
@@ -128,7 +174,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 			Command:          infiniteCmd(),
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
-		}, []string{}, "")
+		}, []string{}, "", []string{"test"})
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
@@ -171,7 +217,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
 		}
-		err := r.RunCommand(&command, []string{}, "")
+		err := r.RunCommand(&command, []string{}, "", []string{"test"})
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
@@ -179,7 +225,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		}, 1*time.Second, 20*time.Millisecond)
 
 		// Try to run the same command again
-		err = r.RunCommand(&command, []string{}, "")
+		err = r.RunCommand(&command, []string{}, "", []string{"test"})
 
 		// Assert
 		assert.NoError(t, err)
@@ -223,7 +269,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 			Command:          infiniteCmd(),
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
-		}, []string{}, "")
+		}, []string{}, "", []string{"test"})
 		assert.NoError(t, err)
 
 		err = r.RunCommand(&commanddomain.Command{
@@ -233,7 +279,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 			Command:          infiniteCmd(),
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
-		}, []string{}, "")
+		}, []string{}, "", []string{"test"})
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
@@ -300,7 +346,7 @@ func TestDefaultRunner_RunCommands(t *testing.T) {
 		}
 
 		// Act
-		err := r.RunCommands(commands, []string{"/test"}, "/test")
+		err := r.RunCommands(commands, []string{"/test"}, "/test", []string{"test"})
 
 		// Wait for both commands to complete
 		r.WaitForCommand(cmd1Id)
@@ -358,7 +404,7 @@ func TestDefaultRunner_RunCommands(t *testing.T) {
 		}
 
 		// Act
-		err := r.RunCommands(commands, []string{}, "")
+		err := r.RunCommands(commands, []string{}, "", []string{"test"})
 
 		// Wait for the first command to complete
 		r.WaitForCommand(cmd1Id)
@@ -413,10 +459,10 @@ func TestDefaultRunner_StopRunningCommands(t *testing.T) {
 			Position:         1,
 		}
 
-		err := r.RunCommand(&cmd1, []string{}, "")
+		err := r.RunCommand(&cmd1, []string{}, "", []string{"test"})
 		assert.NoError(t, err)
 
-		err = r.RunCommand(&cmd2, []string{}, "")
+		err = r.RunCommand(&cmd2, []string{}, "", []string{"test"})
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
@@ -519,8 +565,8 @@ func TestDefaultRunner_GetRunningCommandIds(t *testing.T) {
 		}
 
 		// Start the commands
-		_ = sut.RunCommand(command1, []string{}, validWorkingDirectory())
-		_ = sut.RunCommand(command2, []string{}, validWorkingDirectory())
+		_ = sut.RunCommand(command1, []string{}, validWorkingDirectory(), []string{"test"})
+		_ = sut.RunCommand(command2, []string{}, validWorkingDirectory(), []string{"test"})
 
 		// Give them a moment to start
 		time.Sleep(10 * time.Millisecond)

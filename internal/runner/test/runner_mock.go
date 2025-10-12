@@ -15,13 +15,13 @@ func (m *MockRunner) StopRunningCommands(commands []commanddomain.Command) error
 	return args.Error(0)
 }
 
-func (m *MockRunner) RunCommands(commands []commanddomain.Command, environmentPaths []string, baseWorkingDirectory string) error {
-	args := m.Called(commands, environmentPaths, baseWorkingDirectory)
+func (m *MockRunner) RunCommands(commands []commanddomain.Command, environmentPaths []string, baseWorkingDirectory string, failurePatterns []string) error {
+	args := m.Called(commands, environmentPaths, baseWorkingDirectory, failurePatterns)
 	return args.Error(0)
 }
 
-func (m *MockRunner) RunCommand(command *commanddomain.Command, environmentPaths []string, baseWorkingDirectory string) error {
-	args := m.Called(command, environmentPaths, baseWorkingDirectory)
+func (m *MockRunner) RunCommand(command *commanddomain.Command, environmentPaths []string, baseWorkingDirectory string, failurePatterns []string) error {
+	args := m.Called(command, environmentPaths, baseWorkingDirectory, failurePatterns)
 	return args.Error(0)
 }
 
