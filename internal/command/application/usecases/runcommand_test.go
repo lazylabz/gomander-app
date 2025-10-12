@@ -52,7 +52,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 		}
 		mockProjectRepository.On("Get", cmd.ProjectId).Return(&project, nil)
 
-		mockRunner.On("RunCommand", &cmd, []string{"/1"}, project.WorkingDirectory).Return(nil)
+		mockRunner.On("RunCommand", &cmd, []string{"/1"}, project.WorkingDirectory, mock.AnythingOfType("[]string")).Return(nil)
 
 		// Act
 		err := sut.Execute(cmd.Id)
@@ -183,7 +183,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 		}
 		mockProjectRepository.On("Get", cmd.ProjectId).Return(&project, nil)
 
-		mockRunner.On("RunCommand", &cmd, []string{"/1"}, project.WorkingDirectory).Return(errors.New("failed to run command"))
+		mockRunner.On("RunCommand", &cmd, []string{"/1"}, project.WorkingDirectory, mock.AnythingOfType("[]string")).Return(errors.New("failed to run command"))
 
 		// Act
 		err := sut.Execute(cmd.Id)

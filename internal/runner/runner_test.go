@@ -119,7 +119,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 			data map[string]string) bool {
 			return data["id"] == commandId &&
 				strings.Contains(data["line"], "Error: something went wrong") &&
-				data["pattern"] == "Error:.*"
+				data["pattern"] == "Error*"
 		})).Return()
 
 		logger.On("Info", mock.Anything).Return()
