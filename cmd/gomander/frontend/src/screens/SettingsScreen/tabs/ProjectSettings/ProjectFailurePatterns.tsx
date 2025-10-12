@@ -1,10 +1,15 @@
 import type { FC } from "react";
-import { useFormContext, Controller } from "react-hook-form";
 import { useState } from "react";
+import { Controller,useFormContext } from "react-hook-form";
+
 import type { SettingsFormType } from "../../contexts/settingsFormSchema";
+
+
 
 export const ProjectFailurePatternsField: FC = () => {
   const { control } = useFormContext<SettingsFormType>();
+
+  const [displayValue, setDisplayValue] = useState("");
 
   return (
     <div className="mb-4">
@@ -13,9 +18,9 @@ export const ProjectFailurePatternsField: FC = () => {
         name="failurePatterns"
         control={control}
         render={({ field }) => {
-          const [displayValue, setDisplayValue] = useState(
-            (field.value || []).join("\n")
-          );
+          if (!displayValue && field.value) {
+            setDisplayValue((field.value || []).join("\n"));
+          }
 
           return (
             <textarea

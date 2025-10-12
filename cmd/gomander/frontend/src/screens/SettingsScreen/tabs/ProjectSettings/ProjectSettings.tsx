@@ -13,6 +13,7 @@ import {
 import { Form } from "@/design-system/components/ui/form.tsx";
 import { useSettingsContext } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import type { SettingsFormType } from "@/screens/SettingsScreen/contexts/settingsFormSchema.ts";
+
 import { ProjectFailurePatternsField } from "./ProjectFailurePatterns";
 
 export const ProjectSettings = () => {
