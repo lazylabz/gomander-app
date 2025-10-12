@@ -16,6 +16,7 @@ We started building this for ourselves when we got tired of the daily terminal c
 - See what's running, what's not, and check the logs without switching windows
 - Configure working directories however you want - use relative or absolute paths, whatever fits your workflow
 - Export and import project configurations to get your whole team on the same page
+- Add Regex in project settings to detect erros and failure statments during execution
 - Works on macOS, Linux and Windows
 
 ---
