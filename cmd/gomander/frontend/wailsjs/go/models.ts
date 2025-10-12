@@ -105,7 +105,6 @@ export namespace domain {
 	    workingDirectory: string;
 	    commands: CommandJSONv1[];
 	    commandGroups: CommandGroupJSONv1[];
-	    failurePatterns?: string[];
 	}
 
 }
