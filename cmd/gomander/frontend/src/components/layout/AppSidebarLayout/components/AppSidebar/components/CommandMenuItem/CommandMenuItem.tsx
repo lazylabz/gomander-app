@@ -1,10 +1,11 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Play, Square } from "lucide-react";
+import { GripVertical, LinkIcon, Play, Square } from "lucide-react";
 import { toast } from "sonner";
 
 import { useSidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import { useTheme } from "@/contexts/theme.tsx";
+import { externalBrowserService } from "@/contracts/service.ts";
 import type { Command } from "@/contracts/types.ts";
 import {
   ContextMenu,
@@ -59,6 +60,14 @@ export const CommandMenuItem = ({
     } catch (e) {
       toast.error(parseError(e, "Failed to run command"));
     }
+  };
+
+  const handleOpenLink = async () => {
+    if (!command.link) {
+      return;
+    }
+
+    externalBrowserService.browserOpenURL(command.link);
   };
 
   const handleDeleteCommand = async () => {
@@ -171,6 +180,13 @@ export const CommandMenuItem = ({
               >
                 {command.name}
               </p>
+              {command.link && (
+                <LinkIcon
+                  size={12}
+                  onClick={handleOpenLink}
+                  className="text-muted-foreground cursor-pointer hover:text-primary min-w-4"
+                />
+              )}
             </div>
             <div className="shrink-0">
               {isIdle && (
