@@ -7,4 +7,5 @@ type Command struct {
 	Command          string `json:"command"`
 	WorkingDirectory string `json:"workingDirectory"`
 	Position         int    `json:"position"`
+	Link             string `json:"link"`
 }

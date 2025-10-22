@@ -13,6 +13,7 @@ type CommandData struct {
 	Command          string
 	WorkingDirectory string
 	Position         int
+	Link             string
 }
 
 type CommandBuilder struct {
@@ -28,6 +29,7 @@ func NewCommandBuilder() *CommandBuilder {
 			Command:          "echo 'hello'",
 			WorkingDirectory: "/app",
 			Position:         0,
+			Link:             "",
 		},
 	}
 }
@@ -62,6 +64,11 @@ func (b *CommandBuilder) WithPosition(position int) *CommandBuilder {
 	return b
 }
 
+func (b *CommandBuilder) WithLink(link string) *CommandBuilder {
+	b.data.Link = link
+	return b
+}
+
 func (b *CommandBuilder) Build() domain.Command {
 	return domain.Command{
 		Id:               b.data.Id,
@@ -70,5 +77,6 @@ func (b *CommandBuilder) Build() domain.Command {
 		Command:          b.data.Command,
 		WorkingDirectory: b.data.WorkingDirectory,
 		Position:         b.data.Position,
+		Link:             b.data.Link,
 	}
 }
