@@ -12,6 +12,7 @@ func ToDomainCommand(commandModel CommandModel) domain.Command {
 		WorkingDirectory: commandModel.WorkingDirectory,
 		Position:         commandModel.Position,
 		ProjectId:        commandModel.ProjectId,
+		Link:             commandModel.Link,
 	}
 }
 
@@ -23,5 +24,6 @@ func ToCommandModel(domainCommand *domain.Command) CommandModel {
 		WorkingDirectory: domainCommand.WorkingDirectory,
 		Position:         domainCommand.Position,
 		ProjectId:        domainCommand.ProjectId,
+		Link:             domainCommand.Link,
 	}
 }
