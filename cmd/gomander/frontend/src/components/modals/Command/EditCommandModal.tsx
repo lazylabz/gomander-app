@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { CommandCommandField } from "@/components/modals/Command/common/CommandCommandField.tsx";
 import { CommandComputedPath } from "@/components/modals/Command/common/CommandComputedPath.tsx";
+import { CommandLinkField } from "@/components/modals/Command/common/CommandLinkField.tsx";
 import { CommandNameField } from "@/components/modals/Command/common/CommandNameField.tsx";
 import { CommandWorkingDirectoryField } from "@/components/modals/Command/common/CommandWorkingDirectoryField.tsx";
 import {
@@ -42,6 +43,7 @@ export const EditCommandModal = ({
       name: command?.name || "",
       command: command?.command || "",
       workingDirectory: command?.workingDirectory || "",
+      link: command?.link || "",
     },
   });
 
@@ -57,6 +59,7 @@ export const EditCommandModal = ({
         name: values.name,
         command: values.command,
         workingDirectory: values.workingDirectory,
+        link: values.link,
       });
 
       toast.success("Command updated successfully");
@@ -89,6 +92,7 @@ export const EditCommandModal = ({
             <div className="space-y-6 my-4">
               <CommandNameField />
               <CommandCommandField />
+              <CommandLinkField />
               <CommandWorkingDirectoryField />
               <CommandComputedPath />
             </div>

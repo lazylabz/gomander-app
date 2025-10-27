@@ -8,5 +8,6 @@ export const formSchema = z.object({
     message: "Command is required",
   }),
   workingDirectory: z.string().min(0),
+  link: z.string().min(0),
 });
 export type FormSchemaType = z.infer<typeof formSchema>;
