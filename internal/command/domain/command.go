@@ -8,4 +8,5 @@ type Command struct {
 	WorkingDirectory string `json:"workingDirectory"`
 	Position         int    `json:"position"`
 	Link             string `json:"link"`
+	ErrorPatterns    string `json:"errorPatterns"`
 }

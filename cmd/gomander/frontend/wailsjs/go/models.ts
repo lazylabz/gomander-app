@@ -65,6 +65,7 @@ export namespace domain {
 	    workingDirectory: string;
 	    position: number;
 	    link: string;
+	    errorPatterns: string;
 	}
 	export interface CommandGroup {
 	    id: string;
