@@ -22,15 +22,15 @@ export const CommandErrorPatternsField = () => {
         <FormItem>
           <FormLabel>Error patterns</FormLabel>
           <FormDescription className="text-xs">
-            Regular expressions to identify error messages in the command
-            output. Separate multiple patterns with new lines.
+            Patterns to identify error messages in the command output. Separate
+            multiple patterns with new lines.
           </FormDescription>
           <FormControl>
             <Textarea
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
-              placeholder="/[nodemon] app crashed/gi"
+              placeholder="[nodemon] app crashed"
               {...field}
             />
           </FormControl>

@@ -552,6 +552,137 @@ func mockEmitterLogEntry(emitter *test2.MockEventEmitter, id string, line string
 	}
 }
 
+func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
+	t.Run("Should emit CommandErrorDetected event when error pattern is matched", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test2.MockEventEmitter)
+
+		r := runner.NewDefaultRunner(logger, emitter)
+
+		commandId := "error-pattern-test"
+
+		// Mock the standard events
+		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
+		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
+
+		// Mock the error detection event - this is what we're testing
+		emitter.On("EmitEvent", event.CommandErrorDetected, commandId).Return()
+
+		// Mock log entries for the command output
+		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
+
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Debug", mock.Anything).Return()
+
+		// Act - create a command with error patterns and output that matches them
+		err := r.RunCommand(&commanddomain.Command{
+			Id:               commandId,
+			ProjectId:        commandId,
+			Name:             "Error Pattern Test",
+			Command:          "echo 'Starting...' && echo 'ERROR: Something went wrong' && echo 'Done'",
+			WorkingDirectory: validWorkingDirectory(),
+			Position:         0,
+			ErrorPatterns:    "ERROR:\nFATAL:",
+		}, []string{}, "")
+
+		r.WaitForCommand(commandId)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Empty(t, r.GetRunningCommands())
+
+		// Verify that CommandErrorDetected was called
+		emitter.AssertCalled(t, "EmitEvent", event.CommandErrorDetected, commandId)
+		mock.AssertExpectationsForObjects(t, emitter, logger)
+	})
+
+	t.Run("Should not emit CommandErrorDetected when no error pattern matches", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test2.MockEventEmitter)
+
+		r := runner.NewDefaultRunner(logger, emitter)
+
+		commandId := "no-error-pattern-test"
+
+		// Mock the standard events
+		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
+		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
+
+		// Mock log entries for the command output
+		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
+
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Debug", mock.Anything).Return()
+
+		// Act - create a command with error patterns but output that doesn't match
+		err := r.RunCommand(&commanddomain.Command{
+			Id:               commandId,
+			ProjectId:        commandId,
+			Name:             "No Error Pattern Test",
+			Command:          "echo 'Starting...' && echo 'All good!' && echo 'Done'",
+			WorkingDirectory: validWorkingDirectory(),
+			Position:         0,
+			ErrorPatterns:    "ERROR:\nFATAL:",
+		}, []string{}, "")
+
+		r.WaitForCommand(commandId)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Empty(t, r.GetRunningCommands())
+
+		// Verify that CommandErrorDetected was NOT called
+		emitter.AssertNotCalled(t, "EmitEvent", event.CommandErrorDetected, mock.Anything)
+		mock.AssertExpectationsForObjects(t, emitter, logger)
+	})
+
+	t.Run("Should emit CommandErrorDetected for each matching line", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test2.MockEventEmitter)
+
+		r := runner.NewDefaultRunner(logger, emitter)
+
+		commandId := "multiple-errors-test"
+
+		// Mock the standard events
+		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
+		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
+
+		// Mock the error detection event - will be called once per matching line (3 times in this case)
+		emitter.On("EmitEvent", event.CommandErrorDetected, commandId).Return()
+
+		// Mock log entries for the command output
+		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
+
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Debug", mock.Anything).Return()
+
+		// Act - create a command with error patterns and output with multiple matching lines
+		err := r.RunCommand(&commanddomain.Command{
+			Id:               commandId,
+			ProjectId:        commandId,
+			Name:             "Multiple Errors Test",
+			Command:          "echo 'ERROR: First error' && echo 'ERROR: Second error' && echo 'FATAL: Third error'",
+			WorkingDirectory: validWorkingDirectory(),
+			Position:         0,
+			ErrorPatterns:    "ERROR:\nFATAL:",
+		}, []string{}, "")
+
+		r.WaitForCommand(commandId)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Empty(t, r.GetRunningCommands())
+
+		// Verify that CommandErrorDetected was called (multiple times is OK - once per matching line)
+		emitter.AssertCalled(t, "EmitEvent", event.CommandErrorDetected, commandId)
+		mock.AssertExpectationsForObjects(t, emitter, logger)
+	})
+}
+
 func infiniteCmd() string {
 	if runtime.GOOS == "windows" {
 		return "ping -t 127.0.0.1"

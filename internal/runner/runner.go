@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 
 	"gomander/internal/command/domain"
@@ -138,13 +139,13 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	go func() {
 		defer scanWg.Done()
 		defer wg.Done()
-		c.streamOutput(command.Id, stdout)
+		c.streamOutput(command, stdout)
 	}()
 	// Stream stderr
 	go func() {
 		defer scanWg.Done()
 		defer wg.Done()
-		c.streamOutput(command.Id, stderr)
+		c.streamOutput(command, stderr)
 	}()
 
 	// Wait in background until the command finishes, because it ends naturally or because it is stopped.
@@ -167,7 +168,7 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 		if cmd.ProcessState == nil {
 			err := cmd.Wait()
 			if err != nil {
-				c.sendStreamLine(command.Id, err.Error())
+				c.sendStreamLine(command, err.Error())
 
 				if !isExpectedError(err) {
 					c.logger.Error("[ERROR - Waiting for project]: " + err.Error())
@@ -230,29 +231,49 @@ func isExpectedError(err error) bool {
 	return false
 }
 
-func (c *DefaultRunner) streamOutput(commandId string, pipeReader io.ReadCloser) {
+func (c *DefaultRunner) streamOutput(command *domain.Command, pipeReader io.ReadCloser) {
 	scanner := bufio.NewScanner(pipeReader)
 	scanner.Buffer(make([]byte, 1024), 1024*1024) // Set buffer size to 1MB
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		c.logger.Debug(line)
-
-		c.sendStreamLine(commandId, line)
+		c.sendStreamLine(command, line)
 	}
 }
 
 func (c *DefaultRunner) sendStreamErrorWhileStartingCommand(command *domain.Command, err error) {
-	c.sendStreamLine(command.Id, err.Error())
+	c.sendStreamLine(command, err.Error())
+
 	c.logger.Error(err.Error())
 	c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
 }
 
-func (c *DefaultRunner) sendStreamLine(commandId string, line string) {
+func (c *DefaultRunner) sendStreamLine(command *domain.Command, line string) {
+	go c.asyncProcessStreamLine(command, line)
+
 	c.eventEmitter.EmitEvent(event.NewLogEntry, map[string]string{
-		"id":   commandId,
+		"id":   command.Id,
 		"line": line,
 	})
+}
+
+func (c *DefaultRunner) asyncProcessStreamLine(command *domain.Command, line string) {
+	checkForErrors(command, line, c)
+}
+
+func checkForErrors(command *domain.Command, line string, c *DefaultRunner) {
+	errorPatterns := command.GetErrorPatterns()
+
+	for _, pattern := range errorPatterns {
+		matchString := strings.Contains(line, pattern)
+
+		if matchString {
+			println("Error pattern matched: " + pattern + " in command: " + command.Id)
+			c.eventEmitter.EmitEvent(event.CommandErrorDetected, command.Id)
+			break
+		}
+	}
 }
 
 func (c *DefaultRunner) GetRunningCommands() map[string]RunningCommand {
