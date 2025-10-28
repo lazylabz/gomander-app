@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { CommandCommandField } from "@/components/modals/Command/common/CommandCommandField.tsx";
 import { CommandComputedPath } from "@/components/modals/Command/common/CommandComputedPath.tsx";
+import { CommandErrorPatternsField } from "@/components/modals/Command/common/CommandErrorPatternsField.tsx";
 import { CommandLinkField } from "@/components/modals/Command/common/CommandLinkField.tsx";
 import { CommandNameField } from "@/components/modals/Command/common/CommandNameField.tsx";
 import { CommandWorkingDirectoryField } from "@/components/modals/Command/common/CommandWorkingDirectoryField.tsx";
@@ -60,6 +61,7 @@ export const CreateCommandModal = ({
         workingDirectory: values.workingDirectory,
         position: 0, // Will be set by the backend
         link: values.link,
+        errorPatterns: values.errorPatterns,
       });
       toast.success("Command created successfully");
 
@@ -92,6 +94,7 @@ export const CreateCommandModal = ({
               <CommandNameField />
               <CommandCommandField />
               <CommandLinkField />
+              <CommandErrorPatternsField />
               <CommandWorkingDirectoryField />
               <CommandComputedPath />
             </div>
