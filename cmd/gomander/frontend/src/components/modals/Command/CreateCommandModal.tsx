@@ -44,6 +44,7 @@ export const CreateCommandModal = ({
       command: "",
       workingDirectory: "",
       link: "",
+      errorPatterns: "",
     },
   });
 
