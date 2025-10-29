@@ -252,10 +252,10 @@ func (c *DefaultRunner) sendStreamLine(command *domain.Command, line string) {
 }
 
 func (c *DefaultRunner) asyncProcessStreamLine(command *domain.Command, line string) {
-	checkLineForErrors(command, line, c)
+	c.checkLineForErrors(command, line)
 }
 
-func checkLineForErrors(command *domain.Command, line string, c *DefaultRunner) {
+func (c *DefaultRunner) checkLineForErrors(command *domain.Command, line string) {
 	errorPatterns := command.ErrorPatterns
 
 	for _, pattern := range errorPatterns {
