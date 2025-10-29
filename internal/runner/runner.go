@@ -262,7 +262,6 @@ func checkLineForErrors(command *domain.Command, line string, c *DefaultRunner) 
 		matchString := strings.Contains(line, pattern)
 
 		if matchString {
-			println("Error pattern matched: " + pattern + " in command: " + command.Id)
 			c.eventEmitter.EmitEvent(event.CommandErrorDetected, command.Id)
 			break
 		}
