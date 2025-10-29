@@ -45,7 +45,7 @@ export const EditCommandModal = ({
       command: command?.command || "",
       workingDirectory: command?.workingDirectory || "",
       link: command?.link || "",
-      errorPatterns: command?.errorPatterns || "",
+      errorPatterns: command?.errorPatterns.join("\n") || "",
     },
   });
 
@@ -62,7 +62,9 @@ export const EditCommandModal = ({
         command: values.command,
         workingDirectory: values.workingDirectory,
         link: values.link,
-        errorPatterns: values.errorPatterns,
+        errorPatterns: values.errorPatterns
+          .split("\n")
+          .filter((pattern) => pattern.trim() !== ""),
       });
 
       toast.success("Command updated successfully");

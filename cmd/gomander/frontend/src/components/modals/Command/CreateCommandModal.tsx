@@ -62,7 +62,9 @@ export const CreateCommandModal = ({
         workingDirectory: values.workingDirectory,
         position: 0, // Will be set by the backend
         link: values.link,
-        errorPatterns: values.errorPatterns,
+        errorPatterns: values.errorPatterns
+          .split("\n")
+          .filter((pattern) => pattern.trim() !== ""),
       });
       toast.success("Command created successfully");
 

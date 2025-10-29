@@ -582,7 +582,10 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 			Command:          "echo 'Starting...' && echo 'ERROR: Something went wrong' && echo 'Done'",
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
-			ErrorPatterns:    "ERROR:\nFATAL:",
+			ErrorPatterns: []string{
+				"ERROR:",
+				"FATAL:",
+			},
 		}, []string{}, "")
 
 		r.WaitForCommand(commandId)
@@ -623,7 +626,10 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 			Command:          "echo 'Starting...' && echo 'All good!' && echo 'Done'",
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
-			ErrorPatterns:    "ERROR:\nFATAL:",
+			ErrorPatterns: []string{
+				"ERROR:",
+				"FATAL:",
+			},
 		}, []string{}, "")
 
 		r.WaitForCommand(commandId)
@@ -667,7 +673,10 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 			Command:          "echo 'ERROR: First error' && echo 'ERROR: Second error' && echo 'FATAL: Third error'",
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
-			ErrorPatterns:    "ERROR:\nFATAL:",
+			ErrorPatterns: []string{
+				"ERROR:",
+				"FATAL:",
+			},
 		}, []string{}, "")
 
 		r.WaitForCommand(commandId)

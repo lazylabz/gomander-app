@@ -256,7 +256,7 @@ func (c *DefaultRunner) asyncProcessStreamLine(command *domain.Command, line str
 }
 
 func checkLineForErrors(command *domain.Command, line string, c *DefaultRunner) {
-	errorPatterns := command.GetErrorPatterns()
+	errorPatterns := command.ErrorPatterns
 
 	for _, pattern := range errorPatterns {
 		matchString := strings.Contains(line, pattern)
