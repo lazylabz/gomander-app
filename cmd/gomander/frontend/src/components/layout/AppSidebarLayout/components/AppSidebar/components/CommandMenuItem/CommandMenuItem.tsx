@@ -20,6 +20,7 @@ import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
+import { cleanCommandError } from "@/useCases/command/cleanCommandError.ts";
 import { deleteCommand } from "@/useCases/command/deleteCommand.ts";
 import { duplicateCommand } from "@/useCases/command/duplicateCommand.ts";
 import { removeCommandFromGroup } from "@/useCases/command/removeCommandFromGroup.ts";
@@ -42,6 +43,9 @@ export const CommandMenuItem = ({
   );
   const commandsStatus = useCommandStore((state) => state.commandsStatus);
   const activeCommandId = useCommandStore((state) => state.activeCommandId);
+  const commandIdsWithErrors = useCommandStore(
+    (state) => state.commandIdsWithErrors,
+  );
 
   const { startEditingCommand } = useSidebarContext();
 
@@ -117,6 +121,7 @@ export const CommandMenuItem = ({
 
   const onCommandSectionClick = () => {
     setActiveCommandId(command.id);
+    cleanCommandError(command.id);
   };
 
   const handleStopCommand = async () => {
@@ -131,10 +136,16 @@ export const CommandMenuItem = ({
   const isIdle = commandsStatus[command.id] === CommandStatus.IDLE;
   const isRunning = commandsStatus[command.id] === CommandStatus.RUNNING;
   const isActiveCommand = activeCommandId === command.id;
+  const hasError = commandIdsWithErrors.includes(command.id);
 
   const className = cn(
     "p-2.5",
     isActiveCommand && "bg-sidebar-accent",
+    hasError &&
+      "bg-red-100 hover:bg-red-200 focus:bg-red-100 active:bg-red-100",
+    hasError &&
+      theme === "dark" &&
+      "bg-red-300/30 hover:bg-red-200/40 focus:bg-red-300/30 active:bg-red-300/30",
     isRunning &&
       "bg-green-100 hover:bg-green-200 focus:bg-green-100 active:bg-green-100",
     isRunning &&
