@@ -97,14 +97,14 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		c.sendStreamErrorWhileStartingCommand(command, err)
+		c.sendStreamLine(command, err.Error())
 		c.mutex.Unlock()
 		return err
 	}
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		c.sendStreamErrorWhileStartingCommand(command, err)
+		c.sendStreamLine(command, err.Error())
 		c.mutex.Unlock()
 		return err
 	}
@@ -117,7 +117,7 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 
 	c.sendStartingLine(command)
 	if err := cmd.Start(); err != nil {
-		c.sendStreamErrorWhileStartingCommand(command, err)
+		c.sendStreamLine(command, err.Error())
 		c.mutex.Unlock()
 		return err
 	}
@@ -242,13 +242,6 @@ func (c *DefaultRunner) streamOutput(command *domain.Command, pipeReader io.Read
 	}
 }
 
-func (c *DefaultRunner) sendStreamErrorWhileStartingCommand(command *domain.Command, err error) {
-	c.sendStreamLine(command, err.Error())
-
-	c.logger.Error(err.Error())
-	c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
-}
-
 func (c *DefaultRunner) sendStreamLine(command *domain.Command, line string) {
 	go c.asyncProcessStreamLine(command, line)
 
@@ -259,10 +252,10 @@ func (c *DefaultRunner) sendStreamLine(command *domain.Command, line string) {
 }
 
 func (c *DefaultRunner) asyncProcessStreamLine(command *domain.Command, line string) {
-	checkForErrors(command, line, c)
+	checkLineForErrors(command, line, c)
 }
 
-func checkForErrors(command *domain.Command, line string, c *DefaultRunner) {
+func checkLineForErrors(command *domain.Command, line string, c *DefaultRunner) {
 	errorPatterns := command.GetErrorPatterns()
 
 	for _, pattern := range errorPatterns {

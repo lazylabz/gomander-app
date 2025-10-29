@@ -334,7 +334,6 @@ func TestDefaultRunner_RunCommands(t *testing.T) {
 
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
-		logger.On("Error", mock.Anything).Return()
 
 		invalidWorkingDir := "/definitely/not/a/real/directory/12345"
 
