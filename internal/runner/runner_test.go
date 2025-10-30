@@ -334,7 +334,6 @@ func TestDefaultRunner_RunCommands(t *testing.T) {
 
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
-		logger.On("Error", mock.Anything).Return()
 
 		invalidWorkingDir := "/definitely/not/a/real/directory/12345"
 
@@ -550,6 +549,57 @@ func mockEmitterLogEntry(emitter *test2.MockEventEmitter, id string, line string
 			"line": line,
 		}).Return()
 	}
+}
+
+func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
+	t.Run("Should emit CommandErrorDetected event when error pattern is matched", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test2.MockEventEmitter)
+
+		r := runner.NewDefaultRunner(logger, emitter)
+
+		commandId := "error-pattern-test"
+
+		// Mock the standard events
+		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
+		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
+
+		// Mock the error detection event - this is what we're testing
+		emitter.On("EmitEvent", event.CommandErrorDetected, commandId).Return()
+
+		// Mock log entries for the command output
+		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
+
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Debug", mock.Anything).Return()
+
+		// Act - create a command with error patterns and output that matches them
+		err := r.RunCommand(&commanddomain.Command{
+			Id:               commandId,
+			ProjectId:        commandId,
+			Name:             "Error Pattern Test",
+			Command:          "echo 'Starting...' && echo 'ERROR: Something went wrong' && echo 'Done'",
+			WorkingDirectory: validWorkingDirectory(),
+			Position:         0,
+			ErrorPatterns: []string{
+				"ERROR:",
+				"FATAL:",
+			},
+		}, []string{}, "")
+
+		r.WaitForCommand(commandId)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Empty(t, r.GetRunningCommands())
+
+		// Verify that CommandErrorDetected was called
+		assert.Eventually(t, func() bool {
+			return emitter.AssertCalled(t, "EmitEvent", event.CommandErrorDetected, commandId)
+		}, 1*time.Second, 20*time.Millisecond)
+		mock.AssertExpectationsForObjects(t, emitter, logger)
+	})
 }
 
 func infiniteCmd() string {

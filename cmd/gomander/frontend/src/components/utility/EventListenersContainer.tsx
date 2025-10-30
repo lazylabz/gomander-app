@@ -8,6 +8,7 @@ import { useCommandStore } from "@/store/commandStore.ts";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { cleanCommandLogs } from "@/useCases/command/cleanCommandLogs.ts";
+import { recordCommandError } from "@/useCases/command/recordCommandError.ts";
 import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
 
 export const EventListenersContainer = () => {
@@ -61,6 +62,12 @@ export const EventListenersContainer = () => {
         removeKeyFromLocalStorage(
           getCommandGroupSectionOpenLocalStorageKey(data),
         ),
+    );
+
+    eventService.eventsOn(
+      Event.COMMAND_ERROR_DETECTED,
+      (data: EventData[Event.COMMAND_ERROR_DETECTED]) =>
+        recordCommandError(data)
     );
 
     // Clean listeners on all events

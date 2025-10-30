@@ -9,5 +9,6 @@ export const formSchema = z.object({
   }),
   workingDirectory: z.string().min(0),
   link: z.string().min(0),
+  errorPatterns: z.string().min(0),
 });
 export type FormSchemaType = z.infer<typeof formSchema>;

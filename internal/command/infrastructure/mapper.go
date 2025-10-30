@@ -1,7 +1,10 @@
 package infrastructure
 
 import (
+	"strings"
+
 	"gomander/internal/command/domain"
+	"gomander/internal/helpers/array"
 )
 
 func ToDomainCommand(commandModel CommandModel) domain.Command {
@@ -13,6 +16,7 @@ func ToDomainCommand(commandModel CommandModel) domain.Command {
 		Position:         commandModel.Position,
 		ProjectId:        commandModel.ProjectId,
 		Link:             commandModel.Link,
+		ErrorPatterns:    array.Filter(strings.Split(commandModel.ErrorPatterns, "\n"), func(s string) bool { return s != "" }),
 	}
 }
 
@@ -25,5 +29,6 @@ func ToCommandModel(domainCommand *domain.Command) CommandModel {
 		Position:         domainCommand.Position,
 		ProjectId:        domainCommand.ProjectId,
 		Link:             domainCommand.Link,
+		ErrorPatterns:    strings.Join(domainCommand.ErrorPatterns, "\n"),
 	}
 }

@@ -8,6 +8,7 @@ type CommandModel struct {
 	WorkingDirectory string `gorm:"column:working_directory"`
 	Position         int    `gorm:"column:position"`
 	Link             string `gorm:"column:link"`
+	ErrorPatterns    string `gorm:"column:error_patterns"`
 }
 
 func (CommandModel) TableName() string {

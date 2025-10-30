@@ -14,6 +14,7 @@ type CommandData struct {
 	WorkingDirectory string
 	Position         int
 	Link             string
+	ErrorPatterns    []string
 }
 
 type CommandBuilder struct {
@@ -30,6 +31,7 @@ func NewCommandBuilder() *CommandBuilder {
 			WorkingDirectory: "/app",
 			Position:         0,
 			Link:             "",
+			ErrorPatterns:    []string{},
 		},
 	}
 }
@@ -69,6 +71,11 @@ func (b *CommandBuilder) WithLink(link string) *CommandBuilder {
 	return b
 }
 
+func (b *CommandBuilder) WithErrorPatterns(patterns []string) *CommandBuilder {
+	b.data.ErrorPatterns = patterns
+	return b
+}
+
 func (b *CommandBuilder) Build() domain.Command {
 	return domain.Command{
 		Id:               b.data.Id,
@@ -78,5 +85,6 @@ func (b *CommandBuilder) Build() domain.Command {
 		WorkingDirectory: b.data.WorkingDirectory,
 		Position:         b.data.Position,
 		Link:             b.data.Link,
+		ErrorPatterns:    b.data.ErrorPatterns,
 	}
 }

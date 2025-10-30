@@ -11,6 +11,9 @@ type CommandStore = {
   commandsStatus: Record<string, CommandStatus>;
   setCommandsStatus: (commandsStatus: Record<string, CommandStatus>) => void;
 
+  commandIdsWithErrors: string[];
+  setCommandIdsWithErrors: (commandsWithErrors: string[]) => void;
+
   activeCommandId: string | null;
   setActiveCommandId: (commandId: string | null) => void;
 
@@ -26,6 +29,10 @@ export const commandStore = createStore<CommandStore>()((set) => ({
 
   commandsStatus: {},
   setCommandsStatus: (commandsStatus) => set({ commandsStatus }),
+
+  commandIdsWithErrors: [],
+  setCommandIdsWithErrors: (commandsWithErrors) =>
+    set({ commandIdsWithErrors: commandsWithErrors }),
 
   activeCommandId: null,
   setActiveCommandId: (commandId) => set({ activeCommandId: commandId }),
