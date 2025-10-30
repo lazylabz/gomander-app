@@ -141,11 +141,6 @@ export const CommandMenuItem = ({
   const className = cn(
     "p-2.5",
     isActiveCommand && "bg-sidebar-accent",
-    hasError &&
-      "bg-red-100 hover:bg-red-200 focus:bg-red-100 active:bg-red-100",
-    hasError &&
-      theme === "dark" &&
-      "bg-red-300/30 hover:bg-red-200/40 focus:bg-red-300/30 active:bg-red-300/30",
     isRunning &&
       "bg-green-100 hover:bg-green-200 focus:bg-green-100 active:bg-green-100",
     isRunning &&
@@ -158,6 +153,11 @@ export const CommandMenuItem = ({
       isRunning &&
       theme === "dark" &&
       "bg-green-200/40 hover:bg-green-200/40 focus:bg-green-200/40 active:bg-green-200/40",
+    hasError &&
+      "bg-red-100 hover:bg-red-200 focus:bg-red-100 active:bg-red-100",
+    hasError &&
+      theme === "dark" &&
+      "bg-red-300/30 hover:bg-red-200/40 focus:bg-red-300/30 active:bg-red-300/30",
   );
 
   return (
