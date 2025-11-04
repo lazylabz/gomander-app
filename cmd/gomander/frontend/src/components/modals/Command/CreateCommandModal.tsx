@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { CommandCommandField } from "@/components/modals/Command/common/CommandCommandField.tsx";
 import { CommandComputedPath } from "@/components/modals/Command/common/CommandComputedPath.tsx";
+import { CommandErrorPatternsField } from "@/components/modals/Command/common/CommandErrorPatternsField.tsx";
 import { CommandLinkField } from "@/components/modals/Command/common/CommandLinkField.tsx";
 import { CommandNameField } from "@/components/modals/Command/common/CommandNameField.tsx";
 import { CommandWorkingDirectoryField } from "@/components/modals/Command/common/CommandWorkingDirectoryField.tsx";
@@ -12,6 +13,12 @@ import {
   formSchema,
   type FormSchemaType,
 } from "@/components/modals/Command/common/formSchema.ts";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/design-system/components/ui/accordion.tsx";
 import { Button } from "@/design-system/components/ui/button.tsx";
 import {
   Dialog,
@@ -43,6 +50,7 @@ export const CreateCommandModal = ({
       command: "",
       workingDirectory: "",
       link: "",
+      errorPatterns: "",
     },
   });
 
@@ -60,6 +68,9 @@ export const CreateCommandModal = ({
         workingDirectory: values.workingDirectory,
         position: 0, // Will be set by the backend
         link: values.link,
+        errorPatterns: values.errorPatterns
+          .split("\n")
+          .filter((pattern) => pattern.trim() !== ""),
       });
       toast.success("Command created successfully");
 
@@ -88,12 +99,22 @@ export const CreateCommandModal = ({
               <Terminal />
               <DialogTitle>Create new command</DialogTitle>
             </DialogHeader>
-            <div className="space-y-6 my-4">
-              <CommandNameField />
-              <CommandCommandField />
-              <CommandLinkField />
-              <CommandWorkingDirectoryField />
-              <CommandComputedPath />
+            <div className="my-4 space-y-2">
+              <div className="space-y-6">
+                <CommandNameField />
+                <CommandCommandField />
+                <CommandLinkField />
+                <CommandWorkingDirectoryField />
+                <CommandComputedPath />
+              </div>
+              <Accordion type="single" collapsible>
+                <AccordionItem value="1">
+                  <AccordionTrigger>Advanced</AccordionTrigger>
+                  <AccordionContent>
+                    <CommandErrorPatternsField />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </div>
             <DialogFooter>
               <DialogClose asChild>

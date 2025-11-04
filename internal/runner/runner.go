@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 
 	"gomander/internal/command/domain"
@@ -96,14 +97,14 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		c.sendStreamErrorWhileStartingCommand(command, err)
+		c.sendStreamLine(command, err.Error())
 		c.mutex.Unlock()
 		return err
 	}
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		c.sendStreamErrorWhileStartingCommand(command, err)
+		c.sendStreamLine(command, err.Error())
 		c.mutex.Unlock()
 		return err
 	}
@@ -116,7 +117,7 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 
 	c.sendStartingLine(command)
 	if err := cmd.Start(); err != nil {
-		c.sendStreamErrorWhileStartingCommand(command, err)
+		c.sendStreamLine(command, err.Error())
 		c.mutex.Unlock()
 		return err
 	}
@@ -138,13 +139,13 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	go func() {
 		defer scanWg.Done()
 		defer wg.Done()
-		c.streamOutput(command.Id, stdout)
+		c.streamOutput(command, stdout)
 	}()
 	// Stream stderr
 	go func() {
 		defer scanWg.Done()
 		defer wg.Done()
-		c.streamOutput(command.Id, stderr)
+		c.streamOutput(command, stderr)
 	}()
 
 	// Wait in background until the command finishes, because it ends naturally or because it is stopped.
@@ -167,7 +168,7 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 		if cmd.ProcessState == nil {
 			err := cmd.Wait()
 			if err != nil {
-				c.sendStreamLine(command.Id, err.Error())
+				c.sendStreamLine(command, err.Error())
 
 				if !isExpectedError(err) {
 					c.logger.Error("[ERROR - Waiting for project]: " + err.Error())
@@ -230,29 +231,41 @@ func isExpectedError(err error) bool {
 	return false
 }
 
-func (c *DefaultRunner) streamOutput(commandId string, pipeReader io.ReadCloser) {
+func (c *DefaultRunner) streamOutput(command *domain.Command, pipeReader io.ReadCloser) {
 	scanner := bufio.NewScanner(pipeReader)
 	scanner.Buffer(make([]byte, 1024), 1024*1024) // Set buffer size to 1MB
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		c.logger.Debug(line)
-
-		c.sendStreamLine(commandId, line)
+		c.sendStreamLine(command, line)
 	}
 }
 
-func (c *DefaultRunner) sendStreamErrorWhileStartingCommand(command *domain.Command, err error) {
-	c.sendStreamLine(command.Id, err.Error())
-	c.logger.Error(err.Error())
-	c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
-}
+func (c *DefaultRunner) sendStreamLine(command *domain.Command, line string) {
+	go c.asyncProcessStreamLine(command, line)
 
-func (c *DefaultRunner) sendStreamLine(commandId string, line string) {
 	c.eventEmitter.EmitEvent(event.NewLogEntry, map[string]string{
-		"id":   commandId,
+		"id":   command.Id,
 		"line": line,
 	})
+}
+
+func (c *DefaultRunner) asyncProcessStreamLine(command *domain.Command, line string) {
+	c.checkLineForErrors(command, line)
+}
+
+func (c *DefaultRunner) checkLineForErrors(command *domain.Command, line string) {
+	errorPatterns := command.ErrorPatterns
+
+	for _, pattern := range errorPatterns {
+		matchString := strings.Contains(line, pattern)
+
+		if matchString {
+			c.eventEmitter.EmitEvent(event.CommandErrorDetected, command.Id)
+			break
+		}
+	}
 }
 
 func (c *DefaultRunner) GetRunningCommands() map[string]RunningCommand {
