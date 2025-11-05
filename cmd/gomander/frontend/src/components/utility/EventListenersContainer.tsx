@@ -67,7 +67,7 @@ export const EventListenersContainer = () => {
     eventService.eventsOn(
       Event.COMMAND_ERROR_DETECTED,
       (data: EventData[Event.COMMAND_ERROR_DETECTED]) =>
-        recordCommandError(data)
+        recordCommandError(data),
     );
 
     // Clean listeners on all events

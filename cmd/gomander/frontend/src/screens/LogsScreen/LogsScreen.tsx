@@ -4,6 +4,7 @@ import {
   type ChangeEvent,
   type KeyboardEventHandler,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -48,9 +49,11 @@ export const LogsScreen = () => {
     setSearchQuery(event.target.value);
   };
 
-  const parsedLogs = currentLogs.map((log) =>
-    parseLog(log, searchOpen ? searchQuery : "", theme),
-  );
+  const parsedLogs = useMemo(() => {
+    return currentLogs.map((log) =>
+      parseLog(log, searchOpen ? searchQuery : "", theme),
+    );
+  }, [currentLogs, searchQuery, searchOpen, theme]);
 
   const matchesIds =
     searchQuery && searchOpen ? parsedLogs.flatMap(extractMatchesIds) : [];
