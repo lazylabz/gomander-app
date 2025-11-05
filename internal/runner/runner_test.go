@@ -595,9 +595,6 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 		assert.Empty(t, r.GetRunningCommands())
 
 		// Verify that CommandErrorDetected was called
-		assert.Eventually(t, func() bool {
-			return emitter.AssertCalled(t, "EmitEvent", event.CommandErrorDetected, commandId)
-		}, 1*time.Second, 20*time.Millisecond)
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
 }

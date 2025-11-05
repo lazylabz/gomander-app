@@ -243,7 +243,7 @@ func (c *DefaultRunner) streamOutput(command *domain.Command, pipeReader io.Read
 }
 
 func (c *DefaultRunner) sendStreamLine(command *domain.Command, line string) {
-	go c.asyncProcessStreamLine(command, line)
+	c.processStreamLine(command, line)
 
 	c.eventEmitter.EmitEvent(event.NewLogEntry, map[string]string{
 		"id":   command.Id,
@@ -251,7 +251,7 @@ func (c *DefaultRunner) sendStreamLine(command *domain.Command, line string) {
 	})
 }
 
-func (c *DefaultRunner) asyncProcessStreamLine(command *domain.Command, line string) {
+func (c *DefaultRunner) processStreamLine(command *domain.Command, line string) {
 	c.checkLineForErrors(command, line)
 }
 
