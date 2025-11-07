@@ -8,7 +8,7 @@ import { useCommandStore } from "@/store/commandStore.ts";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { cleanCommandLogs } from "@/useCases/command/cleanCommandLogs.ts";
-import { recordCommandError } from "@/useCases/command/recordCommandError.ts";
+import { recordCommandsErrors } from "@/useCases/command/recordCommandsErrors.ts";
 import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
 
 export const EventListenersContainer = () => {
@@ -16,9 +16,15 @@ export const EventListenersContainer = () => {
   const userConfig = useUserConfigurationStore((state) => state.userConfig);
 
   const logsBuffer = useRef(new Map<string, string[]>());
+  const errorBuffer = useRef<string[]>([]);
 
   useEffect(() => {
     const interval = setInterval(() => {
+      // Process error buffer
+      recordCommandsErrors(errorBuffer.current);
+      errorBuffer.current = [];
+
+      // Process logs buffer
       if (logsBuffer.current.size > 0) {
         const bufferCopy = new Map(logsBuffer.current);
         addLogs(bufferCopy, userConfig.logLineLimit);
@@ -67,7 +73,7 @@ export const EventListenersContainer = () => {
     eventService.eventsOn(
       Event.COMMAND_ERROR_DETECTED,
       (data: EventData[Event.COMMAND_ERROR_DETECTED]) =>
-        recordCommandError(data)
+        errorBuffer.current.push(data),
     );
 
     // Clean listeners on all events
