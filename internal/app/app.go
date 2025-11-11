@@ -12,6 +12,7 @@ import (
 	configusecases "gomander/internal/config/application/usecases"
 	configdomain "gomander/internal/config/domain"
 	"gomander/internal/event"
+	localizationusecases "gomander/internal/localization/application/usecases"
 	"gomander/internal/eventbus"
 	"gomander/internal/facade"
 	"gomander/internal/logger"
@@ -31,6 +32,9 @@ type UseCases struct {
 	// Configuration
 	GetUserConfig  configusecases.GetUserConfig
 	SaveUserConfig configusecases.SaveUserConfig
+	// Localization
+	GetTranslation        localizationusecases.GetTranslation
+	GetSupportedLanguages localizationusecases.GetSupportedLanguages
 	// Projects
 	GetCurrentProject    projectusecases.GetCurrentProject
 	GetAvailableProjects projectusecases.GetAvailableProjects

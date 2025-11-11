@@ -3,6 +3,8 @@ export namespace app {
 	export interface UseCases {
 	    GetUserConfig: any;
 	    SaveUserConfig: any;
+	    GetTranslation: any;
+	    GetSupportedLanguages: any;
 	    GetCurrentProject: any;
 	    GetAvailableProjects: any;
 	    OpenProject: any;
@@ -93,8 +95,17 @@ export namespace domain {
 	    lastOpenedProjectId: string;
 	    environmentPaths: EnvironmentPath[];
 	    logLineLimit: number;
+	    locale: string;
 	}
 	
+	export interface Localization {
+	    "sidebar.title": string;
+	    "sidebar.minimize": string;
+	    "actions.cancel": string;
+	    "actions.save": string;
+	    "toast.test.success": string;
+	    "toast.test.error": string;
+	}
 	export interface Project {
 	    id: string;
 	    name: string;

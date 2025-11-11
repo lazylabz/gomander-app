@@ -22,6 +22,7 @@ import (
 	configusecases "gomander/internal/config/application/usecases"
 	configinfrastructure "gomander/internal/config/infrastructure"
 	"gomander/internal/eventbus"
+	localizationusecases "gomander/internal/localization/application/usecases"
 	"gomander/internal/facade"
 	"gomander/internal/logger"
 	projectusecases "gomander/internal/project/application/usecases"
@@ -42,6 +43,9 @@ import (
 
 //go:embed all:frontend/dist
 var assets embed.FS
+
+//go:embed locales
+var localeFs embed.FS
 
 const ConfigFolderPathName = "gomander"
 
@@ -195,6 +199,9 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	// Configuration
 	getUserConfig := configusecases.NewGetUserConfig(configRepo)
 	saveUserConfig := configusecases.NewSaveUserConfig(configRepo)
+	// Localization
+	getTranslation := localizationusecases.NewGetTranslation(localeFs)
+	getSupportedLanguages := localizationusecases.NewGetSupportedLanguages(localeFs)
 	// Projects
 	getCurrentProject := projectusecases.NewGetCurrentProject(configRepo, projectRepo)
 	getAvailableProjects := projectusecases.NewGetAvailableProjects(projectRepo)
@@ -251,6 +258,9 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 			// Configuration
 			GetUserConfig:  getUserConfig,
 			SaveUserConfig: saveUserConfig,
+			// Localization
+			GetTranslation:        getTranslation,
+			GetSupportedLanguages: getSupportedLanguages,
 			// Projects
 			GetCurrentProject:    getCurrentProject,
 			GetAvailableProjects: getAvailableProjects,
