@@ -1,6 +1,7 @@
 {
   "sidebar.title": "Commands",
   "sidebar.minimize": "Minimize",
+  "sidebar.commands.title": "Commands",
 
   "actions.cancel": "Cancel",
   "actions.save": "Save",

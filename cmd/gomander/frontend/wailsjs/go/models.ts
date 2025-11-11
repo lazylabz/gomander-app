@@ -101,6 +101,7 @@ export namespace domain {
 	export interface Localization {
 	    "sidebar.title": string;
 	    "sidebar.minimize": string;
+	    "sidebar.commands.title": string;
 	    "actions.cancel": string;
 	    "actions.save": string;
 	    "toast.test.success": string;
