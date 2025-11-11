@@ -16,6 +16,7 @@ export const settingsFormSchema = z.object({
     .int()
     .min(1, "Must be at least 1")
     .max(5000, "Must be at most 5000"),
+  locale: z.string(),
   // Project settings schema
   name: z.string().min(1, "Project name is required"),
   baseWorkingDirectory: z.string().min(1, "Base working directory is required"),
