@@ -6,7 +6,7 @@ import { EventListenersContainer } from "@/components/utility/EventListenersCont
 import { ThemeProvider } from "@/contexts/theme.tsx";
 import { VersionProvider } from "@/contexts/version.tsx";
 import { Toaster } from "@/design-system/components/ui/sonner.tsx";
-import { initI18n } from "@/lib/i18n.ts";
+import { initI18n } from "@/design-system/lib/i18n.ts";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
 import { ScreenRoutes } from "@/routes.ts";
