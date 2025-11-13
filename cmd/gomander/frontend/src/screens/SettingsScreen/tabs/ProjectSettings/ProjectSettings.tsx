@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChartNoAxesGantt } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -50,6 +50,8 @@ const handleSave = async (formData: FormSchemaType) => {
 export const ProjectSettings = () => {
   const projectInfo = useProjectStore((state) => state.projectInfo);
 
+  const [isSaved, setIsSaved] = useState(true);
+
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     values: {
@@ -61,11 +63,13 @@ export const ProjectSettings = () => {
   const formWatcher = form.watch();
 
   useEffect(() => {
+    if (!form.formState.isDirty) {
+      return;
+    }
+    setIsSaved(false);
     const timeout = setTimeout(async () => {
-      if (!form.formState.isDirty) {
-        return;
-      }
       await form.handleSubmit(handleSave)();
+      setIsSaved(true);
     }, 300);
 
     return () => clearTimeout(timeout);
@@ -82,6 +86,10 @@ export const ProjectSettings = () => {
             </CardTitle>
             <CardDescription>
               Configure your project details and basic settings.
+            </CardDescription>
+            <CardDescription>
+              {/* TODO: Move this to page header */}
+              <span>{isSaved ? "Saved" : "Saving..."}</span>
             </CardDescription>
           </CardHeader>
           <CardContent>
