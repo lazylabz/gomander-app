@@ -1,8 +1,12 @@
-import { ChartNoAxesGantt, Save } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ChartNoAxesGantt } from "lucide-react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 import { BaseWorkingDirectoryField } from "@/components/modals/Project/common/BaseWorkingDirectoryField.tsx";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
-import { Button } from "@/design-system/components/ui/button.tsx";
 import {
   Card,
   CardContent,
@@ -11,19 +15,65 @@ import {
   CardTitle,
 } from "@/design-system/components/ui/card.tsx";
 import { Form } from "@/design-system/components/ui/form.tsx";
-import { useSettingsContext } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
-import type { SettingsFormType } from "@/screens/SettingsScreen/contexts/settingsFormSchema.ts";
+import { parseError } from "@/helpers/errorHelpers.ts";
+import { fetchProject } from "@/queries/fetchProject.ts";
+import { projectStore, useProjectStore } from "@/store/projectStore.ts";
+import { editOpenedProject } from "@/useCases/project/editOpenedProject.ts";
+
+const formSchema = z.object({
+  name: z.string().min(1, "Project name is required"),
+  baseWorkingDirectory: z.string().min(1, "Base working directory is required"),
+});
+
+type FormSchemaType = z.infer<typeof formSchema>;
+
+const handleSave = async (formData: FormSchemaType) => {
+  const { projectInfo } = projectStore.getState();
+  if (!projectInfo) {
+    return;
+  }
+
+  try {
+    await editOpenedProject({
+      ...projectInfo,
+      name: formData.name,
+      workingDirectory: formData.baseWorkingDirectory,
+    });
+    toast.success("Project settings saved successfully");
+  } catch (e) {
+    toast.error(parseError(e, "Failed to save project settings"));
+  }
+
+  await fetchProject();
+};
 
 export const ProjectSettings = () => {
-  const { settingsForm, saveSettings, hasUnsavedChanges } =
-    useSettingsContext();
+  const projectInfo = useProjectStore((state) => state.projectInfo);
+
+  const form = useForm<FormSchemaType>({
+    resolver: zodResolver(formSchema),
+    values: {
+      name: projectInfo?.name || "",
+      baseWorkingDirectory: projectInfo?.workingDirectory || "",
+    },
+  });
+
+  const formWatcher = form.watch();
+
+  useEffect(() => {
+    const timeout = setTimeout(async () => {
+      if (!form.formState.isDirty) {
+        return;
+      }
+      await form.handleSubmit(handleSave)();
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [form, formWatcher]);
 
   return (
-    <Form {...settingsForm}>
-      <form
-        onSubmit={settingsForm.handleSubmit(saveSettings)}
-        className="w-full h-full flex flex-col justify-between"
-      >
+    <Form {...form}>
+      <form className="w-full h-full flex flex-col justify-between">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -36,20 +86,11 @@ export const ProjectSettings = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-4">
-              <ProjectNameField<SettingsFormType> />
-              <BaseWorkingDirectoryField<SettingsFormType> />
+              <ProjectNameField<FormSchemaType> />
+              <BaseWorkingDirectoryField<FormSchemaType> />
             </div>
           </CardContent>
         </Card>
-
-        <Button
-          className="self-end cursor-pointer"
-          type="submit"
-          disabled={!hasUnsavedChanges}
-        >
-          <Save />
-          Save
-        </Button>
       </form>
     </Form>
   );
