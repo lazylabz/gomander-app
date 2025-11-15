@@ -1,11 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Route, WandSparkles } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
 
 import { type Theme, useTheme } from "@/contexts/theme.tsx";
-import { translationsService } from "@/contracts/service.ts";
 import {
   Card,
   CardContent,
@@ -30,91 +25,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/design-system/components/ui/select";
-import {
-  userSettingsSchema,
-  type UserSettingsSchemaType,
-} from "@/screens/SettingsScreen/schemas/userSettingsSchema.ts";
+import { useSettingsContext } from "@/screens/SettingsScreen/context/settingsContext.tsx";
 import { EnvironmentPathsField } from "@/screens/SettingsScreen/tabs/ProjectSettings/components/EnvironmentPathsField.tsx";
 import { EnvironmentPathsInfoDialog } from "@/screens/SettingsScreen/tabs/UserSettings/components/EnvironmentPathsInfoDialog.tsx";
-import { saveUserSettingsForm } from "@/screens/SettingsScreen/useCases/saveUserSettingsForm.ts";
-import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
-
-type SupportedLanguage = {
-  value: string;
-  label: string;
-};
-
-const languageValueToLabelMap: Record<string, string> = {
-  en: "English",
-  es: "Español",
-};
 
 export const UserSettings = () => {
-  const { i18n } = useTranslation();
-
-  const userConfig = useUserConfigurationStore((state) => state.userConfig);
-
+  const { userSettingsForm, supportedLanguages } = useSettingsContext();
   const { rawTheme, setRawTheme } = useTheme();
-  const [supportedLanguages, setSupportedLanguages] = useState<
-    SupportedLanguage[]
-  >([]);
-
-  useEffect(() => {
-    const loadSupportedLanguages = async () => {
-      try {
-        const languages = await translationsService.getSupportedLanguages();
-        const languageOptions = languages.map(
-          (lang): SupportedLanguage => ({
-            value: lang,
-            label: languageValueToLabelMap[lang] || lang,
-          }),
-        );
-        setSupportedLanguages(languageOptions);
-      } catch (error) {
-        console.error("Failed to load supported languages:", error);
-      }
-    };
-
-    loadSupportedLanguages();
-  }, []);
-
-  const lastSavedValues = useRef<UserSettingsSchemaType | null>(null);
-
-  const form = useForm<UserSettingsSchemaType>({
-    resolver: zodResolver(userSettingsSchema),
-    defaultValues: {
-      environmentPaths: userConfig.environmentPaths,
-      logLineLimit: userConfig.logLineLimit,
-      locale: i18n.language,
-    },
-  });
-
-  const formWatcher = form.watch();
-
-  useEffect(() => {
-    const currentValues = form.getValues();
-
-    if (lastSavedValues.current === null) {
-      lastSavedValues.current = JSON.parse(JSON.stringify(currentValues));
-      return;
-    }
-
-    if (
-      JSON.stringify(currentValues) === JSON.stringify(lastSavedValues.current)
-    ) {
-      return;
-    }
-
-    const timeout = setTimeout(async () => {
-      lastSavedValues.current = JSON.parse(JSON.stringify(currentValues));
-      await form.handleSubmit(saveUserSettingsForm)();
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [form, formWatcher]);
 
   return (
-    <Form {...form}>
+    <Form {...userSettingsForm}>
       <form className="w-full h-full flex flex-col justify-between">
         <div className="flex flex-col gap-2">
           <Card>
@@ -142,7 +62,7 @@ export const UserSettings = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <FormField
-                control={form.control}
+                control={userSettingsForm.control}
                 name="locale"
                 render={({ field }) => (
                   <FormItem>
@@ -196,7 +116,7 @@ export const UserSettings = () => {
                 </FormDescription>
               </FormItem>
               <FormField
-                control={form.control}
+                control={userSettingsForm.control}
                 name="logLineLimit"
                 render={({ field }) => (
                   <FormItem>
