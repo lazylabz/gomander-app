@@ -19,10 +19,7 @@ export const userConfigurationStore = createStore<UserConfigurationStore>()(
       locale: "en",
     },
     setUserConfig: (config: UserConfig) => {
-      set({ userConfig: config });
-      if (!userConfigurationStore.getState().isLoaded) {
-        set({ isLoaded: true });
-      }
+      set({ userConfig: config, isLoaded: true });
     },
   }),
 );
