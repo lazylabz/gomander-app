@@ -1,4 +1,5 @@
 import { ArrowLeft, PanelsTopLeft, Settings, User } from "lucide-react";
+import { useNavigate } from "react-router";
 
 import { Button } from "@/design-system/components/ui/button";
 import {
@@ -23,7 +24,13 @@ export const SettingsScreen = () => {
   const projectConfigurationIsLoaded = useProjectStore(
     (state) => state.projectInfo !== null,
   );
-  const { initialTab, closeSettings } = useSettingsContext();
+  const { initialTab } = useSettingsContext();
+
+  const navigate = useNavigate();
+
+  const goBack = () => {
+    navigate(-1);
+  };
 
   return (
     <div className="bg-background p-6 flex flex-col h-full">
@@ -32,7 +39,7 @@ export const SettingsScreen = () => {
           variant="ghost"
           size="sm"
           className="p-2 cursor-pointer"
-          onClick={closeSettings}
+          onClick={goBack}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>

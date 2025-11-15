@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { availableThemes } from "@/contexts/theme.tsx";
 
+// TODO: Split user and project settings schemas
+
 export const settingsFormSchema = z.object({
   // User settings schema
   environmentPaths: z.array(
