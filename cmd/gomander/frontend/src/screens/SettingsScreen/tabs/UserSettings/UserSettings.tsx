@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Route, WandSparkles } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { getI18n } from "react-i18next";
@@ -133,9 +133,11 @@ export const UserSettings = () => {
     loadSupportedLanguages();
   }, []);
 
+  const lastSavedValues = useRef<FormSchemaType | null>(null);
+
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
-    values: {
+    defaultValues: {
       environmentPaths: userConfig.environmentPaths,
       logLineLimit: userConfig.logLineLimit,
       locale: i18n.language,
@@ -145,10 +147,21 @@ export const UserSettings = () => {
   const formWatcher = form.watch();
 
   useEffect(() => {
-    if (!form.formState.isDirty) {
+    const currentValues = form.getValues();
+
+    if (lastSavedValues.current === null) {
+      lastSavedValues.current = JSON.parse(JSON.stringify(currentValues));
       return;
     }
+
+    if (
+      JSON.stringify(currentValues) === JSON.stringify(lastSavedValues.current)
+    ) {
+      return;
+    }
+
     const timeout = setTimeout(async () => {
+      lastSavedValues.current = JSON.parse(JSON.stringify(currentValues));
       await form.handleSubmit(handleSave)();
     }, 300);
 
