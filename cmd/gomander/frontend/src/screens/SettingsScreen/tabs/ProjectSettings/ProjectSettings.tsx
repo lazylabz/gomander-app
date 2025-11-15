@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChartNoAxesGantt } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -51,10 +51,11 @@ export const ProjectSettings = () => {
   const projectInfo = useProjectStore((state) => state.projectInfo);
 
   const [isSaved, setIsSaved] = useState(true);
+  const lastSavedValues = useRef<FormSchemaType | null>(null);
 
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
-    values: {
+    defaultValues: {
       name: projectInfo?.name || "",
       baseWorkingDirectory: projectInfo?.workingDirectory || "",
     },
@@ -63,11 +64,22 @@ export const ProjectSettings = () => {
   const formWatcher = form.watch();
 
   useEffect(() => {
-    if (!form.formState.isDirty) {
+    const currentValues = form.getValues();
+
+    if (lastSavedValues.current === null) {
+      lastSavedValues.current = JSON.parse(JSON.stringify(currentValues));
       return;
     }
+
+    if (
+      JSON.stringify(currentValues) === JSON.stringify(lastSavedValues.current)
+    ) {
+      return;
+    }
+
     setIsSaved(false);
     const timeout = setTimeout(async () => {
+      lastSavedValues.current = JSON.parse(JSON.stringify(currentValues));
       await form.handleSubmit(handleSave)();
       setIsSaved(true);
     }, 300);

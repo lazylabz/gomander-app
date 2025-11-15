@@ -13,11 +13,15 @@ import {
 } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
 import { ProjectSettings } from "@/screens/SettingsScreen/tabs/ProjectSettings/ProjectSettings.tsx";
 import { UserSettings } from "@/screens/SettingsScreen/tabs/UserSettings/UserSettings.tsx";
+import { useProjectStore } from "@/store/projectStore.ts";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 
 export const SettingsScreen = () => {
   const userConfigurationIsLoaded = useUserConfigurationStore(
     (state) => state.isLoaded,
+  );
+  const projectConfigurationIsLoaded = useProjectStore(
+    (state) => state.projectInfo !== null,
   );
   const { initialTab, closeSettings } = useSettingsContext();
 
@@ -58,7 +62,7 @@ export const SettingsScreen = () => {
           {userConfigurationIsLoaded && <UserSettings />}
         </TabsContent>
         <TabsContent value={SettingsTab.Project}>
-          <ProjectSettings />
+          {projectConfigurationIsLoaded && <ProjectSettings />}
         </TabsContent>
       </Tabs>
     </div>
