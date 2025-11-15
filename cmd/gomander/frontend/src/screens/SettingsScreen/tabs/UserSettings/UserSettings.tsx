@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { getI18n } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import { type Theme, useTheme } from "@/contexts/theme.tsx";
 import { translationsService } from "@/contracts/service.ts";
@@ -35,6 +34,10 @@ import {
 } from "@/design-system/components/ui/select";
 import { parseError } from "@/helpers/errorHelpers.ts";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
+import {
+  userSettingsSchema,
+  type UserSettingsSchemaType,
+} from "@/screens/SettingsScreen/contexts/userSettingsSchema.ts";
 import { EnvironmentPathsField } from "@/screens/SettingsScreen/tabs/ProjectSettings/components/EnvironmentPathsField.tsx";
 import { EnvironmentPathsInfoDialog } from "@/screens/SettingsScreen/tabs/UserSettings/components/EnvironmentPathsInfoDialog.tsx";
 import {
@@ -42,23 +45,6 @@ import {
   useUserConfigurationStore,
 } from "@/store/userConfigurationStore.ts";
 import { saveUserConfig } from "@/useCases/userConfig/saveUserConfig.ts";
-
-const formSchema = z.object({
-  environmentPaths: z.array(
-    z.object({
-      id: z.uuid(),
-      path: z.string().min(1, "Path cannot be empty"),
-    }),
-  ),
-  locale: z.string(),
-  logLineLimit: z
-    .number()
-    .int()
-    .min(1, "Must be at least 1")
-    .max(5000, "Must be at most 5000"),
-});
-
-type FormSchemaType = z.infer<typeof formSchema>;
 
 type SupportedLanguage = {
   value: string;
@@ -85,7 +71,7 @@ const changeLanguage = async (lang: string) => {
   await i18n.changeLanguage(lang);
 };
 
-const handleSave = async (formData: FormSchemaType) => {
+const handleSave = async (formData: UserSettingsSchemaType) => {
   const { userConfig } = userConfigurationStore.getState();
 
   try {
@@ -133,10 +119,10 @@ export const UserSettings = () => {
     loadSupportedLanguages();
   }, []);
 
-  const lastSavedValues = useRef<FormSchemaType | null>(null);
+  const lastSavedValues = useRef<UserSettingsSchemaType | null>(null);
 
-  const form = useForm<FormSchemaType>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<UserSettingsSchemaType>({
+    resolver: zodResolver(userSettingsSchema),
     defaultValues: {
       environmentPaths: userConfig.environmentPaths,
       logLineLimit: userConfig.logLineLimit,

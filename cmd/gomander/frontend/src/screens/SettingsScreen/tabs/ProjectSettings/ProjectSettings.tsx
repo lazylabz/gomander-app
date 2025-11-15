@@ -3,7 +3,6 @@ import { ChartNoAxesGantt } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import { BaseWorkingDirectoryField } from "@/components/modals/Project/common/BaseWorkingDirectoryField.tsx";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
@@ -17,17 +16,14 @@ import {
 import { Form } from "@/design-system/components/ui/form.tsx";
 import { parseError } from "@/helpers/errorHelpers.ts";
 import { fetchProject } from "@/queries/fetchProject.ts";
+import {
+  projectSettingsSchema,
+  type ProjectSettingsSchemaType,
+} from "@/screens/SettingsScreen/contexts/projectSettingsSchema.ts";
 import { projectStore, useProjectStore } from "@/store/projectStore.ts";
 import { editOpenedProject } from "@/useCases/project/editOpenedProject.ts";
 
-const formSchema = z.object({
-  name: z.string().min(1, "Project name is required"),
-  baseWorkingDirectory: z.string().min(1, "Base working directory is required"),
-});
-
-type FormSchemaType = z.infer<typeof formSchema>;
-
-const handleSave = async (formData: FormSchemaType) => {
+const handleSave = async (formData: ProjectSettingsSchemaType) => {
   const { projectInfo } = projectStore.getState();
   if (!projectInfo) {
     return;
@@ -51,10 +47,10 @@ export const ProjectSettings = () => {
   const projectInfo = useProjectStore((state) => state.projectInfo);
 
   const [isSaved, setIsSaved] = useState(true);
-  const lastSavedValues = useRef<FormSchemaType | null>(null);
+  const lastSavedValues = useRef<ProjectSettingsSchemaType | null>(null);
 
-  const form = useForm<FormSchemaType>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<ProjectSettingsSchemaType>({
+    resolver: zodResolver(projectSettingsSchema),
     defaultValues: {
       name: projectInfo?.name || "",
       baseWorkingDirectory: projectInfo?.workingDirectory || "",
@@ -106,8 +102,8 @@ export const ProjectSettings = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-4">
-              <ProjectNameField<FormSchemaType> />
-              <BaseWorkingDirectoryField<FormSchemaType> />
+              <ProjectNameField<ProjectSettingsSchemaType> />
+              <BaseWorkingDirectoryField<ProjectSettingsSchemaType> />
             </div>
           </CardContent>
         </Card>
