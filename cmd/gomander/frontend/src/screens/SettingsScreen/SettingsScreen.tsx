@@ -11,7 +11,7 @@ import {
 import {
   SettingsTab,
   useSettingsContext,
-} from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
+} from "@/screens/SettingsScreen/context/settingsContext.tsx";
 import { ProjectSettings } from "@/screens/SettingsScreen/tabs/ProjectSettings/ProjectSettings.tsx";
 import { UserSettings } from "@/screens/SettingsScreen/tabs/UserSettings/UserSettings.tsx";
 import { useProjectStore } from "@/store/projectStore.ts";

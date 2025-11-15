@@ -37,7 +37,7 @@ import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import {
   userSettingsSchema,
   type UserSettingsSchemaType,
-} from "@/screens/SettingsScreen/contexts/userSettingsSchema.ts";
+} from "@/screens/SettingsScreen/schemas/userSettingsSchema.ts";
 import { EnvironmentPathsField } from "@/screens/SettingsScreen/tabs/ProjectSettings/components/EnvironmentPathsField.tsx";
 import { EnvironmentPathsInfoDialog } from "@/screens/SettingsScreen/tabs/UserSettings/components/EnvironmentPathsInfoDialog.tsx";
 import {

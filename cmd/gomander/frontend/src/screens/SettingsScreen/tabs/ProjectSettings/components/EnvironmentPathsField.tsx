@@ -9,7 +9,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/design-system/components/ui/form.tsx";
-import type { UserSettingsSchemaType } from "@/screens/SettingsScreen/contexts/userSettingsSchema.ts";
+import type { UserSettingsSchemaType } from "@/screens/SettingsScreen/schemas/userSettingsSchema.ts";
 
 export const EnvironmentPathsField = () => {
   const { control } = useFormContext<UserSettingsSchemaType>();

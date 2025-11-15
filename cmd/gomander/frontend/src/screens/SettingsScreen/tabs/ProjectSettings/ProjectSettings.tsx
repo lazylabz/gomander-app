@@ -19,7 +19,7 @@ import { fetchProject } from "@/queries/fetchProject.ts";
 import {
   projectSettingsSchema,
   type ProjectSettingsSchemaType,
-} from "@/screens/SettingsScreen/contexts/projectSettingsSchema.ts";
+} from "@/screens/SettingsScreen/schemas/projectSettingsSchema.ts";
 import { projectStore, useProjectStore } from "@/store/projectStore.ts";
 import { editOpenedProject } from "@/useCases/project/editOpenedProject.ts";
 

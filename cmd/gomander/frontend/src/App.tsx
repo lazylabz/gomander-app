@@ -11,7 +11,7 @@ import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
 import { ScreenRoutes } from "@/routes.ts";
 import { ProjectSelectionScreen } from "@/screens/ProjectSelectionScreen/ProjectSelectionScreen.tsx";
-import { SettingsContextProvider } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
+import { SettingsContextProvider } from "@/screens/SettingsScreen/context/settingsContext.tsx";
 import { SettingsScreen } from "@/screens/SettingsScreen/SettingsScreen.tsx";
 
 import { LogsScreen } from "./screens/LogsScreen/LogsScreen.tsx";
