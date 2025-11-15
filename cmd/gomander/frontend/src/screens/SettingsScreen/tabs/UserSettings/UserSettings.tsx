@@ -3,8 +3,6 @@ import { Route, WandSparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { getI18n } from "react-i18next";
-import { toast } from "sonner";
 
 import { type Theme, useTheme } from "@/contexts/theme.tsx";
 import { translationsService } from "@/contracts/service.ts";
@@ -32,19 +30,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/design-system/components/ui/select";
-import { parseError } from "@/helpers/errorHelpers.ts";
-import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import {
   userSettingsSchema,
   type UserSettingsSchemaType,
 } from "@/screens/SettingsScreen/schemas/userSettingsSchema.ts";
 import { EnvironmentPathsField } from "@/screens/SettingsScreen/tabs/ProjectSettings/components/EnvironmentPathsField.tsx";
 import { EnvironmentPathsInfoDialog } from "@/screens/SettingsScreen/tabs/UserSettings/components/EnvironmentPathsInfoDialog.tsx";
-import {
-  userConfigurationStore,
-  useUserConfigurationStore,
-} from "@/store/userConfigurationStore.ts";
-import { saveUserConfig } from "@/useCases/userConfig/saveUserConfig.ts";
+import { saveUserSettingsForm } from "@/screens/SettingsScreen/useCases/saveUserSettingsForm.ts";
+import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 
 type SupportedLanguage = {
   value: string;
@@ -54,40 +47,6 @@ type SupportedLanguage = {
 const languageValueToLabelMap: Record<string, string> = {
   en: "English",
   es: "Español",
-};
-
-const changeLanguage = async (lang: string) => {
-  const i18n = getI18n();
-
-  if (i18n.language === lang) {
-    return;
-  }
-
-  if (!i18n.hasResourceBundle(lang, "translation")) {
-    const translations = await translationsService.getTranslation(lang);
-    i18n.addResourceBundle(lang, "translation", translations);
-  }
-
-  await i18n.changeLanguage(lang);
-};
-
-const handleSave = async (formData: UserSettingsSchemaType) => {
-  const { userConfig } = userConfigurationStore.getState();
-
-  try {
-    await changeLanguage(formData.locale);
-    await saveUserConfig({
-      lastOpenedProjectId: userConfig.lastOpenedProjectId,
-      environmentPaths: formData.environmentPaths,
-      logLineLimit: formData.logLineLimit,
-      locale: formData.locale,
-    });
-    toast.success("User settings saved successfully");
-  } catch (e) {
-    toast.error(parseError(e, "Failed to save user settings"));
-  }
-
-  await fetchUserConfig();
 };
 
 export const UserSettings = () => {
@@ -148,7 +107,7 @@ export const UserSettings = () => {
 
     const timeout = setTimeout(async () => {
       lastSavedValues.current = JSON.parse(JSON.stringify(currentValues));
-      await form.handleSubmit(handleSave)();
+      await form.handleSubmit(saveUserSettingsForm)();
     }, 300);
 
     return () => clearTimeout(timeout);

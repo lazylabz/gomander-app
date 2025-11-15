@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ChartNoAxesGantt } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { BaseWorkingDirectoryField } from "@/components/modals/Project/common/BaseWorkingDirectoryField.tsx";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
@@ -14,34 +13,12 @@ import {
   CardTitle,
 } from "@/design-system/components/ui/card.tsx";
 import { Form } from "@/design-system/components/ui/form.tsx";
-import { parseError } from "@/helpers/errorHelpers.ts";
-import { fetchProject } from "@/queries/fetchProject.ts";
 import {
   projectSettingsSchema,
   type ProjectSettingsSchemaType,
 } from "@/screens/SettingsScreen/schemas/projectSettingsSchema.ts";
-import { projectStore, useProjectStore } from "@/store/projectStore.ts";
-import { editOpenedProject } from "@/useCases/project/editOpenedProject.ts";
-
-const handleSave = async (formData: ProjectSettingsSchemaType) => {
-  const { projectInfo } = projectStore.getState();
-  if (!projectInfo) {
-    return;
-  }
-
-  try {
-    await editOpenedProject({
-      ...projectInfo,
-      name: formData.name,
-      workingDirectory: formData.baseWorkingDirectory,
-    });
-    toast.success("Project settings saved successfully");
-  } catch (e) {
-    toast.error(parseError(e, "Failed to save project settings"));
-  }
-
-  await fetchProject();
-};
+import { saveProjectSettingsForm } from "@/screens/SettingsScreen/useCases/saveProjectSettingsForm.ts";
+import { useProjectStore } from "@/store/projectStore.ts";
 
 export const ProjectSettings = () => {
   const projectInfo = useProjectStore((state) => state.projectInfo);
@@ -76,7 +53,7 @@ export const ProjectSettings = () => {
     setIsSaved(false);
     const timeout = setTimeout(async () => {
       lastSavedValues.current = JSON.parse(JSON.stringify(currentValues));
-      await form.handleSubmit(handleSave)();
+      await form.handleSubmit(saveProjectSettingsForm)();
       setIsSaved(true);
     }, 300);
 
