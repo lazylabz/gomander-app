@@ -14,16 +14,8 @@ import {
 } from "@/screens/SettingsScreen/context/settingsContext.tsx";
 import { ProjectSettings } from "@/screens/SettingsScreen/tabs/ProjectSettings/ProjectSettings.tsx";
 import { UserSettings } from "@/screens/SettingsScreen/tabs/UserSettings/UserSettings.tsx";
-import { useProjectStore } from "@/store/projectStore.ts";
-import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 
 export const SettingsScreen = () => {
-  const userConfigurationIsLoaded = useUserConfigurationStore(
-    (state) => state.isLoaded,
-  );
-  const projectConfigurationIsLoaded = useProjectStore(
-    (state) => state.projectInfo !== null,
-  );
   const { initialTab } = useSettingsContext();
 
   const navigate = useNavigate();
@@ -66,10 +58,10 @@ export const SettingsScreen = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value={SettingsTab.User}>
-          {userConfigurationIsLoaded && <UserSettings />}
+          <UserSettings />
         </TabsContent>
         <TabsContent value={SettingsTab.Project}>
-          {projectConfigurationIsLoaded && <ProjectSettings />}
+          <ProjectSettings />
         </TabsContent>
       </Tabs>
     </div>

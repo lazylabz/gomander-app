@@ -13,11 +13,20 @@ import { ScreenRoutes } from "@/routes.ts";
 import { ProjectSelectionScreen } from "@/screens/ProjectSelectionScreen/ProjectSelectionScreen.tsx";
 import { SettingsContextProvider } from "@/screens/SettingsScreen/context/settingsContext.tsx";
 import { SettingsScreen } from "@/screens/SettingsScreen/SettingsScreen.tsx";
+import { useProjectStore } from "@/store/projectStore.ts";
+import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 
 import { LogsScreen } from "./screens/LogsScreen/LogsScreen.tsx";
 
 function App() {
+  const projectIsLoaded = useProjectStore((state) => state.isLoaded);
+  const userConfigIsLoaded = useUserConfigurationStore(
+    (state) => state.isLoaded,
+  );
+
   const [i18nReady, setI18nReady] = useState(false);
+
+  const initialFetchesAreDone = projectIsLoaded && userConfigIsLoaded;
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -30,7 +39,7 @@ function App() {
     initializeApp();
   }, []);
 
-  if (!i18nReady) {
+  if (!i18nReady || !initialFetchesAreDone) {
     return null;
   }
 
