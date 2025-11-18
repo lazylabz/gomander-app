@@ -179,9 +179,14 @@ export const SettingsContextProvider = ({
 
   //endregion
 
+  const hasFormErrors =
+    Object.keys(projectForm.formState.errors).length > 0 ||
+    Object.keys(userForm.formState.errors).length > 0;
+
   const value: SettingsContextData = {
     initialTab,
-    hasPendingChanges: hasProjectPendingChanges || hasUserPendingChanges,
+    hasPendingChanges:
+      hasProjectPendingChanges || hasUserPendingChanges || hasFormErrors,
     projectSettingsForm: projectForm,
     userSettingsForm: userForm,
     supportedLanguages,
