@@ -8,6 +8,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/design-system/components/ui/tabs.tsx";
+import { SavingStateIndicator } from "@/screens/SettingsScreen/components/SavingStateIndicator.tsx";
 import {
   SettingsTab,
   useSettingsContext,
@@ -35,9 +36,12 @@ export const SettingsScreen = () => {
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <div className="flex items-center space-x-2">
-          <Settings className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">Settings</h1>
+        <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2">
+            <Settings className="h-6 w-6" />
+            <h1 className="text-2xl font-bold">Settings</h1>
+          </div>
+          <SavingStateIndicator />
         </div>
       </div>
       <Tabs defaultValue={initialTab} className="w-full flex-1">
