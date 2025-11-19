@@ -1,7 +1,6 @@
-import { Route, Save, WandSparkles } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Route, WandSparkles } from "lucide-react";
 
-import { Button } from "@/design-system/components/ui/button.tsx";
+import { type Theme, useTheme } from "@/contexts/theme.tsx";
 import {
   Card,
   CardContent,
@@ -26,22 +25,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/design-system/components/ui/select";
-import { useSettingsContext } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
+import { useSettingsContext } from "@/screens/SettingsScreen/context/settingsContext.tsx";
 import { EnvironmentPathsField } from "@/screens/SettingsScreen/tabs/ProjectSettings/components/EnvironmentPathsField.tsx";
 import { EnvironmentPathsInfoDialog } from "@/screens/SettingsScreen/tabs/UserSettings/components/EnvironmentPathsInfoDialog.tsx";
 
 export const UserSettings = () => {
-  const { t } = useTranslation();
-
-  const { settingsForm, saveSettings, hasUnsavedChanges, supportedLanguages } =
-    useSettingsContext();
+  const { userSettingsForm, supportedLanguages } = useSettingsContext();
+  const { rawTheme, setRawTheme } = useTheme();
 
   return (
-    <Form {...settingsForm}>
-      <form
-        onSubmit={settingsForm.handleSubmit(saveSettings)}
-        className="w-full h-full flex flex-col justify-between"
-      >
+    <Form {...userSettingsForm}>
+      <form className="w-full h-full flex flex-col justify-between">
         <div className="flex flex-col gap-2">
           <Card>
             <CardHeader>
@@ -68,7 +62,7 @@ export const UserSettings = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <FormField
-                control={settingsForm.control}
+                control={userSettingsForm.control}
                 name="locale"
                 render={({ field }) => (
                   <FormItem>
@@ -99,39 +93,30 @@ export const UserSettings = () => {
                   </FormItem>
                 )}
               />
+              <FormItem>
+                <FormLabel>Theme</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    setRawTheme(value as Theme);
+                  }}
+                  value={rawTheme}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your preferred theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="system">System theme</SelectItem>
+                    <SelectItem value="light">Light theme</SelectItem>
+                    <SelectItem value="dark">Dark theme</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription className="text-xs">
+                  (The system theme will adapt to your operating system's theme
+                  settings)
+                </FormDescription>
+              </FormItem>
               <FormField
-                control={settingsForm.control}
-                name="theme"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Theme</FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select your preferred theme" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="system">System theme</SelectItem>
-                          <SelectItem value="light">Light theme</SelectItem>
-                          <SelectItem value="dark">Dark theme</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormDescription className="text-xs">
-                      (The system theme will adapt to your operating system's
-                      theme settings)
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={settingsForm.control}
+                control={userSettingsForm.control}
                 name="logLineLimit"
                 render={({ field }) => (
                   <FormItem>
@@ -142,15 +127,13 @@ export const UserSettings = () => {
                         min={1}
                         max={5000}
                         {...field}
-                        onChange={(e) =>
-                          field.onChange(Number(e.target.value))
-                        }
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
                     <FormDescription className="text-xs">
-                      Maximum number of log lines to keep per command
-                      (1-5000). The recommended value is 100. Bigger values
-                      may impact performance.
+                      Maximum number of log lines to keep per command (1-5000).
+                      The recommended value is 100. Bigger values may impact
+                      performance.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -159,14 +142,6 @@ export const UserSettings = () => {
             </CardContent>
           </Card>
         </div>
-        <Button
-          type="submit"
-          className="self-end cursor-pointer"
-          disabled={!hasUnsavedChanges}
-        >
-          <Save />
-          {t("actions.save")}
-        </Button>
       </form>
     </Form>
   );
