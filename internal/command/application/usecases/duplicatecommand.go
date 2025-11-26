@@ -45,14 +45,12 @@ func (uc *DefaultDuplicateCommand) Execute(commandId, targetGroupId string) erro
 		return err
 	}
 
-	duplicatedCommand := domain.Command{
-		Id:               uuid.New().String(),
-		ProjectId:        originalCommand.ProjectId,
-		Name:             originalCommand.Name + " (copy)",
-		Command:          originalCommand.Command,
-		WorkingDirectory: originalCommand.WorkingDirectory,
-		Position:         len(allCommands),
-	}
+	duplicatedCommand := *originalCommand
+
+	// Override specific fields
+	duplicatedCommand.Id = uuid.New().String()
+	duplicatedCommand.Name = originalCommand.Name + " (copy)"
+	duplicatedCommand.Position = len(allCommands)
 
 	err = uc.commandRepository.Create(&duplicatedCommand)
 	if err != nil {
