@@ -1,5 +1,5 @@
 # Gomander Build Makefile
-.PHONY: all clean windows darwin linux dmg docker-build docker-build-amd64 docker-build-arm64 deb deb-amd64 deb-arm64 dev help lint
+.PHONY: all clean windows darwin linux dmg docker-build docker-build-amd64 docker-build-arm64 deb deb-amd64 deb-arm64 dev help lint test
 
 # Variables
 BUILD_DIR = build/bin
@@ -32,6 +32,10 @@ help:
 	@echo "  deb          - Create .deb packages for amd64 and arm64"
 	@echo "  deb-amd64    - Create .deb package for AMD64"
 	@echo "  deb-arm64    - Create .deb package for ARM64"
+
+# Test target
+test:
+	go test ./...
 
 # Development target
 dev:
