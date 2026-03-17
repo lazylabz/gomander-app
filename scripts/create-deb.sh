@@ -16,6 +16,12 @@ if [ -z "$BINARY" ] || [ -z "$ARCH" ]; then
     exit 1
 fi
 
+if [ "$ARCH" != "amd64" ] && [ "$ARCH" != "arm64" ]; then
+    echo "Usage: $0 <binary_path> <arch> [version]"
+    echo "  arch: amd64 or arm64"
+    exit 1
+fi
+
 if [ ! -f "$BINARY" ]; then
     echo "Error: binary not found at '$BINARY'"
     exit 1
