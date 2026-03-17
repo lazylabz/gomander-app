@@ -1,5 +1,5 @@
 # Gomander Build Makefile
-.PHONY: all clean windows darwin linux dmg docker-build docker-build-amd64 docker-build-arm64 deb deb-amd64 deb-arm64 dev help lint test
+.PHONY: all clean windows darwin linux linux-amd64 linux-arm64 dmg docker-build docker-build-amd64 docker-build-arm64 deb deb-amd64 deb-arm64 dev help lint test
 
 # Variables
 BUILD_DIR = build/bin
