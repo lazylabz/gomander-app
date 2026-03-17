@@ -142,9 +142,11 @@ linux-arm64: docker-build-arm64
 deb: deb-amd64 deb-arm64
 
 deb-amd64:
+	@test -f $(BUILD_DIR)/gomander-linux-amd64 || { echo "Error: $(BUILD_DIR)/gomander-linux-amd64 not found. Run make linux-amd64 first."; exit 1; }
 	bash scripts/create-deb.sh $(BUILD_DIR)/gomander-linux-amd64 amd64
 
 deb-arm64:
+	@test -f $(BUILD_DIR)/gomander-linux-arm64 || { echo "Error: $(BUILD_DIR)/gomander-linux-arm64 not found. Run make linux-arm64 first."; exit 1; }
 	bash scripts/create-deb.sh $(BUILD_DIR)/gomander-linux-arm64 arm64
 
 # Individual platform builds (without dependencies)
