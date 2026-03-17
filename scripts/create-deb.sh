@@ -22,13 +22,12 @@ if [ ! -f "$BINARY" ]; then
 fi
 
 DEB_NAME="gomander_${VERSION}_${ARCH}"
-DEB_STAGING="/tmp/${DEB_NAME}"
+DEB_STAGING="$(mktemp -d)"
 OUTPUT_DIR="$(dirname "$BINARY")"
 
-echo "Packaging gomander v${VERSION} (${ARCH}) -> ${OUTPUT_DIR}/${DEB_NAME}.deb"
+trap 'rm -rf "${DEB_STAGING}"' EXIT
 
-# Cleanup any previous staging directory
-rm -rf "${DEB_STAGING}"
+echo "Packaging gomander v${VERSION} (${ARCH}) -> ${OUTPUT_DIR}/${DEB_NAME}.deb"
 
 # Create .deb directory structure
 mkdir -p "${DEB_STAGING}/DEBIAN"
@@ -77,8 +76,5 @@ EOF
 
 # Build the .deb package
 dpkg-deb --build --root-owner-group "${DEB_STAGING}" "${OUTPUT_DIR}/${DEB_NAME}.deb"
-
-# Cleanup staging directory
-rm -rf "${DEB_STAGING}"
 
 echo "Done: ${OUTPUT_DIR}/${DEB_NAME}.deb"
