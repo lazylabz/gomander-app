@@ -8,20 +8,21 @@ set -e
 
 BINARY="$1"
 ARCH="$2"
-if [ -n "$3" ]; then
-    VERSION="$3"
-else
-    VERSION="$(grep -oP '(?<=CurrentRelease = "v)[^"]+' internal/releases/release.go 2>/dev/null)"
-    if [ -z "$VERSION" ]; then
-        echo "Error: could not extract version from internal/releases/release.go"
-        exit 1
-    fi
-fi
 
 if [ -z "$BINARY" ] || [ -z "$ARCH" ]; then
     echo "Usage: $0 <binary_path> <arch> [version]"
     echo "  arch: amd64 or arm64"
     exit 1
+fi
+
+if [ -n "$3" ]; then
+    VERSION="$3"
+else
+    VERSION="$(grep 'CurrentRelease = "v' internal/releases/release.go | sed 's/.*"v\([^"]*\)".*/\1/' 2>/dev/null)"
+    if [ -z "$VERSION" ]; then
+        echo "Error: could not extract version from internal/releases/release.go"
+        exit 1
+    fi
 fi
 
 if [ "$ARCH" != "amd64" ] && [ "$ARCH" != "arm64" ]; then
