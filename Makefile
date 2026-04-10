@@ -1,5 +1,5 @@
 # Gomander Build Makefile
-.PHONY: all clean windows darwin linux dmg docker-build dev help lint
+.PHONY: all clean windows darwin linux linux-amd64 linux-arm64 dmg docker-build docker-build-amd64 docker-build-arm64 deb deb-amd64 deb-arm64 dev help lint test
 
 # Variables
 BUILD_DIR = build/bin
@@ -29,6 +29,13 @@ help:
 	@echo "  linux-amd64  - Build Linux AMD64 binary"
 	@echo "  linux-arm64  - Build Linux ARM64 binary"
 	@echo "  docker-build - Build Docker image for Linux builds"
+	@echo "  deb          - Create .deb packages for amd64 and arm64"
+	@echo "  deb-amd64    - Create .deb package for AMD64"
+	@echo "  deb-arm64    - Create .deb package for ARM64"
+
+# Test target
+test:
+	go test ./...
 
 # Development target
 dev:
@@ -115,16 +122,32 @@ windows-arm64:
 	mv ../../$(BUILD_DIR)/gomander-arm64-installer.exe ../../$(BUILD_DIR)/gomander-windows-arm64-installer.exe
 
 # Linux targets
-linux: docker-build linux-amd64 linux-arm64
+linux: linux-amd64 linux-arm64
 
-docker-build:
-	docker buildx build --platform linux/amd64,linux/arm64 --output "type=docker" -t $(DOCKER_IMAGE) .
+docker-build: docker-build-amd64 docker-build-arm64
 
-linux-amd64: docker-build
-	docker run --rm --platform linux/amd64 -v $$(pwd)/$(BUILD_DIR):/app/output $(DOCKER_IMAGE)
+docker-build-amd64:
+	docker buildx build --platform linux/amd64 --load -t $(DOCKER_IMAGE)-amd64 .
 
-linux-arm64: docker-build
-	docker run --rm --platform linux/arm64 -v $$(pwd)/$(BUILD_DIR):/app/output $(DOCKER_IMAGE)
+docker-build-arm64:
+	docker buildx build --platform linux/arm64 --load -t $(DOCKER_IMAGE)-arm64 .
+
+linux-amd64: docker-build-amd64
+	docker run --rm --platform linux/amd64 -v $$(pwd)/$(BUILD_DIR):/app/output $(DOCKER_IMAGE)-amd64
+
+linux-arm64: docker-build-arm64
+	docker run --rm --platform linux/arm64 -v $$(pwd)/$(BUILD_DIR):/app/output $(DOCKER_IMAGE)-arm64
+
+# .deb packaging targets (requires pre-built Linux binaries in BUILD_DIR)
+deb: deb-amd64 deb-arm64
+
+deb-amd64:
+	@test -f $(BUILD_DIR)/gomander-linux-amd64 || { echo "Error: $(BUILD_DIR)/gomander-linux-amd64 not found. Run make linux-amd64 first."; exit 1; }
+	bash scripts/create-deb.sh $(BUILD_DIR)/gomander-linux-amd64 amd64
+
+deb-arm64:
+	@test -f $(BUILD_DIR)/gomander-linux-arm64 || { echo "Error: $(BUILD_DIR)/gomander-linux-arm64 not found. Run make linux-arm64 first."; exit 1; }
+	bash scripts/create-deb.sh $(BUILD_DIR)/gomander-linux-arm64 arm64
 
 # Individual platform builds (without dependencies)
 build-darwin-only: clean darwin-amd64 darwin-arm64
