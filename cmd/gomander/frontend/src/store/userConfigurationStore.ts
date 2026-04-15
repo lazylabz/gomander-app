@@ -6,10 +6,12 @@ import type { UserConfig } from "@/contracts/types.ts";
 type UserConfigurationStore = {
   userConfig: UserConfig;
   setUserConfig: (config: UserConfig) => void;
+  isLoaded: boolean;
 };
 
 export const userConfigurationStore = createStore<UserConfigurationStore>()(
   (set) => ({
+    isLoaded: false,
     userConfig: {
       environmentPaths: [],
       lastOpenedProjectId: "",
@@ -17,7 +19,7 @@ export const userConfigurationStore = createStore<UserConfigurationStore>()(
       locale: "en",
     },
     setUserConfig: (config: UserConfig) => {
-      set({ userConfig: config });
+      set({ userConfig: config, isLoaded: true });
     },
   }),
 );

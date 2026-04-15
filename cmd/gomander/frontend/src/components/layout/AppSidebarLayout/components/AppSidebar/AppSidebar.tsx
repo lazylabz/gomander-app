@@ -28,7 +28,7 @@ import {
   SidebarHeader,
 } from "@/design-system/components/ui/sidebar.tsx";
 import { ScreenRoutes } from "@/routes.ts";
-import { SettingsTab } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
+import { SettingsTab } from "@/screens/SettingsScreen/context/settingsContext.tsx";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { closeProject } from "@/useCases/project/closeProject.ts";
 

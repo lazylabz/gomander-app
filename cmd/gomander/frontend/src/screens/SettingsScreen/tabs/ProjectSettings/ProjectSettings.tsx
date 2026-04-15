@@ -1,8 +1,7 @@
-import { ChartNoAxesGantt, Save } from "lucide-react";
+import { ChartNoAxesGantt } from "lucide-react";
 
 import { BaseWorkingDirectoryField } from "@/components/modals/Project/common/BaseWorkingDirectoryField.tsx";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
-import { Button } from "@/design-system/components/ui/button.tsx";
 import {
   Card,
   CardContent,
@@ -11,19 +10,15 @@ import {
   CardTitle,
 } from "@/design-system/components/ui/card.tsx";
 import { Form } from "@/design-system/components/ui/form.tsx";
-import { useSettingsContext } from "@/screens/SettingsScreen/contexts/settingsContext.tsx";
-import type { SettingsFormType } from "@/screens/SettingsScreen/contexts/settingsFormSchema.ts";
+import { useSettingsContext } from "@/screens/SettingsScreen/context/settingsContext.tsx";
+import { type ProjectSettingsSchemaType } from "@/screens/SettingsScreen/schemas/projectSettingsSchema.ts";
 
 export const ProjectSettings = () => {
-  const { settingsForm, saveSettings, hasUnsavedChanges } =
-    useSettingsContext();
+  const { projectSettingsForm } = useSettingsContext();
 
   return (
-    <Form {...settingsForm}>
-      <form
-        onSubmit={settingsForm.handleSubmit(saveSettings)}
-        className="w-full h-full flex flex-col justify-between"
-      >
+    <Form {...projectSettingsForm}>
+      <form className="w-full h-full flex flex-col justify-between">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -36,20 +31,11 @@ export const ProjectSettings = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-4">
-              <ProjectNameField<SettingsFormType> />
-              <BaseWorkingDirectoryField<SettingsFormType> />
+              <ProjectNameField<ProjectSettingsSchemaType> />
+              <BaseWorkingDirectoryField<ProjectSettingsSchemaType> />
             </div>
           </CardContent>
         </Card>
-
-        <Button
-          className="self-end cursor-pointer"
-          type="submit"
-          disabled={!hasUnsavedChanges}
-        >
-          <Save />
-          Save
-        </Button>
       </form>
     </Form>
   );
