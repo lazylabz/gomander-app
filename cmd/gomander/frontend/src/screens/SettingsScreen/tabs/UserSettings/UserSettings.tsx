@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/design-system/components/ui/select";
 import { useSettingsContext } from "@/screens/SettingsScreen/context/settingsContext.tsx";
-import { EnvironmentPathsField } from "@/screens/SettingsScreen/tabs/ProjectSettings/components/EnvironmentPathsField.tsx";
+import { EnvironmentPathsField } from "@/screens/SettingsScreen/tabs/UserSettings/components/EnvironmentPathsField.tsx";
 import { EnvironmentPathsInfoDialog } from "@/screens/SettingsScreen/tabs/UserSettings/components/EnvironmentPathsInfoDialog.tsx";
 
 export const UserSettings = () => {
