@@ -1,5 +1,6 @@
 import { Plus, Trash } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { FSInput } from "@/components/inputs/FSInput.tsx";
 import { Button } from "@/design-system/components/ui/button.tsx";
@@ -12,6 +13,7 @@ import {
 import type { UserSettingsSchemaType } from "@/screens/SettingsScreen/schemas/userSettingsSchema.ts";
 
 export const EnvironmentPathsField = () => {
+  const { t } = useTranslation();
   const { control } = useFormContext<UserSettingsSchemaType>();
 
   const { fields, append, remove } = useFieldArray({
@@ -70,7 +72,7 @@ export const EnvironmentPathsField = () => {
         className="mt-2 w-auto"
         onClick={addNewPath}
       >
-        Add
+        {t('common.add')}
         <Plus />
       </Button>
     </div>

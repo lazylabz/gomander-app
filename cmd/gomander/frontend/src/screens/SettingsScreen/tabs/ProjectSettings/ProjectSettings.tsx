@@ -1,4 +1,5 @@
 import { ChartNoAxesGantt } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { BaseWorkingDirectoryField } from "@/components/modals/Project/common/BaseWorkingDirectoryField.tsx";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
@@ -14,6 +15,7 @@ import { useSettingsContext } from "@/screens/SettingsScreen/context/settingsCon
 import { type ProjectSettingsSchemaType } from "@/screens/SettingsScreen/schemas/projectSettingsSchema.ts";
 
 export const ProjectSettings = () => {
+  const { t } = useTranslation();
   const { projectSettingsForm } = useSettingsContext();
 
   return (
@@ -23,10 +25,10 @@ export const ProjectSettings = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <ChartNoAxesGantt size={20} />
-              <span>Project information</span>
+              <span>{t('projectSettingsForm.sectionTitle')}</span>
             </CardTitle>
             <CardDescription>
-              Configure your project details and basic settings.
+              {t('projectSettingsForm.sectionDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>

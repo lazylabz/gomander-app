@@ -1,4 +1,5 @@
 import { Route, WandSparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { type Theme, useTheme } from "@/contexts/theme.tsx";
 import {
@@ -30,6 +31,7 @@ import { EnvironmentPathsField } from "@/screens/SettingsScreen/tabs/UserSetting
 import { EnvironmentPathsInfoDialog } from "@/screens/SettingsScreen/tabs/UserSettings/components/EnvironmentPathsInfoDialog.tsx";
 
 export const UserSettings = () => {
+  const { t } = useTranslation();
   const { userSettingsForm, supportedLanguages } = useSettingsContext();
   const { rawTheme, setRawTheme } = useTheme();
 
@@ -41,11 +43,11 @@ export const UserSettings = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Route size={20} />
-                <span className="ml-2 mr-2">Environment paths</span>
+                <span className="ml-2 mr-2">{t('userSettingsForm.envPathsTitle')}</span>
                 <EnvironmentPathsInfoDialog />
               </CardTitle>
               <CardDescription>
-                These paths will be used to resolve commands and executables.
+                {t('userSettingsForm.envPathsDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -56,9 +58,9 @@ export const UserSettings = () => {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <WandSparkles size={20} />
-                <span>Preferences</span>
+                <span>{t('userSettingsForm.preferencesTitle')}</span>
               </CardTitle>
-              <CardDescription>Make gomander your own!</CardDescription>
+              <CardDescription>{t('userSettingsForm.preferencesDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <FormField
@@ -66,7 +68,7 @@ export const UserSettings = () => {
                 name="locale"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Language</FormLabel>
+                    <FormLabel>{t('userSettingsForm.languageLabel')}</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={field.onChange}
@@ -74,7 +76,7 @@ export const UserSettings = () => {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select your preferred language" />
+                            <SelectValue placeholder={t('userSettingsForm.languagePlaceholder')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -94,7 +96,7 @@ export const UserSettings = () => {
                 )}
               />
               <FormItem>
-                <FormLabel>Theme</FormLabel>
+                <FormLabel>{t('userSettingsForm.themeLabel')}</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     setRawTheme(value as Theme);
@@ -102,17 +104,16 @@ export const UserSettings = () => {
                   value={rawTheme}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select your preferred theme" />
+                    <SelectValue placeholder={t('userSettingsForm.themePlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="system">System theme</SelectItem>
-                    <SelectItem value="light">Light theme</SelectItem>
-                    <SelectItem value="dark">Dark theme</SelectItem>
+                    <SelectItem value="system">{t('userSettingsForm.themeSystem')}</SelectItem>
+                    <SelectItem value="light">{t('userSettingsForm.themeLight')}</SelectItem>
+                    <SelectItem value="dark">{t('userSettingsForm.themeDark')}</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormDescription className="text-xs">
-                  (The system theme will adapt to your operating system's theme
-                  settings)
+                  {t('userSettingsForm.themeDescription')}
                 </FormDescription>
               </FormItem>
               <FormField
@@ -120,7 +121,7 @@ export const UserSettings = () => {
                 name="logLineLimit"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Log line limit</FormLabel>
+                    <FormLabel>{t('userSettingsForm.logLimitLabel')}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -131,9 +132,7 @@ export const UserSettings = () => {
                       />
                     </FormControl>
                     <FormDescription className="text-xs">
-                      Maximum number of log lines to keep per command (1-5000).
-                      The recommended value is 100. Bigger values may impact
-                      performance.
+                      {t('userSettingsForm.logLimitDescription')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

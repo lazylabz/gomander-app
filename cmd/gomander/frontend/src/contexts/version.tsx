@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { externalBrowserService, helpersService } from "@/contracts/service.ts";
@@ -22,6 +23,7 @@ export const VersionProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const { t } = useTranslation();
   const [currentRelease, setCurrentRelease] = useState<string>("");
   const [newRelease, setNewRelease] = useState<string | null>(null);
   const [errorLoadingNewVersion, setErrorLoadingNewVersion] =
@@ -42,7 +44,7 @@ export const VersionProvider = ({
     } catch (err) {
       setErrorLoadingNewVersion(err as Error);
       console.error("Error checking for new releases:", err);
-      toast.error(`Error checking for new releases`);
+      toast.error(t('toast.version.checkError'));
     }
   };
 

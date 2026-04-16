@@ -4,6 +4,7 @@ import { useForm, type UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
 
+import { LANGUAGE_LABELS } from "@/constants/languages.ts";
 import { translationsService } from "@/contracts/service.ts";
 import {
   projectSettingsSchema,
@@ -28,10 +29,6 @@ type SupportedLanguage = {
   label: string;
 };
 
-const languageValueToLabelMap: Record<string, string> = {
-  en: "English",
-  es: "Español",
-};
 
 // Define context
 export interface SettingsContextData {
@@ -165,7 +162,7 @@ export const SettingsContextProvider = ({
         const languageOptions = languages.map(
           (lang): SupportedLanguage => ({
             value: lang,
-            label: languageValueToLabelMap[lang] || lang,
+            label: LANGUAGE_LABELS[lang] || lang,
           }),
         );
         setSupportedLanguages(languageOptions);

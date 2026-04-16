@@ -1,4 +1,5 @@
 import { CloudAlert, CloudCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import {
   Tooltip,
@@ -8,6 +9,7 @@ import {
 import { useSettingsContext } from "@/screens/SettingsScreen/context/settingsContext.tsx";
 
 export const SavingStateIndicator = () => {
+  const { t } = useTranslation();
   const { hasPendingChanges } = useSettingsContext();
 
   return (
@@ -20,7 +22,7 @@ export const SavingStateIndicator = () => {
         )}
       </TooltipTrigger>
       <TooltipContent>
-        {hasPendingChanges ? "Saving..." : "All changes saved"}
+        {hasPendingChanges ? t('settings.saving.inProgress') : t('settings.saving.done')}
       </TooltipContent>
     </Tooltip>
   );

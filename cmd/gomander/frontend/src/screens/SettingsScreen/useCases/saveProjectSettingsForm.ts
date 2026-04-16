@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 
+import i18n from "@/design-system/lib/i18n.ts";
 import { parseError } from "@/helpers/errorHelpers.ts";
 import { fetchProject } from "@/queries/fetchProject.ts";
 import type { ProjectSettingsSchemaType } from "@/screens/SettingsScreen/schemas/projectSettingsSchema.ts";
@@ -18,9 +19,9 @@ export const saveProjectSettingsForm = async (formData: ProjectSettingsSchemaTyp
       name: formData.name,
       workingDirectory: formData.baseWorkingDirectory,
     });
-    toast.success("Project settings saved successfully");
+    toast.success(i18n.t('toast.settings.projectSaveSuccess'));
   } catch (e) {
-    toast.error(parseError(e, "Failed to save project settings"));
+    toast.error(parseError(e, i18n.t('toast.settings.projectSaveFailed')));
   }
 
   await fetchProject();
