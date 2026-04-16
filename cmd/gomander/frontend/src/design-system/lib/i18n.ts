@@ -52,14 +52,16 @@ export const initI18n = async () => {
 
   // Translate Zod validation messages by treating the message string as an i18n key.
   // Schemas set their messages to i18n key strings (e.g. "commandForm.validation.nameRequired")
-  // and this errorMap resolves them at validation time so language changes are reflected.
-  z.setErrorMap((issue) => {
-    const key = issue.message;
-    if (key && i18n.exists(key)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return { message: i18n.t(key as any) };
-    }
-    return { message: issue.message ?? 'Invalid value' };
+  // and this customError resolves them at validation time so language changes are reflected.
+  z.config({
+    customError: (issue) => {
+      const key = issue.message;
+      if (key && i18n.exists(key)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return i18n.t(key as any);
+      }
+      return issue.message ?? undefined;
+    },
   });
 
   return i18n;
