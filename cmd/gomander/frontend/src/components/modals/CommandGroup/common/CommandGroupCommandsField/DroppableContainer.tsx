@@ -1,5 +1,6 @@
 import { useDroppable } from "@dnd-kit/core";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   ADDED_COMMANDS,
@@ -16,16 +17,17 @@ export const DroppableContainer = ({
   children: React.ReactNode;
   className?: string;
 }) => {
+  const { t } = useTranslation();
   const { setNodeRef } = useDroppable({ id: variant });
 
   return (
     <div className={className}>
       {variant === AVAILABLE_COMMANDS && (
-        <h4 className="font-medium text-sm mb-2">Available Commands</h4>
+        <h4 className="font-medium text-sm mb-2">{t('commandGroupForm.availableCommands')}</h4>
       )}
       {variant === ADDED_COMMANDS && (
         <FormLabel className="font-medium text-sm mb-2">
-          Group Commands
+          {t('commandGroupForm.groupCommands')}
         </FormLabel>
       )}
       <div
@@ -36,8 +38,8 @@ export const DroppableContainer = ({
         {React.Children.count(children) === 0 && (
           <div className="flex items-center justify-center h-full text-muted-foreground text-sm text-center">
             {variant === AVAILABLE_COMMANDS
-              ? "No commands available"
-              : "Drag commands here"}
+              ? t('commandGroupForm.emptyAvailable')
+              : t('commandGroupForm.emptyGroup')}
           </div>
         )}
       </div>

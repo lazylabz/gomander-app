@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { BaseWorkingDirectoryField } from "@/components/modals/Project/common/BaseWorkingDirectoryField.tsx";
@@ -40,6 +41,7 @@ export const ImportProjectModal = ({
   onClose: () => void;
   project: ProjectExport | null;
 }) => {
+  const { t } = useTranslation();
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     values: {
@@ -79,9 +81,9 @@ export const ImportProjectModal = ({
 
       await onSuccess();
       handleOpenChange(false);
-      toast.success("Project imported successfully");
+      toast.success(t('toast.project.importSuccess'));
     } catch (e) {
-      toast.error(parseError(e, "Failed to import the project"));
+      toast.error(parseError(e, t('toast.project.importFailed')));
     }
   };
 
@@ -108,9 +110,9 @@ export const ImportProjectModal = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="w-full sm:max-w-[800px]">
         <DialogHeader>
-          <DialogTitle>Import project</DialogTitle>
+          <DialogTitle>{t('modal.importProject.title')}</DialogTitle>
           <DialogDescription>
-            Feel free to modify the values to the ones you prefer
+            {t('modal.importProject.description')}
           </DialogDescription>
           <Form {...form}>
             <form
@@ -121,7 +123,7 @@ export const ImportProjectModal = ({
               <BaseWorkingDirectoryField<FormSchemaType> />
               <Accordion type="single" collapsible>
                 <AccordionItem value="1">
-                  <AccordionTrigger>Advanced import</AccordionTrigger>
+                  <AccordionTrigger>{t('modal.importProject.advancedTrigger')}</AccordionTrigger>
                   <AccordionContent>
                     <div className="flex sm:items-start flex-wrap flex-col items-stretch sm:flex-row gap-4 justify-between">
                       <ProjectCommandsField
@@ -138,7 +140,7 @@ export const ImportProjectModal = ({
                 </AccordionItem>
               </Accordion>
               <Button className="self-end" type="submit">
-                Save
+                {t('common.save')}
               </Button>
             </form>
           </Form>

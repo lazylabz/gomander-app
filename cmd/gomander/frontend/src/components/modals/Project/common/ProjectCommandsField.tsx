@@ -1,4 +1,5 @@
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import type { FormSchemaType } from "@/components/modals/Project/common/importAndExportSchema.ts";
 import type { ProjectExport } from "@/contracts/types.ts";
@@ -17,11 +18,12 @@ export const ProjectCommandsField = ({
   commands: ProjectExport["commands"];
   onChange?: (selectedCommandIds: string[]) => void;
 }) => {
+  const { t } = useTranslation();
   const form = useFormContext<FormSchemaType>();
 
   return (
     <FormItem className="flex-1">
-      <FormLabel className="mb-1">Commands</FormLabel>
+      <FormLabel className="mb-1">{t('projectForm.commandsLabel')}</FormLabel>
       <div className="max-h-[300px] flex flex-col gap-2 overflow-y-auto pr-2">
         {commands.map((command) => (
           <FormField

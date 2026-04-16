@@ -1,4 +1,5 @@
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import type { FormSchemaType } from "@/components/modals/Command/common/formSchema.ts";
 import {
@@ -11,6 +12,7 @@ import {
 import { Input } from "@/design-system/components/ui/input.tsx";
 
 export const CommandCommandField = () => {
+  const { t } = useTranslation();
   const form = useFormContext<FormSchemaType>();
 
   return (
@@ -19,7 +21,7 @@ export const CommandCommandField = () => {
       name="command"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Command</FormLabel>
+          <FormLabel>{t('commandForm.commandLabel')}</FormLabel>
           <FormControl>
             <Input
               autoComplete="off"

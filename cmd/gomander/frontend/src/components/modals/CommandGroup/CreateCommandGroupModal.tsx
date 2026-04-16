@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Group } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { CommandGroupCommandsField } from "@/components/modals/CommandGroup/common/CommandGroupCommandsField/CommandGroupCommandsField.tsx";
@@ -31,6 +32,7 @@ export const CreateCommandGroupModal = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
+  const { t } = useTranslation();
   const projectId = useProjectStore((state) => state.projectInfo?.id);
 
   const form = useForm<FormSchemaType>({
@@ -54,9 +56,9 @@ export const CreateCommandGroupModal = ({
         commands: values.commands,
         position: 0, // Will be set by the backend
       });
-      toast.success("Command group created successfully");
+      toast.success(t('toast.commandGroup.createSuccess'));
     } catch (e) {
-      toast.error(parseError(e, "Failed to create command group"));
+      toast.error(parseError(e, t('toast.commandGroup.createFailed')));
     } finally {
       fetchCommandGroups();
     }
@@ -79,7 +81,7 @@ export const CreateCommandGroupModal = ({
           <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
             <DialogHeader className="flex flex-row items-center gap-2">
               <Group />
-              <DialogTitle>Create new command group</DialogTitle>
+              <DialogTitle>{t('modal.createCommandGroup.title')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-6 mt-4 mb-2">
               <CommandGroupNameField />
@@ -88,10 +90,10 @@ export const CreateCommandGroupModal = ({
             <DialogFooter>
               <DialogClose asChild>
                 <Button type="button" variant="outline">
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </DialogClose>
-              <Button type="submit">Create</Button>
+              <Button type="submit">{t('common.create')}</Button>
             </DialogFooter>
           </form>
         </Form>

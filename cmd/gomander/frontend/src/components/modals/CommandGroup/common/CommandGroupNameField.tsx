@@ -1,4 +1,5 @@
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import type { FormSchemaType } from "@/components/modals/CommandGroup/common/formSchema.ts";
 import {
@@ -11,6 +12,7 @@ import {
 import { Input } from "@/design-system/components/ui/input.tsx";
 
 export const CommandGroupNameField = () => {
+  const { t } = useTranslation();
   const form = useFormContext<FormSchemaType>();
 
   return (
@@ -19,7 +21,7 @@ export const CommandGroupNameField = () => {
       name="name"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Name</FormLabel>
+          <FormLabel>{t('commandGroupForm.nameLabel')}</FormLabel>
           <FormControl>
             <Input
               autoComplete="off"

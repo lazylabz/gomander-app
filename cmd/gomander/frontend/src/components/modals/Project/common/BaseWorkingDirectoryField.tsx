@@ -1,4 +1,5 @@
 import { type Path, useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { FSInput } from "@/components/inputs/FSInput.tsx";
 import {
@@ -12,6 +13,7 @@ import {
 export const BaseWorkingDirectoryField = <
   T extends { baseWorkingDirectory: string },
 >() => {
+  const { t } = useTranslation();
   const form = useFormContext<T>();
 
   const name = "baseWorkingDirectory" satisfies keyof T as Path<T>;
@@ -22,7 +24,7 @@ export const BaseWorkingDirectoryField = <
       name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Base Working Directory</FormLabel>
+          <FormLabel>{t('projectForm.baseDirLabel')}</FormLabel>
           <FormControl>
             <FSInput
               autoComplete="off"

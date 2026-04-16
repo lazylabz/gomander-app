@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Terminal } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { CommandCommandField } from "@/components/modals/Command/common/CommandCommandField.tsx";
@@ -44,6 +45,7 @@ export const EditCommandModal = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
+  const { t } = useTranslation();
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     values: {
@@ -73,11 +75,11 @@ export const EditCommandModal = ({
           .filter((pattern) => pattern.trim() !== ""),
       });
 
-      toast.success("Command updated successfully");
+      toast.success(t('toast.command.updateSuccess'));
 
       setOpen(false);
     } catch (e: unknown) {
-      toast.error(parseError(e, "Failed to update command"));
+      toast.error(parseError(e, t('toast.command.updateFailed')));
     } finally {
       fetchCommands();
       fetchCommandGroups();
@@ -98,7 +100,7 @@ export const EditCommandModal = ({
           <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
             <DialogHeader className="flex flex-row items-center gap-6">
               <Terminal />
-              <DialogTitle>Edit command</DialogTitle>
+              <DialogTitle>{t('modal.editCommand.title')}</DialogTitle>
             </DialogHeader>
             <div className="my-4 space-y-2">
               <div className="space-y-6">
@@ -110,7 +112,7 @@ export const EditCommandModal = ({
               </div>
               <Accordion type="single" collapsible>
                 <AccordionItem value="1">
-                  <AccordionTrigger>Advanced</AccordionTrigger>
+                  <AccordionTrigger>{t('common.advanced')}</AccordionTrigger>
                   <AccordionContent>
                     <CommandErrorPatternsField />
                   </AccordionContent>
@@ -120,10 +122,10 @@ export const EditCommandModal = ({
             <DialogFooter>
               <DialogClose asChild>
                 <Button type="button" variant="outline">
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </DialogClose>
-              <Button type="submit">Save</Button>
+              <Button type="submit">{t('common.save')}</Button>
             </DialogFooter>
           </form>
         </Form>

@@ -1,4 +1,5 @@
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import type { FormSchemaType } from "@/components/modals/Project/common/importAndExportSchema.ts";
 import type { ProjectExport } from "@/contracts/types.ts";
@@ -24,11 +25,12 @@ export const ProjectCommandGroupsField = ({
   selectedCommandIds: string[];
   commands: ProjectExport["commands"];
 }) => {
+  const { t } = useTranslation();
   const form = useFormContext<FormSchemaType>();
 
   return (
     <FormItem className="flex-1">
-      <FormLabel className="mb-1">Command Groups</FormLabel>
+      <FormLabel className="mb-1">{t('projectForm.commandGroupsLabel')}</FormLabel>
       <div className="max-h-[300px] flex flex-col gap-2 overflow-y-auto pr-2">
         {commandGroups.map((commandGroup) => {
           return (
@@ -77,8 +79,7 @@ export const ProjectCommandGroupsField = ({
                         </TooltipTrigger>
                         {disabled && (
                           <TooltipContent>
-                            Select at least one of its commands to enable this
-                            group
+                            {t('projectForm.commandGroupsDisabledTooltip')}
                           </TooltipContent>
                         )}
                       </Tooltip>
@@ -87,7 +88,7 @@ export const ProjectCommandGroupsField = ({
                       {commandGroup.commandIds.map((commandId) => {
                         const command = commands.find(
                           (c) => c.id === commandId,
-                        ) || { name: "Deleted command" };
+                        ) || { name: t('projectForm.deletedCommand') };
 
                         const isSelected =
                           selectedCommandIds.includes(commandId);
