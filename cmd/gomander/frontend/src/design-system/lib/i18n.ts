@@ -1,5 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { z } from 'zod';
 
 import { dataService, translationsService } from '@/contracts/service';
 import type { Localization } from '@/contracts/types';
@@ -48,6 +49,18 @@ export const initI18n = async () => {
         useSuspense: false,
       }
     });
+
+  // Translate Zod validation messages by treating the message string as an i18n key.
+  // Schemas set their messages to i18n key strings (e.g. "commandForm.validation.nameRequired")
+  // and this errorMap resolves them at validation time so language changes are reflected.
+  z.setErrorMap((issue) => {
+    const key = issue.message;
+    if (key && i18n.exists(key)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return { message: i18n.t(key as any) };
+    }
+    return { message: issue.message ?? 'Invalid value' };
+  });
 
   return i18n;
 };
