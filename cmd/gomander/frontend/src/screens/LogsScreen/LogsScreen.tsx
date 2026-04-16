@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useTheme } from "@/contexts/theme.tsx";
 import { Input } from "@/design-system/components/ui/input.tsx";
@@ -29,6 +30,7 @@ const focusElementByMatchId = (id: string) => {
 };
 
 export const LogsScreen = () => {
+  const { t } = useTranslation();
   const { currentLogs } = useCurrentLogs();
 
   const { theme } = useTheme();
@@ -134,7 +136,7 @@ export const LogsScreen = () => {
                     size={14}
                   />
                 </div>
-                {matchesIds.length} matches
+                {t('logs.matches', { count: matchesIds.length })}
               </div>
               <X
                 size={14}
