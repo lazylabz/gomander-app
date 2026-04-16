@@ -1,8 +1,4 @@
 {
-  "sidebar.title": "Commands",
-  "sidebar.minimize": "Minimize",
-  "actions.cancel": "Cancel",
-  "actions.save": "Save",
-  "toast.test.success": "Test operation completed successfully",
-  "toast.test.error": "Test operation failed"
+  "sidebar.commands.title": "Commands",
+  "common.cancel": "Cancel"
 }
