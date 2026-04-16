@@ -1,5 +1,6 @@
 import { ChevronDown, Settings } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
 import { AllCommandsSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/AllCommandsSection/AllCommandsSection.tsx";
@@ -33,6 +34,7 @@ import { useProjectStore } from "@/store/projectStore.ts";
 import { closeProject } from "@/useCases/project/closeProject.ts";
 
 export const AppSidebar = () => {
+  const { t } = useTranslation();
   const project = useProjectStore((state) => state.projectInfo);
 
   const navigate = useNavigate();
@@ -84,10 +86,10 @@ export const AppSidebar = () => {
                 <DropdownMenuItem
                   onClick={() => goToSettings(SettingsTab.Project)}
                 >
-                  Edit
+                  {t('common.edit')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleCloseProject}>
-                  Close
+                  {t('sidebar.project.close')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

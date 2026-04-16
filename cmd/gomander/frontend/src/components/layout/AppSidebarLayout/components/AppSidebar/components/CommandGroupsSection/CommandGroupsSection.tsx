@@ -6,6 +6,7 @@ import {
 } from "@dnd-kit/sortable";
 import { ArrowUpDown } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { CommandGroupSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandGroupsSection/components/CommandGroupSection/CommandGroupSection.tsx";
@@ -30,6 +31,7 @@ import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
 import { reorderCommandGroups } from "@/useCases/commandGroup/reorderCommandGroups.ts";
 
 export const CommandGroupsSection = () => {
+  const { t } = useTranslation();
   const commandGroups = useCommandGroupStore((state) => state.commandGroups);
   const setCommandGroups = useCommandGroupStore(
     (state) => state.setCommandGroups,
@@ -68,9 +70,9 @@ export const CommandGroupsSection = () => {
     const reorderedCommandGroupIds = commandGroups.map((cg) => cg.id);
     try {
       await reorderCommandGroups(reorderedCommandGroupIds);
-      toast.success("Reordered command groups successfully");
+      toast.success(t('toast.commandGroup.reorderSuccess'));
     } catch (e) {
-      toast.error(parseError(e, "Failed to reorder command groups"));
+      toast.error(parseError(e, t('toast.commandGroup.reorderFailed')));
     } finally {
       fetchCommandGroups();
     }
@@ -99,10 +101,10 @@ export const CommandGroupsSection = () => {
       <ContextMenu>
         <ContextMenuTrigger>
           <div className="flex items-center pl-4 pr-2 mt-2 mb-1 gap-2">
-            <h3 className="text-sm text-muted-foreground">Command groups</h3>
+            <h3 className="text-sm text-muted-foreground">{t('sidebar.commandGroups.title')}</h3>
             <Tooltip delayDuration={1000}>
               <TooltipContent>
-                {isReorderingGroups ? "Apply reordering" : "Start reordering"}
+                {isReorderingGroups ? t('sidebar.commandGroups.applyReorder') : t('sidebar.commandGroups.startReorder')}
               </TooltipContent>
               <TooltipTrigger
                 onClick={toggleReorderingMode}
@@ -120,7 +122,7 @@ export const CommandGroupsSection = () => {
         </ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuItem onClick={openCreateCommandGroupModal}>
-            Add command group
+            {t('sidebar.commandGroups.add')}
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>

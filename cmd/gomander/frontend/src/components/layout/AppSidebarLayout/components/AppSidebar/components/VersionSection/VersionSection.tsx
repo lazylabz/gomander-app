@@ -1,4 +1,5 @@
 import { Info } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { useVersionContext } from "@/contexts/version.tsx";
 import {
@@ -12,6 +13,7 @@ export const VersionSection = ({
 }: {
   openAboutModal: () => void;
 }) => {
+  const { t } = useTranslation();
   const { newVersion, currentVersion, errorLoadingNewVersion } =
     useVersionContext();
 
@@ -19,7 +21,7 @@ export const VersionSection = ({
     <Tooltip>
       <TooltipTrigger className="cursor-pointer" onClick={openAboutModal}>
         <p className="text-sm text-muted-foreground flex items-center gap-2">
-          {currentVersion ? `v${currentVersion}` : "..."}
+          {currentVersion ? t('sidebar.version.current', { version: currentVersion }) : "..."}
           {newVersion && (
             <>
               <Info
@@ -29,7 +31,7 @@ export const VersionSection = ({
               />
               <TooltipContent>
                 <span className="font-semibold">
-                  New Version v{newVersion} Available!
+                  {t('sidebar.version.newAvailable', { version: newVersion })}
                 </span>
               </TooltipContent>
             </>
@@ -41,7 +43,7 @@ export const VersionSection = ({
                 size={16}
                 onClick={openAboutModal}
               />
-              <TooltipContent>You are using the latest version!</TooltipContent>
+              <TooltipContent>{t('sidebar.version.latest')}</TooltipContent>
             </>
           )}
           {errorLoadingNewVersion && (
@@ -51,7 +53,7 @@ export const VersionSection = ({
                 size={16}
                 onClick={openAboutModal}
               />
-              <TooltipContent>Error checking for new version</TooltipContent>
+              <TooltipContent>{t('sidebar.version.checkError')}</TooltipContent>
             </>
           )}
         </p>
