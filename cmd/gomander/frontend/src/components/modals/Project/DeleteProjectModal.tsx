@@ -39,7 +39,7 @@ export const DeleteProjectModal = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={onClose}>{t('common.cancel')}</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>{t('common.continue')}</AlertDialogAction>
+          <AlertDialogAction onClick={onConfirm}>{t('common.delete')}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
