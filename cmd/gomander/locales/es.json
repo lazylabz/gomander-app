@@ -60,7 +60,7 @@
   "modal.editCommandGroup.title": "Editar grupo de comandos",
   "modal.createProject.title": "Crear proyecto",
   "modal.deleteProject.title": "¿Estás completamente seguro?",
-  "modal.deleteProject.description": "Esta acción no se puede deshacer. Eliminará permanentemente tu proyecto y borrará los datos de tu ordenador.",
+  "modal.deleteProject.description": "Esta acción no se puede deshacer. Eliminará permanentemente tu proyecto y borrará los datos de tu equipo.",
   "modal.importProject.title": "Importar proyecto",
   "modal.importProject.description": "Ajusta los valores como prefieras",
   "modal.importProject.advancedTrigger": "Importación avanzada",
@@ -127,7 +127,7 @@
   "toast.command.duplicateSuccess": "Comando duplicado correctamente",
   "toast.command.duplicateFailed": "Error al duplicar el comando",
   "toast.command.reorderFailed": "Error al reordenar los comandos",
-  "toast.command.invalidDrag": "Operación de arrastre no válida: comando no encontrado",
+  "toast.command.invalidDrag": "Arrastre inválido: comando no encontrado",
   "toast.command.removeFromGroupSuccess": "Comando eliminado del grupo correctamente",
   "toast.command.removeFromGroupFailed": "Error al eliminar el comando del grupo",
 
