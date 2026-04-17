@@ -24,7 +24,7 @@
   "sidebar.version.current": "v{{version}}",
   "sidebar.version.newAvailable": "New Version v{{version}} Available!",
   "sidebar.version.latest": "You are using the latest version!",
-  "sidebar.version.checkError": "Error checking for new version",
+  "sidebar.version.checkError": "Error checking for new versions",
 
   "projectSelection.openTitle": "Open project",
   "projectSelection.welcome": "Welcome to Gomander!",
