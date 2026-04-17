@@ -108,7 +108,7 @@
   "userSettingsForm.themeDark": "Oscuro",
   "userSettingsForm.themeDescription": "(El modo automático sigue la apariencia de tu sistema)",
   "userSettingsForm.logLimitLabel": "Límite de líneas de log",
-  "userSettingsForm.logLimitDescription": "Máximo de líneas de log por comando (1-5000). Se recomienda 100. Valores altos pueden afectar el rendimiento.",
+  "userSettingsForm.logLimitDescription": "Máximo de líneas de log por comando (1-5000). Se recomienda 100. Valores altos pueden afectar al rendimiento.",
   "userSettingsForm.validation.pathEmpty": "La ruta no puede estar vacía",
   "userSettingsForm.validation.logLimitMin": "Debe ser al menos 1",
   "userSettingsForm.validation.logLimitMax": "No puede superar 5000",
