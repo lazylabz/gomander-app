@@ -48,7 +48,7 @@
   "aboutModal.newVersion": "La versión {{version}} está disponible",
   "aboutModal.newVersionSubtitle": "Obtén las últimas novedades y mejoras",
   "aboutModal.downloadUpdate": "Descargar actualización",
-  "aboutModal.description": "Una interfaz gráfica sencilla para gestionar y organizar tus comandos de desarrollo. Diseñada para optimizar tu flujo de trabajo y eliminar el caos de la terminal.",
+  "aboutModal.description": "Organiza y lanza todos tus comandos de desarrollo desde un único lugar. Diseñado para simplificar tu flujo de trabajo y acabar con el caos de las terminales.",
   "aboutModal.feedbackTitle": "¿Tienes algún comentario?",
   "aboutModal.feedbackSubtitle": "Visita nuestro repositorio de GitHub",
   "aboutModal.teamTitle": "Conoce al equipo",

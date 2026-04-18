@@ -106,7 +106,6 @@ export const EditCommandModal = ({
               <div className="space-y-6">
                 <CommandNameField />
                 <CommandCommandField />
-                <CommandLinkField />
                 <CommandWorkingDirectoryField />
                 <CommandComputedPath />
               </div>
@@ -114,7 +113,10 @@ export const EditCommandModal = ({
                 <AccordionItem value="1">
                   <AccordionTrigger>{t('common.advanced')}</AccordionTrigger>
                   <AccordionContent>
-                    <CommandErrorPatternsField />
+                    <div className="space-y-6">
+                      <CommandLinkField />
+                      <CommandErrorPatternsField />
+                    </div>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>

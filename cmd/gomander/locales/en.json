@@ -48,7 +48,7 @@
   "aboutModal.newVersion": "Version {{version}} is available",
   "aboutModal.newVersionSubtitle": "Get the latest features and improvements",
   "aboutModal.downloadUpdate": "Download Update",
-  "aboutModal.description": "A simple GUI for managing and organizing your development commands. Built to streamline your workflow and eliminate terminal chaos.",
+  "aboutModal.description": "Organize and launch your development commands from a single place. Built to streamline your workflow and eliminate terminal chaos.",
   "aboutModal.feedbackTitle": "Any feedback?",
   "aboutModal.feedbackSubtitle": "Visit our GitHub repository",
   "aboutModal.teamTitle": "Meet the Team",
