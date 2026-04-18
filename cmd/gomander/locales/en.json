@@ -142,7 +142,7 @@
   "toast.commandGroup.reorderSuccess": "Reordered command groups successfully",
   "toast.commandGroup.reorderFailed": "Failed to reorder command groups",
   "toast.commandGroup.notFound": "Command group not found",
-  "toast.commandGroup.cannotRemoveLast": "Cannot remove the last command from the group. Delete the group instead.",
+  "toast.commandGroup.cannotRemoveLast": "The group needs at least one command.",
 
   "toast.project.selectFailed": "Failed to select project",
   "toast.project.importSuccess": "Project imported successfully",
