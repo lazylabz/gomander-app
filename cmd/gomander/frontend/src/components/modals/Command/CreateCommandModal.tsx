@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Terminal } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { CommandCommandField } from "@/components/modals/Command/common/CommandCommandField.tsx";
@@ -41,6 +42,7 @@ export const CreateCommandModal = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
+  const { t } = useTranslation();
   const projectId = useProjectStore((state) => state.projectInfo?.id);
 
   const form = useForm<FormSchemaType>({
@@ -72,12 +74,12 @@ export const CreateCommandModal = ({
           .split("\n")
           .filter((pattern) => pattern.trim() !== ""),
       });
-      toast.success("Command created successfully");
+      toast.success(t('toast.command.createSuccess'));
 
       setOpen(false);
       form.reset();
     } catch (e) {
-      toast.error(parseError(e, "Failed to create command"));
+      toast.error(parseError(e, t('toast.command.createFailed')));
     } finally {
       fetchCommands();
     }
@@ -97,7 +99,7 @@ export const CreateCommandModal = ({
           <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
             <DialogHeader className="flex flex-row items-center gap-6">
               <Terminal />
-              <DialogTitle>Create new command</DialogTitle>
+              <DialogTitle>{t('modal.createCommand.title')}</DialogTitle>
             </DialogHeader>
             <div className="my-4 space-y-2">
               <div className="space-y-6">
@@ -109,7 +111,7 @@ export const CreateCommandModal = ({
               </div>
               <Accordion type="single" collapsible>
                 <AccordionItem value="1">
-                  <AccordionTrigger>Advanced</AccordionTrigger>
+                  <AccordionTrigger>{t('common.advanced')}</AccordionTrigger>
                   <AccordionContent>
                     <CommandErrorPatternsField />
                   </AccordionContent>
@@ -119,10 +121,10 @@ export const CreateCommandModal = ({
             <DialogFooter>
               <DialogClose asChild>
                 <Button type="button" variant="outline">
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </DialogClose>
-              <Button type="submit">Create</Button>
+              <Button type="submit">{t('common.create')}</Button>
             </DialogFooter>
           </form>
         </Form>

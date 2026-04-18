@@ -157,6 +157,70 @@ When reporting bugs or requesting features:
 - Address feedback promptly
 - Ask questions if feedback is unclear
 
+## Adding a New Language
+
+The backend auto-discovers available languages by reading the `cmd/gomander/locales/` directory at build time — there is no hardcoded list of supported locales anywhere in the codebase. Adding a new language requires creating one JSON file and registering a display label. No other backend or frontend code needs to change.
+
+### Steps
+
+#### 1. Create the locale file
+
+Copy `cmd/gomander/locales/en.json` to `cmd/gomander/locales/<code>.json`, where `<code>` is a BCP-47 / ISO 639-1 language code (e.g. `fr`, `de`, `pt-BR`).
+
+```bash
+cp cmd/gomander/locales/en.json cmd/gomander/locales/fr.json
+```
+
+#### 2. Translate all values
+
+Open the new file and translate every **value** (the right-hand side of each key-value pair). Do not rename or remove any keys.
+
+Keep the following as-is:
+
+- **Placeholders** like `{{version}}` or `{{count}}` — they are replaced at runtime
+- **Plural suffixes** (`_one`, `_other`) — they must be present; some languages need additional forms (see the [i18next plurals guide](https://www.i18next.com/translation-function/plurals) for CLDR rules)
+- **Inline HTML tags** — one key (`userSettingsForm.envPathsHelpBody`) contains `<code>` tags used by the `<Trans>` component; preserve them
+
+Use `en.json` as the canonical reference.
+
+#### 3. Register the language label
+
+Add an entry to `cmd/gomander/frontend/src/constants/languages.ts`:
+
+```ts
+export const LANGUAGE_LABELS: Record<string, string> = {
+  en: 'English',
+  es: 'Español',
+  fr: 'Français', // add your language here
+};
+```
+
+The label must be the language's **native name** (as it appears in that language), because the selector shows it regardless of the active locale.
+
+#### 4. Rebuild the application
+
+The locale files are compiled into the binary via `go:embed`. A rebuild is required for the new file to be included:
+
+```bash
+# Development
+make dev
+
+# Production build
+make all
+```
+
+#### 5. Verify manually
+
+1. Open **Settings → Language** — your language should appear in the dropdown
+2. Switch to it and verify the full UI: main screens, modals, form validation error messages, and toast notifications
+3. Check that no strings appear empty (would indicate a missing key)
+
+### Commit format
+
+```
+feat(i18n): add <language name> translations
+```
+
 ## Getting Help
 
 - Check existing documentation and issues first

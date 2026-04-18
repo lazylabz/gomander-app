@@ -1,5 +1,6 @@
 import { ChevronDownIcon, Import, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -24,6 +25,7 @@ import { useProjectStore } from "@/store/projectStore.ts";
 import { deleteProject } from "@/useCases/project/deleteProject.ts";
 
 export const ProjectSelectionScreen = () => {
+  const { t } = useTranslation();
   const [projectIdBeingDeleted, setProjectIdBeingDeleted] = useState<
     string | null
   >(null);
@@ -62,7 +64,7 @@ export const ProjectSelectionScreen = () => {
       const projectToImport = await dataService.getProjectToImport();
       setProjectBeingImported(projectToImport);
     } catch (e) {
-      toast.error(parseError(e, "Failed to select project"));
+      toast.error(parseError(e, t('toast.project.selectFailed')));
     }
   };
 
@@ -72,7 +74,7 @@ export const ProjectSelectionScreen = () => {
         await dataService.getProjectToImportFromPackageJson();
       setProjectBeingImported(projectToImport);
     } catch (e) {
-      toast.error(parseError(e, "Failed to select project"));
+      toast.error(parseError(e, t('toast.project.selectFailed')));
     }
   };
 
@@ -108,7 +110,7 @@ export const ProjectSelectionScreen = () => {
       />
       <div className="w-full h-full flex flex-col items-center justify-center gap-10">
         <h1 className="text-3xl">
-          {hasProjects ? "Open project" : "Welcome to Gomander!"}
+          {hasProjects ? t('projectSelection.openTitle') : t('projectSelection.welcome')}
         </h1>
         {hasProjects && (
           <div className="flex flex-col items-center justify-center gap-2">
@@ -122,26 +124,26 @@ export const ProjectSelectionScreen = () => {
           </div>
         )}
         {!hasProjects && (
-          <p>You don't have projects yet. Create or import one.</p>
+          <p>{t('projectSelection.emptyState')}</p>
         )}
         <div className="flex flex-row items-center gap-2 justify-center">
           <Button onClick={openCreateProjectModal} variant="ghost">
-            <Plus /> Create a new project
+            <Plus /> {t('projectSelection.createButton')}
           </Button>
           <ButtonGroup>
             <Button variant="ghost" onClick={handleImportProject}>
               <Import />
-              Import an existing project
+              {t('projectSelection.importButton')}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="More Options">
+                <Button variant="ghost" size="icon" aria-label={t('projectSelection.moreOptions')}>
                   <ChevronDownIcon />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
                 <DropdownMenuItem onClick={handleImportProjectFromPackageJson}>
-                  From a package.json
+                  {t('projectSelection.importPackageJson')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

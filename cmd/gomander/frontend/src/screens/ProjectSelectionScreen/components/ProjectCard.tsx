@@ -1,4 +1,5 @@
 import { EllipsisVertical } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { dataService } from "@/contracts/service.ts";
@@ -21,6 +22,8 @@ export const ProjectCard = ({
   project: Project;
   handleDeleteProject: () => void;
 }) => {
+  const { t } = useTranslation();
+
   const handleOpenProject = (projectId: string) => async () => {
     await dataService.openProject(projectId);
     await loadAllProjectData();
@@ -42,7 +45,7 @@ export const ProjectCard = ({
         },
       );
     } catch (e) {
-      toast.error(parseError(e, "Failed to export the project"));
+      toast.error(parseError(e, t('toast.project.exportFailed')));
     }
   };
 
@@ -57,13 +60,13 @@ export const ProjectCard = ({
             className="cursor-pointer"
             onClick={handleDeleteProject}
           >
-            Delete
+            {t('common.delete')}
           </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer"
             onClick={handleExportProject}
           >
-            Export
+            {t('projectSelection.exportAction')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

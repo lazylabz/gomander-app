@@ -1,4 +1,5 @@
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import type { FormSchemaType } from "@/components/modals/Command/common/formSchema.ts";
 import {
@@ -12,6 +13,7 @@ import {
 import { Textarea } from "@/design-system/components/ui/textarea.tsx";
 
 export const CommandErrorPatternsField = () => {
+  const { t } = useTranslation();
   const form = useFormContext<FormSchemaType>();
 
   return (
@@ -20,10 +22,9 @@ export const CommandErrorPatternsField = () => {
       name="errorPatterns"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Error patterns</FormLabel>
+          <FormLabel>{t('commandForm.errorPatternsLabel')}</FormLabel>
           <FormDescription className="text-xs">
-            Patterns to identify error messages in the command output. Separate
-            multiple patterns with new lines.
+            {t('commandForm.errorPatternsDescription')}
           </FormDescription>
           <FormControl>
             <Textarea

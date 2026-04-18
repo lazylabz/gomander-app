@@ -1,4 +1,5 @@
 import { Download, ExternalLink, Heart } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { useVersionContext } from "@/contexts/version.tsx";
 import { externalBrowserService } from "@/contracts/service.ts";
@@ -22,6 +23,7 @@ export const AboutModal = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
+  const { t } = useTranslation();
   const { currentVersion, newVersion, openLatestReleasePage } =
     useVersionContext();
 
@@ -49,7 +51,7 @@ export const AboutModal = ({
           <h3 className="text-xl font-bold text-foreground">
             Gomander
             <span className="ml-2 font-normal text-sm text-muted-foreground">
-              v{currentVersion}
+              {t('aboutModal.version', { version: currentVersion })}
             </span>
           </h3>
         </div>
@@ -59,10 +61,10 @@ export const AboutModal = ({
             <div className="flex items-center">
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground mb-1">
-                  Version {newVersion} is available
+                  {t('aboutModal.newVersion', { version: newVersion })}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Get the latest features and improvements
+                  {t('aboutModal.newVersionSubtitle')}
                 </p>
               </div>
               <Button
@@ -71,15 +73,14 @@ export const AboutModal = ({
                 className="cursor-pointer"
               >
                 <Download className="size-4" />
-                Download Update
+                {t('aboutModal.downloadUpdate')}
               </Button>
             </div>
           </div>
         )}
         {/* Description */}
         <p className="text-sm text-muted-foreground leading-relaxed">
-          A simple GUI for managing and organizing your development commands.
-          Built to streamline your workflow and eliminate terminal chaos.
+          {t('aboutModal.description')}
         </p>
         {/* CTAs */}
         <div className={cn("flex gap-4", newVersion ? "flex-row" : "flex-col")}>
@@ -91,10 +92,10 @@ export const AboutModal = ({
             <GithubIcon className="size-5 text-foreground" />
             <div className="text-left">
               <div className="font-medium text-foreground text-sm">
-                Any feedback?
+                {t('aboutModal.feedbackTitle')}
               </div>
               <div className="text-xs text-muted-foreground">
-                Visit our GitHub repository
+                {t('aboutModal.feedbackSubtitle')}
               </div>
             </div>
             <ExternalLink className="size-4 text-muted-foreground group-hover:text-foreground transition-colors ml-auto" />
@@ -108,10 +109,10 @@ export const AboutModal = ({
             <Heart className="size-5 text-foreground" />
             <div className="text-left">
               <div className="font-medium text-foreground text-sm">
-                Meet the Team
+                {t('aboutModal.teamTitle')}
               </div>
               <div className="text-xs text-muted-foreground">
-                Learn more about LazyLabz
+                {t('aboutModal.teamSubtitle')}
               </div>
             </div>
             <ExternalLink className="size-4 text-muted-foreground group-hover:text-foreground transition-colors ml-auto" />

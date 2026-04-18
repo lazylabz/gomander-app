@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Group } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { CommandGroupCommandsField } from "@/components/modals/CommandGroup/common/CommandGroupCommandsField/CommandGroupCommandsField.tsx";
@@ -33,6 +34,7 @@ export const EditCommandGroupModal = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
+  const { t } = useTranslation();
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     values: {
@@ -57,9 +59,9 @@ export const EditCommandGroupModal = ({
 
       setOpen(false);
       form.reset();
-      toast.success("Command group updated successfully");
+      toast.success(t('toast.commandGroup.updateSuccess'));
     } catch (e) {
-      toast.error(parseError(e, "Failed to edit the command group"));
+      toast.error(parseError(e, t('toast.commandGroup.updateFailed')));
     } finally {
       fetchCommandGroups();
     }
@@ -79,7 +81,7 @@ export const EditCommandGroupModal = ({
           <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
             <DialogHeader className="flex flex-row items-center gap-2">
               <Group />
-              <DialogTitle>Edit command group</DialogTitle>
+              <DialogTitle>{t('modal.editCommandGroup.title')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-6 mt-4 mb-2">
               <CommandGroupNameField />
@@ -88,10 +90,10 @@ export const EditCommandGroupModal = ({
             <DialogFooter>
               <DialogClose asChild>
                 <Button type="button" variant="outline">
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </DialogClose>
-              <Button type="submit">Save</Button>
+              <Button type="submit">{t('common.save')}</Button>
             </DialogFooter>
           </form>
         </Form>

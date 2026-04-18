@@ -25,8 +25,8 @@ func TestDefaultGetTranslation_Execute(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 		assert.NotNil(t, translation)
-		assert.Equal(t, "Commands", translation.SidebarTitle)
-		assert.Equal(t, "Cancel", translation.ActionsCancel)
+		assert.Equal(t, "Commands", translation.SidebarCommandsTitle)
+		assert.Equal(t, "Cancel", translation.CommonCancel)
 	})
 
 	t.Run("Should return error for non-existent locale", func(t *testing.T) {

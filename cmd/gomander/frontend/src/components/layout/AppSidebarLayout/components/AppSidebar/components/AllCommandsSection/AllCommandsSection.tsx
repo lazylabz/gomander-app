@@ -59,7 +59,7 @@ export const AllCommandsSection = () => {
     try {
       await reorderCommands(newOrder);
     } catch (e) {
-      toast.error(parseError(e, "Failed to reorder commands"));
+      toast.error(parseError(e, t('toast.command.reorderFailed')));
     } finally {
       fetchCommands();
     }
@@ -81,7 +81,7 @@ export const AllCommandsSection = () => {
       (command) => command.id === over.id.toString(),
     );
     if (oldIndex === -1 || newIndex === -1) {
-      toast.error("Invalid drag operation: command not found");
+      toast.error(t('toast.command.invalidDrag'));
       return;
     }
 
@@ -116,7 +116,7 @@ export const AllCommandsSection = () => {
             </ContextMenuTrigger>
             <ContextMenuContent>
               <ContextMenuItem onClick={openCreateCommandModal}>
-                Add command
+                {t('sidebar.commands.add')}
               </ContextMenuItem>
             </ContextMenuContent>
           </ContextMenu>

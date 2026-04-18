@@ -1,3 +1,5 @@
+import { Trans, useTranslation } from "react-i18next";
+
 import {
   HoverCard,
   HoverCardContent,
@@ -5,6 +7,8 @@ import {
 } from "@/design-system/components/ui/hover-card.tsx";
 
 export const EnvironmentPathsInfoDialog = () => {
+  const { t } = useTranslation();
+
   return (
     <HoverCard openDelay={100}>
       <HoverCardTrigger className="text-xs self-center cursor-help text-muted-foreground hover:text-foreground border rounded-full size-4 flex items-center justify-center">
@@ -15,13 +19,13 @@ export const EnvironmentPathsInfoDialog = () => {
         className="w-100 text-sm flex flex-col gap-2 [&>p>code]:bg-accent"
       >
         <p>
-          You may need to set this when working with version managers like{" "}
-          <code>nvm</code> and <code>pyenv</code> or when your path is modified
-          by files as <code>.bashrc</code>, <code>.zshrc</code>, or{" "}
-          <code>.profile</code>.
+          <Trans
+            i18nKey="userSettingsForm.envPathsHelpBody"
+            components={{ code: <code /> }}
+          />
         </p>
         <p className="text-xs">
-          e.g. <code>/path/to/.nvm/versions/node/&lt;version&gt;/bin/</code>
+          {t('userSettingsForm.envPathsHelpExample')}
         </p>
       </HoverCardContent>
     </HoverCard>

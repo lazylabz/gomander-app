@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { helpersService } from "@/contracts/service.ts";
@@ -9,6 +10,8 @@ export const ProjectExportSuccessToast = ({
   exportFilePath: string;
   toastId: string;
 }) => {
+  const { t } = useTranslation();
+
   const handleOpenExportPath = async () => {
     await helpersService.openFileFolder(exportFilePath);
 
@@ -17,9 +20,9 @@ export const ProjectExportSuccessToast = ({
 
   return (
     <div className="flex flex-col gap-2 items-start">
-      <p>Project exported successfully</p>
+      <p>{t('toast.project.exportSuccess')}</p>
       <button className="underline" onClick={handleOpenExportPath}>
-        Open containing folder
+        {t('toast.project.openFolderAction')}
       </button>
     </div>
   );

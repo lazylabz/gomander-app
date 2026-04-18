@@ -1,4 +1,5 @@
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { FSInput } from "@/components/inputs/FSInput.tsx";
 import type { FormSchemaType } from "@/components/modals/Command/common/formSchema.ts";
@@ -11,6 +12,7 @@ import {
 } from "@/design-system/components/ui/form.tsx";
 
 export const CommandWorkingDirectoryField = () => {
+  const { t } = useTranslation();
   const form = useFormContext<FormSchemaType>();
 
   return (
@@ -19,7 +21,7 @@ export const CommandWorkingDirectoryField = () => {
       name="workingDirectory"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Working Directory</FormLabel>
+          <FormLabel>{t('commandForm.workingDirectoryLabel')}</FormLabel>
           <FormControl>
             <FSInput
               autoComplete="off"

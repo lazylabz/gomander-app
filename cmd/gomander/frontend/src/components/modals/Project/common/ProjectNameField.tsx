@@ -1,4 +1,5 @@
 import { type Path, useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import {
   FormControl,
@@ -10,6 +11,7 @@ import {
 import { Input } from "@/design-system/components/ui/input.tsx";
 
 export const ProjectNameField = <T extends { name: string }>() => {
+  const { t } = useTranslation();
   const form = useFormContext<T>();
 
   const name = "name" satisfies keyof T as Path<T>;
@@ -20,7 +22,7 @@ export const ProjectNameField = <T extends { name: string }>() => {
       name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Name</FormLabel>
+          <FormLabel>{t('projectForm.nameLabel')}</FormLabel>
           <FormControl>
             <Input
               autoComplete="off"

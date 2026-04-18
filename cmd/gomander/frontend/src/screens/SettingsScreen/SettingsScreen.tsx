@@ -1,4 +1,5 @@
 import { ArrowLeft, PanelsTopLeft, Settings, User } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
 import { Button } from "@/design-system/components/ui/button";
@@ -17,6 +18,7 @@ import { ProjectSettings } from "@/screens/SettingsScreen/tabs/ProjectSettings/P
 import { UserSettings } from "@/screens/SettingsScreen/tabs/UserSettings/UserSettings.tsx";
 
 export const SettingsScreen = () => {
+  const { t } = useTranslation();
   const { initialTab } = useSettingsContext();
 
   const navigate = useNavigate();
@@ -39,7 +41,7 @@ export const SettingsScreen = () => {
         <div className="flex items-center space-x-6">
           <div className="flex items-center space-x-2">
             <Settings className="h-6 w-6" />
-            <h1 className="text-2xl font-bold">Settings</h1>
+            <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
           </div>
           <SavingStateIndicator />
         </div>
@@ -51,14 +53,14 @@ export const SettingsScreen = () => {
             className="flex items-center space-x-2 cursor-pointer"
           >
             <User className="h-4 w-4" />
-            <span>User Settings</span>
+            <span>{t('settings.tabs.user')}</span>
           </TabsTrigger>
           <TabsTrigger
             value={SettingsTab.Project}
             className="flex items-center space-x-2 cursor-pointer"
           >
             <PanelsTopLeft className="h-4 w-4" />
-            <span>Project Settings</span>
+            <span>{t('settings.tabs.project')}</span>
           </TabsTrigger>
         </TabsList>
         <TabsContent value={SettingsTab.User}>

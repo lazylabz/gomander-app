@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SetStateAction } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { BaseWorkingDirectoryField } from "@/components/modals/Project/common/BaseWorkingDirectoryField.tsx";
 import {
@@ -27,6 +28,7 @@ export const CreateProjectModal = ({
   setOpen: React.Dispatch<SetStateAction<boolean>>;
   onSuccess: () => Promise<void>;
 }) => {
+  const { t } = useTranslation();
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,7 +59,7 @@ export const CreateProjectModal = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create project</DialogTitle>
+          <DialogTitle>{t('modal.createProject.title')}</DialogTitle>
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -66,7 +68,7 @@ export const CreateProjectModal = ({
               <ProjectNameField<FormSchemaType> />
               <BaseWorkingDirectoryField<FormSchemaType> />
               <Button className="self-end" type="submit">
-                Save
+                {t('common.save')}
               </Button>
             </form>
           </Form>

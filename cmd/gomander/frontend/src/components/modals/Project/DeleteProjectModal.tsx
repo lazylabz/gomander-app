@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +20,8 @@ export const DeleteProjectModal = ({
   onConfirm: () => Promise<void>;
   onClose: () => void;
 }) => {
+  const { t } = useTranslation();
+
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       onClose();
@@ -28,15 +32,14 @@ export const DeleteProjectModal = ({
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>{t('modal.deleteProject.title')}</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            project and remove the data from your computer.
+            {t('modal.deleteProject.description')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onClose}>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>Continue</AlertDialogAction>
+          <AlertDialogCancel onClick={onClose}>{t('common.cancel')}</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>{t('common.delete')}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

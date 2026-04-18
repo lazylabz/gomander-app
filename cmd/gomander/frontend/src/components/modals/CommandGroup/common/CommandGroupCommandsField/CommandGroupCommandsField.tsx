@@ -15,6 +15,7 @@ import {
 import { ChevronRight, X } from "lucide-react";
 import { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import {
   ADDED_COMMANDS,
@@ -33,6 +34,7 @@ import { isDefined } from "@/helpers/mapHelpers.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 
 export const CommandGroupCommandsField = () => {
+  const { t } = useTranslation();
   const allCommands = useCommandStore((state) => state.commands);
   const form = useFormContext<FormSchemaType>();
 
@@ -212,8 +214,7 @@ export const CommandGroupCommandsField = () => {
             </div>
           </DndContext>
           <FormDescription className="text-xs mt-1">
-            Drag commands from left to right to add them, and reorder them as
-            needed
+            {t('commandGroupForm.commandsDescription')}
           </FormDescription>
 
           <FormMessage />

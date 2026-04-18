@@ -2,6 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Folder, FolderOpen, Play, Square } from "lucide-react";
 import { type SyntheticEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
@@ -39,6 +40,7 @@ export const CommandGroupSection = ({
   startEditingCommandGroup: (commandGroup: CommandGroup) => void;
   isReorderingGroups: boolean;
 }) => {
+  const { t } = useTranslation();
   const commandsStatus = useCommandStore((state) => state.commandsStatus);
 
   const [internalIsOpen, setInternalIsOpen] = useLocalStorageState(
@@ -75,7 +77,7 @@ export const CommandGroupSection = ({
     try {
       await runCommandGroup(commandGroup.id);
     } catch (e) {
-      toast.error(parseError(e, "Failed to run command group"));
+      toast.error(parseError(e, t('toast.commandGroup.runFailed')));
     }
   };
 
@@ -87,7 +89,7 @@ export const CommandGroupSection = ({
     try {
       await stopCommandGroup(commandGroup.id);
     } catch (e) {
-      toast.error(parseError(e, "Failed to stop command group"));
+      toast.error(parseError(e, t('toast.commandGroup.stopFailed')));
     }
   };
 
@@ -95,9 +97,9 @@ export const CommandGroupSection = ({
     if (isReorderingGroups) return;
     try {
       await deleteCommandGroup(commandGroup.id);
-      toast.success("Command group deleted successfully");
+      toast.success(t('toast.commandGroup.deleteSuccess'));
     } catch (e) {
-      toast.error(parseError(e, "Failed to delete command group"));
+      toast.error(parseError(e, t('toast.commandGroup.deleteFailed')));
     } finally {
       fetchCommandGroups();
     }
@@ -168,8 +170,8 @@ export const CommandGroupSection = ({
           </SidebarGroupLabel>
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuItem onClick={handleEdit}>Edit</ContextMenuItem>
-          <ContextMenuItem onClick={handleDelete}>Delete</ContextMenuItem>
+          <ContextMenuItem onClick={handleEdit}>{t('common.edit')}</ContextMenuItem>
+          <ContextMenuItem onClick={handleDelete}>{t('common.delete')}</ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
       {isOpen && (
