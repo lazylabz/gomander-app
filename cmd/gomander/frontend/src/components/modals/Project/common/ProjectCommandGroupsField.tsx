@@ -5,115 +5,117 @@ import type { FormSchemaType } from "@/components/modals/Project/common/importAn
 import type { ProjectExport } from "@/contracts/types.ts";
 import { Checkbox } from "@/design-system/components/ui/checkbox.tsx";
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
 } from "@/design-system/components/ui/form.tsx";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
 } from "@/design-system/components/ui/tooltip.tsx";
 
 export const ProjectCommandGroupsField = ({
-  commandGroups,
-  selectedCommandIds,
-  commands,
+	commandGroups,
+	selectedCommandIds,
+	commands,
 }: {
-  commandGroups: ProjectExport["commandGroups"];
-  selectedCommandIds: string[];
-  commands: ProjectExport["commands"];
+	commandGroups: ProjectExport["commandGroups"];
+	selectedCommandIds: string[];
+	commands: ProjectExport["commands"];
 }) => {
-  const { t } = useTranslation();
-  const form = useFormContext<FormSchemaType>();
+	const { t } = useTranslation();
+	const form = useFormContext<FormSchemaType>();
 
-  return (
-    <FormItem className="flex-1">
-      <FormLabel className="mb-1">{t('projectForm.commandGroupsLabel')}</FormLabel>
-      <div className="max-h-[300px] flex flex-col gap-2 overflow-y-auto pr-2">
-        {commandGroups.map((commandGroup) => {
-          return (
-            <FormField
-              key={commandGroup.id}
-              control={form.control}
-              name="commandGroups"
-              render={({ field }) => {
-                const disabled = !commandGroup.commandIds.some((id) =>
-                  selectedCommandIds.includes(id),
-                );
+	return (
+		<FormItem className="flex-1">
+			<FormLabel className="mb-1">
+				{t("projectForm.commandGroupsLabel")}
+			</FormLabel>
+			<div className="max-h-[300px] flex flex-col gap-2 overflow-y-auto pr-2">
+				{commandGroups.map((commandGroup) => {
+					return (
+						<FormField
+							key={commandGroup.id}
+							control={form.control}
+							name="commandGroups"
+							render={({ field }) => {
+								const disabled = !commandGroup.commandIds.some((id) =>
+									selectedCommandIds.includes(id),
+								);
 
-                return (
-                  <div>
-                    <FormItem
-                      key={commandGroup.id}
-                      className="flex flex-row items-center gap-2"
-                    >
-                      <FormControl>
-                        <Checkbox
-                          disabled={disabled}
-                          checked={field.value?.includes(commandGroup.id)}
-                          onCheckedChange={(checked) => {
-                            return checked
-                              ? field.onChange([
-                                  ...field.value,
-                                  commandGroup.id,
-                                ])
-                              : field.onChange(
-                                  field.value?.filter(
-                                    (value) => value !== commandGroup.id,
-                                  ),
-                                );
-                          }}
-                        />
-                      </FormControl>
+								return (
+									<div>
+										<FormItem
+											key={commandGroup.id}
+											className="flex flex-row items-center gap-2"
+										>
+											<FormControl>
+												<Checkbox
+													disabled={disabled}
+													checked={field.value?.includes(commandGroup.id)}
+													onCheckedChange={(checked) => {
+														return checked
+															? field.onChange([
+																	...field.value,
+																	commandGroup.id,
+																])
+															: field.onChange(
+																	field.value?.filter(
+																		(value) => value !== commandGroup.id,
+																	),
+																);
+													}}
+												/>
+											</FormControl>
 
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <FormLabel
-                            title={commandGroup.name}
-                            className="text-sm font-normal truncate"
-                          >
-                            {commandGroup.name}
-                          </FormLabel>
-                        </TooltipTrigger>
-                        {disabled && (
-                          <TooltipContent>
-                            {t('projectForm.commandGroupsDisabledTooltip')}
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
-                    </FormItem>
-                    <ul className="mb-2 text-start">
-                      {commandGroup.commandIds.map((commandId) => {
-                        const command = commands.find(
-                          (c) => c.id === commandId,
-                        ) || { name: t('projectForm.deletedCommand') };
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<FormLabel
+														title={commandGroup.name}
+														className="text-sm font-normal truncate"
+													>
+														{commandGroup.name}
+													</FormLabel>
+												</TooltipTrigger>
+												{disabled && (
+													<TooltipContent>
+														{t("projectForm.commandGroupsDisabledTooltip")}
+													</TooltipContent>
+												)}
+											</Tooltip>
+										</FormItem>
+										<ul className="mb-2 text-start">
+											{commandGroup.commandIds.map((commandId) => {
+												const command = commands.find(
+													(c) => c.id === commandId,
+												) || { name: t("projectForm.deletedCommand") };
 
-                        const isSelected =
-                          selectedCommandIds.includes(commandId);
+												const isSelected =
+													selectedCommandIds.includes(commandId);
 
-                        return (
-                          <li
-                            key={commandId}
-                            className={`text-xs ml-6 text-muted-foreground ${
-                              isSelected
-                                ? "font-medium"
-                                : "opacity-75 line-through"
-                            }`}
-                          >
-                            {command.name}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                );
-              }}
-            />
-          );
-        })}
-      </div>
-    </FormItem>
-  );
+												return (
+													<li
+														key={commandId}
+														className={`text-xs ml-6 text-muted-foreground ${
+															isSelected
+																? "font-medium"
+																: "opacity-75 line-through"
+														}`}
+													>
+														{command.name}
+													</li>
+												);
+											})}
+										</ul>
+									</div>
+								);
+							}}
+						/>
+					);
+				})}
+			</div>
+		</FormItem>
+	);
 };

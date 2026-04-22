@@ -11,23 +11,23 @@ import { CommandLinkField } from "@/components/modals/Command/common/CommandLink
 import { CommandNameField } from "@/components/modals/Command/common/CommandNameField.tsx";
 import { CommandWorkingDirectoryField } from "@/components/modals/Command/common/CommandWorkingDirectoryField.tsx";
 import {
-  formSchema,
-  type FormSchemaType,
+	type FormSchemaType,
+	formSchema,
 } from "@/components/modals/Command/common/formSchema.ts";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
 } from "@/design-system/components/ui/accordion.tsx";
 import { Button } from "@/design-system/components/ui/button.tsx";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
 } from "@/design-system/components/ui/dialog.tsx";
 import { Form } from "@/design-system/components/ui/form.tsx";
 import { parseError } from "@/helpers/errorHelpers.ts";
@@ -36,101 +36,101 @@ import { useProjectStore } from "@/store/projectStore.ts";
 import { createCommand } from "@/useCases/command/createCommand.ts";
 
 export const CreateCommandModal = ({
-  open,
-  setOpen,
+	open,
+	setOpen,
 }: {
-  open: boolean;
-  setOpen: (open: boolean) => void;
+	open: boolean;
+	setOpen: (open: boolean) => void;
 }) => {
-  const { t } = useTranslation();
-  const projectId = useProjectStore((state) => state.projectInfo?.id);
+	const { t } = useTranslation();
+	const projectId = useProjectStore((state) => state.projectInfo?.id);
 
-  const form = useForm<FormSchemaType>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      command: "",
-      workingDirectory: "",
-      link: "",
-      errorPatterns: "",
-    },
-  });
+	const form = useForm<FormSchemaType>({
+		resolver: zodResolver(formSchema),
+		defaultValues: {
+			name: "",
+			command: "",
+			workingDirectory: "",
+			link: "",
+			errorPatterns: "",
+		},
+	});
 
-  const onSubmit = async (values: FormSchemaType) => {
-    if (!projectId) {
-      return;
-    }
+	const onSubmit = async (values: FormSchemaType) => {
+		if (!projectId) {
+			return;
+		}
 
-    try {
-      await createCommand({
-        id: crypto.randomUUID(),
-        projectId: projectId,
-        name: values.name,
-        command: values.command,
-        workingDirectory: values.workingDirectory,
-        position: 0, // Will be set by the backend
-        link: values.link,
-        errorPatterns: values.errorPatterns
-          .split("\n")
-          .filter((pattern) => pattern.trim() !== ""),
-      });
-      toast.success(t('toast.command.createSuccess'));
+		try {
+			await createCommand({
+				id: crypto.randomUUID(),
+				projectId: projectId,
+				name: values.name,
+				command: values.command,
+				workingDirectory: values.workingDirectory,
+				position: 0, // Will be set by the backend
+				link: values.link,
+				errorPatterns: values.errorPatterns
+					.split("\n")
+					.filter((pattern) => pattern.trim() !== ""),
+			});
+			toast.success(t("toast.command.createSuccess"));
 
-      setOpen(false);
-      form.reset();
-    } catch (e) {
-      toast.error(parseError(e, t('toast.command.createFailed')));
-    } finally {
-      fetchCommands();
-    }
-  };
+			setOpen(false);
+			form.reset();
+		} catch (e) {
+			toast.error(parseError(e, t("toast.command.createFailed")));
+		} finally {
+			fetchCommands();
+		}
+	};
 
-  const onOpenChange = (open: boolean) => {
-    setOpen(open);
-    if (!open) {
-      form.reset();
-    }
-  };
+	const onOpenChange = (open: boolean) => {
+		setOpen(open);
+		if (!open) {
+			form.reset();
+		}
+	};
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[628px]">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
-            <DialogHeader className="flex flex-row items-center gap-6">
-              <Terminal />
-              <DialogTitle>{t('modal.createCommand.title')}</DialogTitle>
-            </DialogHeader>
-            <div className="my-4 space-y-2">
-              <div className="space-y-6">
-                <CommandNameField />
-                <CommandCommandField />
-                <CommandWorkingDirectoryField />
-                <CommandComputedPath />
-              </div>
-              <Accordion type="single" collapsible>
-                <AccordionItem value="1">
-                  <AccordionTrigger>{t('common.advanced')}</AccordionTrigger>
-                  <AccordionContent>
-                    <div className="space-y-6">
-                      <CommandLinkField />
-                      <CommandErrorPatternsField />
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="outline">
-                  {t('common.cancel')}
-                </Button>
-              </DialogClose>
-              <Button type="submit">{t('common.create')}</Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
-  );
+	return (
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			<DialogContent className="sm:max-w-[628px]">
+				<Form {...form}>
+					<form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+						<DialogHeader className="flex flex-row items-center gap-6">
+							<Terminal />
+							<DialogTitle>{t("modal.createCommand.title")}</DialogTitle>
+						</DialogHeader>
+						<div className="my-4 space-y-2">
+							<div className="space-y-6">
+								<CommandNameField />
+								<CommandCommandField />
+								<CommandWorkingDirectoryField />
+								<CommandComputedPath />
+							</div>
+							<Accordion type="single" collapsible>
+								<AccordionItem value="1">
+									<AccordionTrigger>{t("common.advanced")}</AccordionTrigger>
+									<AccordionContent>
+										<div className="space-y-6">
+											<CommandLinkField />
+											<CommandErrorPatternsField />
+										</div>
+									</AccordionContent>
+								</AccordionItem>
+							</Accordion>
+						</div>
+						<DialogFooter>
+							<DialogClose asChild>
+								<Button type="button" variant="outline">
+									{t("common.cancel")}
+								</Button>
+							</DialogClose>
+							<Button type="submit">{t("common.create")}</Button>
+						</DialogFooter>
+					</form>
+				</Form>
+			</DialogContent>
+		</Dialog>
+	);
 };

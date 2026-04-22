@@ -19,61 +19,61 @@ import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 import { LogsScreen } from "./screens/LogsScreen/LogsScreen.tsx";
 
 function App() {
-  const projectIsLoaded = useProjectStore((state) => state.isLoaded);
-  const userConfigIsLoaded = useUserConfigurationStore(
-    (state) => state.isLoaded,
-  );
+	const projectIsLoaded = useProjectStore((state) => state.isLoaded);
+	const userConfigIsLoaded = useUserConfigurationStore(
+		(state) => state.isLoaded,
+	);
 
-  const [i18nReady, setI18nReady] = useState(false);
+	const [i18nReady, setI18nReady] = useState(false);
 
-  const initialFetchesAreDone = projectIsLoaded && userConfigIsLoaded;
+	const initialFetchesAreDone = projectIsLoaded && userConfigIsLoaded;
 
-  useEffect(() => {
-    const initializeApp = async () => {
-      await initI18n();
-      setI18nReady(true);
-      loadAllProjectData();
-      fetchUserConfig();
-    };
+	useEffect(() => {
+		const initializeApp = async () => {
+			await initI18n();
+			setI18nReady(true);
+			loadAllProjectData();
+			fetchUserConfig();
+		};
 
-    initializeApp();
-  }, []);
+		initializeApp();
+	}, []);
 
-  if (!i18nReady || !initialFetchesAreDone) {
-    return null;
-  }
+	if (!i18nReady || !initialFetchesAreDone) {
+		return null;
+	}
 
-  return (
-    <VersionProvider>
-      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-        <EventListenersContainer />
-        <Toaster richColors position="top-right" />
-        <Routes>
-          <Route
-            path={ScreenRoutes.ProjectSelection}
-            element={<ProjectSelectionScreen />}
-          />
-          <Route
-            path={ScreenRoutes.Logs}
-            element={
-              <AppSidebarLayout>
-                <LogsScreen />
-              </AppSidebarLayout>
-            }
-          />
+	return (
+		<VersionProvider>
+			<ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+				<EventListenersContainer />
+				<Toaster richColors position="top-right" />
+				<Routes>
+					<Route
+						path={ScreenRoutes.ProjectSelection}
+						element={<ProjectSelectionScreen />}
+					/>
+					<Route
+						path={ScreenRoutes.Logs}
+						element={
+							<AppSidebarLayout>
+								<LogsScreen />
+							</AppSidebarLayout>
+						}
+					/>
 
-          <Route
-            path={ScreenRoutes.Settings}
-            element={
-              <SettingsContextProvider>
-                <SettingsScreen />
-              </SettingsContextProvider>
-            }
-          />
-        </Routes>
-      </ThemeProvider>
-    </VersionProvider>
-  );
+					<Route
+						path={ScreenRoutes.Settings}
+						element={
+							<SettingsContextProvider>
+								<SettingsScreen />
+							</SettingsContextProvider>
+						}
+					/>
+				</Routes>
+			</ThemeProvider>
+		</VersionProvider>
+	);
 }
 
 export default App;

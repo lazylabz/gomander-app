@@ -7,17 +7,17 @@ import { toast } from "sonner";
 import { CommandGroupCommandsField } from "@/components/modals/CommandGroup/common/CommandGroupCommandsField/CommandGroupCommandsField.tsx";
 import { CommandGroupNameField } from "@/components/modals/CommandGroup/common/CommandGroupNameField.tsx";
 import {
-  formSchema,
-  type FormSchemaType,
+	type FormSchemaType,
+	formSchema,
 } from "@/components/modals/CommandGroup/common/formSchema.ts";
 import { Button } from "@/design-system/components/ui/button.tsx";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
 } from "@/design-system/components/ui/dialog.tsx";
 import { Form } from "@/design-system/components/ui/form.tsx";
 import { parseError } from "@/helpers/errorHelpers.ts";
@@ -26,78 +26,78 @@ import { useProjectStore } from "@/store/projectStore.ts";
 import { createCommandGroup } from "@/useCases/commandGroup/createCommandGroup.ts";
 
 export const CreateCommandGroupModal = ({
-  open,
-  setOpen,
+	open,
+	setOpen,
 }: {
-  open: boolean;
-  setOpen: (open: boolean) => void;
+	open: boolean;
+	setOpen: (open: boolean) => void;
 }) => {
-  const { t } = useTranslation();
-  const projectId = useProjectStore((state) => state.projectInfo?.id);
+	const { t } = useTranslation();
+	const projectId = useProjectStore((state) => state.projectInfo?.id);
 
-  const form = useForm<FormSchemaType>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      commands: [],
-    },
-  });
+	const form = useForm<FormSchemaType>({
+		resolver: zodResolver(formSchema),
+		defaultValues: {
+			name: "",
+			commands: [],
+		},
+	});
 
-  const onSubmit = async (values: FormSchemaType) => {
-    if (!projectId) {
-      return;
-    }
+	const onSubmit = async (values: FormSchemaType) => {
+		if (!projectId) {
+			return;
+		}
 
-    try {
-      await createCommandGroup({
-        id: crypto.randomUUID(),
-        projectId: projectId,
-        name: values.name,
-        commands: values.commands,
-        position: 0, // Will be set by the backend
-      });
-      toast.success(t('toast.commandGroup.createSuccess'));
-    } catch (e) {
-      toast.error(parseError(e, t('toast.commandGroup.createFailed')));
-    } finally {
-      fetchCommandGroups();
-    }
+		try {
+			await createCommandGroup({
+				id: crypto.randomUUID(),
+				projectId: projectId,
+				name: values.name,
+				commands: values.commands,
+				position: 0, // Will be set by the backend
+			});
+			toast.success(t("toast.commandGroup.createSuccess"));
+		} catch (e) {
+			toast.error(parseError(e, t("toast.commandGroup.createFailed")));
+		} finally {
+			fetchCommandGroups();
+		}
 
-    setOpen(false);
-    form.reset();
-  };
+		setOpen(false);
+		form.reset();
+	};
 
-  const onOpenChange = (open: boolean) => {
-    setOpen(open);
-    if (!open) {
-      form.reset();
-    }
-  };
+	const onOpenChange = (open: boolean) => {
+		setOpen(open);
+		if (!open) {
+			form.reset();
+		}
+	};
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[628px] lg:max-w-3xl">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
-            <DialogHeader className="flex flex-row items-center gap-2">
-              <Group />
-              <DialogTitle>{t('modal.createCommandGroup.title')}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-6 mt-4 mb-2">
-              <CommandGroupNameField />
-              <CommandGroupCommandsField />
-            </div>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="outline">
-                  {t('common.cancel')}
-                </Button>
-              </DialogClose>
-              <Button type="submit">{t('common.create')}</Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
-  );
+	return (
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			<DialogContent className="sm:max-w-[628px] lg:max-w-3xl">
+				<Form {...form}>
+					<form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+						<DialogHeader className="flex flex-row items-center gap-2">
+							<Group />
+							<DialogTitle>{t("modal.createCommandGroup.title")}</DialogTitle>
+						</DialogHeader>
+						<div className="space-y-6 mt-4 mb-2">
+							<CommandGroupNameField />
+							<CommandGroupCommandsField />
+						</div>
+						<DialogFooter>
+							<DialogClose asChild>
+								<Button type="button" variant="outline">
+									{t("common.cancel")}
+								</Button>
+							</DialogClose>
+							<Button type="submit">{t("common.create")}</Button>
+						</DialogFooter>
+					</form>
+				</Form>
+			</DialogContent>
+		</Dialog>
+	);
 };

@@ -1,4 +1,4 @@
 export enum CommandStatus {
-  IDLE,
-  RUNNING,
+	IDLE,
+	RUNNING,
 }

@@ -6,12 +6,13 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"includes": ["**", "!!**/dist"]
+		"includes": ["**", "!!**/dist", "!!**/wailsjs", "!!**/design-system"]
 	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab"
 	},
+	"css": { "parser": { "tailwindDirectives": true } },
 	"linter": {
 		"enabled": true,
 		"rules": {

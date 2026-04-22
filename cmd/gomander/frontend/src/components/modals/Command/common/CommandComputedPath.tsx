@@ -7,27 +7,27 @@ import { helpersService } from "@/contracts/service.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
 
 export const CommandComputedPath = () => {
-  const { t } = useTranslation();
-  const projectBaseWorkingDirectory =
-    useProjectStore((state) => state.projectInfo?.workingDirectory) || "";
-  const [computedPath, setComputedPath] = useState(
-    projectBaseWorkingDirectory || "",
-  );
+	const { t } = useTranslation();
+	const projectBaseWorkingDirectory =
+		useProjectStore((state) => state.projectInfo?.workingDirectory) || "";
+	const [computedPath, setComputedPath] = useState(
+		projectBaseWorkingDirectory || "",
+	);
 
-  const form = useFormContext<FormSchemaType>();
+	const form = useFormContext<FormSchemaType>();
 
-  const workingDirectoryWatcher = form.watch("workingDirectory");
-  useEffect(() => {
-    helpersService
-      .getComputedPath(projectBaseWorkingDirectory, workingDirectoryWatcher)
-      .then((cp) => {
-        setComputedPath(cp);
-      });
-  }, [projectBaseWorkingDirectory, workingDirectoryWatcher]);
+	const workingDirectoryWatcher = form.watch("workingDirectory");
+	useEffect(() => {
+		helpersService
+			.getComputedPath(projectBaseWorkingDirectory, workingDirectoryWatcher)
+			.then((cp) => {
+				setComputedPath(cp);
+			});
+	}, [projectBaseWorkingDirectory, workingDirectoryWatcher]);
 
-  return (
-    <p className="-mt-4 text-xs text-muted-foreground">
-      {t('commandForm.computedPath', { path: computedPath })}
-    </p>
-  );
+	return (
+		<p className="-mt-4 text-xs text-muted-foreground">
+			{t("commandForm.computedPath", { path: computedPath })}
+		</p>
+	);
 };

@@ -4,26 +4,30 @@ import { toast } from "sonner";
 import { helpersService } from "@/contracts/service.ts";
 
 export const ProjectExportSuccessToast = ({
-  exportFilePath,
-  toastId,
+	exportFilePath,
+	toastId,
 }: {
-  exportFilePath: string;
-  toastId: string;
+	exportFilePath: string;
+	toastId: string;
 }) => {
-  const { t } = useTranslation();
+	const { t } = useTranslation();
 
-  const handleOpenExportPath = async () => {
-    await helpersService.openFileFolder(exportFilePath);
+	const handleOpenExportPath = async () => {
+		await helpersService.openFileFolder(exportFilePath);
 
-    toast.dismiss(toastId);
-  };
+		toast.dismiss(toastId);
+	};
 
-  return (
-    <div className="flex flex-col gap-2 items-start">
-      <p>{t('toast.project.exportSuccess')}</p>
-      <button className="underline" onClick={handleOpenExportPath}>
-        {t('toast.project.openFolderAction')}
-      </button>
-    </div>
-  );
+	return (
+		<div className="flex flex-col gap-2 items-start">
+			<p>{t("toast.project.exportSuccess")}</p>
+			<button
+				type="button"
+				className="underline"
+				onClick={handleOpenExportPath}
+			>
+				{t("toast.project.openFolderAction")}
+			</button>
+		</div>
+	);
 };

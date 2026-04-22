@@ -10,35 +10,37 @@ import { userConfigurationStore } from "@/store/userConfigurationStore.ts";
 import { saveUserConfig } from "@/useCases/userConfig/saveUserConfig.ts";
 
 const changeLanguage = async (lang: string) => {
-  const i18nInstance = getI18n();
+	const i18nInstance = getI18n();
 
-  if (i18nInstance.language === lang) {
-    return;
-  }
+	if (i18nInstance.language === lang) {
+		return;
+	}
 
-  if (!i18nInstance.hasResourceBundle(lang, "translation")) {
-    const translations = await translationsService.getTranslation(lang);
-    i18nInstance.addResourceBundle(lang, "translation", translations);
-  }
+	if (!i18nInstance.hasResourceBundle(lang, "translation")) {
+		const translations = await translationsService.getTranslation(lang);
+		i18nInstance.addResourceBundle(lang, "translation", translations);
+	}
 
-  await i18nInstance.changeLanguage(lang);
+	await i18nInstance.changeLanguage(lang);
 };
 
-export const saveUserSettingsForm = async (formData: UserSettingsSchemaType) => {
-  const { userConfig } = userConfigurationStore.getState();
+export const saveUserSettingsForm = async (
+	formData: UserSettingsSchemaType,
+) => {
+	const { userConfig } = userConfigurationStore.getState();
 
-  try {
-    await changeLanguage(formData.locale);
-    await saveUserConfig({
-      lastOpenedProjectId: userConfig.lastOpenedProjectId,
-      environmentPaths: formData.environmentPaths,
-      logLineLimit: formData.logLineLimit,
-      locale: formData.locale,
-    });
-    toast.success(i18n.t('toast.settings.userSaveSuccess'));
-  } catch (e) {
-    toast.error(parseError(e, i18n.t('toast.settings.userSaveFailed')));
-  }
+	try {
+		await changeLanguage(formData.locale);
+		await saveUserConfig({
+			lastOpenedProjectId: userConfig.lastOpenedProjectId,
+			environmentPaths: formData.environmentPaths,
+			logLineLimit: formData.logLineLimit,
+			locale: formData.locale,
+		});
+		toast.success(i18n.t("toast.settings.userSaveSuccess"));
+	} catch (e) {
+		toast.error(parseError(e, i18n.t("toast.settings.userSaveFailed")));
+	}
 
-  await fetchUserConfig();
+	await fetchUserConfig();
 };
