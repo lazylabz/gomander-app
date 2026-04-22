@@ -20,7 +20,7 @@ export const ProjectSettings = () => {
 
 	return (
 		<Form {...projectSettingsForm}>
-			<form className="w-full h-full flex flex-col justify-between">
+			<form className="w-full flex flex-col justify-between">
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center space-x-2">
