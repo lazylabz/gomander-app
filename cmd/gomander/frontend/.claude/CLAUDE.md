@@ -16,6 +16,7 @@ communicates with the Go backend through Wails-generated bindings.
 - **TailwindCSS v4** for styling
 - **shadcn/ui** components (Radix UI primitives)
 - **react-hook-form** + **Zod** for forms and validation
+- **Biome** for linting and formatting
 - **pnpm** as package manager
 
 ## Common Commands
@@ -84,7 +85,7 @@ src/
 #### 1. Contracts Layer (Wails Abstraction)
 
 - **CRITICAL**: Direct `wailsjs` imports are ONLY allowed in `src/contracts/`
-- ESLint enforces this rule - imports from `wailsjs` anywhere else will fail linting
+- Biome enforces this rule - imports from `wailsjs` anywhere else will fail linting
 - All backend communication must go through `contracts/service.ts`
 - This provides a clean abstraction layer between frontend and Wails-generated code
 
@@ -153,7 +154,7 @@ Example: `useCases/command/startCommand.ts` calls backend and updates state
 
 ### Import Organization
 
-- ESLint enforces import sorting via `eslint-plugin-simple-import-sort`
+- Biome enforces import sorting via its `organizeImports` assist action
 - Imports are automatically sorted: external packages → internal imports (via @/)
 
 ### Adding New Backend Calls
