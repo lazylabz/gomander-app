@@ -12,10 +12,10 @@ import type { ProjectExport } from "@/contracts/types.ts";
 import { Button } from "@/design-system/components/ui/button.tsx";
 import { ButtonGroup } from "@/design-system/components/ui/button-group.tsx";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
 } from "@/design-system/components/ui/dropdown-menu.tsx";
 import { parseError } from "@/helpers/errorHelpers.ts";
 import { ScreenRoutes } from "@/routes.ts";
@@ -25,131 +25,139 @@ import { useProjectStore } from "@/store/projectStore.ts";
 import { deleteProject } from "@/useCases/project/deleteProject.ts";
 
 export const ProjectSelectionScreen = () => {
-  const { t } = useTranslation();
-  const [projectIdBeingDeleted, setProjectIdBeingDeleted] = useState<
-    string | null
-  >(null);
-  const project = useProjectStore((state) => state.projectInfo);
+	const { t } = useTranslation();
+	const [projectIdBeingDeleted, setProjectIdBeingDeleted] = useState<
+		string | null
+	>(null);
+	const project = useProjectStore((state) => state.projectInfo);
 
-  const navigate = useNavigate();
+	const navigate = useNavigate();
 
-  const [projectBeingImported, setProjectBeingImported] =
-    useState<ProjectExport | null>(null);
+	const [projectBeingImported, setProjectBeingImported] =
+		useState<ProjectExport | null>(null);
 
-  const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false);
+	const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false);
 
-  const { availableProjects, fetchAvailableProjects } =
-    useGetAvailableProjects();
+	const { availableProjects, fetchAvailableProjects } =
+		useGetAvailableProjects();
 
-  const openCreateProjectModal = () => {
-    setCreateProjectModalOpen(true);
-  };
+	const openCreateProjectModal = () => {
+		setCreateProjectModalOpen(true);
+	};
 
-  const handleDeleteProject = (projectId: string) => async () => {
-    setProjectIdBeingDeleted(projectId);
-  };
+	const handleDeleteProject = (projectId: string) => async () => {
+		setProjectIdBeingDeleted(projectId);
+	};
 
-  const confirmDeleteProject = async () => {
-    await deleteProject(projectIdBeingDeleted!);
-    setProjectIdBeingDeleted(null);
-    await fetchAvailableProjects();
-  };
+	const confirmDeleteProject = async () => {
+		if (!projectIdBeingDeleted) {
+			return;
+		}
 
-  const cancelDeleteProject = () => {
-    setProjectIdBeingDeleted(null);
-  };
+		await deleteProject(projectIdBeingDeleted);
+		setProjectIdBeingDeleted(null);
+		await fetchAvailableProjects();
+	};
 
-  const handleImportProject = async () => {
-    try {
-      const projectToImport = await dataService.getProjectToImport();
-      setProjectBeingImported(projectToImport);
-    } catch (e) {
-      toast.error(parseError(e, t('toast.project.selectFailed')));
-    }
-  };
+	const cancelDeleteProject = () => {
+		setProjectIdBeingDeleted(null);
+	};
 
-  const handleImportProjectFromPackageJson = async () => {
-    try {
-      const projectToImport =
-        await dataService.getProjectToImportFromPackageJson();
-      setProjectBeingImported(projectToImport);
-    } catch (e) {
-      toast.error(parseError(e, t('toast.project.selectFailed')));
-    }
-  };
+	const handleImportProject = async () => {
+		try {
+			const projectToImport = await dataService.getProjectToImport();
+			setProjectBeingImported(projectToImport);
+		} catch (e) {
+			toast.error(parseError(e, t("toast.project.selectFailed")));
+		}
+	};
 
-  useEffect(() => {
-    fetchAvailableProjects();
-  }, [fetchAvailableProjects]);
+	const handleImportProjectFromPackageJson = async () => {
+		try {
+			const projectToImport =
+				await dataService.getProjectToImportFromPackageJson();
+			setProjectBeingImported(projectToImport);
+		} catch (e) {
+			toast.error(parseError(e, t("toast.project.selectFailed")));
+		}
+	};
 
-  useEffect(() => {
-    if (project) {
-      navigate(ScreenRoutes.Logs);
-    }
-  }, [navigate, project]);
+	useEffect(() => {
+		fetchAvailableProjects();
+	}, [fetchAvailableProjects]);
 
-  const hasProjects = availableProjects.length > 0;
+	useEffect(() => {
+		if (project) {
+			navigate(ScreenRoutes.Logs);
+		}
+	}, [navigate, project]);
 
-  return (
-    <>
-      <CreateProjectModal
-        onSuccess={fetchAvailableProjects}
-        open={createProjectModalOpen}
-        setOpen={setCreateProjectModalOpen}
-      />
-      <ImportProjectModal
-        open={!!projectBeingImported}
-        onSuccess={fetchAvailableProjects}
-        onClose={() => setProjectBeingImported(null)}
-        project={projectBeingImported}
-      />
-      <DeleteProjectModal
-        open={!!projectIdBeingDeleted}
-        onConfirm={confirmDeleteProject}
-        onClose={cancelDeleteProject}
-      />
-      <div className="w-full h-full flex flex-col items-center justify-center gap-10">
-        <h1 className="text-3xl">
-          {hasProjects ? t('projectSelection.openTitle') : t('projectSelection.welcome')}
-        </h1>
-        {hasProjects && (
-          <div className="flex flex-col items-center justify-center gap-2">
-            {availableProjects.map((p) => (
-              <ProjectCard
-                key={p.id}
-                project={p}
-                handleDeleteProject={handleDeleteProject(p.id)}
-              />
-            ))}
-          </div>
-        )}
-        {!hasProjects && (
-          <p>{t('projectSelection.emptyState')}</p>
-        )}
-        <div className="flex flex-row items-center gap-2 justify-center">
-          <Button onClick={openCreateProjectModal} variant="ghost">
-            <Plus /> {t('projectSelection.createButton')}
-          </Button>
-          <ButtonGroup>
-            <Button variant="ghost" onClick={handleImportProject}>
-              <Import />
-              {t('projectSelection.importButton')}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label={t('projectSelection.moreOptions')}>
-                  <ChevronDownIcon />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuItem onClick={handleImportProjectFromPackageJson}>
-                  {t('projectSelection.importPackageJson')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </ButtonGroup>
-        </div>
-      </div>
-    </>
-  );
+	const hasProjects = availableProjects.length > 0;
+
+	return (
+		<>
+			<CreateProjectModal
+				onSuccess={fetchAvailableProjects}
+				open={createProjectModalOpen}
+				setOpen={setCreateProjectModalOpen}
+			/>
+			<ImportProjectModal
+				open={!!projectBeingImported}
+				onSuccess={fetchAvailableProjects}
+				onClose={() => setProjectBeingImported(null)}
+				project={projectBeingImported}
+			/>
+			<DeleteProjectModal
+				open={!!projectIdBeingDeleted}
+				onConfirm={confirmDeleteProject}
+				onClose={cancelDeleteProject}
+			/>
+			<div className="w-full h-full flex flex-col items-center justify-center gap-10">
+				<h1 className="text-3xl">
+					{hasProjects
+						? t("projectSelection.openTitle")
+						: t("projectSelection.welcome")}
+				</h1>
+				{hasProjects && (
+					<div className="flex flex-col items-center justify-center gap-2">
+						{availableProjects.map((p) => (
+							<ProjectCard
+								key={p.id}
+								project={p}
+								handleDeleteProject={handleDeleteProject(p.id)}
+							/>
+						))}
+					</div>
+				)}
+				{!hasProjects && <p>{t("projectSelection.emptyState")}</p>}
+				<div className="flex flex-row items-center gap-2 justify-center">
+					<Button onClick={openCreateProjectModal} variant="ghost">
+						<Plus /> {t("projectSelection.createButton")}
+					</Button>
+					<ButtonGroup>
+						<Button variant="ghost" onClick={handleImportProject}>
+							<Import />
+							{t("projectSelection.importButton")}
+						</Button>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									aria-label={t("projectSelection.moreOptions")}
+								>
+									<ChevronDownIcon />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end" className="w-52">
+								<DropdownMenuItem onClick={handleImportProjectFromPackageJson}>
+									{t("projectSelection.importPackageJson")}
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</ButtonGroup>
+				</div>
+			</div>
+		</>
+	);
 };

@@ -4,24 +4,24 @@ import { commandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 
 export const loadCommandDataIntoStore = (commands: Command[]) => {
-  const { setCommands, setCommandsStatus, commandsStatus } =
-    commandStore.getState();
+	const { setCommands, setCommandsStatus, commandsStatus } =
+		commandStore.getState();
 
-  setCommands(commands);
+	setCommands(commands);
 
-  const newCommandsStatus: Record<string, CommandStatus> = {};
-  commands.forEach((command) => {
-    if (!newCommandsStatus[command.id]) {
-      newCommandsStatus[command.id] =
-        commandsStatus[command.id] || CommandStatus.IDLE;
-    }
-  });
+	const newCommandsStatus: Record<string, CommandStatus> = {};
+	commands.forEach((command) => {
+		if (!newCommandsStatus[command.id]) {
+			newCommandsStatus[command.id] =
+				commandsStatus[command.id] || CommandStatus.IDLE;
+		}
+	});
 
-  setCommandsStatus(newCommandsStatus);
+	setCommandsStatus(newCommandsStatus);
 };
 
 export const fetchCommands = async () => {
-  const commands = await dataService.getCommands();
+	const commands = await dataService.getCommands();
 
-  loadCommandDataIntoStore(commands);
+	loadCommandDataIntoStore(commands);
 };

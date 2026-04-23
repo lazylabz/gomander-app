@@ -4,29 +4,29 @@ import { isDefined } from "@/helpers/mapHelpers.ts";
 import { commandStore } from "@/store/commandStore.ts";
 
 interface EditCommandGroupParams extends Omit<CommandGroup, "commands"> {
-  commands: string[];
+	commands: string[];
 }
 
 export const editCommandGroup = async (args: EditCommandGroupParams) => {
-  const { commands } = commandStore.getState();
+	const { commands } = commandStore.getState();
 
-  const groupCommands = args.commands
-    .map((commandId) => {
-      const command = commands.find((c) => c.id === commandId);
-      if (!command) {
-        return undefined;
-      }
-      return command;
-    })
-    .filter(isDefined);
+	const groupCommands = args.commands
+		.map((commandId) => {
+			const command = commands.find((c) => c.id === commandId);
+			if (!command) {
+				return undefined;
+			}
+			return command;
+		})
+		.filter(isDefined);
 
-  const commandGroup: CommandGroup = {
-    id: args.id,
-    projectId: args.projectId,
-    name: args.name,
-    commands: groupCommands,
-    position: args.position,
-  };
+	const commandGroup: CommandGroup = {
+		id: args.id,
+		projectId: args.projectId,
+		name: args.name,
+		commands: groupCommands,
+		position: args.position,
+	};
 
-  await dataService.editCommandGroup(commandGroup);
+	await dataService.editCommandGroup(commandGroup);
 };

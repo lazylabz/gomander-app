@@ -5,75 +5,75 @@ import { useTranslation } from "react-i18next";
 
 import { BaseWorkingDirectoryField } from "@/components/modals/Project/common/BaseWorkingDirectoryField.tsx";
 import {
-  formSchema,
-  type FormSchemaType,
+	type FormSchemaType,
+	formSchema,
 } from "@/components/modals/Project/common/createSchema.ts";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
 import { dataService } from "@/contracts/service";
 import { Button } from "@/design-system/components/ui/button.tsx";
 import {
-  Dialog,
-  DialogHeader,
-  DialogTitle,
+	Dialog,
+	DialogHeader,
+	DialogTitle,
 } from "@/design-system/components/ui/dialog";
 import { DialogContent } from "@/design-system/components/ui/dialog.tsx";
 import { Form } from "@/design-system/components/ui/form.tsx";
 
 export const CreateProjectModal = ({
-  open,
-  setOpen,
-  onSuccess,
+	open,
+	setOpen,
+	onSuccess,
 }: {
-  open: boolean;
-  setOpen: React.Dispatch<SetStateAction<boolean>>;
-  onSuccess: () => Promise<void>;
+	open: boolean;
+	setOpen: React.Dispatch<SetStateAction<boolean>>;
+	onSuccess: () => Promise<void>;
 }) => {
-  const { t } = useTranslation();
-  const form = useForm<FormSchemaType>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      baseWorkingDirectory: "",
-    },
-  });
+	const { t } = useTranslation();
+	const form = useForm<FormSchemaType>({
+		resolver: zodResolver(formSchema),
+		defaultValues: {
+			name: "",
+			baseWorkingDirectory: "",
+		},
+	});
 
-  const handleOpenChange = (open: boolean) => {
-    setOpen(open);
-    if (!open) {
-      form.reset();
-    }
-  };
+	const handleOpenChange = (open: boolean) => {
+		setOpen(open);
+		if (!open) {
+			form.reset();
+		}
+	};
 
-  const onSubmit = async (values: FormSchemaType) => {
-    await dataService.createProject({
-      id: crypto.randomUUID(),
-      name: values.name,
-      workingDirectory: values.baseWorkingDirectory,
-    });
+	const onSubmit = async (values: FormSchemaType) => {
+		await dataService.createProject({
+			id: crypto.randomUUID(),
+			name: values.name,
+			workingDirectory: values.baseWorkingDirectory,
+		});
 
-    onSuccess();
-    handleOpenChange(false);
-  };
+		onSuccess();
+		handleOpenChange(false);
+	};
 
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('modal.createProject.title')}</DialogTitle>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="w-full mt-2 flex flex-col gap-4"
-            >
-              <ProjectNameField<FormSchemaType> />
-              <BaseWorkingDirectoryField<FormSchemaType> />
-              <Button className="self-end" type="submit">
-                {t('common.save')}
-              </Button>
-            </form>
-          </Form>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
-  );
+	return (
+		<Dialog open={open} onOpenChange={handleOpenChange}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>{t("modal.createProject.title")}</DialogTitle>
+					<Form {...form}>
+						<form
+							onSubmit={form.handleSubmit(onSubmit)}
+							className="w-full mt-2 flex flex-col gap-4"
+						>
+							<ProjectNameField<FormSchemaType> />
+							<BaseWorkingDirectoryField<FormSchemaType> />
+							<Button className="self-end" type="submit">
+								{t("common.save")}
+							</Button>
+						</form>
+					</Form>
+				</DialogHeader>
+			</DialogContent>
+		</Dialog>
+	);
 };

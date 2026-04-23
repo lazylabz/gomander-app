@@ -9,10 +9,10 @@ import { useTheme } from "@/contexts/theme.tsx";
 import { externalBrowserService } from "@/contracts/service.ts";
 import type { Command } from "@/contracts/types.ts";
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuTrigger,
 } from "@/design-system/components/ui/context-menu.tsx";
 import { SidebarMenuButton } from "@/design-system/components/ui/sidebar.tsx";
 import { cn } from "@/design-system/lib/utils.ts";
@@ -29,215 +29,216 @@ import { startCommand } from "@/useCases/command/startCommand.ts";
 import { stopCommand } from "@/useCases/command/stopCommand.ts";
 
 export const CommandMenuItem = ({
-  command,
-  insideGroupId,
-  draggable = false,
+	command,
+	insideGroupId,
+	draggable = false,
 }: {
-  command: Command;
-  insideGroupId?: string;
-  draggable?: boolean;
+	command: Command;
+	insideGroupId?: string;
+	draggable?: boolean;
 }) => {
-  const { t } = useTranslation();
-  const { theme } = useTheme();
+	const { t } = useTranslation();
+	const { theme } = useTheme();
 
-  const setActiveCommandId = useCommandStore(
-    (state) => state.setActiveCommandId,
-  );
-  const commandsStatus = useCommandStore((state) => state.commandsStatus);
-  const activeCommandId = useCommandStore((state) => state.activeCommandId);
-  const commandIdsWithErrors = useCommandStore(
-    (state) => state.commandIdsWithErrors,
-  );
+	const setActiveCommandId = useCommandStore(
+		(state) => state.setActiveCommandId,
+	);
+	const commandsStatus = useCommandStore((state) => state.commandsStatus);
+	const activeCommandId = useCommandStore((state) => state.activeCommandId);
+	const commandIdsWithErrors = useCommandStore(
+		(state) => state.commandIdsWithErrors,
+	);
 
-  const { startEditingCommand } = useSidebarContext();
+	const { startEditingCommand } = useSidebarContext();
 
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: command.id });
+	const { attributes, listeners, setNodeRef, transform, transition } =
+		useSortable({ id: command.id });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition,
+	};
 
-  const handleRunCommand = async () => {
-    setActiveCommandId(command.id);
-    try {
-      await startCommand(command.id);
-    } catch (e) {
-      toast.error(parseError(e, t('toast.command.runFailed')));
-    }
-  };
+	const handleRunCommand = async () => {
+		setActiveCommandId(command.id);
+		try {
+			await startCommand(command.id);
+		} catch (e) {
+			toast.error(parseError(e, t("toast.command.runFailed")));
+		}
+	};
 
-  const handleOpenLink = async () => {
-    if (!command.link) {
-      return;
-    }
+	const handleOpenLink = async () => {
+		if (!command.link) {
+			return;
+		}
 
-    externalBrowserService.browserOpenURL(command.link);
-  };
+		externalBrowserService.browserOpenURL(command.link);
+	};
 
-  const handleDeleteCommand = async () => {
-    try {
-      await deleteCommand(command.id);
-      setActiveCommandId(null); // Reset active command after deletion
-      toast.success(t('toast.command.deleteSuccess'));
-    } catch (e) {
-      toast.error(parseError(e, t('toast.command.deleteFailed')));
-    } finally {
-      fetchCommands();
-      fetchCommandGroups();
-    }
-    setActiveCommandId(null); // Reset active command after deletion
-  };
+	const handleDeleteCommand = async () => {
+		try {
+			await deleteCommand(command.id);
+			setActiveCommandId(null); // Reset active command after deletion
+			toast.success(t("toast.command.deleteSuccess"));
+		} catch (e) {
+			toast.error(parseError(e, t("toast.command.deleteFailed")));
+		} finally {
+			fetchCommands();
+			fetchCommandGroups();
+		}
+		setActiveCommandId(null); // Reset active command after deletion
+	};
 
-  const handleRemoveFromGroup = async () => {
-    if (!insideGroupId) return;
-    try {
-      await removeCommandFromGroup(command.id, insideGroupId);
-      toast.success(t('toast.command.removeFromGroupSuccess'));
-    } catch (e) {
-      toast.error(parseError(e, t('toast.command.removeFromGroupFailed')));
-    } finally {
-      fetchCommandGroups();
-    }
-  };
+	const handleRemoveFromGroup = async () => {
+		if (!insideGroupId) return;
+		try {
+			await removeCommandFromGroup(command.id, insideGroupId);
+			toast.success(t("toast.command.removeFromGroupSuccess"));
+		} catch (e) {
+			toast.error(parseError(e, t("toast.command.removeFromGroupFailed")));
+		} finally {
+			fetchCommandGroups();
+		}
+	};
 
-  const handleEditCommand = () => {
-    startEditingCommand(command);
-  };
+	const handleEditCommand = () => {
+		startEditingCommand(command);
+	};
 
-  const handleDuplicateCommand = async () => {
-    try {
-      await duplicateCommand(command, insideGroupId);
-      toast.success(t('toast.command.duplicateSuccess'));
-    } catch (e) {
-      toast.error(parseError(e, t('toast.command.duplicateFailed')));
-    } finally {
-      fetchCommands();
-      if (insideGroupId) {
-        fetchCommandGroups();
-      }
-    }
-    setActiveCommandId(null); // Reset active command after duplication
-  };
+	const handleDuplicateCommand = async () => {
+		try {
+			await duplicateCommand(command, insideGroupId);
+			toast.success(t("toast.command.duplicateSuccess"));
+		} catch (e) {
+			toast.error(parseError(e, t("toast.command.duplicateFailed")));
+		} finally {
+			fetchCommands();
+			if (insideGroupId) {
+				fetchCommandGroups();
+			}
+		}
+		setActiveCommandId(null); // Reset active command after duplication
+	};
 
-  const onCommandSectionClick = () => {
-    setActiveCommandId(command.id);
-    cleanCommandError(command.id);
-  };
+	const onCommandSectionClick = () => {
+		setActiveCommandId(command.id);
+		cleanCommandError(command.id);
+	};
 
-  const handleStopCommand = async () => {
-    try {
-      await stopCommand(command.id);
-    } catch (e) {
-      toast.error(parseError(e, t('toast.command.stopFailed')));
-    }
-    setActiveCommandId(command.id);
-  };
+	const handleStopCommand = async () => {
+		try {
+			await stopCommand(command.id);
+		} catch (e) {
+			toast.error(parseError(e, t("toast.command.stopFailed")));
+		}
+		setActiveCommandId(command.id);
+	};
 
-  const isIdle = commandsStatus[command.id] === CommandStatus.IDLE;
-  const isRunning = commandsStatus[command.id] === CommandStatus.RUNNING;
-  const isActiveCommand = activeCommandId === command.id;
-  const hasError = commandIdsWithErrors.includes(command.id);
+	const isIdle = commandsStatus[command.id] === CommandStatus.IDLE;
+	const isRunning = commandsStatus[command.id] === CommandStatus.RUNNING;
+	const isActiveCommand = activeCommandId === command.id;
+	const hasError = commandIdsWithErrors.includes(command.id);
 
-  const className = cn(
-    "p-2.5",
-    isActiveCommand && "bg-sidebar-accent",
-    isRunning &&
-      "bg-green-100 hover:bg-green-200 focus:bg-green-100 active:bg-green-100",
-    isRunning &&
-      theme === "dark" &&
-      "bg-green-300/30 hover:bg-green-200/40 focus:bg-green-300/30 active:bg-green-300/30",
-    isActiveCommand &&
-      isRunning &&
-      "bg-green-200 hover:bg-green-200 focus:bg-green-200 active:bg-green-200",
-    isActiveCommand &&
-      isRunning &&
-      theme === "dark" &&
-      "bg-green-200/40 hover:bg-green-200/40 focus:bg-green-200/40 active:bg-green-200/40",
-    hasError &&
-      "bg-red-100 hover:bg-red-200 focus:bg-red-100 active:bg-red-100",
-    hasError &&
-      theme === "dark" &&
-      "bg-red-300/30 hover:bg-red-200/40 focus:bg-red-300/30 active:bg-red-300/30",
-  );
+	const className = cn(
+		"p-2.5",
+		isActiveCommand && "bg-sidebar-accent",
+		isRunning &&
+			"bg-green-100 hover:bg-green-200 focus:bg-green-100 active:bg-green-100",
+		isRunning &&
+			theme === "dark" &&
+			"bg-green-300/30 hover:bg-green-200/40 focus:bg-green-300/30 active:bg-green-300/30",
+		isActiveCommand &&
+			isRunning &&
+			"bg-green-200 hover:bg-green-200 focus:bg-green-200 active:bg-green-200",
+		isActiveCommand &&
+			isRunning &&
+			theme === "dark" &&
+			"bg-green-200/40 hover:bg-green-200/40 focus:bg-green-200/40 active:bg-green-200/40",
+		hasError &&
+			"bg-red-100 hover:bg-red-200 focus:bg-red-100 active:bg-red-100",
+		hasError &&
+			theme === "dark" &&
+			"bg-red-300/30 hover:bg-red-200/40 focus:bg-red-300/30 active:bg-red-300/30",
+	);
 
-  return (
-    <ContextMenu>
-      <ContextMenuTrigger>
-        <SidebarMenuButton asChild className={className}>
-          <div
-            onClick={onCommandSectionClick}
-            className="flex flex-row justify-between items-center w-full select-none"
-            ref={setNodeRef}
-            style={style}
-          >
-            <div
-              className={cn(
-                "flex items-center gap-1 w-full min-w-0 overflow-hidden text-sm text-sidebar-foreground",
-                !draggable && "pl-2",
-              )}
-            >
-              {draggable && (
-                <div
-                  {...attributes}
-                  {...listeners}
-                  className="cursor-grab active:cursor-grabbing pr-0.5 rounded hover:bg-sidebar-accent/50 shrink-0"
-                >
-                  <GripVertical size={14} className="text-muted-foreground" />
-                </div>
-              )}
-              <p
-                className="cursor-default text-left truncate"
-                title={command.name}
-              >
-                {command.name}
-              </p>
-              {command.link && (
-                <LinkIcon
-                  size={12}
-                  onClick={handleOpenLink}
-                  className="text-muted-foreground cursor-pointer hover:text-primary min-w-4"
-                />
-              )}
-            </div>
-            <div className="shrink-0">
-              {isIdle && (
-                <Play
-                  size={16}
-                  className="text-muted-foreground cursor-pointer hover:text-primary"
-                  onClick={handleRunCommand}
-                />
-              )}
-              {isRunning && (
-                <Square
-                  size={16}
-                  className="text-muted-foreground dark:text-primary/70 cursor-pointer hover:text-primary dark:hover:text-primary"
-                  onClick={handleStopCommand}
-                />
-              )}
-            </div>
-          </div>
-        </SidebarMenuButton>
-      </ContextMenuTrigger>
-      <ContextMenuContent>
-        <ContextMenuItem disabled={isRunning} onClick={handleEditCommand}>
-          {t('common.edit')}
-        </ContextMenuItem>
-        <ContextMenuItem disabled={isRunning} onClick={handleDuplicateCommand}>
-          {t('common.duplicate')}
-        </ContextMenuItem>
-        {!insideGroupId && (
-          <ContextMenuItem disabled={isRunning} onClick={handleDeleteCommand}>
-            {t('common.delete')}
-          </ContextMenuItem>
-        )}
-        {insideGroupId && (
-          <ContextMenuItem disabled={isRunning} onClick={handleRemoveFromGroup}>
-            {t('sidebar.commands.removeFromGroup')}
-          </ContextMenuItem>
-        )}
-      </ContextMenuContent>
-    </ContextMenu>
-  );
+	return (
+		<ContextMenu>
+			<ContextMenuTrigger>
+				<SidebarMenuButton asChild className={className}>
+					<button
+						type="button"
+						onClick={onCommandSectionClick}
+						className="flex flex-row justify-between items-center w-full select-none"
+						ref={setNodeRef}
+						style={style}
+					>
+						<div
+							className={cn(
+								"flex items-center gap-1 w-full min-w-0 overflow-hidden text-sm text-sidebar-foreground",
+								!draggable && "pl-2",
+							)}
+						>
+							{draggable && (
+								<div
+									{...attributes}
+									{...listeners}
+									className="cursor-grab active:cursor-grabbing pr-0.5 rounded hover:bg-sidebar-accent/50 shrink-0"
+								>
+									<GripVertical size={14} className="text-muted-foreground" />
+								</div>
+							)}
+							<p
+								className="cursor-default text-left truncate"
+								title={command.name}
+							>
+								{command.name}
+							</p>
+							{command.link && (
+								<LinkIcon
+									size={12}
+									onClick={handleOpenLink}
+									className="text-muted-foreground cursor-pointer hover:text-primary min-w-4"
+								/>
+							)}
+						</div>
+						<div className="shrink-0">
+							{isIdle && (
+								<Play
+									size={16}
+									className="text-muted-foreground cursor-pointer hover:text-primary"
+									onClick={handleRunCommand}
+								/>
+							)}
+							{isRunning && (
+								<Square
+									size={16}
+									className="text-muted-foreground dark:text-primary/70 cursor-pointer hover:text-primary dark:hover:text-primary"
+									onClick={handleStopCommand}
+								/>
+							)}
+						</div>
+					</button>
+				</SidebarMenuButton>
+			</ContextMenuTrigger>
+			<ContextMenuContent>
+				<ContextMenuItem disabled={isRunning} onClick={handleEditCommand}>
+					{t("common.edit")}
+				</ContextMenuItem>
+				<ContextMenuItem disabled={isRunning} onClick={handleDuplicateCommand}>
+					{t("common.duplicate")}
+				</ContextMenuItem>
+				{!insideGroupId && (
+					<ContextMenuItem disabled={isRunning} onClick={handleDeleteCommand}>
+						{t("common.delete")}
+					</ContextMenuItem>
+				)}
+				{insideGroupId && (
+					<ContextMenuItem disabled={isRunning} onClick={handleRemoveFromGroup}>
+						{t("sidebar.commands.removeFromGroup")}
+					</ContextMenuItem>
+				)}
+			</ContextMenuContent>
+		</ContextMenu>
+	);
 };

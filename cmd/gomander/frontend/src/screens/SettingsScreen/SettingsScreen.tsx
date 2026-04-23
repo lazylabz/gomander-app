@@ -4,72 +4,72 @@ import { useNavigate } from "react-router";
 
 import { Button } from "@/design-system/components/ui/button";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
 } from "@/design-system/components/ui/tabs.tsx";
 import { SavingStateIndicator } from "@/screens/SettingsScreen/components/SavingStateIndicator.tsx";
 import {
-  SettingsTab,
-  useSettingsContext,
+	SettingsTab,
+	useSettingsContext,
 } from "@/screens/SettingsScreen/context/settingsContext.tsx";
 import { ProjectSettings } from "@/screens/SettingsScreen/tabs/ProjectSettings/ProjectSettings.tsx";
 import { UserSettings } from "@/screens/SettingsScreen/tabs/UserSettings/UserSettings.tsx";
 
 export const SettingsScreen = () => {
-  const { t } = useTranslation();
-  const { initialTab } = useSettingsContext();
+	const { t } = useTranslation();
+	const { initialTab } = useSettingsContext();
 
-  const navigate = useNavigate();
+	const navigate = useNavigate();
 
-  const goBack = () => {
-    navigate(-1);
-  };
+	const goBack = () => {
+		navigate(-1);
+	};
 
-  return (
-    <div className="bg-background p-6 flex flex-col h-full">
-      <div className="flex items-center space-x-4 mb-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="p-2 cursor-pointer"
-          onClick={goBack}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-2">
-            <Settings className="h-6 w-6" />
-            <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
-          </div>
-          <SavingStateIndicator />
-        </div>
-      </div>
-      <Tabs defaultValue={initialTab} className="w-full flex-1">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger
-            value={SettingsTab.User}
-            className="flex items-center space-x-2 cursor-pointer"
-          >
-            <User className="h-4 w-4" />
-            <span>{t('settings.tabs.user')}</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value={SettingsTab.Project}
-            className="flex items-center space-x-2 cursor-pointer"
-          >
-            <PanelsTopLeft className="h-4 w-4" />
-            <span>{t('settings.tabs.project')}</span>
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value={SettingsTab.User}>
-          <UserSettings />
-        </TabsContent>
-        <TabsContent value={SettingsTab.Project}>
-          <ProjectSettings />
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
+	return (
+		<div className="bg-background p-6 flex flex-col h-full">
+			<div className="flex items-center space-x-4 mb-6">
+				<Button
+					variant="ghost"
+					size="sm"
+					className="p-2 cursor-pointer"
+					onClick={goBack}
+				>
+					<ArrowLeft className="h-4 w-4" />
+				</Button>
+				<div className="flex items-center space-x-6">
+					<div className="flex items-center space-x-2">
+						<Settings className="h-6 w-6" />
+						<h1 className="text-2xl font-bold">{t("settings.title")}</h1>
+					</div>
+					<SavingStateIndicator />
+				</div>
+			</div>
+			<Tabs defaultValue={initialTab} className="w-full flex-1">
+				<TabsList className="grid w-full grid-cols-2">
+					<TabsTrigger
+						value={SettingsTab.User}
+						className="flex items-center space-x-2 cursor-pointer"
+					>
+						<User className="h-4 w-4" />
+						<span>{t("settings.tabs.user")}</span>
+					</TabsTrigger>
+					<TabsTrigger
+						value={SettingsTab.Project}
+						className="flex items-center space-x-2 cursor-pointer"
+					>
+						<PanelsTopLeft className="h-4 w-4" />
+						<span>{t("settings.tabs.project")}</span>
+					</TabsTrigger>
+				</TabsList>
+				<TabsContent value={SettingsTab.User}>
+					<UserSettings />
+				</TabsContent>
+				<TabsContent value={SettingsTab.Project}>
+					<ProjectSettings />
+				</TabsContent>
+			</Tabs>
+		</div>
+	);
 };

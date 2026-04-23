@@ -7,22 +7,24 @@ import type { ProjectSettingsSchemaType } from "@/screens/SettingsScreen/schemas
 import { projectStore } from "@/store/projectStore.ts";
 import { editOpenedProject } from "@/useCases/project/editOpenedProject.ts";
 
-export const saveProjectSettingsForm = async (formData: ProjectSettingsSchemaType) => {
-  const { projectInfo } = projectStore.getState();
-  if (!projectInfo) {
-    return;
-  }
+export const saveProjectSettingsForm = async (
+	formData: ProjectSettingsSchemaType,
+) => {
+	const { projectInfo } = projectStore.getState();
+	if (!projectInfo) {
+		return;
+	}
 
-  try {
-    await editOpenedProject({
-      ...projectInfo,
-      name: formData.name,
-      workingDirectory: formData.baseWorkingDirectory,
-    });
-    toast.success(i18n.t('toast.settings.projectSaveSuccess'));
-  } catch (e) {
-    toast.error(parseError(e, i18n.t('toast.settings.projectSaveFailed')));
-  }
+	try {
+		await editOpenedProject({
+			...projectInfo,
+			name: formData.name,
+			workingDirectory: formData.baseWorkingDirectory,
+		});
+		toast.success(i18n.t("toast.settings.projectSaveSuccess"));
+	} catch (e) {
+		toast.error(parseError(e, i18n.t("toast.settings.projectSaveFailed")));
+	}
 
-  await fetchProject();
+	await fetchProject();
 };

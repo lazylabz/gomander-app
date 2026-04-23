@@ -1,5 +1,5 @@
 export enum ScreenRoutes {
-  ProjectSelection = "/",
-  Logs = "/logs",
-  Settings = "/settings",
+	ProjectSelection = "/",
+	Logs = "/logs",
+	Settings = "/settings",
 }

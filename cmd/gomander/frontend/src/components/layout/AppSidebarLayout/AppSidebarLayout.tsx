@@ -2,17 +2,17 @@ import { AppSidebar } from "@/components/layout/AppSidebarLayout/components/AppS
 import { SidebarProvider } from "@/design-system/components/ui/sidebar.tsx";
 
 export const AppSidebarLayout = ({
-  children,
+	children,
 }: {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }) => {
-  return (
-    <SidebarProvider>
-      <nav>
-        <AppSidebar />
-      </nav>
+	return (
+		<SidebarProvider>
+			<nav>
+				<AppSidebar />
+			</nav>
 
-      <main className="w-full h-screen bg-white">{children}</main>
-    </SidebarProvider>
-  );
+			<main className="w-full h-screen bg-white">{children}</main>
+		</SidebarProvider>
+	);
 };

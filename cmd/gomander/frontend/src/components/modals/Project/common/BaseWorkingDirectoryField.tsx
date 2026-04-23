@@ -3,40 +3,40 @@ import { useTranslation } from "react-i18next";
 
 import { FSInput } from "@/components/inputs/FSInput.tsx";
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
 } from "@/design-system/components/ui/form.tsx";
 
 export const BaseWorkingDirectoryField = <
-  T extends { baseWorkingDirectory: string },
+	T extends { baseWorkingDirectory: string },
 >() => {
-  const { t } = useTranslation();
-  const form = useFormContext<T>();
+	const { t } = useTranslation();
+	const form = useFormContext<T>();
 
-  const name = "baseWorkingDirectory" satisfies keyof T as Path<T>;
+	const name = "baseWorkingDirectory" satisfies keyof T as Path<T>;
 
-  return (
-    <FormField
-      control={form.control}
-      name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>{t('projectForm.baseDirLabel')}</FormLabel>
-          <FormControl>
-            <FSInput
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              placeholder="/Users/hackerman/Code"
-              {...field}
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
+	return (
+		<FormField
+			control={form.control}
+			name={name}
+			render={({ field }) => (
+				<FormItem>
+					<FormLabel>{t("projectForm.baseDirLabel")}</FormLabel>
+					<FormControl>
+						<FSInput
+							autoComplete="off"
+							autoCorrect="off"
+							autoCapitalize="off"
+							placeholder="/Users/hackerman/Code"
+							{...field}
+						/>
+					</FormControl>
+					<FormMessage />
+				</FormItem>
+			)}
+		/>
+	);
 };

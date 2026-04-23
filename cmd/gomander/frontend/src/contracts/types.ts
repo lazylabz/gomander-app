@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/style/useLiteralEnumMembers: proxy to wails types */
 import type { domain } from "../../wailsjs/go/models.ts";
 import { event } from "../../wailsjs/go/models.ts";
 
@@ -11,20 +12,20 @@ export type Localization = domain.Localization;
 
 // Enums
 export enum Event {
-  NEW_LOG_ENTRY = event.Event.NEW_LOG_ENTRY,
-  PROCESS_FINISHED = event.Event.PROCESS_FINISHED,
-  PROCESS_STARTED = event.Event.PROCESS_STARTED,
-  COMMAND_GROUP_DELETED = event.Event.COMMAND_GROUP_DELETED,
-  COMMAND_ERROR_DETECTED = event.Event.COMMAND_ERROR_DETECTED,
+	NEW_LOG_ENTRY = event.Event.NEW_LOG_ENTRY,
+	PROCESS_FINISHED = event.Event.PROCESS_FINISHED,
+	PROCESS_STARTED = event.Event.PROCESS_STARTED,
+	COMMAND_GROUP_DELETED = event.Event.COMMAND_GROUP_DELETED,
+	COMMAND_ERROR_DETECTED = event.Event.COMMAND_ERROR_DETECTED,
 }
 
 export type EventData = {
-  [Event.NEW_LOG_ENTRY]: {
-    id: string;
-    line: string;
-  };
-  [Event.PROCESS_FINISHED]: string;
-  [Event.PROCESS_STARTED]: string;
-  [Event.COMMAND_GROUP_DELETED]: string;
-  [Event.COMMAND_ERROR_DETECTED]: string;
+	[Event.NEW_LOG_ENTRY]: {
+		id: string;
+		line: string;
+	};
+	[Event.PROCESS_FINISHED]: string;
+	[Event.PROCESS_STARTED]: string;
+	[Event.COMMAND_GROUP_DELETED]: string;
+	[Event.COMMAND_ERROR_DETECTED]: string;
 };

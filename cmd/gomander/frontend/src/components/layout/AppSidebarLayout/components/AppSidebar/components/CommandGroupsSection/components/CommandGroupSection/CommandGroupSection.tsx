@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Folder, FolderOpen, Play, Square } from "lucide-react";
-import { type SyntheticEvent } from "react";
+import type { SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -9,17 +9,17 @@ import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components
 import { getCommandGroupSectionOpenLocalStorageKey } from "@/constants/localStorage.ts";
 import type { Command, CommandGroup } from "@/contracts/types.ts";
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuTrigger,
 } from "@/design-system/components/ui/context-menu.tsx";
 import {
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuItem,
+	SidebarGroup,
+	SidebarGroupContent,
+	SidebarGroupLabel,
+	SidebarMenu,
+	SidebarMenuItem,
 } from "@/design-system/components/ui/sidebar.tsx";
 import { cn } from "@/design-system/lib/utils.ts";
 import { parseError } from "@/helpers/errorHelpers.ts";
@@ -32,162 +32,166 @@ import { runCommandGroup } from "@/useCases/commandGroup/runCommandGroup.ts";
 import { stopCommandGroup } from "@/useCases/commandGroup/stopCommandGroup.ts";
 
 export const CommandGroupSection = ({
-  commandGroup,
-  startEditingCommandGroup,
-  isReorderingGroups,
+	commandGroup,
+	startEditingCommandGroup,
+	isReorderingGroups,
 }: {
-  commandGroup: CommandGroup;
-  startEditingCommandGroup: (commandGroup: CommandGroup) => void;
-  isReorderingGroups: boolean;
+	commandGroup: CommandGroup;
+	startEditingCommandGroup: (commandGroup: CommandGroup) => void;
+	isReorderingGroups: boolean;
 }) => {
-  const { t } = useTranslation();
-  const commandsStatus = useCommandStore((state) => state.commandsStatus);
+	const { t } = useTranslation();
+	const commandsStatus = useCommandStore((state) => state.commandsStatus);
 
-  const [internalIsOpen, setInternalIsOpen] = useLocalStorageState(
-    getCommandGroupSectionOpenLocalStorageKey(commandGroup.id),
-    false,
-  );
+	const [internalIsOpen, setInternalIsOpen] = useLocalStorageState(
+		getCommandGroupSectionOpenLocalStorageKey(commandGroup.id),
+		false,
+	);
 
-  const isOpen = internalIsOpen && !isReorderingGroups;
+	const isOpen = internalIsOpen && !isReorderingGroups;
 
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: commandGroup.id, disabled: !isReorderingGroups });
+	const { attributes, listeners, setNodeRef, transform, transition } =
+		useSortable({ id: commandGroup.id, disabled: !isReorderingGroups });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition,
+	};
 
-  const numberOfCommandsRunning = commandGroup.commands.filter(
-    (command: Command) => commandsStatus[command.id] === CommandStatus.RUNNING,
-  ).length;
+	const numberOfCommandsRunning = commandGroup.commands.filter(
+		(command: Command) => commandsStatus[command.id] === CommandStatus.RUNNING,
+	).length;
 
-  const someCommandIsRunning = numberOfCommandsRunning > 0;
+	const someCommandIsRunning = numberOfCommandsRunning > 0;
 
-  const someCommandIsIdle = commandGroup.commands.some(
-    (command: Command) => commandsStatus[command.id] === CommandStatus.IDLE,
-  );
+	const someCommandIsIdle = commandGroup.commands.some(
+		(command: Command) => commandsStatus[command.id] === CommandStatus.IDLE,
+	);
 
-  const run = async (e: SyntheticEvent) => {
-    // Prevent the folder from collapsing when clicking the play button
-    e.stopPropagation();
+	const run = async (e: SyntheticEvent) => {
+		// Prevent the folder from collapsing when clicking the play button
+		e.stopPropagation();
 
-    if (isReorderingGroups) return;
+		if (isReorderingGroups) return;
 
-    try {
-      await runCommandGroup(commandGroup.id);
-    } catch (e) {
-      toast.error(parseError(e, t('toast.commandGroup.runFailed')));
-    }
-  };
+		try {
+			await runCommandGroup(commandGroup.id);
+		} catch (e) {
+			toast.error(parseError(e, t("toast.commandGroup.runFailed")));
+		}
+	};
 
-  const stop = async (e: SyntheticEvent) => {
-    // Prevent the folder from collapsing when clicking the stop button
-    e.stopPropagation();
-    if (isReorderingGroups) return;
+	const stop = async (e: SyntheticEvent) => {
+		// Prevent the folder from collapsing when clicking the stop button
+		e.stopPropagation();
+		if (isReorderingGroups) return;
 
-    try {
-      await stopCommandGroup(commandGroup.id);
-    } catch (e) {
-      toast.error(parseError(e, t('toast.commandGroup.stopFailed')));
-    }
-  };
+		try {
+			await stopCommandGroup(commandGroup.id);
+		} catch (e) {
+			toast.error(parseError(e, t("toast.commandGroup.stopFailed")));
+		}
+	};
 
-  const handleDelete = async () => {
-    if (isReorderingGroups) return;
-    try {
-      await deleteCommandGroup(commandGroup.id);
-      toast.success(t('toast.commandGroup.deleteSuccess'));
-    } catch (e) {
-      toast.error(parseError(e, t('toast.commandGroup.deleteFailed')));
-    } finally {
-      fetchCommandGroups();
-    }
-  };
+	const handleDelete = async () => {
+		if (isReorderingGroups) return;
+		try {
+			await deleteCommandGroup(commandGroup.id);
+			toast.success(t("toast.commandGroup.deleteSuccess"));
+		} catch (e) {
+			toast.error(parseError(e, t("toast.commandGroup.deleteFailed")));
+		} finally {
+			fetchCommandGroups();
+		}
+	};
 
-  const handleEdit = () => {
-    if (isReorderingGroups) return;
-    startEditingCommandGroup(commandGroup);
-  };
+	const handleEdit = () => {
+		if (isReorderingGroups) return;
+		startEditingCommandGroup(commandGroup);
+	};
 
-  return (
-    <SidebarGroup
-      className="py-0"
-      key={commandGroup.id}
-      style={style}
-      ref={setNodeRef}
-    >
-      <ContextMenu>
-        <ContextMenuTrigger disabled={isReorderingGroups}>
-          <SidebarGroupLabel
-            asChild
-            className={cn(
-              "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm border-2 border-transparent",
-              isReorderingGroups && "border-dashed border-muted-foreground/30",
-            )}
-          >
-            <button
-              className="group flex items-center gap-2 p-2 w-full justify-between"
-              style={{ cursor: isReorderingGroups ? "grab" : "pointer" }}
-              onClick={() => setInternalIsOpen(!internalIsOpen)}
-              disabled={isReorderingGroups}
-              {...(isReorderingGroups ? { ...attributes, ...listeners } : {})}
-            >
-              <div className="flex items-center gap-2 min-w-0 overflow-hidden">
-                <div className="size-4 shrink-0 flex items-center justify-center">
-                  {isOpen ? <FolderOpen size={16} /> : <Folder size={16} />}
-                </div>
-                <p className="text-left truncate" title={commandGroup.name}>
-                  {commandGroup.name}
-                </p>
-              </div>
-              {!isReorderingGroups && (
-                <div className="flex gap-2 items-center shrink-0">
-                  {someCommandIsRunning && (
-                    <span className="whitespace-nowrap">
-                      ({numberOfCommandsRunning}/{commandGroup.commands.length})
-                    </span>
-                  )}
-                  {someCommandIsIdle && (
-                    <Play
-                      size={16}
-                      className="text-muted-foreground cursor-pointer hover:text-primary"
-                      onClick={run}
-                    />
-                  )}
-                  {someCommandIsRunning && (
-                    <div className="group/command p-0 m-0">
-                      <Square
-                        size={16}
-                        className="text-muted-foreground cursor-pointer hover:text-primary"
-                        onClick={stop}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-            </button>
-          </SidebarGroupLabel>
-        </ContextMenuTrigger>
-        <ContextMenuContent>
-          <ContextMenuItem onClick={handleEdit}>{t('common.edit')}</ContextMenuItem>
-          <ContextMenuItem onClick={handleDelete}>{t('common.delete')}</ContextMenuItem>
-        </ContextMenuContent>
-      </ContextMenu>
-      {isOpen && (
-        <SidebarGroupContent>
-          <SidebarMenu>
-            {commandGroup.commands.map((command) => (
-              <SidebarMenuItem key={command.id}>
-                <CommandMenuItem
-                  command={command}
-                  insideGroupId={commandGroup.id}
-                />
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroupContent>
-      )}
-    </SidebarGroup>
-  );
+	return (
+		<SidebarGroup
+			className="py-0"
+			key={commandGroup.id}
+			style={style}
+			ref={setNodeRef}
+		>
+			<ContextMenu>
+				<ContextMenuTrigger disabled={isReorderingGroups}>
+					<SidebarGroupLabel
+						asChild
+						className={cn(
+							"text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm border-2 border-transparent",
+							isReorderingGroups && "border-dashed border-muted-foreground/30",
+						)}
+					>
+						<button
+							className="group flex items-center gap-2 p-2 w-full justify-between"
+							style={{ cursor: isReorderingGroups ? "grab" : "pointer" }}
+							onClick={() => setInternalIsOpen(!internalIsOpen)}
+							disabled={isReorderingGroups}
+							{...(isReorderingGroups ? { ...attributes, ...listeners } : {})}
+						>
+							<div className="flex items-center gap-2 min-w-0 overflow-hidden">
+								<div className="size-4 shrink-0 flex items-center justify-center">
+									{isOpen ? <FolderOpen size={16} /> : <Folder size={16} />}
+								</div>
+								<p className="text-left truncate" title={commandGroup.name}>
+									{commandGroup.name}
+								</p>
+							</div>
+							{!isReorderingGroups && (
+								<div className="flex gap-2 items-center shrink-0">
+									{someCommandIsRunning && (
+										<span className="whitespace-nowrap">
+											({numberOfCommandsRunning}/{commandGroup.commands.length})
+										</span>
+									)}
+									{someCommandIsIdle && (
+										<Play
+											size={16}
+											className="text-muted-foreground cursor-pointer hover:text-primary"
+											onClick={run}
+										/>
+									)}
+									{someCommandIsRunning && (
+										<div className="group/command p-0 m-0">
+											<Square
+												size={16}
+												className="text-muted-foreground cursor-pointer hover:text-primary"
+												onClick={stop}
+											/>
+										</div>
+									)}
+								</div>
+							)}
+						</button>
+					</SidebarGroupLabel>
+				</ContextMenuTrigger>
+				<ContextMenuContent>
+					<ContextMenuItem onClick={handleEdit}>
+						{t("common.edit")}
+					</ContextMenuItem>
+					<ContextMenuItem onClick={handleDelete}>
+						{t("common.delete")}
+					</ContextMenuItem>
+				</ContextMenuContent>
+			</ContextMenu>
+			{isOpen && (
+				<SidebarGroupContent>
+					<SidebarMenu>
+						{commandGroup.commands.map((command) => (
+							<SidebarMenuItem key={command.id}>
+								<CommandMenuItem
+									command={command}
+									insideGroupId={commandGroup.id}
+								/>
+							</SidebarMenuItem>
+						))}
+					</SidebarMenu>
+				</SidebarGroupContent>
+			)}
+		</SidebarGroup>
+	);
 };
