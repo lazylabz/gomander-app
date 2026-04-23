@@ -6,7 +6,7 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"includes": ["**", "!!**/dist", "!!**/wailsjs", "!!**/design-system"]
+		"includes": ["**", "!!**/dist", "!!**/wailsjs"]
 	},
 	"formatter": {
 		"enabled": true,
