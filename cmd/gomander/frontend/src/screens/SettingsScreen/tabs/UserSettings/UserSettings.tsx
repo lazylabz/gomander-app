@@ -37,7 +37,7 @@ export const UserSettings = () => {
 
 	return (
 		<Form {...userSettingsForm}>
-			<form className="w-full h-full flex flex-col justify-between">
+			<form className="w-full flex flex-col justify-between">
 				<div className="flex flex-col gap-2">
 					<Card>
 						<CardHeader>

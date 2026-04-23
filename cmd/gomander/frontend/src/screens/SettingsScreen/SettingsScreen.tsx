@@ -46,7 +46,7 @@ export const SettingsScreen = () => {
 					<SavingStateIndicator />
 				</div>
 			</div>
-			<Tabs defaultValue={initialTab} className="w-full flex-1">
+			<Tabs defaultValue={initialTab} className="w-full flex-1 min-h-0">
 				<TabsList className="grid w-full grid-cols-2">
 					<TabsTrigger
 						value={SettingsTab.User}
@@ -63,10 +63,16 @@ export const SettingsScreen = () => {
 						<span>{t("settings.tabs.project")}</span>
 					</TabsTrigger>
 				</TabsList>
-				<TabsContent value={SettingsTab.User}>
+				<TabsContent
+					value={SettingsTab.User}
+					className="min-h-0 overflow-y-auto"
+				>
 					<UserSettings />
 				</TabsContent>
-				<TabsContent value={SettingsTab.Project}>
+				<TabsContent
+					value={SettingsTab.Project}
+					className="min-h-0 overflow-y-auto"
+				>
 					<ProjectSettings />
 				</TabsContent>
 			</Tabs>
