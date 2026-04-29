@@ -41,6 +41,11 @@
   "settings.title": "Settings",
   "settings.tabs.user": "User Settings",
   "settings.tabs.project": "Project Settings",
+  "settings.tabs.experimental": "Experimental",
+  "settings.experimental.title": "Experimental Features",
+  "settings.experimental.description": "Enable experimental features that are not yet stable.",
+  "settings.experimental.xtermjs.label": "Use xterm.js renderer",
+  "settings.experimental.xtermjs.description": "Use the xterm.js terminal renderer for command output.",
   "settings.saving.inProgress": "Saving...",
   "settings.saving.done": "All changes saved",
 

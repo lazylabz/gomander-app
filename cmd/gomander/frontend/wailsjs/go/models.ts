@@ -137,6 +137,11 @@ export namespace domain {
 	    "settings.title": string;
 	    "settings.tabs.user": string;
 	    "settings.tabs.project": string;
+	    "settings.tabs.experimental": string;
+	    "settings.experimental.title": string;
+	    "settings.experimental.description": string;
+	    "settings.experimental.xtermjs.label": string;
+	    "settings.experimental.xtermjs.description": string;
 	    "settings.saving.inProgress": string;
 	    "settings.saving.done": string;
 	    "aboutModal.version": string;
