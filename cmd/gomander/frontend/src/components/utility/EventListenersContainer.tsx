@@ -5,6 +5,7 @@ import { eventService } from "@/contracts/service.ts";
 import { Event, type EventData } from "@/contracts/types.ts";
 import { removeKeyFromLocalStorage } from "@/helpers/localStorage.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
+import { terminalStore } from "@/store/terminalStore.ts";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { cleanCommandLogs } from "@/useCases/command/cleanCommandLogs.ts";
@@ -29,6 +30,15 @@ export const EventListenersContainer = () => {
 				const bufferCopy = new Map(logsBuffer.current);
 				addLogs(bufferCopy, userConfig.logLineLimit);
 				logsBuffer.current.clear();
+
+				// Write directly to any open terminals (bypasses React re-render cycle)
+				const { terminals } = terminalStore.getState();
+				for (const [commandId, lines] of bufferCopy) {
+					const term = terminals.get(commandId);
+					if (term) {
+						for (const line of lines) term.writeln(line);
+					}
+				}
 			}
 		}, 30); // Flush every 30ms
 
@@ -59,6 +69,7 @@ export const EventListenersContainer = () => {
 			(data: EventData[Event.PROCESS_STARTED]) => {
 				updateCommandStatus(data, CommandStatus.RUNNING);
 				cleanCommandLogs(data);
+				terminalStore.getState().terminals.get(data)?.reset();
 			},
 		);
 
