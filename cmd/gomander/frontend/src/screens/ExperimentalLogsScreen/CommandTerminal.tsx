@@ -1,9 +1,11 @@
 import "@xterm/xterm/css/xterm.css";
 import { FitAddon } from "@xterm/addon-fit";
+import { WebLinksAddon } from "@xterm/addon-web-links";
 import type { ITheme } from "@xterm/xterm";
 import { useEffect, useRef } from "react";
 
 import { useTheme } from "@/contexts/theme.tsx";
+import { externalBrowserService } from "@/contracts/service.ts";
 import { terminalStore } from "@/store/terminalStore.ts";
 
 export const XTERM_THEMES: Record<"light" | "dark", ITheme> = {
@@ -18,6 +20,10 @@ export const XTERM_THEMES: Record<"light" | "dark", ITheme> = {
 
 type Props = {
 	commandId: string;
+};
+
+const openTerminalLink = (_: unknown, uri: string) => {
+	externalBrowserService.browserOpenURL(uri);
 };
 
 export const CommandTerminal = ({ commandId }: Props) => {
@@ -47,7 +53,11 @@ export const CommandTerminal = ({ commandId }: Props) => {
 		}
 
 		const fit = new FitAddon();
+		const links = new WebLinksAddon(openTerminalLink);
+
 		term.loadAddon(fit);
+		term.loadAddon(links);
+
 		fit.fit();
 		fitRef.current = fit;
 
