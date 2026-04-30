@@ -4,7 +4,6 @@ import type { ITheme } from "@xterm/xterm";
 import { useEffect, useRef } from "react";
 
 import { useTheme } from "@/contexts/theme.tsx";
-import { commandStore } from "@/store/commandStore.ts";
 import { terminalStore } from "@/store/terminalStore.ts";
 
 export const XTERM_THEMES: Record<"light" | "dark", ITheme> = {
@@ -32,14 +31,13 @@ export const CommandTerminal = ({ commandId }: Props) => {
 			.getState()
 			.getOrCreate(commandId, xtermThemeRef.current);
 
+		// Correct theme in case terminal was pre-created by EventListenersContainer
+		term.options.theme = xtermThemeRef.current;
+
 		if (term.element) {
 			// Terminal was previously opened — re-attach its DOM element
 			container.appendChild(term.element);
 		} else {
-			// First open: replay logs currently in store, then open into the container
-			const existingLogs =
-				commandStore.getState().commandsLogs[commandId] ?? [];
-			for (const line of existingLogs) term.writeln(line);
 			term.open(container);
 		}
 

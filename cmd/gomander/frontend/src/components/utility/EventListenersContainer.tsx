@@ -32,12 +32,10 @@ export const EventListenersContainer = () => {
 				logsBuffer.current.clear();
 
 				// Write directly to any open terminals (bypasses React re-render cycle)
-				const { terminals } = terminalStore.getState();
+				const { getOrCreate, currentTheme } = terminalStore.getState();
 				for (const [commandId, lines] of bufferCopy) {
-					const term = terminals.get(commandId);
-					if (term) {
-						for (const line of lines) term.writeln(line);
-					}
+					const term = getOrCreate(commandId, currentTheme);
+					for (const line of lines) term.writeln(line);
 				}
 			}
 		}, 30); // Flush every 30ms

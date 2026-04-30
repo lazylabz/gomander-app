@@ -4,6 +4,7 @@ import { createStore } from "zustand/vanilla";
 
 type TerminalState = {
 	terminals: Map<string, Terminal>;
+	currentTheme: ITheme;
 	getOrCreate: (commandId: string, theme: ITheme) => Terminal;
 	dispose: (commandId: string) => void;
 	disposeAll: () => void;
@@ -12,6 +13,7 @@ type TerminalState = {
 
 export const terminalStore = createStore<TerminalState>()((set, get) => ({
 	terminals: new Map(),
+	currentTheme: { background: "#0a0a0a", foreground: "#fbfbfb" }, // dark default
 
 	getOrCreate: (commandId, theme) => {
 		const { terminals } = get();
@@ -49,5 +51,6 @@ export const terminalStore = createStore<TerminalState>()((set, get) => ({
 		for (const term of terminals.values()) {
 			term.options.theme = theme;
 		}
+		set({ currentTheme: theme });
 	},
 }));
