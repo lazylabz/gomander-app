@@ -7,7 +7,12 @@ import { useTheme } from "@/contexts/theme.tsx";
 import { terminalStore } from "@/store/terminalStore.ts";
 
 export const XTERM_THEMES: Record<"light" | "dark", ITheme> = {
-	light: { background: "#ffffff", foreground: "#0a0a0a" },
+	light: {
+		background: "#ffffff",
+		foreground: "#0a0a0a",
+		selectionBackground: "#ebebeb",
+		selectionInactiveBackground: "#f5f5f5",
+	},
 	dark: { background: "#0a0a0a", foreground: "#fbfbfb" },
 };
 
