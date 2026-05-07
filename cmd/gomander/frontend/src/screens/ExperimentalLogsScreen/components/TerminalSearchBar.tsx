@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { ChangeEvent, KeyboardEvent, RefObject } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Input } from "src/design-system/components/ui/input.tsx";
+import { Input } from "@/design-system/components/ui/input.tsx";
 
 type Props = {
 	inputRef: RefObject<HTMLInputElement | null>;

@@ -5,10 +5,10 @@ import { WebLinksAddon } from "@xterm/addon-web-links";
 import type { ITheme } from "@xterm/xterm";
 import { useEffect, useRef, useState } from "react";
 
-import { useTheme } from "src/contexts/theme.tsx";
-import { externalBrowserService } from "src/contracts/service.ts";
-import { useShortcut } from "src/hooks/useShortcut.ts";
-import { terminalStore } from "src/store/terminalStore.ts";
+import { useTheme } from "@/contexts/theme.tsx";
+import { externalBrowserService } from "@/contracts/service.ts";
+import { useShortcut } from "@/hooks/useShortcut.ts";
+import { terminalStore } from "@/store/terminalStore.ts";
 import { useTerminalSearch } from "../hooks/useTerminalSearch.ts";
 import { TerminalSearchBar } from "./TerminalSearchBar.tsx";
 
