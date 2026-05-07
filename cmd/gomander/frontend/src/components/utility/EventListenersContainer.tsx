@@ -5,7 +5,6 @@ import { useTheme } from "@/contexts/theme.tsx";
 import { eventService } from "@/contracts/service.ts";
 import { Event, type EventData } from "@/contracts/types.ts";
 import { removeKeyFromLocalStorage } from "@/helpers/localStorage.ts";
-import { XTERM_THEMES } from "@/screens/ExperimentalLogsScreen/CommandTerminal.tsx";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { terminalStore } from "@/store/terminalStore.ts";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
@@ -13,6 +12,7 @@ import { CommandStatus } from "@/types/CommandStatus.ts";
 import { cleanCommandLogs } from "@/useCases/command/cleanCommandLogs.ts";
 import { recordCommandsErrors } from "@/useCases/command/recordCommandsErrors.ts";
 import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
+import { XTERM_THEMES } from "../../screens/ExperimentalLogsScreen/components/CommandTerminal.tsx";
 
 export const EventListenersContainer = () => {
 	const addLogs = useCommandStore((state) => state.addLogs);

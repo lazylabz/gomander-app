@@ -4,7 +4,7 @@ import {
 } from "@/design-system/components/ui/sidebar.tsx";
 import { cn } from "@/design-system/lib/utils.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
-import { CommandTerminal } from "./CommandTerminal.tsx";
+import { CommandTerminal } from "./components/CommandTerminal.tsx";
 
 export const ExperimentalLogsScreen = () => {
 	const activeCommandId = useCommandStore((s) => s.activeCommandId);
