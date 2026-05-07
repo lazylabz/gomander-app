@@ -21,6 +21,7 @@ export const terminalStore = createStore<TerminalState>()((set, get) => ({
 			return terminals.get(commandId) as Terminal;
 		}
 		const term = new Terminal({
+			allowProposedApi: true,
 			convertEol: true,
 			scrollback: 10_000,
 			disableStdin: true,

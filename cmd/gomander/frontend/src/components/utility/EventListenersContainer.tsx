@@ -1,9 +1,11 @@
 import { Fragment, useEffect, useRef } from "react";
 
 import { getCommandGroupSectionOpenLocalStorageKey } from "@/constants/localStorage.ts";
+import { useTheme } from "@/contexts/theme.tsx";
 import { eventService } from "@/contracts/service.ts";
 import { Event, type EventData } from "@/contracts/types.ts";
 import { removeKeyFromLocalStorage } from "@/helpers/localStorage.ts";
+import { XTERM_THEMES } from "@/screens/ExperimentalLogsScreen/CommandTerminal.tsx";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { terminalStore } from "@/store/terminalStore.ts";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
@@ -15,6 +17,11 @@ import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
 export const EventListenersContainer = () => {
 	const addLogs = useCommandStore((state) => state.addLogs);
 	const userConfig = useUserConfigurationStore((state) => state.userConfig);
+	const { theme } = useTheme();
+
+	useEffect(() => {
+		terminalStore.getState().setThemeAll(XTERM_THEMES[theme]);
+	}, [theme]);
 
 	const logsBuffer = useRef(new Map<string, string[]>());
 	const errorBuffer = useRef<string[]>([]);

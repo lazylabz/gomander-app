@@ -1,19 +1,23 @@
 import "@xterm/xterm/css/xterm.css";
 import { FitAddon } from "@xterm/addon-fit";
+import { SearchAddon } from "@xterm/addon-search";
 import { WebLinksAddon } from "@xterm/addon-web-links";
 import type { ITheme } from "@xterm/xterm";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useTheme } from "@/contexts/theme.tsx";
 import { externalBrowserService } from "@/contracts/service.ts";
+import { useShortcut } from "@/hooks/useShortcut.ts";
 import { terminalStore } from "@/store/terminalStore.ts";
+import { TerminalSearchBar } from "./TerminalSearchBar.tsx";
+import { useTerminalSearch } from "./useTerminalSearch.ts";
 
 export const XTERM_THEMES: Record<"light" | "dark", ITheme> = {
 	light: {
 		background: "#ffffff",
 		foreground: "#0a0a0a",
-		selectionBackground: "#ebebeb",
-		selectionInactiveBackground: "#f5f5f5",
+		selectionBackground: "#f0c000",
+		selectionInactiveBackground: "#f0c000",
 	},
 	dark: { background: "#0a0a0a", foreground: "#fbfbfb" },
 };
@@ -28,22 +32,48 @@ const openTerminalLink = (_: unknown, uri: string) => {
 
 export const CommandTerminal = ({ commandId }: Props) => {
 	const { theme } = useTheme();
-	const containerRef = useRef<HTMLDivElement>(null);
-	const fitRef = useRef<FitAddon | null>(null);
-	const xtermThemeRef = useRef(XTERM_THEMES[theme]);
-	xtermThemeRef.current = XTERM_THEMES[theme];
 
-	// Mount / re-attach terminal on activation; detach (without dispose) on deactivation
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	const fitRef = useRef<FitAddon | null>(null);
+	const searchRef = useRef<SearchAddon | null>(null);
+
+	const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+	const [searchOpen, setSearchOpen] = useState(false);
+
+	const {
+		searchQuery,
+		resultCount,
+		setResultCount,
+		handleSearchInputChange,
+		clearSearch,
+		nextMatch,
+		prevMatch,
+	} = useTerminalSearch(searchRef, theme);
+
+	useShortcut("Mod-F", () => setSearchOpen(true));
+
+	useEffect(() => {
+		if (searchOpen) {
+			searchInputRef.current?.focus();
+		}
+	}, [searchOpen]);
+
+	const handleClose = () => {
+		setSearchOpen(false);
+		clearSearch();
+	};
+
 	useEffect(() => {
 		if (!containerRef.current) return;
 		const container = containerRef.current;
 
-		const term = terminalStore
-			.getState()
-			.getOrCreate(commandId, xtermThemeRef.current);
+		const { getOrCreate, currentTheme } = terminalStore.getState();
+		const term = getOrCreate(commandId, currentTheme);
 
 		// Correct theme in case terminal was pre-created by EventListenersContainer
-		term.options.theme = xtermThemeRef.current;
+		term.options.theme = currentTheme;
 
 		if (term.element) {
 			// Terminal was previously opened — re-attach its DOM element
@@ -54,18 +84,30 @@ export const CommandTerminal = ({ commandId }: Props) => {
 
 		const fit = new FitAddon();
 		const links = new WebLinksAddon(openTerminalLink);
+		const search = new SearchAddon();
 
 		term.loadAddon(fit);
 		term.loadAddon(links);
+		term.loadAddon(search);
 
 		fit.fit();
 		fitRef.current = fit;
+		searchRef.current = search;
+
+		const resultsHandle = search.onDidChangeResults(
+			({ resultCount: count }) => {
+				setResultCount(count);
+			},
+		);
 
 		const ro = new ResizeObserver(() => fitRef.current?.fit());
 		ro.observe(container);
 
 		return () => {
 			ro.disconnect();
+			resultsHandle.dispose();
+			search.dispose();
+			searchRef.current = null;
 			// Detach terminal DOM — do NOT dispose, terminal lives in terminalStore
 			if (term.element && container.contains(term.element)) {
 				container.removeChild(term.element);
@@ -73,12 +115,22 @@ export const CommandTerminal = ({ commandId }: Props) => {
 			fit.dispose();
 			fitRef.current = null;
 		};
-	}, [commandId]);
+	}, [commandId, setResultCount]);
 
-	// Propagate theme change to all open terminals
-	useEffect(() => {
-		terminalStore.getState().setThemeAll(XTERM_THEMES[theme]);
-	}, [theme]);
-
-	return <div ref={containerRef} className="absolute inset-0" />;
+	return (
+		<div className="absolute inset-0">
+			<div ref={containerRef} className="absolute inset-0" />
+			{searchOpen && (
+				<TerminalSearchBar
+					inputRef={searchInputRef}
+					query={searchQuery}
+					resultCount={resultCount}
+					onChange={handleSearchInputChange}
+					onPrev={prevMatch}
+					onNext={nextMatch}
+					onClose={handleClose}
+				/>
+			)}
+		</div>
+	);
 };
