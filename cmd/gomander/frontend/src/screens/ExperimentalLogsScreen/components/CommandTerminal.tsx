@@ -16,8 +16,8 @@ export const XTERM_THEMES: Record<"light" | "dark", ITheme> = {
 	light: {
 		background: "#ffffff",
 		foreground: "#0a0a0a",
-		selectionBackground: "#f0c000",
-		selectionInactiveBackground: "#f0c000",
+		selectionBackground: "#ebebeb",
+		selectionInactiveBackground: "#f5f5f5",
 	},
 	dark: { background: "#0a0a0a", foreground: "#fbfbfb" },
 };
