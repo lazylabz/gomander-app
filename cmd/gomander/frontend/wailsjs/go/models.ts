@@ -108,6 +108,7 @@ export namespace domain {
 	    "common.continue": string;
 	    "common.add": string;
 	    "common.advanced": string;
+	    "common.close": string;
 	    "sidebar.project.close": string;
 	    "sidebar.commands.title": string;
 	    "sidebar.commands.add": string;
@@ -134,6 +135,8 @@ export namespace domain {
 	    "projectSelection.exportAction": string;
 	    "logs.matches_one": string;
 	    "logs.matches_other": string;
+	    "logs.searchPrev": string;
+	    "logs.searchNext": string;
 	    "settings.title": string;
 	    "settings.tabs.user": string;
 	    "settings.tabs.project": string;

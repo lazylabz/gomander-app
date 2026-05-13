@@ -11,6 +11,7 @@ type Localization struct {
 	CommonContinue  string `json:"common.continue"`
 	CommonAdd       string `json:"common.add"`
 	CommonAdvanced  string `json:"common.advanced"`
+	CommonClose     string `json:"common.close"`
 
 	// sidebar
 	SidebarProjectClose                string `json:"sidebar.project.close"`
@@ -43,6 +44,8 @@ type Localization struct {
 	// logs
 	LogsMatchesOne   string `json:"logs.matches_one"`
 	LogsMatchesOther string `json:"logs.matches_other"`
+	LogsSearchPrev   string `json:"logs.searchPrev"`
+	LogsSearchNext   string `json:"logs.searchNext"`
 
 	// settings screen
 	SettingsTitle           string `json:"settings.title"`

@@ -8,6 +8,7 @@
   "common.continue": "Continue",
   "common.add": "Add",
   "common.advanced": "Advanced",
+  "common.close": "Close",
 
   "sidebar.project.close": "Close",
   "sidebar.commands.title": "Commands",
@@ -37,6 +38,8 @@
 
   "logs.matches_one": "{{count}} match",
   "logs.matches_other": "{{count}} matches",
+  "logs.searchPrev": "Previous match",
+  "logs.searchNext": "Next match",
 
   "settings.title": "Settings",
   "settings.tabs.user": "User Settings",

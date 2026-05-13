@@ -8,6 +8,7 @@
   "common.continue": "Continuar",
   "common.add": "Añadir",
   "common.advanced": "Avanzado",
+  "common.close": "Cerrar",
 
   "sidebar.project.close": "Cerrar",
   "sidebar.commands.title": "Comandos",
@@ -37,6 +38,8 @@
 
   "logs.matches_one": "{{count}} coincidencia",
   "logs.matches_other": "{{count}} coincidencias",
+  "logs.searchPrev": "Coincidencia anterior",
+  "logs.searchNext": "Siguiente coincidencia",
 
   "settings.title": "Ajustes",
   "settings.tabs.user": "Ajustes de usuario",

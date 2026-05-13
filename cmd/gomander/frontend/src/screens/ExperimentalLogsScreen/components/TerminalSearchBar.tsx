@@ -61,7 +61,7 @@ export const TerminalSearchBar = ({
 						<button
 							type="button"
 							onClick={onPrev}
-							aria-label="Previous match"
+							aria-label={t("logs.searchPrev")}
 							className="inline-flex items-center border-0 bg-transparent p-0 text-muted-foreground hover:text-foreground cursor-pointer"
 						>
 							<ChevronLeft size={14} />
@@ -69,7 +69,7 @@ export const TerminalSearchBar = ({
 						<button
 							type="button"
 							onClick={onNext}
-							aria-label="Next match"
+							aria-label={t("logs.searchNext")}
 							className="inline-flex items-center border-0 bg-transparent p-0 text-muted-foreground hover:text-foreground cursor-pointer"
 						>
 							<ChevronRight size={14} />
@@ -80,7 +80,7 @@ export const TerminalSearchBar = ({
 				<button
 					type="button"
 					onClick={onClose}
-					aria-label="Close"
+					aria-label={t("common.close")}
 					className="inline-flex items-center border-0 bg-transparent p-0 text-muted-foreground hover:text-foreground cursor-pointer"
 				>
 					<X size={14} />
