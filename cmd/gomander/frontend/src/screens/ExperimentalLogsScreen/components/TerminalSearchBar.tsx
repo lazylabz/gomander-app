@@ -55,28 +55,37 @@ export const TerminalSearchBar = ({
 				onChange={onChange}
 				onKeyDown={handleKeyDown}
 			/>
-			<span className="text-xs text-muted-foreground pl-2 flex items-center gap-2 pb-1 justify-between select-none">
+			<div className="text-xs text-muted-foreground pl-2 flex items-center gap-2 pb-1 justify-between select-none">
 				<div className="flex flex-row items-center gap-2">
 					<div className="flex flex-row items-center">
-						<ChevronLeft
-							className="text-muted-foreground hover:text-foreground cursor-pointer"
+						<button
+							type="button"
 							onClick={onPrev}
-							size={14}
-						/>
-						<ChevronRight
-							className="text-muted-foreground hover:text-foreground cursor-pointer"
+							aria-label="Previous match"
+							className="inline-flex items-center border-0 bg-transparent p-0 text-muted-foreground hover:text-foreground cursor-pointer"
+						>
+							<ChevronLeft size={14} />
+						</button>
+						<button
+							type="button"
 							onClick={onNext}
-							size={14}
-						/>
+							aria-label="Next match"
+							className="inline-flex items-center border-0 bg-transparent p-0 text-muted-foreground hover:text-foreground cursor-pointer"
+						>
+							<ChevronRight size={14} />
+						</button>
 					</div>
 					{t("logs.matches", { count: resultCount })}
 				</div>
-				<X
-					size={14}
+				<button
+					type="button"
 					onClick={onClose}
-					className="text-muted-foreground hover:text-foreground cursor-pointer"
-				/>
-			</span>
+					aria-label="Close"
+					className="inline-flex items-center border-0 bg-transparent p-0 text-muted-foreground hover:text-foreground cursor-pointer"
+				>
+					<X size={14} />
+				</button>
+			</div>
 		</div>
 	);
 };
