@@ -12,6 +12,7 @@ type TerminalState = {
 	dispose: (commandId: string) => void;
 	disposeAll: () => void;
 	setThemeAll: (theme: ITheme) => void;
+	resetTerminal: (commandId: string) => void;
 };
 
 export const terminalStore = createStore<TerminalState>()((set, get) => ({
@@ -72,5 +73,10 @@ export const terminalStore = createStore<TerminalState>()((set, get) => ({
 			term.options.theme = theme;
 		}
 		set({ currentTheme: theme });
+	},
+
+	resetTerminal: (commandId: string) => {
+		const { terminals } = get();
+		terminals.get(commandId)?.reset();
 	},
 }));
