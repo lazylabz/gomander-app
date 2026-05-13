@@ -69,10 +69,10 @@ export const CommandTerminal = ({ commandId }: Props) => {
 		if (!containerRef.current) return;
 		const container = containerRef.current;
 
-		const { getOrCreate, currentTheme } = terminalStore.getState();
-		const term = getOrCreate(commandId, currentTheme);
+		const { getOrCreate, drainPendingLogs, currentTheme } =
+			terminalStore.getState();
+		const term = getOrCreate(commandId);
 
-		// Correct theme in case terminal was pre-created by EventListenersContainer
 		term.options.theme = currentTheme;
 
 		if (term.element) {
@@ -80,6 +80,8 @@ export const CommandTerminal = ({ commandId }: Props) => {
 			container.appendChild(term.element);
 		} else {
 			term.open(container);
+			// Backfill logs that arrived before this terminal was opened
+			for (const line of drainPendingLogs(commandId)) term.writeln(line);
 		}
 
 		const fit = new FitAddon();
