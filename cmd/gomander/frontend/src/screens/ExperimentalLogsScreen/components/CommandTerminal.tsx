@@ -104,16 +104,25 @@ export const CommandTerminal = ({ commandId }: Props) => {
 		ro.observe(container);
 
 		return () => {
+			// Disconnect resize observer
 			ro.disconnect();
+
+			// Dispose/clean search related vars
 			resultsHandle.dispose();
 			search.dispose();
 			searchRef.current = null;
+
 			// Detach terminal DOM — do NOT dispose, terminal lives in terminalStore
 			if (term.element && container.contains(term.element)) {
 				container.removeChild(term.element);
 			}
+
+			// Dispose/clean fit related vars
 			fit.dispose();
 			fitRef.current = null;
+
+			// Dispose/clean links addon
+			links.dispose();
 		};
 	}, [commandId, setResultCount]);
 
