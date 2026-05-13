@@ -29,7 +29,7 @@ export const terminalStore = createStore<TerminalState>()((set, get) => ({
 			theme,
 		});
 		terminals.set(commandId, term);
-		set({ terminals });
+		set({ terminals: new Map(terminals) });
 		return term;
 	},
 
@@ -37,14 +37,13 @@ export const terminalStore = createStore<TerminalState>()((set, get) => ({
 		const { terminals } = get();
 		terminals.get(commandId)?.dispose();
 		terminals.delete(commandId);
-		set({ terminals });
+		set({ terminals: new Map(terminals) });
 	},
 
 	disposeAll: () => {
 		const { terminals } = get();
 		for (const term of terminals.values()) term.dispose();
-		terminals.clear();
-		set({ terminals });
+		set({ terminals: new Map() });
 	},
 
 	setThemeAll: (theme) => {
