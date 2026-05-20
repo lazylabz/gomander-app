@@ -1,0 +1,68 @@
+name: Tag on version bump
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'internal/releases/release.go'
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    name: Push tag when CurrentRelease changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Use RELEASE_PERSONAL_ACCESS_TOKEN (a PAT with `contents: write`) if
+          # present so that pushing the tag triggers downstream workflows (e.g.
+          # release.yml). Falls back to GITHUB_TOKEN, which will push the tag
+          # but will NOT trigger other workflows.
+          #
+          # To renew the token when it expires:
+          #   1. Go to https://github.com/settings/personal-access-tokens
+          #   2. Find the existing token and click "Regenerate token" (or
+          #      create a new fine-grained token scoped to this repo with
+          #      Repository permissions -> Contents: Read and write).
+          #   3. Copy the new token value.
+          #   4. In the repo: Settings -> Secrets and variables -> Actions,
+          #      update the RELEASE_PERSONAL_ACCESS_TOKEN secret with the new
+          #      value.
+          token: ${{ secrets.RELEASE_PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Extract CurrentRelease version
+        id: version
+        run: |
+          version=$(grep -oE 'CurrentRelease = "v[0-9]+\.[0-9]+\.[0-9]+"' internal/releases/release.go \
+            | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')
+          if [ -z "$version" ]; then
+            echo "Could not extract CurrentRelease from internal/releases/release.go" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Check if tag already exists
+        id: tag_check
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Tag ${{ steps.version.outputs.version }} already exists, skipping."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Configure git
+        if: steps.tag_check.outputs.exists == 'false'
+        run: |
+          git config user.name "moisesrj97"
+          git config user.email "65286072+moisesrj97@users.noreply.github.com"
+
+      - name: Create and push tag
+        if: steps.tag_check.outputs.exists == 'false'
+        run: |
+          git tag -a "${{ steps.version.outputs.version }}" -m "Release ${{ steps.version.outputs.version }}"
+          git push origin "${{ steps.version.outputs.version }}"
