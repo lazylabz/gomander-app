@@ -88,8 +88,8 @@ jobs:
       - name: Install Wails CLI
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-      - name: Install NSIS
-        run: choco install nsis -y --no-progress
+      - name: Add NSIS to PATH
+        run: echo "C:\Program Files (x86)\NSIS" >> $GITHUB_PATH
 
       - name: Build Windows amd64
         working-directory: cmd/gomander
