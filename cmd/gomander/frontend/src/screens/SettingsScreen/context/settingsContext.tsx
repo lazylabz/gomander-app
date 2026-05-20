@@ -22,6 +22,7 @@ import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 export enum SettingsTab {
 	User = "user",
 	Project = "project",
+	Experimental = "experimental",
 }
 
 type SupportedLanguage = {

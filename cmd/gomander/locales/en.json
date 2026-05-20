@@ -8,6 +8,7 @@
   "common.continue": "Continue",
   "common.add": "Add",
   "common.advanced": "Advanced",
+  "common.close": "Close",
 
   "sidebar.project.close": "Close",
   "sidebar.commands.title": "Commands",
@@ -37,10 +38,17 @@
 
   "logs.matches_one": "{{count}} match",
   "logs.matches_other": "{{count}} matches",
+  "logs.searchPrev": "Previous match",
+  "logs.searchNext": "Next match",
 
   "settings.title": "Settings",
   "settings.tabs.user": "User Settings",
   "settings.tabs.project": "Project Settings",
+  "settings.tabs.experimental": "Experimental",
+  "settings.experimental.title": "Experimental Features",
+  "settings.experimental.description": "Enable experimental features that are not yet stable.",
+  "settings.experimental.xtermjs.label": "Use xterm.js renderer",
+  "settings.experimental.xtermjs.description": "Use the xterm.js terminal renderer for command output.",
   "settings.saving.inProgress": "Saving...",
   "settings.saving.done": "All changes saved",
 

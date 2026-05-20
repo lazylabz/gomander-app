@@ -1,19 +1,27 @@
 import { Fragment, useEffect, useRef } from "react";
 
 import { getCommandGroupSectionOpenLocalStorageKey } from "@/constants/localStorage.ts";
+import { useTheme } from "@/contexts/theme.tsx";
 import { eventService } from "@/contracts/service.ts";
 import { Event, type EventData } from "@/contracts/types.ts";
 import { removeKeyFromLocalStorage } from "@/helpers/localStorage.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
+import { terminalStore } from "@/store/terminalStore.ts";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { cleanCommandLogs } from "@/useCases/command/cleanCommandLogs.ts";
 import { recordCommandsErrors } from "@/useCases/command/recordCommandsErrors.ts";
 import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
+import { XTERM_THEMES } from "../../screens/ExperimentalLogsScreen/components/CommandTerminal.tsx";
 
 export const EventListenersContainer = () => {
 	const addLogs = useCommandStore((state) => state.addLogs);
 	const userConfig = useUserConfigurationStore((state) => state.userConfig);
+	const { theme } = useTheme();
+
+	useEffect(() => {
+		terminalStore.getState().setThemeAll(XTERM_THEMES[theme]);
+	}, [theme]);
 
 	const logsBuffer = useRef(new Map<string, string[]>());
 	const errorBuffer = useRef<string[]>([]);
@@ -29,6 +37,18 @@ export const EventListenersContainer = () => {
 				const bufferCopy = new Map(logsBuffer.current);
 				addLogs(bufferCopy, userConfig.logLineLimit);
 				logsBuffer.current.clear();
+
+				// Write directly to already-open terminals (bypasses React re-render cycle).
+				// Commands not yet viewed are buffered in terminalStore.pendingLogs;
+				const { terminals, bufferLogs } = terminalStore.getState();
+				for (const [commandId, lines] of bufferCopy) {
+					const term = terminals.get(commandId);
+					if (term) {
+						for (const line of lines) term.writeln(line);
+					} else {
+						bufferLogs(commandId, lines);
+					}
+				}
 			}
 		}, 30); // Flush every 30ms
 
@@ -59,6 +79,7 @@ export const EventListenersContainer = () => {
 			(data: EventData[Event.PROCESS_STARTED]) => {
 				updateCommandStatus(data, CommandStatus.RUNNING);
 				cleanCommandLogs(data);
+				terminalStore.getState().terminals.get(data)?.reset();
 			},
 		);
 

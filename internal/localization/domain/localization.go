@@ -11,6 +11,7 @@ type Localization struct {
 	CommonContinue  string `json:"common.continue"`
 	CommonAdd       string `json:"common.add"`
 	CommonAdvanced  string `json:"common.advanced"`
+	CommonClose     string `json:"common.close"`
 
 	// sidebar
 	SidebarProjectClose                string `json:"sidebar.project.close"`
@@ -43,12 +44,19 @@ type Localization struct {
 	// logs
 	LogsMatchesOne   string `json:"logs.matches_one"`
 	LogsMatchesOther string `json:"logs.matches_other"`
+	LogsSearchPrev   string `json:"logs.searchPrev"`
+	LogsSearchNext   string `json:"logs.searchNext"`
 
 	// settings screen
 	SettingsTitle           string `json:"settings.title"`
-	SettingsTabsUser        string `json:"settings.tabs.user"`
-	SettingsTabsProject     string `json:"settings.tabs.project"`
-	SettingsSavingInProgress string `json:"settings.saving.inProgress"`
+	SettingsTabsUser                    string `json:"settings.tabs.user"`
+	SettingsTabsProject                 string `json:"settings.tabs.project"`
+	SettingsTabsExperimental            string `json:"settings.tabs.experimental"`
+	SettingsExperimentalTitle           string `json:"settings.experimental.title"`
+	SettingsExperimentalDescription     string `json:"settings.experimental.description"`
+	SettingsExperimentalXtermjsLabel    string `json:"settings.experimental.xtermjs.label"`
+	SettingsExperimentalXtermjsDesc     string `json:"settings.experimental.xtermjs.description"`
+	SettingsSavingInProgress            string `json:"settings.saving.inProgress"`
 	SettingsSavingDone      string `json:"settings.saving.done"`
 
 	// aboutModal

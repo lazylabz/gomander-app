@@ -8,6 +8,7 @@
   "common.continue": "Continuar",
   "common.add": "Añadir",
   "common.advanced": "Avanzado",
+  "common.close": "Cerrar",
 
   "sidebar.project.close": "Cerrar",
   "sidebar.commands.title": "Comandos",
@@ -37,10 +38,17 @@
 
   "logs.matches_one": "{{count}} coincidencia",
   "logs.matches_other": "{{count}} coincidencias",
+  "logs.searchPrev": "Coincidencia anterior",
+  "logs.searchNext": "Siguiente coincidencia",
 
   "settings.title": "Ajustes",
   "settings.tabs.user": "Ajustes de usuario",
   "settings.tabs.project": "Ajustes del proyecto",
+  "settings.tabs.experimental": "Experimental",
+  "settings.experimental.title": "Características experimentales",
+  "settings.experimental.description": "Activa características experimentales que aún no son estables.",
+  "settings.experimental.xtermjs.label": "Usar renderizador xterm.js",
+  "settings.experimental.xtermjs.description": "Usa el renderizador de terminal xterm.js para la salida de comandos.",
   "settings.saving.inProgress": "Guardando...",
   "settings.saving.done": "Todos los cambios guardados",
 
