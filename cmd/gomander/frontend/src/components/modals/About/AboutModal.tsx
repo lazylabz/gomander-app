@@ -1,8 +1,8 @@
-import { Download, ExternalLink, Heart } from "lucide-react";
+import { Download, ExternalLink, Heart, Loader2, Rocket } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-
 import { useVersionContext } from "@/contexts/version.tsx";
-import { externalBrowserService } from "@/contracts/service.ts";
+import { externalBrowserService, helpersService } from "@/contracts/service.ts";
 import {
 	Avatar,
 	AvatarFallback,
@@ -16,6 +16,8 @@ import {
 import { cn } from "@/design-system/lib/utils.ts";
 import { GithubIcon } from "@/icons/GithubIcon.tsx";
 
+type OS = "darwin" | "linux" | "widows";
+
 export const AboutModal = ({
 	open,
 	setOpen,
@@ -24,8 +26,57 @@ export const AboutModal = ({
 	setOpen: (open: boolean) => void;
 }) => {
 	const { t } = useTranslation();
-	const { currentVersion, newVersion, openLatestReleasePage } =
-		useVersionContext();
+
+	const {
+		currentVersion,
+		newVersion,
+		updateStatus,
+		downloadLatestRelease,
+		installLatestRelease,
+	} = useVersionContext();
+
+	const [installDisclaimerModalOpen, setInstallDisclaimersModalOpen] =
+		useState(false);
+	const [os, setOs] = useState<OS | null>(null);
+
+	const fetchOs = useCallback(async () => {
+		const res = await helpersService.getOs();
+		setOs(res as OS);
+	}, []);
+
+	useEffect(() => {
+		fetchOs();
+	}, [fetchOs]);
+
+	const isDownloaded =
+		updateStatus === "downloaded" || updateStatus === "installing";
+	const isBusy =
+		updateStatus === "downloading" || updateStatus === "installing";
+
+	const buttonInfo = useMemo(() => {
+		switch (updateStatus) {
+			case "downloading":
+				return {
+					label: t("aboutModal.downloading"),
+					icon: <Loader2 className="size-4 animate-spin" />,
+				};
+			case "installing":
+				return {
+					label: t("aboutModal.installing"),
+					icon: <Loader2 className="size-4 animate-spin" />,
+				};
+			case "downloaded":
+				return {
+					label: t("aboutModal.installUpdate"),
+					icon: <Rocket className="size-4" />,
+				};
+			default:
+				return {
+					label: t("aboutModal.downloadUpdate"),
+					icon: <Download className="size-4" />,
+				};
+		}
+	}, [t, updateStatus]);
 
 	const handleGithubClick = () => {
 		const url = `https://github.com/lazylabz/gomander-app`;
@@ -36,6 +87,39 @@ export const AboutModal = ({
 		const url = `https://lazylabz.github.io/`;
 		externalBrowserService.browserOpenURL(url);
 	};
+
+	const handleInstallClick = async () => {
+		setOpen(false);
+		setInstallDisclaimersModalOpen(true);
+	};
+
+	const handleCloseDisclaimerModal = () => {
+		setInstallDisclaimersModalOpen(false);
+		setOpen(true);
+	};
+
+	if (installDisclaimerModalOpen) {
+		return (
+			<Dialog
+				open={installDisclaimerModalOpen}
+				onOpenChange={handleCloseDisclaimerModal}
+			>
+				<DialogContent className="sm:max-w-[628px]">
+					<p>test</p>
+					<p>{os === "darwin" && <p>MACOS DETECTED</p>}</p>
+					<Button
+						onClick={installLatestRelease}
+						disabled={isBusy}
+						variant="outline"
+						className="cursor-pointer"
+					>
+						{buttonInfo.icon}
+						{buttonInfo.label}
+					</Button>
+				</DialogContent>
+			</Dialog>
+		);
+	}
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
@@ -68,12 +152,15 @@ export const AboutModal = ({
 								</p>
 							</div>
 							<Button
-								onClick={openLatestReleasePage}
+								onClick={
+									isDownloaded ? handleInstallClick : downloadLatestRelease
+								}
+								disabled={isBusy}
 								variant="outline"
 								className="cursor-pointer"
 							>
-								<Download className="size-4" />
-								{t("aboutModal.downloadUpdate")}
+								{buttonInfo.icon}
+								{buttonInfo.label}
 							</Button>
 						</div>
 					</div>
