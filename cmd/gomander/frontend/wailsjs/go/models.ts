@@ -159,6 +159,14 @@ export namespace domain {
 	    "aboutModal.feedbackSubtitle": string;
 	    "aboutModal.teamTitle": string;
 	    "aboutModal.teamSubtitle": string;
+	    "aboutModal.installDisclaimer.title": string;
+	    "aboutModal.installDisclaimer.description": string;
+	    "aboutModal.installDisclaimer.releaseNotesTitle": string;
+	    "aboutModal.installDisclaimer.releaseNotesSubtitle": string;
+	    "aboutModal.installDisclaimer.macosTitle": string;
+	    "aboutModal.installDisclaimer.macosDescription": string;
+	    "aboutModal.installDisclaimer.copyCommand": string;
+	    "aboutModal.installDisclaimer.readMore": string;
 	    "modal.createCommand.title": string;
 	    "modal.editCommand.title": string;
 	    "modal.createCommandGroup.title": string;
