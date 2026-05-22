@@ -46,3 +46,7 @@ func (m *MockRuntimeFacade) OpenFolderInFileManager(path string) error {
 	args := m.Called(path)
 	return args.Error(0)
 }
+
+func (m *MockRuntimeFacade) CloseApp(ctx context.Context) {
+	m.Called(ctx)
+}

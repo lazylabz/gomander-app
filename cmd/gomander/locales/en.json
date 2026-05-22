@@ -56,6 +56,9 @@
   "aboutModal.newVersion": "Version {{version}} is available",
   "aboutModal.newVersionSubtitle": "Get the latest features and improvements",
   "aboutModal.downloadUpdate": "Download Update",
+  "aboutModal.downloading": "Downloading...",
+  "aboutModal.installUpdate": "Install Update",
+  "aboutModal.installing": "Installing...",
   "aboutModal.description": "Organize and launch your development commands from a single place. Built to streamline your workflow and eliminate terminal chaos.",
   "aboutModal.feedbackTitle": "Any feedback?",
   "aboutModal.feedbackSubtitle": "Visit our GitHub repository",
@@ -164,5 +167,7 @@
   "toast.settings.projectSaveSuccess": "Project settings saved successfully",
   "toast.settings.projectSaveFailed": "Failed to save project settings",
 
-  "toast.version.checkError": "Error checking for new releases"
+  "toast.version.checkError": "Error checking for new releases",
+  "toast.version.downloadFailed": "Failed to download the update",
+  "toast.version.installFailed": "Failed to install the update"
 }

@@ -151,6 +151,9 @@ export namespace domain {
 	    "aboutModal.newVersion": string;
 	    "aboutModal.newVersionSubtitle": string;
 	    "aboutModal.downloadUpdate": string;
+	    "aboutModal.downloading": string;
+	    "aboutModal.installUpdate": string;
+	    "aboutModal.installing": string;
 	    "aboutModal.description": string;
 	    "aboutModal.feedbackTitle": string;
 	    "aboutModal.feedbackSubtitle": string;
@@ -249,6 +252,8 @@ export namespace domain {
 	    "toast.settings.projectSaveSuccess": string;
 	    "toast.settings.projectSaveFailed": string;
 	    "toast.version.checkError": string;
+	    "toast.version.downloadFailed": string;
+	    "toast.version.installFailed": string;
 	}
 	export interface Project {
 	    id: string;
