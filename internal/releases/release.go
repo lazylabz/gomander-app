@@ -15,7 +15,7 @@ import (
 	"gomander/internal/facade"
 )
 
-const CurrentRelease = "v1.2.0"
+const CurrentRelease = "v1.3.0"
 
 const RepoOwnerAndName = "Lazylabz/gomander-app"
 
