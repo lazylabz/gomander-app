@@ -55,9 +55,7 @@ export const VersionProvider = ({
 		setErrorLoadingNewVersion(null);
 		try {
 			const release = await helpersService.isThereANewRelease();
-			if (release) {
-				setNewRelease(release);
-			}
+			setNewRelease(release || null);
 		} catch (err) {
 			setErrorLoadingNewVersion(err as Error);
 			console.error("Error checking for new releases:", err);
