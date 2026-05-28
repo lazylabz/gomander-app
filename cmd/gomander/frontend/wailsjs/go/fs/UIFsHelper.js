@@ -9,7 +9,3 @@ export function AskForDirPath() {
 export function OpenFileFolder(arg1) {
   return window['go']['fs']['UIFsHelper']['OpenFileFolder'](arg1);
 }
-
-export function SetContext(arg1) {
-  return window['go']['fs']['UIFsHelper']['SetContext'](arg1);
-}

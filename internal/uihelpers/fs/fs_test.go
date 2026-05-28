@@ -31,7 +31,7 @@ func TestUIFsHelper_SetContext(t *testing.T) {
 	ctx := context.Background()
 
 	// Act
-	helper.SetContext(ctx)
+	fs.SetUIFsHelperContext(helper, ctx)
 
 	// No Assert needed as this is a simple setter method
 	// The method doesn't return anything and just sets an internal field
@@ -43,7 +43,7 @@ func TestUIFsHelper_AskForDirPath(t *testing.T) {
 		mockRuntime := new(test.MockRuntimeFacade)
 		helper := fs.NewUIFsHelper(mockRuntime)
 		ctx := context.Background()
-		helper.SetContext(ctx)
+		fs.SetUIFsHelperContext(helper, ctx)
 
 		expectedPath := "/some/directory/path"
 		mockRuntime.On("OpenDirectoryDialog", ctx, runtime.OpenDialogOptions{}).Return(expectedPath, nil)
@@ -62,7 +62,7 @@ func TestUIFsHelper_AskForDirPath(t *testing.T) {
 		mockRuntime := new(test.MockRuntimeFacade)
 		helper := fs.NewUIFsHelper(mockRuntime)
 		ctx := context.Background()
-		helper.SetContext(ctx)
+		fs.SetUIFsHelperContext(helper, ctx)
 
 		expectedError := errors.New("dialog error")
 		mockRuntime.On("OpenDirectoryDialog", ctx, runtime.OpenDialogOptions{}).Return("", expectedError)
@@ -83,7 +83,7 @@ func TestUIFsHelper_OpenDirectoryDialog(t *testing.T) {
 	mockRuntime := new(test.MockRuntimeFacade)
 	helper := fs.NewUIFsHelper(mockRuntime)
 	ctx := context.Background()
-	helper.SetContext(ctx)
+	fs.SetUIFsHelperContext(helper, ctx)
 
 	filePath := "/some/directory/file.txt"
 	expectedFolderPath := "/some/directory"

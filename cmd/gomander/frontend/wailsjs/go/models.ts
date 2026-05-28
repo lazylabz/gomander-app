@@ -151,11 +151,22 @@ export namespace domain {
 	    "aboutModal.newVersion": string;
 	    "aboutModal.newVersionSubtitle": string;
 	    "aboutModal.downloadUpdate": string;
+	    "aboutModal.downloading": string;
+	    "aboutModal.installUpdate": string;
+	    "aboutModal.installing": string;
 	    "aboutModal.description": string;
 	    "aboutModal.feedbackTitle": string;
 	    "aboutModal.feedbackSubtitle": string;
 	    "aboutModal.teamTitle": string;
 	    "aboutModal.teamSubtitle": string;
+	    "aboutModal.installDisclaimer.title": string;
+	    "aboutModal.installDisclaimer.description": string;
+	    "aboutModal.installDisclaimer.releaseNotesTitle": string;
+	    "aboutModal.installDisclaimer.releaseNotesSubtitle": string;
+	    "aboutModal.installDisclaimer.macosTitle": string;
+	    "aboutModal.installDisclaimer.macosDescription": string;
+	    "aboutModal.installDisclaimer.copyCommand": string;
+	    "aboutModal.installDisclaimer.readMore": string;
 	    "modal.createCommand.title": string;
 	    "modal.editCommand.title": string;
 	    "modal.createCommandGroup.title": string;
@@ -249,6 +260,8 @@ export namespace domain {
 	    "toast.settings.projectSaveSuccess": string;
 	    "toast.settings.projectSaveFailed": string;
 	    "toast.version.checkError": string;
+	    "toast.version.downloadFailed": string;
+	    "toast.version.installFailed": string;
 	}
 	export interface Project {
 	    id: string;

@@ -56,11 +56,22 @@
   "aboutModal.newVersion": "Version {{version}} is available",
   "aboutModal.newVersionSubtitle": "Get the latest features and improvements",
   "aboutModal.downloadUpdate": "Download Update",
+  "aboutModal.downloading": "Downloading...",
+  "aboutModal.installUpdate": "Install Update",
+  "aboutModal.installing": "Installing...",
   "aboutModal.description": "Organize and launch your development commands from a single place. Built to streamline your workflow and eliminate terminal chaos.",
   "aboutModal.feedbackTitle": "Any feedback?",
   "aboutModal.feedbackSubtitle": "Visit our GitHub repository",
   "aboutModal.teamTitle": "Meet the Team",
   "aboutModal.teamSubtitle": "Learn more about LazyLabz",
+  "aboutModal.installDisclaimer.title": "Ready to install update",
+  "aboutModal.installDisclaimer.description": "Gomander will close and the installer will open to finish the update.",
+  "aboutModal.installDisclaimer.releaseNotesTitle": "Release notes",
+  "aboutModal.installDisclaimer.releaseNotesSubtitle": "See what's new in v{{version}}",
+  "aboutModal.installDisclaimer.macosTitle": "Heads up for macOS users",
+  "aboutModal.installDisclaimer.macosDescription": "Once installation finishes, open a terminal and run the following command to bypass the lack of code-signature issue:",
+  "aboutModal.installDisclaimer.copyCommand": "Copy command",
+  "aboutModal.installDisclaimer.readMore": "Read more",
 
   "modal.createCommand.title": "Create new command",
   "modal.editCommand.title": "Edit command",
@@ -164,5 +175,7 @@
   "toast.settings.projectSaveSuccess": "Project settings saved successfully",
   "toast.settings.projectSaveFailed": "Failed to save project settings",
 
-  "toast.version.checkError": "Error checking for new releases"
+  "toast.version.checkError": "Error checking for new releases",
+  "toast.version.downloadFailed": "Failed to download the update",
+  "toast.version.installFailed": "Failed to install the update"
 }

@@ -56,11 +56,22 @@
   "aboutModal.newVersion": "La versión {{version}} está disponible",
   "aboutModal.newVersionSubtitle": "Obtén las últimas novedades y mejoras",
   "aboutModal.downloadUpdate": "Descargar actualización",
+  "aboutModal.downloading": "Descargando...",
+  "aboutModal.installUpdate": "Instalar actualización",
+  "aboutModal.installing": "Instalando...",
   "aboutModal.description": "Organiza y lanza todos tus comandos de desarrollo desde un único lugar. Diseñado para simplificar tu flujo de trabajo y acabar con el caos de las terminales.",
   "aboutModal.feedbackTitle": "¿Tienes algún comentario?",
   "aboutModal.feedbackSubtitle": "Visita nuestro repositorio de GitHub",
   "aboutModal.teamTitle": "Conoce al equipo",
   "aboutModal.teamSubtitle": "Conoce más sobre LazyLabz",
+  "aboutModal.installDisclaimer.title": "Listo para instalar la actualización",
+  "aboutModal.installDisclaimer.description": "Gomander se cerrará y se abrirá el instalador para finalizar la actualización.",
+  "aboutModal.installDisclaimer.releaseNotesTitle": "Notas de la versión",
+  "aboutModal.installDisclaimer.releaseNotesSubtitle": "Descubre las novedades de la v{{version}}",
+  "aboutModal.installDisclaimer.macosTitle": "Aviso para usuarios de macOS",
+  "aboutModal.installDisclaimer.macosDescription": "Cuando termine la instalación, abre una terminal y ejecuta el siguiente comando para evitar el problema de falta de firma:",
+  "aboutModal.installDisclaimer.copyCommand": "Copiar comando",
+  "aboutModal.installDisclaimer.readMore": "Más información",
 
   "modal.createCommand.title": "Crear nuevo comando",
   "modal.editCommand.title": "Editar comando",
@@ -164,5 +175,7 @@
   "toast.settings.projectSaveSuccess": "Ajustes del proyecto guardados",
   "toast.settings.projectSaveFailed": "Error al guardar los ajustes del proyecto",
 
-  "toast.version.checkError": "Error al comprobar nuevas versiones"
+  "toast.version.checkError": "Error al comprobar nuevas versiones",
+  "toast.version.downloadFailed": "Error al descargar la actualización",
+  "toast.version.installFailed": "Error al instalar la actualización"
 }

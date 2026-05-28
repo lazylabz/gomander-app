@@ -22,14 +22,15 @@ import (
 	configusecases "gomander/internal/config/application/usecases"
 	configinfrastructure "gomander/internal/config/infrastructure"
 	"gomander/internal/eventbus"
-	localizationusecases "gomander/internal/localization/application/usecases"
 	"gomander/internal/facade"
+	localizationusecases "gomander/internal/localization/application/usecases"
 	"gomander/internal/logger"
 	projectusecases "gomander/internal/project/application/usecases"
 	projectinfrastructure "gomander/internal/project/infrastructure"
 	"gomander/internal/releases"
 	"gomander/internal/runner"
 	"gomander/internal/uihelpers/fs"
+	"gomander/internal/uihelpers/os_internal"
 	"gomander/internal/uihelpers/path"
 
 	"github.com/wailsapp/wails/v2"
@@ -56,7 +57,15 @@ func main() {
 	// Create instance of helpers
 	uiPathHelper := path.NewUiPathHelper()
 	uiFsHelper := fs.NewUIFsHelper(facade.DefaultRuntimeFacade{})
-	releaseHelper := releases.NewReleaseHelper()
+	uiOsHelper := os_internal.NewUIOsHelper()
+	releaseHelper := releases.NewReleaseHelper(
+		facade.DefaultRuntimeFacade{},
+		facade.DefaultOpenFacade{},
+		facade.DefaultOSFacade{},
+		facade.DefaultIOFacade{},
+		releases.DefaultLatestReleaseUrl,
+		releases.DefaultBinaryDownloadBaseUrl,
+	)
 
 	// Create instance of controllers
 	controllers := NewWailsControllers()
@@ -87,7 +96,8 @@ func main() {
 			controllers.loadUseCases(app.UseCases)
 
 			// Load context into helpers
-			uiFsHelper.SetContext(ctx)
+			fs.SetUIFsHelperContext(uiFsHelper, ctx)
+			releases.SetReleaseHelperContext(releaseHelper, ctx)
 
 			// Start http server for 3rd party integrations
 			server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases)
@@ -106,6 +116,7 @@ func main() {
 			controllers,
 			releaseHelper,
 			uiFsHelper,
+			uiOsHelper,
 		},
 		OnBeforeClose: app.OnBeforeClose,
 		EnumBind: []interface{}{

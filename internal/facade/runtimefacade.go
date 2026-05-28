@@ -2,6 +2,7 @@ package facade
 
 import (
 	"context"
+
 	"github.com/skratchdot/open-golang/open"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -16,6 +17,7 @@ type RuntimeFacade interface {
 	LogDebug(ctx context.Context, message string)
 	LogError(ctx context.Context, message string)
 	OpenFolderInFileManager(path string) error
+	CloseApp(ctx context.Context)
 }
 
 type DefaultRuntimeFacade struct{}
@@ -50,4 +52,8 @@ func (d DefaultRuntimeFacade) OpenDirectoryDialog(ctx context.Context, dialogOpt
 
 func (d DefaultRuntimeFacade) OpenFolderInFileManager(path string) error {
 	return open.Run(path)
+}
+
+func (d DefaultRuntimeFacade) CloseApp(ctx context.Context) {
+	runtime.Quit(ctx)
 }

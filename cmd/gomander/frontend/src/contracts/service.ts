@@ -33,9 +33,12 @@ import {
 	UpdateCommandGroupController,
 } from "../../wailsjs/go/main/WailsControllers";
 import type { domain } from "../../wailsjs/go/models.ts";
+import { GetOs } from "../../wailsjs/go/os_internal/UIOsHelper";
 import { GetComputedPath } from "../../wailsjs/go/path/UiPathHelper";
 import {
+	DownloadLatestRelease,
 	GetCurrentRelease,
+	InstallLatestReleaseAndQuit,
 	IsThereANewRelease,
 } from "../../wailsjs/go/releases/ReleaseHelper";
 import { BrowserOpenURL, EventsOff, EventsOn } from "../../wailsjs/runtime";
@@ -78,6 +81,9 @@ export const helpersService = {
 	getComputedPath: GetComputedPath,
 	isThereANewRelease: IsThereANewRelease,
 	getCurrentRelease: GetCurrentRelease,
+	downloadLatestRelease: DownloadLatestRelease,
+	installLatestReleaseAndQuit: InstallLatestReleaseAndQuit,
+	getOs: GetOs,
 	askForDirPath: AskForDirPath,
 	openFileFolder: OpenFileFolder,
 };

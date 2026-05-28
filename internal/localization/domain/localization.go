@@ -14,32 +14,32 @@ type Localization struct {
 	CommonClose     string `json:"common.close"`
 
 	// sidebar
-	SidebarProjectClose                string `json:"sidebar.project.close"`
-	SidebarCommandsTitle               string `json:"sidebar.commands.title"`
-	SidebarCommandsAdd                 string `json:"sidebar.commands.add"`
-	SidebarCommandsRemoveFromGroup     string `json:"sidebar.commands.removeFromGroup"`
-	SidebarCommandGroupsTitle          string `json:"sidebar.commandGroups.title"`
-	SidebarCommandGroupsAdd            string `json:"sidebar.commandGroups.add"`
-	SidebarCommandGroupsApplyReorder   string `json:"sidebar.commandGroups.applyReorder"`
-	SidebarCommandGroupsStartReorder   string `json:"sidebar.commandGroups.startReorder"`
-	SidebarCreateTitle                 string `json:"sidebar.create.title"`
-	SidebarCreateCommand               string `json:"sidebar.create.command"`
-	SidebarCreateCommandGroup          string `json:"sidebar.create.commandGroup"`
-	SidebarCreateNoCommandsTooltip     string `json:"sidebar.create.noCommandsTooltip"`
-	SidebarVersionCurrent              string `json:"sidebar.version.current"`
-	SidebarVersionNewAvailable         string `json:"sidebar.version.newAvailable"`
-	SidebarVersionLatest               string `json:"sidebar.version.latest"`
-	SidebarVersionCheckError           string `json:"sidebar.version.checkError"`
+	SidebarProjectClose              string `json:"sidebar.project.close"`
+	SidebarCommandsTitle             string `json:"sidebar.commands.title"`
+	SidebarCommandsAdd               string `json:"sidebar.commands.add"`
+	SidebarCommandsRemoveFromGroup   string `json:"sidebar.commands.removeFromGroup"`
+	SidebarCommandGroupsTitle        string `json:"sidebar.commandGroups.title"`
+	SidebarCommandGroupsAdd          string `json:"sidebar.commandGroups.add"`
+	SidebarCommandGroupsApplyReorder string `json:"sidebar.commandGroups.applyReorder"`
+	SidebarCommandGroupsStartReorder string `json:"sidebar.commandGroups.startReorder"`
+	SidebarCreateTitle               string `json:"sidebar.create.title"`
+	SidebarCreateCommand             string `json:"sidebar.create.command"`
+	SidebarCreateCommandGroup        string `json:"sidebar.create.commandGroup"`
+	SidebarCreateNoCommandsTooltip   string `json:"sidebar.create.noCommandsTooltip"`
+	SidebarVersionCurrent            string `json:"sidebar.version.current"`
+	SidebarVersionNewAvailable       string `json:"sidebar.version.newAvailable"`
+	SidebarVersionLatest             string `json:"sidebar.version.latest"`
+	SidebarVersionCheckError         string `json:"sidebar.version.checkError"`
 
 	// projectSelection
-	ProjectSelectionOpenTitle        string `json:"projectSelection.openTitle"`
-	ProjectSelectionWelcome          string `json:"projectSelection.welcome"`
-	ProjectSelectionEmptyState       string `json:"projectSelection.emptyState"`
-	ProjectSelectionCreateButton     string `json:"projectSelection.createButton"`
-	ProjectSelectionImportButton     string `json:"projectSelection.importButton"`
-	ProjectSelectionMoreOptions      string `json:"projectSelection.moreOptions"`
+	ProjectSelectionOpenTitle         string `json:"projectSelection.openTitle"`
+	ProjectSelectionWelcome           string `json:"projectSelection.welcome"`
+	ProjectSelectionEmptyState        string `json:"projectSelection.emptyState"`
+	ProjectSelectionCreateButton      string `json:"projectSelection.createButton"`
+	ProjectSelectionImportButton      string `json:"projectSelection.importButton"`
+	ProjectSelectionMoreOptions       string `json:"projectSelection.moreOptions"`
 	ProjectSelectionImportPackageJson string `json:"projectSelection.importPackageJson"`
-	ProjectSelectionExportAction     string `json:"projectSelection.exportAction"`
+	ProjectSelectionExportAction      string `json:"projectSelection.exportAction"`
 
 	// logs
 	LogsMatchesOne   string `json:"logs.matches_one"`
@@ -48,49 +48,61 @@ type Localization struct {
 	LogsSearchNext   string `json:"logs.searchNext"`
 
 	// settings screen
-	SettingsTitle           string `json:"settings.title"`
-	SettingsTabsUser                    string `json:"settings.tabs.user"`
-	SettingsTabsProject                 string `json:"settings.tabs.project"`
-	SettingsTabsExperimental            string `json:"settings.tabs.experimental"`
-	SettingsExperimentalTitle           string `json:"settings.experimental.title"`
-	SettingsExperimentalDescription     string `json:"settings.experimental.description"`
-	SettingsExperimentalXtermjsLabel    string `json:"settings.experimental.xtermjs.label"`
-	SettingsExperimentalXtermjsDesc     string `json:"settings.experimental.xtermjs.description"`
-	SettingsSavingInProgress            string `json:"settings.saving.inProgress"`
-	SettingsSavingDone      string `json:"settings.saving.done"`
+	SettingsTitle                    string `json:"settings.title"`
+	SettingsTabsUser                 string `json:"settings.tabs.user"`
+	SettingsTabsProject              string `json:"settings.tabs.project"`
+	SettingsTabsExperimental         string `json:"settings.tabs.experimental"`
+	SettingsExperimentalTitle        string `json:"settings.experimental.title"`
+	SettingsExperimentalDescription  string `json:"settings.experimental.description"`
+	SettingsExperimentalXtermjsLabel string `json:"settings.experimental.xtermjs.label"`
+	SettingsExperimentalXtermjsDesc  string `json:"settings.experimental.xtermjs.description"`
+	SettingsSavingInProgress         string `json:"settings.saving.inProgress"`
+	SettingsSavingDone               string `json:"settings.saving.done"`
 
 	// aboutModal
 	AboutModalVersion            string `json:"aboutModal.version"`
 	AboutModalNewVersion         string `json:"aboutModal.newVersion"`
 	AboutModalNewVersionSubtitle string `json:"aboutModal.newVersionSubtitle"`
 	AboutModalDownloadUpdate     string `json:"aboutModal.downloadUpdate"`
+	AboutModalDownloading        string `json:"aboutModal.downloading"`
+	AboutModalInstallUpdate      string `json:"aboutModal.installUpdate"`
+	AboutModalInstalling         string `json:"aboutModal.installing"`
 	AboutModalDescription        string `json:"aboutModal.description"`
 	AboutModalFeedbackTitle      string `json:"aboutModal.feedbackTitle"`
 	AboutModalFeedbackSubtitle   string `json:"aboutModal.feedbackSubtitle"`
 	AboutModalTeamTitle          string `json:"aboutModal.teamTitle"`
 	AboutModalTeamSubtitle       string `json:"aboutModal.teamSubtitle"`
 
+	AboutModalInstallDisclaimerTitle                string `json:"aboutModal.installDisclaimer.title"`
+	AboutModalInstallDisclaimerDescription          string `json:"aboutModal.installDisclaimer.description"`
+	AboutModalInstallDisclaimerReleaseNotesTitle    string `json:"aboutModal.installDisclaimer.releaseNotesTitle"`
+	AboutModalInstallDisclaimerReleaseNotesSubtitle string `json:"aboutModal.installDisclaimer.releaseNotesSubtitle"`
+	AboutModalInstallDisclaimerMacosTitle           string `json:"aboutModal.installDisclaimer.macosTitle"`
+	AboutModalInstallDisclaimerMacosDescription     string `json:"aboutModal.installDisclaimer.macosDescription"`
+	AboutModalInstallDisclaimerCopyCommand          string `json:"aboutModal.installDisclaimer.copyCommand"`
+	AboutModalInstallDisclaimerReadMore             string `json:"aboutModal.installDisclaimer.readMore"`
+
 	// modal chrome
-	ModalCreateCommandTitle         string `json:"modal.createCommand.title"`
-	ModalEditCommandTitle           string `json:"modal.editCommand.title"`
-	ModalCreateCommandGroupTitle    string `json:"modal.createCommandGroup.title"`
-	ModalEditCommandGroupTitle      string `json:"modal.editCommandGroup.title"`
-	ModalCreateProjectTitle         string `json:"modal.createProject.title"`
-	ModalDeleteProjectTitle         string `json:"modal.deleteProject.title"`
-	ModalDeleteProjectDescription   string `json:"modal.deleteProject.description"`
-	ModalImportProjectTitle         string `json:"modal.importProject.title"`
-	ModalImportProjectDescription   string `json:"modal.importProject.description"`
+	ModalCreateCommandTitle           string `json:"modal.createCommand.title"`
+	ModalEditCommandTitle             string `json:"modal.editCommand.title"`
+	ModalCreateCommandGroupTitle      string `json:"modal.createCommandGroup.title"`
+	ModalEditCommandGroupTitle        string `json:"modal.editCommandGroup.title"`
+	ModalCreateProjectTitle           string `json:"modal.createProject.title"`
+	ModalDeleteProjectTitle           string `json:"modal.deleteProject.title"`
+	ModalDeleteProjectDescription     string `json:"modal.deleteProject.description"`
+	ModalImportProjectTitle           string `json:"modal.importProject.title"`
+	ModalImportProjectDescription     string `json:"modal.importProject.description"`
 	ModalImportProjectAdvancedTrigger string `json:"modal.importProject.advancedTrigger"`
 
 	// commandForm
-	CommandFormNameLabel                string `json:"commandForm.nameLabel"`
-	CommandFormCommandLabel             string `json:"commandForm.commandLabel"`
-	CommandFormErrorPatternsLabel       string `json:"commandForm.errorPatternsLabel"`
-	CommandFormErrorPatternsDescription string `json:"commandForm.errorPatternsDescription"`
-	CommandFormLinkLabel                string `json:"commandForm.linkLabel"`
-	CommandFormWorkingDirectoryLabel    string `json:"commandForm.workingDirectoryLabel"`
-	CommandFormComputedPath             string `json:"commandForm.computedPath"`
-	CommandFormValidationNameRequired   string `json:"commandForm.validation.nameRequired"`
+	CommandFormNameLabel                 string `json:"commandForm.nameLabel"`
+	CommandFormCommandLabel              string `json:"commandForm.commandLabel"`
+	CommandFormErrorPatternsLabel        string `json:"commandForm.errorPatternsLabel"`
+	CommandFormErrorPatternsDescription  string `json:"commandForm.errorPatternsDescription"`
+	CommandFormLinkLabel                 string `json:"commandForm.linkLabel"`
+	CommandFormWorkingDirectoryLabel     string `json:"commandForm.workingDirectoryLabel"`
+	CommandFormComputedPath              string `json:"commandForm.computedPath"`
+	CommandFormValidationNameRequired    string `json:"commandForm.validation.nameRequired"`
 	CommandFormValidationCommandRequired string `json:"commandForm.validation.commandRequired"`
 
 	// commandGroupForm
@@ -104,14 +116,14 @@ type Localization struct {
 	CommandGroupFormValidationCommandsRequired string `json:"commandGroupForm.validation.commandsRequired"`
 
 	// projectForm
-	ProjectFormNameLabel                  string `json:"projectForm.nameLabel"`
-	ProjectFormBaseDirLabel               string `json:"projectForm.baseDirLabel"`
-	ProjectFormCommandsLabel              string `json:"projectForm.commandsLabel"`
-	ProjectFormCommandGroupsLabel         string `json:"projectForm.commandGroupsLabel"`
+	ProjectFormNameLabel                    string `json:"projectForm.nameLabel"`
+	ProjectFormBaseDirLabel                 string `json:"projectForm.baseDirLabel"`
+	ProjectFormCommandsLabel                string `json:"projectForm.commandsLabel"`
+	ProjectFormCommandGroupsLabel           string `json:"projectForm.commandGroupsLabel"`
 	ProjectFormCommandGroupsDisabledTooltip string `json:"projectForm.commandGroupsDisabledTooltip"`
-	ProjectFormDeletedCommand             string `json:"projectForm.deletedCommand"`
-	ProjectFormValidationNameRequired     string `json:"projectForm.validation.nameRequired"`
-	ProjectFormValidationBaseDirRequired  string `json:"projectForm.validation.baseDirRequired"`
+	ProjectFormDeletedCommand               string `json:"projectForm.deletedCommand"`
+	ProjectFormValidationNameRequired       string `json:"projectForm.validation.nameRequired"`
+	ProjectFormValidationBaseDirRequired    string `json:"projectForm.validation.baseDirRequired"`
 
 	// userSettingsForm
 	UserSettingsFormEnvPathsTitle          string `json:"userSettingsForm.envPathsTitle"`
@@ -139,34 +151,34 @@ type Localization struct {
 	ProjectSettingsFormSectionDescription string `json:"projectSettingsForm.sectionDescription"`
 
 	// toast.command
-	ToastCommandRunFailed             string `json:"toast.command.runFailed"`
-	ToastCommandStopFailed            string `json:"toast.command.stopFailed"`
-	ToastCommandCreateSuccess         string `json:"toast.command.createSuccess"`
-	ToastCommandCreateFailed          string `json:"toast.command.createFailed"`
-	ToastCommandUpdateSuccess         string `json:"toast.command.updateSuccess"`
-	ToastCommandUpdateFailed          string `json:"toast.command.updateFailed"`
-	ToastCommandDeleteSuccess         string `json:"toast.command.deleteSuccess"`
-	ToastCommandDeleteFailed          string `json:"toast.command.deleteFailed"`
-	ToastCommandDuplicateSuccess      string `json:"toast.command.duplicateSuccess"`
-	ToastCommandDuplicateFailed       string `json:"toast.command.duplicateFailed"`
-	ToastCommandReorderFailed         string `json:"toast.command.reorderFailed"`
-	ToastCommandInvalidDrag           string `json:"toast.command.invalidDrag"`
+	ToastCommandRunFailed              string `json:"toast.command.runFailed"`
+	ToastCommandStopFailed             string `json:"toast.command.stopFailed"`
+	ToastCommandCreateSuccess          string `json:"toast.command.createSuccess"`
+	ToastCommandCreateFailed           string `json:"toast.command.createFailed"`
+	ToastCommandUpdateSuccess          string `json:"toast.command.updateSuccess"`
+	ToastCommandUpdateFailed           string `json:"toast.command.updateFailed"`
+	ToastCommandDeleteSuccess          string `json:"toast.command.deleteSuccess"`
+	ToastCommandDeleteFailed           string `json:"toast.command.deleteFailed"`
+	ToastCommandDuplicateSuccess       string `json:"toast.command.duplicateSuccess"`
+	ToastCommandDuplicateFailed        string `json:"toast.command.duplicateFailed"`
+	ToastCommandReorderFailed          string `json:"toast.command.reorderFailed"`
+	ToastCommandInvalidDrag            string `json:"toast.command.invalidDrag"`
 	ToastCommandRemoveFromGroupSuccess string `json:"toast.command.removeFromGroupSuccess"`
 	ToastCommandRemoveFromGroupFailed  string `json:"toast.command.removeFromGroupFailed"`
 
 	// toast.commandGroup
-	ToastCommandGroupCreateSuccess     string `json:"toast.commandGroup.createSuccess"`
-	ToastCommandGroupCreateFailed      string `json:"toast.commandGroup.createFailed"`
-	ToastCommandGroupUpdateSuccess     string `json:"toast.commandGroup.updateSuccess"`
-	ToastCommandGroupUpdateFailed      string `json:"toast.commandGroup.updateFailed"`
-	ToastCommandGroupDeleteSuccess     string `json:"toast.commandGroup.deleteSuccess"`
-	ToastCommandGroupDeleteFailed      string `json:"toast.commandGroup.deleteFailed"`
-	ToastCommandGroupRunFailed         string `json:"toast.commandGroup.runFailed"`
-	ToastCommandGroupStopFailed        string `json:"toast.commandGroup.stopFailed"`
-	ToastCommandGroupReorderSuccess    string `json:"toast.commandGroup.reorderSuccess"`
-	ToastCommandGroupReorderFailed     string `json:"toast.commandGroup.reorderFailed"`
-	ToastCommandGroupNotFound          string `json:"toast.commandGroup.notFound"`
-	ToastCommandGroupCannotRemoveLast  string `json:"toast.commandGroup.cannotRemoveLast"`
+	ToastCommandGroupCreateSuccess    string `json:"toast.commandGroup.createSuccess"`
+	ToastCommandGroupCreateFailed     string `json:"toast.commandGroup.createFailed"`
+	ToastCommandGroupUpdateSuccess    string `json:"toast.commandGroup.updateSuccess"`
+	ToastCommandGroupUpdateFailed     string `json:"toast.commandGroup.updateFailed"`
+	ToastCommandGroupDeleteSuccess    string `json:"toast.commandGroup.deleteSuccess"`
+	ToastCommandGroupDeleteFailed     string `json:"toast.commandGroup.deleteFailed"`
+	ToastCommandGroupRunFailed        string `json:"toast.commandGroup.runFailed"`
+	ToastCommandGroupStopFailed       string `json:"toast.commandGroup.stopFailed"`
+	ToastCommandGroupReorderSuccess   string `json:"toast.commandGroup.reorderSuccess"`
+	ToastCommandGroupReorderFailed    string `json:"toast.commandGroup.reorderFailed"`
+	ToastCommandGroupNotFound         string `json:"toast.commandGroup.notFound"`
+	ToastCommandGroupCannotRemoveLast string `json:"toast.commandGroup.cannotRemoveLast"`
 
 	// toast.project
 	ToastProjectSelectFailed     string `json:"toast.project.selectFailed"`
@@ -183,5 +195,7 @@ type Localization struct {
 	ToastSettingsProjectSaveFailed  string `json:"toast.settings.projectSaveFailed"`
 
 	// toast.version
-	ToastVersionCheckError string `json:"toast.version.checkError"`
+	ToastVersionCheckError     string `json:"toast.version.checkError"`
+	ToastVersionDownloadFailed string `json:"toast.version.downloadFailed"`
+	ToastVersionInstallFailed  string `json:"toast.version.installFailed"`
 }
