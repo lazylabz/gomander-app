@@ -73,14 +73,14 @@ type Localization struct {
 	AboutModalTeamTitle          string `json:"aboutModal.teamTitle"`
 	AboutModalTeamSubtitle       string `json:"aboutModal.teamSubtitle"`
 
-	AboutModalInstallDisclaimerTitle                 string `json:"aboutModal.installDisclaimer.title"`
-	AboutModalInstallDisclaimerDescription           string `json:"aboutModal.installDisclaimer.description"`
-	AboutModalInstallDisclaimerReleaseNotesTitle     string `json:"aboutModal.installDisclaimer.releaseNotesTitle"`
-	AboutModalInstallDisclaimerReleaseNotesSubtitle  string `json:"aboutModal.installDisclaimer.releaseNotesSubtitle"`
-	AboutModalInstallDisclaimerMacosTitle            string `json:"aboutModal.installDisclaimer.macosTitle"`
-	AboutModalInstallDisclaimerMacosDescription      string `json:"aboutModal.installDisclaimer.macosDescription"`
-	AboutModalInstallDisclaimerCopyCommand           string `json:"aboutModal.installDisclaimer.copyCommand"`
-	AboutModalInstallDisclaimerReadMore              string `json:"aboutModal.installDisclaimer.readMore"`
+	AboutModalInstallDisclaimerTitle                string `json:"aboutModal.installDisclaimer.title"`
+	AboutModalInstallDisclaimerDescription          string `json:"aboutModal.installDisclaimer.description"`
+	AboutModalInstallDisclaimerReleaseNotesTitle    string `json:"aboutModal.installDisclaimer.releaseNotesTitle"`
+	AboutModalInstallDisclaimerReleaseNotesSubtitle string `json:"aboutModal.installDisclaimer.releaseNotesSubtitle"`
+	AboutModalInstallDisclaimerMacosTitle           string `json:"aboutModal.installDisclaimer.macosTitle"`
+	AboutModalInstallDisclaimerMacosDescription     string `json:"aboutModal.installDisclaimer.macosDescription"`
+	AboutModalInstallDisclaimerCopyCommand          string `json:"aboutModal.installDisclaimer.copyCommand"`
+	AboutModalInstallDisclaimerReadMore             string `json:"aboutModal.installDisclaimer.readMore"`
 
 	// modal chrome
 	ModalCreateCommandTitle           string `json:"modal.createCommand.title"`
