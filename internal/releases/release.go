@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -195,7 +194,7 @@ func (rh *ReleaseHelper) getBinaryUrl(version string) string {
 
 func (rh *ReleaseHelper) InstallLatestReleaseAndQuit(binaryPath string) error {
 	// Check binary exists
-	if _, err := rh.osFacade.Stat(binaryPath); errors.Is(err, os.ErrNotExist) {
+	if _, err := rh.osFacade.Stat(binaryPath); err != nil {
 		return err
 	}
 
