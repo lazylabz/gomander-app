@@ -349,7 +349,7 @@ func TestReleaseHelper_InstallLatestReleaseAndQuit(t *testing.T) {
 			"",
 			"",
 		)
-		rh.SetContext(ctx)
+		releases.SetReleaseHelperContext(rh, ctx)
 
 		// Act
 		err := rh.InstallLatestReleaseAndQuit(binaryPath)
@@ -376,7 +376,7 @@ func TestReleaseHelper_InstallLatestReleaseAndQuit(t *testing.T) {
 			"",
 			"",
 		)
-		rh.SetContext(context.Background())
+		releases.SetReleaseHelperContext(rh, context.Background())
 
 		// Act
 		err := rh.InstallLatestReleaseAndQuit(binaryPath)

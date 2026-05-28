@@ -96,8 +96,8 @@ func main() {
 			controllers.loadUseCases(app.UseCases)
 
 			// Load context into helpers
-			uiFsHelper.SetContext(ctx)
-			releaseHelper.SetContext(ctx)
+			fs.SetUIFsHelperContext(uiFsHelper, ctx)
+			releases.SetReleaseHelperContext(releaseHelper, ctx)
 
 			// Start http server for 3rd party integrations
 			server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases)

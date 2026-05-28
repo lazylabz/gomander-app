@@ -20,7 +20,7 @@ func NewUIFsHelper(runtime facade.RuntimeFacade) *UIFsHelper {
 	}
 }
 
-func (h *UIFsHelper) SetContext(ctx context.Context) {
+func SetUIFsHelperContext(h *UIFsHelper, ctx context.Context) {
 	h.ctx = ctx
 }
 

@@ -17,7 +17,3 @@ export function InstallLatestReleaseAndQuit(arg1) {
 export function IsThereANewRelease() {
   return window['go']['releases']['ReleaseHelper']['IsThereANewRelease']();
 }
-
-export function SetContext(arg1) {
-  return window['go']['releases']['ReleaseHelper']['SetContext'](arg1);
-}

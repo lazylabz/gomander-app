@@ -57,7 +57,7 @@ func NewReleaseHelper(
 	}
 }
 
-func (rh *ReleaseHelper) SetContext(ctx context.Context) {
+func SetReleaseHelperContext(rh *ReleaseHelper, ctx context.Context) {
 	rh.ctx = ctx
 }
 
