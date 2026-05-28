@@ -5,6 +5,10 @@ import { useTheme } from "@/contexts/theme.tsx";
 import { eventService } from "@/contracts/service.ts";
 import { Event, type EventData } from "@/contracts/types.ts";
 import { removeKeyFromLocalStorage } from "@/helpers/localStorage.ts";
+import {
+	formatLogTimestamp,
+	prependTimestamp,
+} from "@/screens/ExperimentalLogsScreen/helpers.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { terminalStore } from "@/store/terminalStore.ts";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
@@ -39,14 +43,16 @@ export const EventListenersContainer = () => {
 				logsBuffer.current.clear();
 
 				// Write directly to already-open terminals (bypasses React re-render cycle).
-				// Commands not yet viewed are buffered in terminalStore.pendingLogs;
+				// timestamps stay xterm-only.
+				const ts = formatLogTimestamp(new Date());
 				const { terminals, bufferLogs } = terminalStore.getState();
 				for (const [commandId, lines] of bufferCopy) {
+					const stamped = lines.map((line) => prependTimestamp(line, ts));
 					const term = terminals.get(commandId);
 					if (term) {
-						for (const line of lines) term.writeln(line);
+						for (const line of stamped) term.writeln(line);
 					} else {
-						bufferLogs(commandId, lines);
+						bufferLogs(commandId, stamped);
 					}
 				}
 			}
