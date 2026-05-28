@@ -43,9 +43,6 @@ export const EventListenersContainer = () => {
 				logsBuffer.current.clear();
 
 				// Write directly to already-open terminals (bypasses React re-render cycle).
-				// Commands not yet viewed are buffered in terminalStore.pendingLogs.
-				// Timestamps use frontend flush time (~30ms granularity, indistinguishable
-				// at HH:MM:SS). The classic view used the unstamped bufferCopy above, so
 				// timestamps stay xterm-only.
 				const ts = formatLogTimestamp(new Date());
 				const { terminals, bufferLogs } = terminalStore.getState();
