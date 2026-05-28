@@ -9,10 +9,16 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/Masterminds/semver"
 
 	"gomander/internal/facade"
+)
+
+const (
+	latestReleaseRequestTimeout = 30 * time.Second
+	downloadRequestTimeout      = 10 * time.Minute
 )
 
 const CurrentRelease = "v1.3.0"
@@ -87,9 +93,27 @@ func (rh *ReleaseHelper) IsThereANewRelease() (release string, err error) {
 	return
 }
 
+// httpGet issues a GET bound to rh.ctx (so app shutdown cancels in-flight
+// requests) with a hard timeout. It falls back to context.Background when the
+// context has not been set yet, since http.NewRequestWithContext panics on nil.
+func (rh *ReleaseHelper) httpGet(url string, timeout time.Duration) (*http.Response, error) {
+	ctx := rh.ctx
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{Timeout: timeout}
+	return client.Do(req)
+}
+
 func (rh *ReleaseHelper) getLatestRelease() (release *semver.Version, err error) {
 
-	res, err := http.Get(rh.latestReleaseUrl)
+	res, err := rh.httpGet(rh.latestReleaseUrl, latestReleaseRequestTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch latest release: " + err.Error())
 	}
@@ -128,7 +152,7 @@ func (rh *ReleaseHelper) getLatestRelease() (release *semver.Version, err error)
 func (rh *ReleaseHelper) DownloadLatestRelease(version string) (binaryPath string, err error) {
 	binaryPath = filepath.Join(rh.osFacade.TempDir(), rh.getBinaryName(version))
 
-	resp, err := http.Get(rh.getBinaryUrl(version))
+	resp, err := rh.httpGet(rh.getBinaryUrl(version), downloadRequestTimeout)
 	if err != nil {
 		return "", err
 	}
