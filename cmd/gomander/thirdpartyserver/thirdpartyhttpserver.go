@@ -9,7 +9,7 @@ import (
 	"gomander/internal/app"
 )
 
-var StartPort = 9001
+var StartPort = 9002
 var EndPort = 9100
 
 type ThirdPartyIntegrationsServer struct {
