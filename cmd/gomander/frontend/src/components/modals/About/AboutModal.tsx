@@ -191,7 +191,7 @@ export const AboutModal = ({
 						<button
 							type="button"
 							onClick={handleGithubClick}
-							className="focus-visible:outline-none cursor-pointer w-full flex flex-1 items-center justify-center gap-3 px-4 py-3 bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md rounded-lg transition-colors group"
+							className="outline-none focus-visible:ring-[3px] focus-visible:ring-neutral-950/50 dark:focus-visible:ring-neutral-300/50 cursor-pointer w-full flex flex-1 items-center justify-center gap-3 px-4 py-3 bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md rounded-lg transition-colors group"
 						>
 							<GithubIcon className="size-5 text-foreground" />
 							<div className="text-left">
@@ -209,7 +209,7 @@ export const AboutModal = ({
 						<button
 							type="button"
 							onClick={handleTeamClick}
-							className="focus-visible:outline-none cursor-pointer w-full flex flex-1 items-center justify-center gap-3 px-4 py-3 bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md rounded-lg transition-all group"
+							className="outline-none focus-visible:ring-[3px] focus-visible:ring-neutral-950/50 dark:focus-visible:ring-neutral-300/50 cursor-pointer w-full flex flex-1 items-center justify-center gap-3 px-4 py-3 bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md rounded-lg transition-all group"
 						>
 							<Heart className="size-5 text-foreground" />
 							<div className="text-left">
@@ -241,7 +241,7 @@ export const AboutModal = ({
 					<button
 						type="button"
 						onClick={handleReleaseNotesClick}
-						className="focus-visible:outline-none cursor-pointer w-full flex items-center gap-3 px-4 py-3 bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md rounded-lg transition-colors group"
+						className="outline-none focus-visible:ring-[3px] focus-visible:ring-neutral-950/50 dark:focus-visible:ring-neutral-300/50 cursor-pointer w-full flex items-center gap-3 px-4 py-3 bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md rounded-lg transition-colors group"
 					>
 						<BookOpen className="size-5 text-foreground" />
 						<div className="text-left">
@@ -289,7 +289,7 @@ export const AboutModal = ({
 									<button
 										type="button"
 										onClick={handleMacosReadMoreClick}
-										className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 cursor-pointer focus-visible:outline-none"
+										className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 cursor-pointer rounded-sm outline-none focus-visible:ring-[3px] focus-visible:ring-neutral-950/50 dark:focus-visible:ring-neutral-300/50"
 									>
 										{t("aboutModal.installDisclaimer.readMore")}
 										<ExternalLink className="size-3" />
