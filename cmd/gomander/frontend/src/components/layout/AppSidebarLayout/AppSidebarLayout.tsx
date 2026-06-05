@@ -8,10 +8,10 @@ import {
 // Shown only when the sidebar is collapsed, since the footer indicator
 // disappears together with the sidebar.
 const CollapsedRunningIndicator = () => {
-	const { open, isMobile } = useSidebar();
-	const isDesktopSidebarOpen = !isMobile && open;
+	const { open, openMobile, isMobile } = useSidebar();
+	const isSidebarOpen = isMobile ? openMobile : open;
 
-	if (isDesktopSidebarOpen) return null;
+	if (isSidebarOpen) return null;
 
 	return (
 		<RunningIndicator className="fixed bottom-3 left-3 z-10 opacity-25 transition-opacity hover:opacity-100" />
