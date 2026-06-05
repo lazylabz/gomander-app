@@ -125,6 +125,9 @@ export namespace domain {
 	    "sidebar.version.newAvailable": string;
 	    "sidebar.version.latest": string;
 	    "sidebar.version.checkError": string;
+	    "sidebar.runningIndicator.idle": string;
+	    "sidebar.runningIndicator.running_one": string;
+	    "sidebar.runningIndicator.running_other": string;
 	    "projectSelection.openTitle": string;
 	    "projectSelection.welcome": string;
 	    "projectSelection.emptyState": string;

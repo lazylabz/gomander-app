@@ -31,6 +31,10 @@ type Localization struct {
 	SidebarVersionLatest             string `json:"sidebar.version.latest"`
 	SidebarVersionCheckError         string `json:"sidebar.version.checkError"`
 
+	SidebarRunningIndicatorIdle         string `json:"sidebar.runningIndicator.idle"`
+	SidebarRunningIndicatorRunningOne   string `json:"sidebar.runningIndicator.running_one"`
+	SidebarRunningIndicatorRunningOther string `json:"sidebar.runningIndicator.running_other"`
+
 	// projectSelection
 	ProjectSelectionOpenTitle         string `json:"projectSelection.openTitle"`
 	ProjectSelectionWelcome           string `json:"projectSelection.welcome"`
