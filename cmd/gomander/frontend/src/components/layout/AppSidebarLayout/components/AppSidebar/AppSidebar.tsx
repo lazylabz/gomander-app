@@ -6,6 +6,7 @@ import { useNavigate } from "react-router";
 import { AllCommandsSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/AllCommandsSection/AllCommandsSection.tsx";
 import { CommandGroupsSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandGroupsSection/CommandGroupsSection.tsx";
 import { CreateMenu } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CreateMenu/CreateMenu.tsx";
+import { RunningIndicator } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/RunningIndicator/RunningIndicator.tsx";
 import { VersionSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/VersionSection/VersionSection.tsx";
 import { sidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import { AboutModal } from "@/components/modals/About/AboutModal.tsx";
@@ -101,11 +102,14 @@ export const AppSidebar = () => {
 					<CommandGroupsSection />
 				</SidebarContent>
 				<SidebarFooter className="flex flex-row items-center justify-between p-2">
-					<Settings
-						onClick={() => goToSettings(SettingsTab.User)}
-						size={20}
-						className="text-muted-foreground cursor-pointer hover:text-primary"
-					/>
+					<div className="flex items-center gap-2">
+						<Settings
+							onClick={() => goToSettings(SettingsTab.User)}
+							size={20}
+							className="text-muted-foreground cursor-pointer hover:text-primary"
+						/>
+						<RunningIndicator />
+					</div>
 					<VersionSection openAboutModal={() => setAboutModalOpen(true)} />
 				</SidebarFooter>
 			</Sidebar>
