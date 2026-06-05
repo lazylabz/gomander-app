@@ -6,10 +6,14 @@ import {
 } from "@/components/MissingEnvironmentPath/MissingEnvironmentPathToast.tsx";
 import { commandStore } from "@/store/commandStore.ts";
 
+// Shell/OS specific wording for "this executable could not be located".
 // "No such file or directory" is intentionally excluded as it is too noisy.
 const MISSING_PATH_PATTERNS = [
-	/: command not found/i,
-	/executable file not found in \$?path/i,
+	/: command not found/i, // bash, zsh
+	/: not found/i, // dash, sh, busybox ("sh: 1: foo: not found")
+	/unknown command/i, // fish ("fish: Unknown command: foo")
+	/is not recognized as an internal or external command/i, // Windows cmd.exe
+	/executable file not found in \$?path/i, // Go exec
 ];
 
 const isMissingPathLine = (line: string): boolean =>
