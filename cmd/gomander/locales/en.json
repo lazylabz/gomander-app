@@ -177,5 +177,16 @@
 
   "toast.version.checkError": "Error checking for new releases",
   "toast.version.downloadFailed": "Failed to download the update",
-  "toast.version.installFailed": "Failed to install the update"
+  "toast.version.installFailed": "Failed to install the update",
+
+  "toast.missingPath.message": "A command may have failed because its executable wasn't found in your environment paths.",
+  "toast.missingPath.action": "Learn more",
+
+  "modal.missingPath.title": "Possible missing environment path",
+  "modal.missingPath.description": "One of your commands exited with a \"command not found\" error. This usually means the executable isn't available in the environment paths Gomander uses to run your commands. This often happens with version managers like <code>nvm</code> or <code>pyenv</code>, whose paths are normally set by files such as <code>.bashrc</code>, <code>.zshrc</code> or <code>.profile</code>.",
+  "modal.missingPath.howToTitle": "How to fix it",
+  "modal.missingPath.howToStep1": "Find where the executable lives by running <whichcmd/> (macOS/Linux) or <wherecmd/> (Windows) in your terminal.",
+  "modal.missingPath.howToStep2": "Copy the directory that contains it and add it to your environment paths in Settings.",
+  "modal.missingPath.commandPlaceholder": "<command>",
+  "modal.missingPath.goToSettings": "Open settings"
 }

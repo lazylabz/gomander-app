@@ -177,5 +177,16 @@
 
   "toast.version.checkError": "Error al comprobar nuevas versiones",
   "toast.version.downloadFailed": "Error al descargar la actualización",
-  "toast.version.installFailed": "Error al instalar la actualización"
+  "toast.version.installFailed": "Error al instalar la actualización",
+
+  "toast.missingPath.message": "Puede que un comando haya fallado porque no se encontró su ejecutable en tus rutas de entorno.",
+  "toast.missingPath.action": "Más información",
+
+  "modal.missingPath.title": "Posible ruta de entorno ausente",
+  "modal.missingPath.description": "Uno de tus comandos terminó con un error \"command not found\". Esto suele significar que el ejecutable no está disponible en las rutas de entorno que Gomander usa para ejecutar tus comandos. Es habitual con gestores de versiones como <code>nvm</code> o <code>pyenv</code>, cuyas rutas normalmente las definen archivos como <code>.bashrc</code>, <code>.zshrc</code> o <code>.profile</code>.",
+  "modal.missingPath.howToTitle": "Cómo solucionarlo",
+  "modal.missingPath.howToStep1": "Averigua dónde está el ejecutable ejecutando <whichcmd/> (macOS/Linux) o <wherecmd/> (Windows) en tu terminal.",
+  "modal.missingPath.howToStep2": "Copia el directorio que lo contiene y añádelo a tus rutas de entorno en Ajustes.",
+  "modal.missingPath.commandPlaceholder": "<comando>",
+  "modal.missingPath.goToSettings": "Abrir ajustes"
 }
