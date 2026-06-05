@@ -14,6 +14,7 @@ import { terminalStore } from "@/store/terminalStore.ts";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { cleanCommandLogs } from "@/useCases/command/cleanCommandLogs.ts";
+import { detectMissingEnvironmentPathFailure } from "@/useCases/command/detectMissingEnvironmentPathFailure.tsx";
 import { recordCommandsErrors } from "@/useCases/command/recordCommandsErrors.ts";
 import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
 import { XTERM_THEMES } from "../../screens/ExperimentalLogsScreen/components/CommandTerminal.tsx";
@@ -76,8 +77,13 @@ export const EventListenersContainer = () => {
 
 		eventService.eventsOn(
 			Event.PROCESS_FINISHED,
-			(data: EventData[Event.PROCESS_FINISHED]) =>
-				updateCommandStatus(data, CommandStatus.IDLE),
+			(data: EventData[Event.PROCESS_FINISHED]) => {
+				updateCommandStatus(data, CommandStatus.IDLE);
+				detectMissingEnvironmentPathFailure(
+					data,
+					logsBuffer.current.get(data) ?? [],
+				);
+			},
 		);
 
 		eventService.eventsOn(

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Route, Routes } from "react-router";
 
 import { AppSidebarLayout } from "@/components/layout/AppSidebarLayout/AppSidebarLayout.tsx";
+import { MissingEnvironmentPathDialog } from "@/components/MissingEnvironmentPath/MissingEnvironmentPathDialog.tsx";
 import { EventListenersContainer } from "@/components/utility/EventListenersContainer.tsx";
 import { ThemeProvider } from "@/contexts/theme.tsx";
 import { VersionProvider } from "@/contexts/version.tsx";
@@ -52,6 +53,7 @@ function App() {
 		<VersionProvider>
 			<ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
 				<EventListenersContainer />
+				<MissingEnvironmentPathDialog />
 				<Toaster richColors position="top-right" />
 				<Routes>
 					<Route
