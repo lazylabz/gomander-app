@@ -16,11 +16,7 @@ export const MissingEnvironmentPathToast = () => {
 	return (
 		<div className="flex flex-col gap-2 items-start">
 			<p>{t("toast.missingPath.message")}</p>
-			<button
-				type="button"
-				className="underline"
-				onClick={handleLearnMore}
-			>
+			<button type="button" className="underline" onClick={handleLearnMore}>
 				{t("toast.missingPath.action")}
 			</button>
 		</div>

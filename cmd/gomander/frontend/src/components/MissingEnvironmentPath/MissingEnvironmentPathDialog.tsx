@@ -53,10 +53,14 @@ export const MissingEnvironmentPathDialog = () => {
 								i18nKey="modal.missingPath.howToStep1"
 								components={{
 									whichcmd: (
-										<code>which {t("modal.missingPath.commandPlaceholder")}</code>
+										<code>
+											which {t("modal.missingPath.commandPlaceholder")}
+										</code>
 									),
 									wherecmd: (
-										<code>where {t("modal.missingPath.commandPlaceholder")}</code>
+										<code>
+											where {t("modal.missingPath.commandPlaceholder")}
+										</code>
 									),
 								}}
 							/>
