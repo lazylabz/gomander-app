@@ -265,6 +265,15 @@ export namespace domain {
 	    "toast.version.checkError": string;
 	    "toast.version.downloadFailed": string;
 	    "toast.version.installFailed": string;
+	    "toast.missingPath.message": string;
+	    "toast.missingPath.action": string;
+	    "modal.missingPath.title": string;
+	    "modal.missingPath.description": string;
+	    "modal.missingPath.howToTitle": string;
+	    "modal.missingPath.howToStep1": string;
+	    "modal.missingPath.howToStep2": string;
+	    "modal.missingPath.commandPlaceholder": string;
+	    "modal.missingPath.goToSettings": string;
 	}
 	export interface Project {
 	    id: string;

@@ -202,4 +202,17 @@ type Localization struct {
 	ToastVersionCheckError     string `json:"toast.version.checkError"`
 	ToastVersionDownloadFailed string `json:"toast.version.downloadFailed"`
 	ToastVersionInstallFailed  string `json:"toast.version.installFailed"`
+
+	// toast.missingPath
+	ToastMissingPathMessage string `json:"toast.missingPath.message"`
+	ToastMissingPathAction  string `json:"toast.missingPath.action"`
+
+	// modal.missingPath
+	ModalMissingPathTitle              string `json:"modal.missingPath.title"`
+	ModalMissingPathDescription        string `json:"modal.missingPath.description"`
+	ModalMissingPathHowToTitle         string `json:"modal.missingPath.howToTitle"`
+	ModalMissingPathHowToStep1         string `json:"modal.missingPath.howToStep1"`
+	ModalMissingPathHowToStep2         string `json:"modal.missingPath.howToStep2"`
+	ModalMissingPathCommandPlaceholder string `json:"modal.missingPath.commandPlaceholder"`
+	ModalMissingPathGoToSettings       string `json:"modal.missingPath.goToSettings"`
 }
