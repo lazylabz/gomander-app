@@ -51,7 +51,7 @@
   "settings.experimental.title": "Experimental Features",
   "settings.experimental.description": "Enable experimental features that are not yet stable.",
   "settings.experimental.xtermjs.label": "Use xterm.js renderer",
-  "settings.experimental.xtermjs.description": "Use the xterm.js terminal renderer for command output.",
+  "settings.experimental.xtermjs.description": "Enabled by default. Turn it off to go back to the classic log renderer.",
   "settings.saving.inProgress": "Saving...",
   "settings.saving.done": "All changes saved",
 

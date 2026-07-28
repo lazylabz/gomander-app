@@ -11,14 +11,14 @@ import { initI18n } from "@/design-system/lib/i18n.ts";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
 import { ScreenRoutes } from "@/routes.ts";
-import { ExperimentalLogsScreen } from "@/screens/ExperimentalLogsScreen/ExperimentalLogsScreen.tsx";
+import { LegacyLogsScreen } from "@/screens/LegacyLogsScreen/LegacyLogsScreen.tsx";
+import { LogsScreen } from "@/screens/LogsScreen/LogsScreen.tsx";
 import { ProjectSelectionScreen } from "@/screens/ProjectSelectionScreen/ProjectSelectionScreen.tsx";
 import { SettingsContextProvider } from "@/screens/SettingsScreen/context/settingsContext.tsx";
 import { SettingsScreen } from "@/screens/SettingsScreen/SettingsScreen.tsx";
 import { useExperimentalFeatsStore } from "@/store/experimentalFeatsStore.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
-import { LogsScreen } from "./screens/LogsScreen/LogsScreen.tsx";
 
 function App() {
 	const projectIsLoaded = useProjectStore((state) => state.isLoaded);
@@ -64,7 +64,7 @@ function App() {
 						path={ScreenRoutes.Logs}
 						element={
 							<AppSidebarLayout>
-								{xtermjs ? <ExperimentalLogsScreen /> : <LogsScreen />}
+								{xtermjs ? <LogsScreen /> : <LegacyLogsScreen />}
 							</AppSidebarLayout>
 						}
 					/>

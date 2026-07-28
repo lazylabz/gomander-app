@@ -31,7 +31,7 @@ const readBool = (key: string, fallback: boolean): boolean => {
 export const experimentalFeatsStore = createStore<ExperimentalFeatsStore>()(
 	(set) => ({
 		experimentalFeats: {
-			xtermjs: readBool(EXPERIMENTAL_XTERMJS, false),
+			xtermjs: readBool(EXPERIMENTAL_XTERMJS, true),
 		},
 		setExperimentalFeat: (key, value) => {
 			try {
