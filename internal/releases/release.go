@@ -20,7 +20,7 @@ const (
 	downloadRequestTimeout      = 10 * time.Minute
 )
 
-const CurrentRelease = "v1.5.0"
+const CurrentRelease = "v1.6.0"
 
 const RepoOwnerAndName = "Lazylabz/gomander-app"
 
