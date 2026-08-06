@@ -3,8 +3,6 @@ package runner
 import (
 	"bufio"
 	"io"
-	"os"
-	"os/exec"
 	"strings"
 	"sync"
 
@@ -25,8 +23,9 @@ var ExpectedTerminationLogs = []string{
 }
 
 type RunningCommand struct {
-	cmd *exec.Cmd
-	wg  *sync.WaitGroup
+	process commandProcess
+	done    chan struct{}
+	wg      *sync.WaitGroup
 }
 
 type DefaultRunner struct {
@@ -84,39 +83,22 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 		return nil
 	}
 
-	// Get the command object based on the project string and OS
-	cmd := GetCommand(command.Command)
-
-	// Enable color output and set terminal type
-	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
-	cmd.Dir = path.GetComputedPath(baseWorkingDirectory, command.WorkingDirectory)
-
-	// Set project attributes based on OS
-	SetProcAttributes(cmd)
-	SetProcEnv(cmd, environmentPaths)
-
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		c.sendStreamLine(command, err.Error())
-		c.mutex.Unlock()
-		return err
-	}
-
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		c.sendStreamLine(command, err.Error())
-		c.mutex.Unlock()
-		return err
-	}
-
 	var wg sync.WaitGroup
+	done := make(chan struct{})
+	process := newCommandProcess(
+		command.Command,
+		path.GetComputedPath(baseWorkingDirectory, command.WorkingDirectory),
+		commandEnvironment(environmentPaths),
+	)
 	runningCommand := RunningCommand{
-		cmd: cmd,
-		wg:  &wg,
+		process: process,
+		done:    done,
+		wg:      &wg,
 	}
 
 	c.sendStartingLine(command)
-	if err := cmd.Start(); err != nil {
+	readers, err := process.Start()
+	if err != nil {
 		c.sendStreamLine(command, err.Error())
 		c.mutex.Unlock()
 		return err
@@ -129,28 +111,24 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	c.mutex.Unlock()
 
 	// Add to WaitGroup before starting goroutines to avoid race conditions
-	wg.Add(3) // stdout, stderr, and wait goroutines
+	wg.Add(len(readers) + 1)
 
 	var scanWg sync.WaitGroup
+	scanWg.Add(len(readers))
 
-	scanWg.Add(2) // For stdout and stderr streaming
-
-	// Stream stdout
-	go func() {
-		defer scanWg.Done()
-		defer wg.Done()
-		c.streamOutput(command, stdout)
-	}()
-	// Stream stderr
-	go func() {
-		defer scanWg.Done()
-		defer wg.Done()
-		c.streamOutput(command, stderr)
-	}()
+	for _, reader := range readers {
+		go func(pipe io.ReadCloser) {
+			defer scanWg.Done()
+			defer wg.Done()
+			defer pipe.Close()
+			c.streamOutput(command, pipe)
+		}(reader)
+	}
 
 	// Wait in background until the command finishes, because it ends naturally or because it is stopped.
 	go func() {
 		defer wg.Done()
+		defer close(done)
 
 		// Notify the event emitter that the command has finished and remove it from the runningCommands map
 		defer func() {
@@ -161,18 +139,14 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 			c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
 		}()
 
-		// Wait for all pipes to finish
+		err := process.Wait()
 		scanWg.Wait()
 
-		// If the command is still running (StopRunningCommand has not been called, this is a self-ended command), wait for it to finish
-		if cmd.ProcessState == nil {
-			err := cmd.Wait()
-			if err != nil {
-				c.sendStreamLine(command, err.Error())
+		if err != nil {
+			c.sendStreamLine(command, err.Error())
 
-				if !isExpectedError(err) {
-					c.logger.Error("[ERROR - Waiting for project]: " + err.Error())
-				}
+			if !isExpectedError(err) {
+				c.logger.Error("[ERROR - Waiting for project]: " + err.Error())
 			}
 		}
 	}()
@@ -196,7 +170,7 @@ func (c *DefaultRunner) StopRunningCommand(id string) error {
 		return nil
 	}
 
-	return StopProcessGracefully(runningCommand.cmd)
+	return stopProcessGracefully(runningCommand.process, runningCommand.done)
 }
 
 func (c *DefaultRunner) StopAllRunningCommands() []error {
@@ -204,14 +178,16 @@ func (c *DefaultRunner) StopAllRunningCommands() []error {
 
 	// Create a slice to hold commands to stop
 	// this is necessary because we should not modify the map while iterating over it
-	commandsToStop := make([]*exec.Cmd, 0, len(c.runningCommands))
+	c.mutex.Lock()
+	commandsToStop := make([]RunningCommand, 0, len(c.runningCommands))
 
-	for _, cmd := range c.runningCommands {
-		commandsToStop = append(commandsToStop, cmd.cmd)
+	for _, command := range c.runningCommands {
+		commandsToStop = append(commandsToStop, command)
 	}
+	c.mutex.Unlock()
 
-	for _, cmd := range commandsToStop {
-		err := StopProcessGracefully(cmd)
+	for _, command := range commandsToStop {
+		err := stopProcessGracefully(command.process, command.done)
 
 		if err != nil {
 			errs = append(errs, err)
@@ -237,6 +213,9 @@ func (c *DefaultRunner) streamOutput(command *domain.Command, pipeReader io.Read
 
 	for scanner.Scan() {
 		line := scanner.Text()
+		if shouldSkipProcessOutputLine(line) {
+			continue
+		}
 		c.logger.Debug(line)
 		c.sendStreamLine(command, line)
 	}
@@ -269,7 +248,14 @@ func (c *DefaultRunner) checkLineForErrors(command *domain.Command, line string)
 }
 
 func (c *DefaultRunner) GetRunningCommands() map[string]RunningCommand {
-	return c.runningCommands
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	runningCommands := make(map[string]RunningCommand, len(c.runningCommands))
+	for id, command := range c.runningCommands {
+		runningCommands[id] = command
+	}
+	return runningCommands
 }
 
 func (c *DefaultRunner) WaitForCommand(commandId string) {

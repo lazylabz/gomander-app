@@ -532,17 +532,18 @@ func TestDefaultRunner_GetRunningCommandIds(t *testing.T) {
 		assert.Contains(t, result, "cmd-1")
 		assert.Contains(t, result, "cmd-2")
 
-		// Wait for the commands to finish so we don't affect other tests
-		time.Sleep(200 * time.Millisecond)
+		// Stop the infinite commands so they don't affect other tests.
+		assert.Empty(t, sut.StopAllRunningCommands())
+		sut.WaitForCommand(command1.Id)
+		sut.WaitForCommand(command2.Id)
 	})
 }
 
 func mockEmitterLogEntry(emitter *test2.MockEventEmitter, id string, line string) {
 	if runtime.GOOS == "windows" {
-		emitter.On("EmitEvent", event.NewLogEntry, map[string]string{
-			"id":   id,
-			"line": "'" + line + "'",
-		}).Return()
+		emitter.On("EmitEvent", event.NewLogEntry, mock.MatchedBy(func(data map[string]string) bool {
+			return data["id"] == id && strings.HasSuffix(data["line"], "'"+line+"'")
+		})).Return()
 	} else {
 		emitter.On("EmitEvent", event.NewLogEntry, map[string]string{
 			"id":   id,

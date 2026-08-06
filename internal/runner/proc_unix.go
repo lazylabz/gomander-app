@@ -5,70 +5,41 @@ package runner
 import (
 	"os"
 	"os/exec"
-	"strings"
 	"syscall"
 	"time"
 )
 
-func SetProcAttributes(cmd *exec.Cmd) {
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Setpgid: true,
-	}
+func newCommandProcess(command, workingDirectory string, environment []string) commandProcess {
+	cmd := exec.Command(os.Getenv("SHELL"), "-c", command)
+	cmd.Dir = workingDirectory
+	cmd.Env = environment
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	return &execProcess{cmd: cmd}
 }
 
-func SetProcEnv(cmd *exec.Cmd, environmentPaths []string) {
-	if len(environmentPaths) == 0 {
-		return
-	}
-
-	currentPath := os.Getenv("PATH")
-
-	separator := ":"
-
-	newPath := strings.Join(environmentPaths, separator) + separator + currentPath
-
-	// Set the environment
-	if cmd.Env == nil {
-		cmd.Env = os.Environ()
-	}
-
-	// Update or add PATH
-	for i, env := range cmd.Env {
-		if strings.HasPrefix(strings.ToUpper(env), "PATH=") {
-			cmd.Env[i] = "PATH=" + newPath
-			return
-		}
-	}
-
-	// If PATH wasn't found, add it
-	cmd.Env = append(cmd.Env, "PATH="+newPath)
+func shouldSkipProcessOutputLine(string) bool {
+	return false
 }
 
-func StopProcessGracefully(cmd *exec.Cmd) error {
-	// Try graceful termination first
-	err := syscall.Kill(-cmd.Process.Pid, syscall.SIGTERM)
+func stopProcessGracefully(process commandProcess, done <-chan struct{}) error {
+	select {
+	case <-done:
+		return nil
+	default:
+	}
+
+	err := syscall.Kill(-process.PID(), syscall.SIGTERM)
 	if err != nil {
-		// Fallback to force kill
-		return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+		return syscall.Kill(-process.PID(), syscall.SIGKILL)
 	}
 
-	// Wait a bit for graceful shutdown
-	done := make(chan error, 1)
-	go func() {
-		done <- cmd.Wait()
-	}()
+	timer := time.NewTimer(5 * time.Second)
+	defer timer.Stop()
 
 	select {
-	case <-time.After(5 * time.Second):
-		// Force kill if graceful shutdown takes too long
-		return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+	case <-timer.C:
+		return syscall.Kill(-process.PID(), syscall.SIGKILL)
 	case <-done:
 		return nil
 	}
-}
-
-func GetCommand(cmdStr string) *exec.Cmd {
-	shell := os.Getenv("SHELL")
-
-	return exec.Command(shell, "-c", cmdStr)
 }
