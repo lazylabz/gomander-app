@@ -29,6 +29,7 @@ func TestWindowsProcessUsesTerminalOutput(t *testing.T) {
 	for _, reader := range readers {
 		go func() {
 			output, _ := io.ReadAll(reader)
+			_ = reader.Close()
 			outputs <- string(output)
 		}()
 	}
@@ -41,6 +42,12 @@ func TestWindowsProcessUsesTerminalOutput(t *testing.T) {
 	}
 	assert.Contains(t, output.String(), "False")
 	assert.NotContains(t, output.String(), string(conPTYClearScreen))
+}
+
+func TestCommandInterpreterDefaultsToCmd(t *testing.T) {
+	t.Setenv("COMSPEC", "")
+
+	assert.Equal(t, "cmd.exe", commandInterpreter())
 }
 
 func TestWindowsProcessReturnsCommandFailure(t *testing.T) {

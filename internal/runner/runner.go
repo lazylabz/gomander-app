@@ -25,7 +25,6 @@ var ExpectedTerminationLogs = []string{
 type RunningCommand struct {
 	process commandProcess
 	done    chan struct{}
-	wg      *sync.WaitGroup
 }
 
 type DefaultRunner struct {
@@ -83,7 +82,6 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 		return nil
 	}
 
-	var wg sync.WaitGroup
 	done := make(chan struct{})
 	process := newCommandProcess(
 		command.Command,
@@ -93,7 +91,6 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	runningCommand := RunningCommand{
 		process: process,
 		done:    done,
-		wg:      &wg,
 	}
 
 	c.sendStartingLine(command)
@@ -110,16 +107,12 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	c.runningCommands[command.Id] = runningCommand
 	c.mutex.Unlock()
 
-	// Add to WaitGroup before starting goroutines to avoid race conditions
-	wg.Add(len(readers) + 1)
-
 	var scanWg sync.WaitGroup
 	scanWg.Add(len(readers))
 
 	for _, reader := range readers {
 		go func(pipe io.ReadCloser) {
 			defer scanWg.Done()
-			defer wg.Done()
 			defer pipe.Close()
 			c.streamOutput(command, pipe)
 		}(reader)
@@ -127,7 +120,6 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 
 	// Wait in background until the command finishes, because it ends naturally or because it is stopped.
 	go func() {
-		defer wg.Done()
 		defer close(done)
 
 		// Notify the event emitter that the command has finished and remove it from the runningCommands map
@@ -264,7 +256,7 @@ func (c *DefaultRunner) WaitForCommand(commandId string) {
 	c.mutex.Unlock()
 
 	if exists {
-		runningCommand.wg.Wait()
+		<-runningCommand.done
 	} else {
 		return
 	}

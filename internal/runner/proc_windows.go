@@ -110,7 +110,7 @@ func (p *windowsProcess) Start() ([]io.ReadCloser, error) {
 			return nil, err
 		}
 
-		command := pseudoConsole.Command(os.Getenv("COMSPEC"), "/D", "/S", "/C", p.command)
+		command := pseudoConsole.Command(commandInterpreter(), "/D", "/S", "/C", p.command)
 		command.Dir = p.workingDirectory
 		command.Env = p.environment
 		if err := command.Start(); err != nil {
@@ -128,7 +128,7 @@ func (p *windowsProcess) Start() ([]io.ReadCloser, error) {
 		return []io.ReadCloser{output}, nil
 	}
 
-	cmd := exec.Command("cmd", "/D", "/S", "/C", p.command)
+	cmd := exec.Command(commandInterpreter(), "/D", "/S", "/C", p.command)
 	cmd.Dir = p.workingDirectory
 	cmd.Env = p.environment
 	cmd.SysProcAttr = &syscall.SysProcAttr{
@@ -137,6 +137,14 @@ func (p *windowsProcess) Start() ([]io.ReadCloser, error) {
 	}
 	p.fallback = &execProcess{cmd: cmd}
 	return p.fallback.Start()
+}
+
+func commandInterpreter() string {
+	interpreter := os.Getenv("COMSPEC")
+	if interpreter == "" {
+		return "cmd.exe"
+	}
+	return interpreter
 }
 
 func (p *windowsProcess) Wait() error {
