@@ -1,4 +1,5 @@
 import { dataService } from "@/contracts/service.ts";
+import { clearLogTail } from "@/store/commandLogsTail.ts";
 import { terminalStore } from "@/store/terminalStore.ts";
 
 export const deleteCommand = async (commandId: string) => {
@@ -6,4 +7,5 @@ export const deleteCommand = async (commandId: string) => {
 
 	// Dispose existing terminal
 	terminalStore.getState().dispose(commandId);
+	clearLogTail(commandId);
 };
