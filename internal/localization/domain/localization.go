@@ -52,16 +52,11 @@ type Localization struct {
 	LogsSearchNext   string `json:"logs.searchNext"`
 
 	// settings screen
-	SettingsTitle                    string `json:"settings.title"`
-	SettingsTabsUser                 string `json:"settings.tabs.user"`
-	SettingsTabsProject              string `json:"settings.tabs.project"`
-	SettingsTabsExperimental         string `json:"settings.tabs.experimental"`
-	SettingsExperimentalTitle        string `json:"settings.experimental.title"`
-	SettingsExperimentalDescription  string `json:"settings.experimental.description"`
-	SettingsExperimentalXtermjsLabel string `json:"settings.experimental.xtermjs.label"`
-	SettingsExperimentalXtermjsDesc  string `json:"settings.experimental.xtermjs.description"`
-	SettingsSavingInProgress         string `json:"settings.saving.inProgress"`
-	SettingsSavingDone               string `json:"settings.saving.done"`
+	SettingsTitle            string `json:"settings.title"`
+	SettingsTabsUser         string `json:"settings.tabs.user"`
+	SettingsTabsProject      string `json:"settings.tabs.project"`
+	SettingsSavingInProgress string `json:"settings.saving.inProgress"`
+	SettingsSavingDone       string `json:"settings.saving.done"`
 
 	// aboutModal
 	AboutModalVersion            string `json:"aboutModal.version"`

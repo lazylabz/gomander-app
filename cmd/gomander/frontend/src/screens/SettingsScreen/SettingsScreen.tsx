@@ -1,10 +1,4 @@
-import {
-	ArrowLeft,
-	PanelsTopLeft,
-	Settings,
-	TestTubeDiagonal,
-	User,
-} from "lucide-react";
+import { ArrowLeft, PanelsTopLeft, Settings, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
@@ -20,7 +14,6 @@ import {
 	SettingsTab,
 	useSettingsContext,
 } from "@/screens/SettingsScreen/context/settingsContext.tsx";
-import { ExperimentalSettings } from "@/screens/SettingsScreen/tabs/ExperimentalSettings/ExperimentalSettings.tsx";
 import { ProjectSettings } from "@/screens/SettingsScreen/tabs/ProjectSettings/ProjectSettings.tsx";
 import { UserSettings } from "@/screens/SettingsScreen/tabs/UserSettings/UserSettings.tsx";
 
@@ -54,7 +47,7 @@ export const SettingsScreen = () => {
 				</div>
 			</div>
 			<Tabs defaultValue={initialTab} className="w-full flex-1 min-h-0">
-				<TabsList className="grid w-full grid-cols-3">
+				<TabsList className="grid w-full grid-cols-2">
 					<TabsTrigger
 						value={SettingsTab.User}
 						className="flex items-center space-x-2 cursor-pointer"
@@ -69,13 +62,6 @@ export const SettingsScreen = () => {
 						<PanelsTopLeft className="h-4 w-4" />
 						<span>{t("settings.tabs.project")}</span>
 					</TabsTrigger>
-					<TabsTrigger
-						value={SettingsTab.Experimental}
-						className="flex items-center space-x-2 cursor-pointer"
-					>
-						<TestTubeDiagonal className="h-4 w-4" />
-						<span>{t("settings.tabs.experimental")}</span>
-					</TabsTrigger>
 				</TabsList>
 				<TabsContent
 					value={SettingsTab.User}
@@ -88,12 +74,6 @@ export const SettingsScreen = () => {
 					className="min-h-0 overflow-y-auto"
 				>
 					<ProjectSettings />
-				</TabsContent>
-				<TabsContent
-					value={SettingsTab.Experimental}
-					className="min-h-0 overflow-y-auto"
-				>
-					<ExperimentalSettings />
 				</TabsContent>
 			</Tabs>
 		</div>

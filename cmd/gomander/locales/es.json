@@ -47,11 +47,6 @@
   "settings.title": "Ajustes",
   "settings.tabs.user": "Ajustes de usuario",
   "settings.tabs.project": "Ajustes del proyecto",
-  "settings.tabs.experimental": "Experimental",
-  "settings.experimental.title": "Características experimentales",
-  "settings.experimental.description": "Activa características experimentales que aún no son estables.",
-  "settings.experimental.xtermjs.label": "Usar renderizador xterm.js",
-  "settings.experimental.xtermjs.description": "Activado por defecto. Desactívalo para volver al renderizador de logs clásico.",
   "settings.saving.inProgress": "Guardando...",
   "settings.saving.done": "Todos los cambios guardados",
 
