@@ -44,7 +44,6 @@ export const EventListenersContainer = () => {
 				logsBuffer.current.clear();
 
 				// Write directly to already-open terminals (bypasses React re-render cycle).
-				// timestamps stay xterm-only.
 				const ts = formatLogTimestamp(new Date());
 				const { terminals, bufferLogs } = terminalStore.getState();
 				for (const [commandId, lines] of bufferCopy) {
