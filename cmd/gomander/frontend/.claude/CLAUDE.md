@@ -206,7 +206,10 @@ Example: `useCases/command/startCommand.ts` calls backend and updates state
 
 ### Testing
 
-Vitest, happy-dom environment, tests live next to the code as `*.test.ts(x)`.
+Vitest, jsdom environment, tests live next to the code as `*.test.ts(x)`.
+
+Node 22.10 or newer is required (`engines` in `package.json`): jsdom 30 pulls an undici that
+calls `worker_threads.markAsUncloneable`. On an older Node every test file fails to start.
 
 - Tests substitute the in-memory adapter at the seam: `installInMemoryBackend()` (from
   `@/testing/backend.ts`) swaps every service exported by `contracts/service.ts`, and
