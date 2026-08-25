@@ -24,3 +24,6 @@ package.json.md5
 *.njsproj
 *.sln
 *.sw?
+
+# Test coverage
+coverage

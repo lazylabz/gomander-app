@@ -35,6 +35,18 @@ pnpm run lint:fix
 
 # Auto-fix lint issues, including fixes that Biome classifies as unsafe
 pnpm run lint:fix:unsafe
+
+# Tests (Vitest)
+pnpm run test
+
+# Tests in watch mode
+pnpm run test:watch
+
+# Tests with coverage
+pnpm run test:cov
+
+# A single test file
+pnpm run test src/queries/fetchCommands.test.ts
 ```
 
 Note: Development server is run from the root via `make dev` or `wails dev` - not from this directory.
@@ -48,8 +60,12 @@ The frontend follows a **layered architecture** with clear separation of concern
 ```
 src/
 ├── contracts/         # Wails backend interface layer (ONLY place wailsjs imports allowed)
-│   ├── service.ts     # Exported service wrappers for backend calls
-│   └── types.ts       # Type definitions from backend
+│   ├── ports.ts       # The backend contract, declared as types
+│   ├── service.ts     # The services the app calls, plus the adapter swap for tests
+│   ├── types.ts       # Type definitions from backend
+│   └── adapters/      # Implementations of the contract
+│       ├── wails.ts   # Generated bindings (production)
+│       └── inMemory.ts # Fake holding queryable state (tests)
 ├── useCases/          # Business logic organized by domain
 │   ├── command/       # Command-specific operations (start, stop, create, etc.)
 │   ├── commandGroup/  # Command group operations
@@ -79,6 +95,7 @@ src/
 ├── hooks/             # Custom React hooks (application-specific)
 ├── contexts/          # React contexts (theme, version, etc.)
 ├── helpers/           # Pure utility functions
+├── testing/           # Test-only helpers (in-memory backend installer, builders)
 ├── types/             # TypeScript type definitions
 └── constants/         # Application constants
 ```
@@ -90,7 +107,9 @@ src/
 - **CRITICAL**: Direct `wailsjs` imports are ONLY allowed in `src/contracts/`
 - Biome enforces this rule - imports from `wailsjs` anywhere else will fail linting
 - All backend communication must go through `contracts/service.ts`
-- This provides a clean abstraction layer between frontend and Wails-generated code
+- The contract is declared in `contracts/ports.ts` as types; adapters implement it and are
+  checked with `satisfies` - the shape is not derived from the generated bindings
+- Two adapters exist: `adapters/wails.ts` (production) and `adapters/inMemory.ts` (tests)
 
 #### 2. State Management (Zustand)
 
@@ -168,9 +187,10 @@ Example: `useCases/command/startCommand.ts` calls backend and updates state
 ### Adding New Backend Calls
 
 1. Wails generates bindings in `wailsjs/` (DO NOT edit manually)
-2. Add wrapper to `contracts/service.ts` (exported from `dataService`, `helpersService`, etc.)
-3. Create use case in `useCases/` that calls the service
-4. Never import from `wailsjs/` outside of `contracts/` directory
+2. Declare the method on the matching type in `contracts/ports.ts`
+3. Map it in `contracts/adapters/wails.ts` and implement it in `contracts/adapters/inMemory.ts`
+4. Create use case in `useCases/` that calls the service
+5. Never import from `wailsjs/` outside of `contracts/` directory
 
 ### Working with State
 
@@ -183,6 +203,31 @@ Example: `useCases/command/startCommand.ts` calls backend and updates state
 - All event listeners registered in `EventListenersContainer.tsx`
 - Define event type in `contracts/types.ts` if new
 - Call use case to handle state updates
+
+### Testing
+
+Vitest, jsdom environment, tests live next to the code as `*.test.ts(x)`.
+
+Node 22.10 or newer is required (`engines` in `package.json`): jsdom 30 pulls an undici that
+calls `worker_threads.markAsUncloneable`. On an older Node every test file fails to start.
+
+- Tests substitute the in-memory adapter at the seam: `installInMemoryBackend()` (from
+  `@/testing/backend.ts`) swaps every service exported by `contracts/service.ts`, and
+  `resetBackendServices()` puts the Wails adapter back
+- The swap is module-level (the service exports are live `let` bindings) rather than
+  injected into every use case: it reaches all call sites without changing a signature.
+  `setBackendServices` is for tests only - production code never calls it
+- The fake **holds state** instead of asserting interactions: drive it through the seam and
+  then query `backend.state`, so refactors behind the contract do not break the tests
+- Emit backend events on demand with `backend.emit(Event.NEW_LOG_ENTRY, { id, line })`
+- Build domain objects with the builder classes in `@/testing/builders/`, mirroring the Go
+  side: `new CommandBuilder().withId("cmd-1").build()`. They mutate and return `this`, so
+  reuse a builder only when you mean the earlier `with` calls to carry over
+- Mirror the Go test conventions: Arrange / Act / Assert comments, and name the unit under
+  test `sut` when the test has a single one
+- Never `vi.mock` the `wailsjs/` modules - that is what the contracts seam exists to avoid
+- Frontend coverage is not uploaded to Codecov yet (it would fail the repo-wide 80% project
+  target while the suite is this small)
 
 ## Known Constraints
 
