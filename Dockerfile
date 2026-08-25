@@ -14,8 +14,7 @@ RUN apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
 RUN apt-get install -y libnss3-dev libxss1 libasound2-dev xvfb
 RUN rm -rf /var/lib/apt/lists/*
 
-# Install Node.js 18.x (LTS)
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
     apt-get install -y nodejs
 
 # Detect architecture and install appropriate Go version
