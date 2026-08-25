@@ -2,7 +2,6 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, LinkIcon, Play, Square } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { useSidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import { useTheme } from "@/contexts/theme.tsx";
@@ -16,9 +15,6 @@ import {
 } from "@/design-system/components/ui/context-menu.tsx";
 import { SidebarMenuButton } from "@/design-system/components/ui/sidebar.tsx";
 import { cn } from "@/design-system/lib/utils.ts";
-import { parseError } from "@/helpers/errorHelpers.ts";
-import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
-import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { cleanCommandError } from "@/useCases/command/cleanCommandError.ts";
@@ -61,11 +57,7 @@ export const CommandMenuItem = ({
 
 	const handleRunCommand = async () => {
 		setActiveCommandId(command.id);
-		try {
-			await startCommand(command.id);
-		} catch (e) {
-			toast.error(parseError(e, t("toast.command.runFailed")));
-		}
+		await startCommand(command.id);
 	};
 
 	const handleOpenLink = async () => {
@@ -77,31 +69,15 @@ export const CommandMenuItem = ({
 	};
 
 	const handleDeleteCommand = async () => {
-		try {
-			await deleteCommand(command.id);
-			setActiveCommandId(null); // Reset active command after deletion
-			toast.success(t("toast.command.deleteSuccess"));
-		} catch (e) {
-			toast.error(parseError(e, t("toast.command.deleteFailed")));
-		} finally {
-			fetchCommands();
-			fetchCommandGroups();
-		}
-		setActiveCommandId(null); // Reset active command after deletion
+		await deleteCommand(command.id);
 	};
 
 	const handleRemoveFromGroup = async () => {
 		if (!insideGroupId) {
 			return;
 		}
-		try {
-			await removeCommandFromGroup(command.id, insideGroupId);
-			toast.success(t("toast.command.removeFromGroupSuccess"));
-		} catch (e) {
-			toast.error(parseError(e, t("toast.command.removeFromGroupFailed")));
-		} finally {
-			fetchCommandGroups();
-		}
+
+		await removeCommandFromGroup(command.id, insideGroupId);
 	};
 
 	const handleEditCommand = () => {
@@ -109,18 +85,7 @@ export const CommandMenuItem = ({
 	};
 
 	const handleDuplicateCommand = async () => {
-		try {
-			await duplicateCommand(command, insideGroupId);
-			toast.success(t("toast.command.duplicateSuccess"));
-		} catch (e) {
-			toast.error(parseError(e, t("toast.command.duplicateFailed")));
-		} finally {
-			fetchCommands();
-			if (insideGroupId) {
-				fetchCommandGroups();
-			}
-		}
-		setActiveCommandId(null); // Reset active command after duplication
+		await duplicateCommand(command.id, insideGroupId);
 	};
 
 	const onCommandSectionClick = () => {
@@ -129,11 +94,7 @@ export const CommandMenuItem = ({
 	};
 
 	const handleStopCommand = async () => {
-		try {
-			await stopCommand(command.id);
-		} catch (e) {
-			toast.error(parseError(e, t("toast.command.stopFailed")));
-		}
+		await stopCommand(command.id);
 		setActiveCommandId(command.id);
 	};
 

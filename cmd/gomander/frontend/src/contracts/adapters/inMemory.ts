@@ -139,6 +139,14 @@ export const createInMemoryBackend = (
 				state.commands = state.commands.map((c) =>
 					c.id === command.id ? snapshot(command) : c,
 				);
+				// A group carries a copy of every command it holds, so an edit shows
+				// up there too.
+				state.commandGroups = state.commandGroups.map((g) => ({
+					...g,
+					commands: g.commands.map((c) =>
+						c.id === command.id ? snapshot(command) : c,
+					),
+				}));
 			},
 			reorderCommands: async (orderedCommandIds) => {
 				state.commands = reorderBy(state.commands, orderedCommandIds);

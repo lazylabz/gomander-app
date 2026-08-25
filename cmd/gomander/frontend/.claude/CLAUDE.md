@@ -132,8 +132,22 @@ export const useCommandStore = <T>(selector) => useStore(commandStore, selector)
 - Each use case is a single exported async function
 - Use cases interact with backend via `contracts/service.ts`
 - Use cases update state via vanilla Zustand stores (not React hooks)
+- A **mutation** owns its whole outcome: the backend call, the stores it has to
+  refresh afterwards, its own `i18n.t` toast on success and on failure, and any
+  state the change forces (disposing a terminal, clearing the active command).
+  It never throws - it returns `false` instead, so a caller that has UI to run
+  on success can branch on it
+- What stays at the call site is only what is local to the UI: closing a modal,
+  resetting a form, `stopPropagation`, selecting the clicked command. A call
+  site with a `try`/`catch`, a `fetchX()` or a `parseError` import around a
+  mutation is a mutation that has not absorbed its outcome yet
+- Refresh through `refreshAfterMutation(...queries)`: the mutation has already
+  reported its outcome by then, so a failing refresh must not reject
+- Only `useCases/command/` follows this yet; the `commandGroup` and `project`
+  mutations still leave their outcome at the call site
 
-Example: `useCases/command/startCommand.ts` calls backend and updates state
+Example: `useCases/command/deleteCommand.ts` deletes, disposes the terminal,
+refreshes commands and groups, and toasts the result
 
 #### 4. Queries vs Use Cases
 
@@ -225,6 +239,14 @@ calls `worker_threads.markAsUncloneable`. On an older Node every test file fails
   reuse a builder only when you mean the earlier `with` calls to carry over
 - Mirror the Go test conventions: Arrange / Act / Assert comments, and name the unit under
   test `sut` when the test has a single one
+- `installTranslations()` (from `@/testing/i18n.ts`) makes `i18n.t` resolve during a test.
+  No resources are registered, so every key echoes itself and an assertion names the key
+  (`expect(toastError).toHaveBeenCalledWith("toast.command.deleteFailed: boom")`) instead
+  of duplicating the English copy
+- Toasts are asserted with `vi.spyOn(toast, "success" | "error")`, and the keys are
+  type-checked against `Localization`, so a wrong key fails the typecheck
+- Drive a failure path by replacing one method on the installed fake:
+  `backend.data.removeCommand = async () => { throw new Error("boom") }`
 - Never `vi.mock` the `wailsjs/` modules - that is what the contracts seam exists to avoid
 - Frontend coverage is not uploaded to Codecov yet (it would fail the repo-wide 80% project
   target while the suite is this small)

@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Terminal } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { CommandCommandField } from "@/components/modals/Command/common/CommandCommandField.tsx";
 import { CommandComputedPath } from "@/components/modals/Command/common/CommandComputedPath.tsx";
@@ -31,9 +30,6 @@ import {
 	DialogTitle,
 } from "@/design-system/components/ui/dialog.tsx";
 import { Form } from "@/design-system/components/ui/form.tsx";
-import { parseError } from "@/helpers/errorHelpers.ts";
-import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
-import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { editCommand } from "@/useCases/command/editCommand.ts";
 
 export const EditCommandModal = ({
@@ -62,28 +58,22 @@ export const EditCommandModal = ({
 			return;
 		}
 
-		try {
-			await editCommand({
-				...command,
-				// Editable fields
-				name: values.name,
-				command: values.command,
-				workingDirectory: values.workingDirectory,
-				link: values.link,
-				errorPatterns: values.errorPatterns
-					.split("\n")
-					.filter((pattern) => pattern.trim() !== ""),
-			});
-
-			toast.success(t("toast.command.updateSuccess"));
-
-			setOpen(false);
-		} catch (e: unknown) {
-			toast.error(parseError(e, t("toast.command.updateFailed")));
-		} finally {
-			fetchCommands();
-			fetchCommandGroups();
+		const edited = await editCommand({
+			...command,
+			// Editable fields
+			name: values.name,
+			command: values.command,
+			workingDirectory: values.workingDirectory,
+			link: values.link,
+			errorPatterns: values.errorPatterns
+				.split("\n")
+				.filter((pattern) => pattern.trim() !== ""),
+		});
+		if (!edited) {
+			return;
 		}
+
+		setOpen(false);
 	};
 
 	const onOpenChange = (open: boolean) => {
