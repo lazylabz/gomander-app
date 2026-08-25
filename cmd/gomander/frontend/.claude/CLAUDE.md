@@ -32,6 +32,9 @@ pnpm run lint
 
 # Auto-fix lint issues
 pnpm run lint:fix
+
+# Auto-fix lint issues, including fixes that Biome classifies as unsafe
+pnpm run lint:fix:unsafe
 ```
 
 Note: Development server is run from the root via `make dev` or `wails dev` - not from this directory.
@@ -156,6 +159,11 @@ Example: `useCases/command/startCommand.ts` calls backend and updates state
 
 - Biome enforces import sorting via its `organizeImports` assist action
 - Imports are automatically sorted: external packages → internal imports (via @/)
+
+### Control Flow
+
+- Biome enforces `style/useBlockStatements` - `if`/`for`/`while` bodies always need braces, even for a single statement
+- Its autofix is classed unsafe, so `pnpm run lint:fix` skips it silently; use `pnpm run lint:fix:unsafe`
 
 ### Adding New Backend Calls
 

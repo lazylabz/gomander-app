@@ -11,7 +11,9 @@ const CollapsedRunningIndicator = () => {
 	const { open, openMobile, isMobile } = useSidebar();
 	const isSidebarOpen = isMobile ? openMobile : open;
 
-	if (isSidebarOpen) return null;
+	if (isSidebarOpen) {
+		return null;
+	}
 
 	return (
 		<RunningIndicator className="fixed bottom-3 left-3 z-10 opacity-25 transition-opacity hover:opacity-100" />

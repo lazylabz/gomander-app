@@ -66,7 +66,9 @@ export const CommandTerminal = ({ commandId }: Props) => {
 	};
 
 	useEffect(() => {
-		if (!containerRef.current) return;
+		if (!containerRef.current) {
+			return;
+		}
 		const container = containerRef.current;
 
 		const { getOrCreate, drainPendingLogs, currentTheme } =
@@ -81,7 +83,9 @@ export const CommandTerminal = ({ commandId }: Props) => {
 		} else {
 			term.open(container);
 			// Backfill logs that arrived before this terminal was opened
-			for (const line of drainPendingLogs(commandId)) term.writeln(line);
+			for (const line of drainPendingLogs(commandId)) {
+				term.writeln(line);
+			}
 		}
 
 		const fit = new FitAddon();

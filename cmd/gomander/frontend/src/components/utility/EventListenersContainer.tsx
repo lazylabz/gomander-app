@@ -47,7 +47,9 @@ export const EventListenersContainer = () => {
 					const stamped = lines.map((line) => prependTimestamp(line, ts));
 					const term = terminals.get(commandId);
 					if (term) {
-						for (const line of stamped) term.writeln(line);
+						for (const line of stamped) {
+							term.writeln(line);
+						}
 					} else {
 						bufferLogs(commandId, stamped);
 					}

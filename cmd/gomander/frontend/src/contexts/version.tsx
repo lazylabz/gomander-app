@@ -69,7 +69,9 @@ export const VersionProvider = ({
 	}, [checkNewRelease, fetchCurrentRelease]);
 
 	const downloadLatestRelease = useCallback(async () => {
-		if (!newRelease) return;
+		if (!newRelease) {
+			return;
+		}
 
 		setUpdateStatus("downloading");
 		try {
@@ -83,7 +85,9 @@ export const VersionProvider = ({
 	}, [newRelease, t]);
 
 	const installLatestRelease = useCallback(async () => {
-		if (!downloadedBinaryPath) return;
+		if (!downloadedBinaryPath) {
+			return;
+		}
 
 		setUpdateStatus("installing");
 		try {

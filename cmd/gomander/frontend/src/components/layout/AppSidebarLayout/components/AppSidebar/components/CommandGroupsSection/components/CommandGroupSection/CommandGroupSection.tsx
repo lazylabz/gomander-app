@@ -72,7 +72,9 @@ export const CommandGroupSection = ({
 		// Prevent the folder from collapsing when clicking the play button
 		e.stopPropagation();
 
-		if (isReorderingGroups) return;
+		if (isReorderingGroups) {
+			return;
+		}
 
 		try {
 			await runCommandGroup(commandGroup.id);
@@ -84,7 +86,9 @@ export const CommandGroupSection = ({
 	const stop = async (e: SyntheticEvent) => {
 		// Prevent the folder from collapsing when clicking the stop button
 		e.stopPropagation();
-		if (isReorderingGroups) return;
+		if (isReorderingGroups) {
+			return;
+		}
 
 		try {
 			await stopCommandGroup(commandGroup.id);
@@ -94,7 +98,9 @@ export const CommandGroupSection = ({
 	};
 
 	const handleDelete = async () => {
-		if (isReorderingGroups) return;
+		if (isReorderingGroups) {
+			return;
+		}
 		try {
 			await deleteCommandGroup(commandGroup.id);
 			toast.success(t("toast.commandGroup.deleteSuccess"));
@@ -106,7 +112,9 @@ export const CommandGroupSection = ({
 	};
 
 	const handleEdit = () => {
-		if (isReorderingGroups) return;
+		if (isReorderingGroups) {
+			return;
+		}
 		startEditingCommandGroup(commandGroup);
 	};
 

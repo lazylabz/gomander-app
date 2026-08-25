@@ -91,7 +91,9 @@ export const CommandMenuItem = ({
 	};
 
 	const handleRemoveFromGroup = async () => {
-		if (!insideGroupId) return;
+		if (!insideGroupId) {
+			return;
+		}
 		try {
 			await removeCommandFromGroup(command.id, insideGroupId);
 			toast.success(t("toast.command.removeFromGroupSuccess"));
