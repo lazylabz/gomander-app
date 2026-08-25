@@ -35,7 +35,10 @@ help:
 
 # Test target
 test:
+	@echo "Running Go tests..."
 	go test ./...
+	@echo "Running frontend tests..."
+	cd $(CMD_DIR)/frontend && pnpm run test
 
 # Development target
 dev:
