@@ -86,6 +86,9 @@ export const EventListenersContainer = () => {
 			Event.PROCESS_STARTED,
 			(data: EventData[Event.PROCESS_STARTED]) => {
 				updateCommandStatus(data, CommandStatus.RUNNING);
+				// Not-yet-flushed lines belong to the previous run; without this
+				// they would land in the reset terminal and the cleared tail.
+				logsBuffer.current.delete(data);
 				clearLogTail(data);
 				terminalStore.getState().terminals.get(data)?.reset();
 			},
