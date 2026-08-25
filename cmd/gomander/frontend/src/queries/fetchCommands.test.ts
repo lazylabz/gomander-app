@@ -4,7 +4,7 @@ import { resetBackendServices } from "@/contracts/service.ts";
 import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { commandStore } from "@/store/commandStore.ts";
 import { installInMemoryBackend } from "@/testing/backend.ts";
-import { newCommandBuilder } from "@/testing/builders/command.ts";
+import { CommandBuilder } from "@/testing/builders/command.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 
 describe("fetchCommands", () => {
@@ -20,8 +20,8 @@ describe("fetchCommands", () => {
 
 	it("Should load the commands held by the backend into the store", async () => {
 		// Arrange
-		const firstCommand = newCommandBuilder().withId("cmd-1").build();
-		const secondCommand = newCommandBuilder().withId("cmd-2").build();
+		const firstCommand = new CommandBuilder().withId("cmd-1").build();
+		const secondCommand = new CommandBuilder().withId("cmd-2").build();
 		installInMemoryBackend({ commands: [firstCommand, secondCommand] });
 
 		// Act
@@ -37,7 +37,7 @@ describe("fetchCommands", () => {
 	it("Should mark every fetched command as idle", async () => {
 		// Arrange
 		installInMemoryBackend({
-			commands: [newCommandBuilder().withId("cmd-1").build()],
+			commands: [new CommandBuilder().withId("cmd-1").build()],
 		});
 
 		// Act
@@ -52,7 +52,7 @@ describe("fetchCommands", () => {
 	it("Should keep the status of a command that is already known", async () => {
 		// Arrange
 		installInMemoryBackend({
-			commands: [newCommandBuilder().withId("cmd-1").build()],
+			commands: [new CommandBuilder().withId("cmd-1").build()],
 		});
 		commandStore.setState({
 			commandsStatus: { "cmd-1": CommandStatus.RUNNING },
@@ -70,7 +70,7 @@ describe("fetchCommands", () => {
 	it("Should forget the status of a command the backend no longer has", async () => {
 		// Arrange
 		installInMemoryBackend({
-			commands: [newCommandBuilder().withId("cmd-1").build()],
+			commands: [new CommandBuilder().withId("cmd-1").build()],
 		});
 		commandStore.setState({
 			commandsStatus: {

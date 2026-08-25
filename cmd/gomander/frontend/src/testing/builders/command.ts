@@ -1,32 +1,7 @@
 import type { Command } from "@/contracts/types.ts";
 
-export type CommandBuilder = {
-	withId: (id: string) => CommandBuilder;
-	withProjectId: (projectId: string) => CommandBuilder;
-	withName: (name: string) => CommandBuilder;
-	withCommand: (command: string) => CommandBuilder;
-	withWorkingDirectory: (workingDirectory: string) => CommandBuilder;
-	withPosition: (position: number) => CommandBuilder;
-	withLink: (link: string) => CommandBuilder;
-	withErrorPatterns: (...errorPatterns: string[]) => CommandBuilder;
-	build: () => Command;
-};
-
-const builder = (data: Command): CommandBuilder => ({
-	withId: (id) => builder({ ...data, id }),
-	withProjectId: (projectId) => builder({ ...data, projectId }),
-	withName: (name) => builder({ ...data, name }),
-	withCommand: (command) => builder({ ...data, command }),
-	withWorkingDirectory: (workingDirectory) =>
-		builder({ ...data, workingDirectory }),
-	withPosition: (position) => builder({ ...data, position }),
-	withLink: (link) => builder({ ...data, link }),
-	withErrorPatterns: (...errorPatterns) => builder({ ...data, errorPatterns }),
-	build: () => ({ ...data }),
-});
-
-export const newCommandBuilder = (): CommandBuilder =>
-	builder({
+export class CommandBuilder {
+	private data: Command = {
 		id: crypto.randomUUID(),
 		projectId: crypto.randomUUID(),
 		name: "Test Command",
@@ -35,4 +10,49 @@ export const newCommandBuilder = (): CommandBuilder =>
 		position: 0,
 		link: "",
 		errorPatterns: [],
-	});
+	};
+
+	withId(id: string): this {
+		this.data.id = id;
+		return this;
+	}
+
+	withProjectId(projectId: string): this {
+		this.data.projectId = projectId;
+		return this;
+	}
+
+	withName(name: string): this {
+		this.data.name = name;
+		return this;
+	}
+
+	withCommand(command: string): this {
+		this.data.command = command;
+		return this;
+	}
+
+	withWorkingDirectory(workingDirectory: string): this {
+		this.data.workingDirectory = workingDirectory;
+		return this;
+	}
+
+	withPosition(position: number): this {
+		this.data.position = position;
+		return this;
+	}
+
+	withLink(link: string): this {
+		this.data.link = link;
+		return this;
+	}
+
+	withErrorPatterns(...errorPatterns: string[]): this {
+		this.data.errorPatterns = errorPatterns;
+		return this;
+	}
+
+	build(): Command {
+		return { ...this.data, errorPatterns: [...this.data.errorPatterns] };
+	}
+}

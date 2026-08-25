@@ -8,7 +8,7 @@ import {
 } from "@/contracts/service.ts";
 import { Event, type EventData } from "@/contracts/types.ts";
 import { installInMemoryBackend } from "@/testing/backend.ts";
-import { newCommandBuilder } from "@/testing/builders/command.ts";
+import { CommandBuilder } from "@/testing/builders/command.ts";
 
 describe("the backend seam", () => {
 	afterEach(() => {
@@ -18,7 +18,7 @@ describe("the backend seam", () => {
 	it("Should route calls to the substituted adapter", async () => {
 		// Arrange
 		const backend = installInMemoryBackend();
-		const command = newCommandBuilder().withId("cmd-1").build();
+		const command = new CommandBuilder().withId("cmd-1").build();
 
 		// Act
 		await dataService.addCommand(command);

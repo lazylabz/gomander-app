@@ -217,8 +217,9 @@ Vitest, jsdom environment, tests live next to the code as `*.test.ts(x)`.
 - The fake **holds state** instead of asserting interactions: drive it through the seam and
   then query `backend.state`, so refactors behind the contract do not break the tests
 - Emit backend events on demand with `backend.emit(Event.NEW_LOG_ENTRY, { id, line })`
-- Build domain objects with the builders in `@/testing/builders/`, mirroring the Go side:
-  `newCommandBuilder().withId("cmd-1").build()`
+- Build domain objects with the builder classes in `@/testing/builders/`, mirroring the Go
+  side: `new CommandBuilder().withId("cmd-1").build()`. They mutate and return `this`, so
+  reuse a builder only when you mean the earlier `with` calls to carry over
 - Mirror the Go test conventions: Arrange / Act / Assert comments, and name the unit under
   test `sut` when the test has a single one
 - Never `vi.mock` the `wailsjs/` modules - that is what the contracts seam exists to avoid
