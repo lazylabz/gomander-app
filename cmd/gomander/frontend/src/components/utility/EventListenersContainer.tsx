@@ -10,18 +10,14 @@ import {
 	formatLogTimestamp,
 	prependTimestamp,
 } from "@/screens/LogsScreen/helpers.ts";
-import { useCommandStore } from "@/store/commandStore.ts";
+import { clearLogTail, recordLogTail } from "@/store/commandLogsTail.ts";
 import { terminalStore } from "@/store/terminalStore.ts";
-import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
-import { cleanCommandLogs } from "@/useCases/command/cleanCommandLogs.ts";
 import { detectMissingEnvironmentPathFailure } from "@/useCases/command/detectMissingEnvironmentPathFailure.tsx";
 import { recordCommandsErrors } from "@/useCases/command/recordCommandsErrors.ts";
 import { updateCommandStatus } from "@/useCases/command/updateCommandStatus.ts";
 
 export const EventListenersContainer = () => {
-	const addLogs = useCommandStore((state) => state.addLogs);
-	const userConfig = useUserConfigurationStore((state) => state.userConfig);
 	const { theme } = useTheme();
 
 	useEffect(() => {
@@ -40,13 +36,14 @@ export const EventListenersContainer = () => {
 			// Process logs buffer
 			if (logsBuffer.current.size > 0) {
 				const bufferCopy = new Map(logsBuffer.current);
-				addLogs(bufferCopy, userConfig.logLineLimit);
 				logsBuffer.current.clear();
 
 				// Write directly to already-open terminals (bypasses React re-render cycle).
 				const ts = formatLogTimestamp(new Date());
 				const { terminals, bufferLogs } = terminalStore.getState();
 				for (const [commandId, lines] of bufferCopy) {
+					recordLogTail(commandId, lines);
+
 					const stamped = lines.map((line) => prependTimestamp(line, ts));
 					const term = terminals.get(commandId);
 					if (term) {
@@ -59,7 +56,7 @@ export const EventListenersContainer = () => {
 		}, 30); // Flush every 30ms
 
 		return () => clearInterval(interval);
-	}, [addLogs, userConfig.logLineLimit]);
+	}, []);
 
 	// Register events listeners
 	useEffect(() => {
@@ -89,7 +86,10 @@ export const EventListenersContainer = () => {
 			Event.PROCESS_STARTED,
 			(data: EventData[Event.PROCESS_STARTED]) => {
 				updateCommandStatus(data, CommandStatus.RUNNING);
-				cleanCommandLogs(data);
+				// Not-yet-flushed lines belong to the previous run; without this
+				// they would land in the reset terminal and the cleared tail.
+				logsBuffer.current.delete(data);
+				clearLogTail(data);
 				terminalStore.getState().terminals.get(data)?.reset();
 			},
 		);

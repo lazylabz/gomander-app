@@ -16,10 +16,6 @@ type CommandStore = {
 
 	activeCommandId: string | null;
 	setActiveCommandId: (commandId: string | null) => void;
-
-	commandsLogs: Record<string, string[]>;
-	setCommandsLogs: (logs: Record<string, string[]>) => void;
-	addLogs: (logs: Map<string, string[]>, linesLimit?: number) => void;
 };
 
 // To be used in use cases
@@ -36,27 +32,6 @@ export const commandStore = createStore<CommandStore>()((set) => ({
 
 	activeCommandId: null,
 	setActiveCommandId: (commandId) => set({ activeCommandId: commandId }),
-
-	commandsLogs: {},
-	setCommandsLogs: (logs) => set({ commandsLogs: logs }),
-
-	addLogs: (logs: Map<string, string[]>, linesLimit: number = 100) =>
-		set((state) => {
-			const newCommandsLogs = { ...state.commandsLogs };
-			logs.forEach((lines, commandId) => {
-				if (!newCommandsLogs[commandId]) {
-					newCommandsLogs[commandId] = [];
-				}
-				newCommandsLogs[commandId] = [
-					...newCommandsLogs[commandId],
-					...lines,
-				].slice(-linesLimit); // Keep only the last `linesLimit` lines
-			});
-			return {
-				...state,
-				commandsLogs: newCommandsLogs,
-			};
-		}),
 }));
 
 // To be used in react components
