@@ -5,7 +5,9 @@ export default mergeConfig(
 	viteConfig,
 	defineConfig({
 		test: {
-			environment: "jsdom",
+			// happy-dom over jsdom: jsdom 30 pulls undici 8, which needs
+			// worker_threads.markAsUncloneable and so refuses to run on the Node 20 CI uses.
+			environment: "happy-dom",
 			include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
 			coverage: {
 				provider: "v8",

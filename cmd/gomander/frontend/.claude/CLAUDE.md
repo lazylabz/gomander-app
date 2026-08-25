@@ -206,7 +206,7 @@ Example: `useCases/command/startCommand.ts` calls backend and updates state
 
 ### Testing
 
-Vitest, jsdom environment, tests live next to the code as `*.test.ts(x)`.
+Vitest, happy-dom environment, tests live next to the code as `*.test.ts(x)`.
 
 - Tests substitute the in-memory adapter at the seam: `installInMemoryBackend()` (from
   `@/testing/backend.ts`) swaps every service exported by `contracts/service.ts`, and
