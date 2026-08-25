@@ -182,6 +182,19 @@ refreshes commands and groups, and toasts the result
 - The emulator sits behind `commandOutput/ports.ts`, search included; Biome keeps every
   `@xterm/*` import inside `commandOutput/`, the way it keeps `wailsjs` inside `contracts/`
 
+#### 7. Autosaved Forms
+
+- `hooks/useAutosavedForm.ts` takes a schema, its defaults and a save function, and returns
+  `{ form, isPending }`. The settings context calls it twice, once per settings tab
+- The dirty check, the debounce window, the submit and the pending flag are implementation.
+  A call site that watches the form, diffs it against a `useRef` of the last saved values or
+  sequences its own `setTimeout` is a call site that should be using this instead
+- The rules live in `createAutosaver`, a plain factory the hook drives from a
+  `form.subscribe` callback - they are unit-tested without rendering anything
+- `formState.dirtyFields` cannot replace the snapshot comparison: it is measured against the
+  form defaults, not against the last saved values, so it would need a `form.reset` after
+  every save - which re-keys any `useFieldArray` on screen and steals focus mid-typing
+
 ### Path Aliases
 
 - `@/` maps to `src/` directory
@@ -269,6 +282,9 @@ calls `worker_threads.markAsUncloneable`. On an older Node every test file fails
   type-checked against `Localization`, so a wrong key fails the typecheck
 - Drive a failure path by replacing one method on the installed fake:
   `backend.data.removeCommand = async () => { throw new Error("boom") }`
+- A hook that owns an effect is driven through a probe component rendered with `createRoot`
+  and `act` (see `hooks/useAutosavedForm.test.tsx`); everything a hook can hand to a plain
+  function belongs in that function, tested without a renderer
 - Never `vi.mock` the `wailsjs/` modules - that is what the contracts seam exists to avoid
 - Frontend coverage is not uploaded to Codecov yet (it would fail the repo-wide 80% project
   target while the suite is this small)
