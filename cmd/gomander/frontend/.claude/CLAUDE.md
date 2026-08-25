@@ -33,7 +33,7 @@ pnpm run lint
 # Auto-fix lint issues
 pnpm run lint:fix
 
-# Auto-fix lint issues, including fixes Biome classes as unsafe
+# Auto-fix lint issues, including fixes that Biome classifies as unsafe
 pnpm run lint:fix:unsafe
 ```
 
