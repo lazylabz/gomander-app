@@ -30,6 +30,9 @@ cd cmd/gomander && wails dev
 # Run all Go tests
 go test ./...
 
+# Run all tests (Go + frontend)
+make test
+
 # Run linting and type checking (backend + frontend)
 make lint
 ```
@@ -55,6 +58,9 @@ go test ./internal/command/domain -run TestCommandName
 
 # Run tests in a specific package with verbose output
 go test -v ./internal/command/application/usecases
+
+# Run a single frontend test file
+cd cmd/gomander/frontend && pnpm run test src/queries/fetchCommands.test.ts
 ```
 
 ## Architecture
