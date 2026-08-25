@@ -57,14 +57,13 @@ export const CreateCommandGroupModal = ({
 				position: 0, // Will be set by the backend
 			});
 			toast.success(t("toast.commandGroup.createSuccess"));
+			setOpen(false);
+			form.reset();
 		} catch (e) {
 			toast.error(parseError(e, t("toast.commandGroup.createFailed")));
 		} finally {
 			fetchCommandGroups();
 		}
-
-		setOpen(false);
-		form.reset();
 	};
 
 	const onOpenChange = (open: boolean) => {
