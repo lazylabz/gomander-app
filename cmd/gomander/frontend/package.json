@@ -9,6 +9,7 @@
 		"typecheck": "tsc -b --noEmit",
 		"lint": "biome check .",
 		"lint:fix": "biome check . --fix",
+		"lint:fix:unsafe": "biome check . --fix --unsafe",
 		"preview": "vite preview"
 	},
 	"dependencies": {
