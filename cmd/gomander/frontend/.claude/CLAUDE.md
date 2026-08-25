@@ -66,6 +66,12 @@ src/
 │   └── adapters/      # Implementations of the contract
 │       ├── wails.ts   # Generated bindings (production)
 │       └── inMemory.ts # Fake holding queryable state (tests)
+├── commandOutput/     # A command's output, from Wails event to pixels
+│   ├── commandOutput.ts # The pipeline: append, attach, reset, tail, dispose
+│   ├── ports.ts       # The terminal emulator contract, declared as types
+│   └── adapters/      # Implementations of the contract
+│       ├── xterm.ts   # xterm.js (production, ONLY place @xterm/* is imported)
+│       └── recording.ts # Fake recording what was written (tests)
 ├── useCases/          # Business logic organized by domain
 │   ├── command/       # Command-specific operations (start, stop, create, etc.)
 │   ├── commandGroup/  # Command group operations
@@ -95,7 +101,7 @@ src/
 ├── hooks/             # Custom React hooks (application-specific)
 ├── contexts/          # React contexts (theme, version, etc.)
 ├── helpers/           # Pure utility functions
-├── testing/           # Test-only helpers (in-memory backend installer, builders)
+├── testing/           # Test-only helpers (fake backend and terminal installers, builders)
 ├── types/             # TypeScript type definitions
 └── constants/         # Application constants
 ```
@@ -161,7 +167,20 @@ refreshes commands and groups, and toasts the result
 - `EventListenersContainer` component (rendered in App.tsx) listens to all events
 - Events defined in `contracts/types.ts` (Event enum)
 - Event handlers call use cases to update state (e.g., PROCESS_STARTED → updateCommandStatus)
-- Log buffering: Logs are buffered for 30ms before being flushed to state for performance
+- `EventListenersContainer` is wiring only: it turns an event into one call, it owns no
+  pipeline of its own
+
+#### 6. Command Output Pipeline
+
+- `commandOutput/commandOutput.ts` owns a command's output end to end: `appendCommandOutput`,
+  `attachCommandOutput`, `resetCommandOutput`, `commandOutputTail`, `disposeCommandOutput`
+- Buffering, the 30 ms flush interval, timestamping, the backfill of lines that arrived
+  before a terminal was on screen, the bounded tail and the reset ordering are all
+  implementation - callers never sequence them
+- The tail is recorded on append rather than on flush, so a `PROCESS_FINISHED` landing
+  between two flushes still sees the line that explains the failure
+- The emulator sits behind `commandOutput/ports.ts`, search included; Biome keeps every
+  `@xterm/*` import inside `commandOutput/`, the way it keeps `wailsjs` inside `contracts/`
 
 ### Path Aliases
 
@@ -234,6 +253,9 @@ calls `worker_threads.markAsUncloneable`. On an older Node every test file fails
 - The fake **holds state** instead of asserting interactions: drive it through the seam and
   then query `backend.state`, so refactors behind the contract do not break the tests
 - Emit backend events on demand with `backend.emit(Event.NEW_LOG_ENTRY, { id, line })`
+- The terminal emulator has the same shape of seam: `installRecordingTerminals()` (from
+  `@/testing/terminals.ts`) swaps in a factory whose terminals record what was written,
+  and `resetTerminals()` puts xterm back. Use fake timers to drive the flush loop
 - Build domain objects with the builder classes in `@/testing/builders/`, mirroring the Go
   side: `new CommandBuilder().withId("cmd-1").build()`. They mutate and return `this`, so
   reuse a builder only when you mean the earlier `with` calls to carry over

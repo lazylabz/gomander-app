@@ -24,6 +24,9 @@
 						"patterns": [
 							{
 								"group": ["**/wailsjs/**"]
+							},
+							{
+								"group": ["@xterm/**"]
 							}
 						]
 					}
@@ -38,7 +41,35 @@
 			"linter": {
 				"rules": {
 					"style": {
-						"noRestrictedImports": "off"
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": ["@xterm/**"]
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["src/commandOutput/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": ["**/wailsjs/**"]
+									}
+								]
+							}
+						}
 					}
 				}
 			}

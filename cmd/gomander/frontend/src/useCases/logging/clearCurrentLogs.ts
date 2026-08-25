@@ -1,6 +1,5 @@
-import { clearLogTail } from "@/store/commandLogsTail.ts";
+import { resetCommandOutput } from "@/commandOutput/commandOutput.ts";
 import { commandStore } from "@/store/commandStore.ts";
-import { terminalStore } from "@/store/terminalStore.ts";
 
 export const clearCurrentLogs = () => {
 	const { activeCommandId } = commandStore.getState();
@@ -9,8 +8,5 @@ export const clearCurrentLogs = () => {
 		return;
 	}
 
-	clearLogTail(activeCommandId);
-
-	const { resetTerminal } = terminalStore.getState();
-	resetTerminal(activeCommandId);
+	resetCommandOutput(activeCommandId);
 };
