@@ -5,10 +5,11 @@ import { SearchAddon } from "@xterm/addon-search";
 import { WebLinksAddon } from "@xterm/addon-web-links";
 import { type ITheme, Terminal } from "@xterm/xterm";
 
-import type {
-	OutputTerminal,
-	TerminalFactory,
-	TerminalTheme,
+import {
+	type OutputTerminal,
+	TERMINAL_SCROLLBACK,
+	type TerminalFactory,
+	type TerminalTheme,
 } from "@/commandOutput/ports.ts";
 import { externalBrowserService } from "@/contracts/service.ts";
 
@@ -45,11 +46,14 @@ const openTerminalLink = (_: unknown, uri: string) => {
 
 export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
 	let theme = initialTheme;
+	// Set while a terminal is attached: match decorations are painted once, so a
+	// theme change has to re-run the search that painted them.
+	let repaintSearch: (() => void) | null = null;
 
 	const terminal = new Terminal({
 		allowProposedApi: true,
 		convertEol: true,
-		scrollback: 10_000,
+		scrollback: TERMINAL_SCROLLBACK,
 		disableStdin: true,
 		fontFamily: "monospace",
 		theme: XTERM_THEMES[theme],
@@ -61,6 +65,7 @@ export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
 		setTheme: (nextTheme) => {
 			theme = nextTheme;
 			terminal.options.theme = XTERM_THEMES[nextTheme];
+			repaintSearch?.();
 		},
 		dispose: () => terminal.dispose(),
 
@@ -82,22 +87,35 @@ export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
 
 			fit.fit();
 
+			let lastQuery = "";
+			repaintSearch = () => {
+				if (lastQuery) {
+					search.findNext(lastQuery, {
+						decorations: XTERM_SEARCH_DECORATIONS[theme],
+						incremental: true,
+					});
+				}
+			};
+
 			return {
 				fit: () => fit.fit(),
 
 				search: {
 					findNext: (query, incremental) => {
+						lastQuery = query;
 						search.findNext(query, {
 							decorations: XTERM_SEARCH_DECORATIONS[theme],
 							incremental,
 						});
 					},
 					findPrevious: (query) => {
+						lastQuery = query;
 						search.findPrevious(query, {
 							decorations: XTERM_SEARCH_DECORATIONS[theme],
 						});
 					},
 					clear: () => {
+						lastQuery = "";
 						search.clearDecorations();
 						search.clearActiveDecoration();
 					},
@@ -110,6 +128,7 @@ export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
 				},
 
 				detach: () => {
+					repaintSearch = null;
 					search.dispose();
 					// Detach the DOM only — the emulator outlives the view
 					if (terminal.element && element.contains(terminal.element)) {

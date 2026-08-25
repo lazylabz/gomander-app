@@ -1,9 +1,10 @@
 import { xtermTerminal } from "@/commandOutput/adapters/xterm.ts";
-import type {
-	AttachedTerminal,
-	OutputTerminal,
-	TerminalFactory,
-	TerminalTheme,
+import {
+	type AttachedTerminal,
+	type OutputTerminal,
+	TERMINAL_SCROLLBACK,
+	type TerminalFactory,
+	type TerminalTheme,
 } from "@/commandOutput/ports.ts";
 
 export const FLUSH_INTERVAL_MS = 30;
@@ -73,7 +74,12 @@ const flush = (): void => {
 		output.buffered = [];
 
 		if (!output.terminal) {
-			output.backlog.push(...stamped);
+			// Capped: a chatty command whose terminal is never opened would otherwise
+			// hold every line it ever printed, and the emulator would drop the older
+			// ones on write anyway.
+			output.backlog = [...output.backlog, ...stamped].slice(
+				-TERMINAL_SCROLLBACK,
+			);
 			continue;
 		}
 		for (const line of stamped) {
@@ -146,8 +152,9 @@ export const resetCommandOutput = (commandId: string): void => {
 		return;
 	}
 
-	// Lines still buffered belong to the run that just ended; without this they
-	// would land in the terminal the new run just cleared.
+	// Buffered lines are dropped rather than flushed: on a new run they belong to
+	// the run that just ended, and on a manual clear the user asked for the
+	// screen to be empty - either way they must not land in a cleared terminal.
 	output.buffered = [];
 	output.backlog = [];
 	output.tail = [];

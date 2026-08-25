@@ -1,5 +1,9 @@
 export type TerminalTheme = "light" | "dark";
 
+// How many lines a terminal keeps. Shared with the pipeline: anything it holds
+// for a terminal that does not exist yet beyond this would be dropped on write.
+export const TERMINAL_SCROLLBACK = 10_000;
+
 export type TerminalSearch = {
 	findNext: (query: string, incremental?: boolean) => void;
 	findPrevious: (query: string) => void;

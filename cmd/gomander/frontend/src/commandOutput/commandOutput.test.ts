@@ -11,6 +11,7 @@ import {
 	resetCommandOutput,
 	setCommandOutputTheme,
 } from "@/commandOutput/commandOutput.ts";
+import { TERMINAL_SCROLLBACK } from "@/commandOutput/ports.ts";
 import {
 	installRecordingTerminals,
 	resetTerminals,
@@ -220,6 +221,23 @@ describe("the command output pipeline", () => {
 
 			// Assert
 			expect(terminalOf("cmd-1").writtenWhenAttached).toBe(0);
+		});
+
+		it("Should hold at most a terminal's worth of lines for a command never attached", () => {
+			// Arrange
+			appendCommandOutput(
+				"cmd-1",
+				Array.from({ length: TERMINAL_SCROLLBACK + 5 }, (_, i) => `line ${i}`),
+			);
+			flush();
+
+			// Act
+			attachCommandOutput("cmd-1", document.createElement("div"));
+
+			// Assert
+			const { written } = terminalOf("cmd-1");
+			expect(written).toHaveLength(TERMINAL_SCROLLBACK);
+			expect(written.at(-1)).toContain(`line ${TERMINAL_SCROLLBACK + 4}`);
 		});
 
 		it("Should attach the terminal to the given element", () => {
