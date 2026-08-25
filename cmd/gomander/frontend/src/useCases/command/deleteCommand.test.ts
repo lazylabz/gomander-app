@@ -68,6 +68,23 @@ describe("deleteCommand", () => {
 		expect(commandStore.getState().activeCommandId).toBeNull();
 	});
 
+	it("Should keep the active command when another one is deleted", async () => {
+		// Arrange
+		installInMemoryBackend({
+			commands: [
+				new CommandBuilder().withId("cmd-1").build(),
+				new CommandBuilder().withId("cmd-2").build(),
+			],
+		});
+		commandStore.setState({ activeCommandId: "cmd-2" });
+
+		// Act
+		await sut("cmd-1");
+
+		// Assert
+		expect(commandStore.getState().activeCommandId).toBe("cmd-2");
+	});
+
 	it("Should dispose the terminal and the buffered logs of the command", async () => {
 		// Arrange
 		installInMemoryBackend({

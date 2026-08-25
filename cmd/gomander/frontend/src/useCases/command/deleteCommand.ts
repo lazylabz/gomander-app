@@ -16,7 +16,11 @@ export const deleteCommand = async (commandId: string): Promise<boolean> => {
 
 		terminalStore.getState().dispose(commandId);
 		clearLogTail(commandId);
-		commandStore.getState().setActiveCommandId(null);
+
+		const { activeCommandId, setActiveCommandId } = commandStore.getState();
+		if (activeCommandId === commandId) {
+			setActiveCommandId(null);
+		}
 
 		toast.success(i18n.t("toast.command.deleteSuccess"));
 		return true;
