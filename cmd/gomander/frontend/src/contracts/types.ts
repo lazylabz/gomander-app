@@ -7,7 +7,10 @@ export type Command = domain.Command;
 export type UserConfig = domain.Config;
 export type CommandGroup = domain.CommandGroup;
 export type Project = domain.Project;
+export type EnvironmentPath = domain.EnvironmentPath;
 export type ProjectExport = domain.ProjectExportJSONv1;
+export type CommandExport = domain.CommandJSONv1;
+export type CommandGroupExport = domain.CommandGroupJSONv1;
 export type Localization = domain.Localization;
 
 // Enums

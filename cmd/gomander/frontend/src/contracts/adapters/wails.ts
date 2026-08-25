@@ -1,0 +1,103 @@
+import type { BackendServices } from "@/contracts/ports.ts";
+import {
+	AskForDirPath,
+	OpenFileFolder,
+} from "../../../wailsjs/go/fs/UIFsHelper";
+import {
+	AddCommandController,
+	CloseProjectController,
+	CreateCommandGroupController,
+	CreateProjectController,
+	DeleteCommandGroupController,
+	DeleteProjectController,
+	DuplicateCommandController,
+	EditCommandController,
+	EditProjectController,
+	ExportProjectController,
+	GetAvailableProjectsController,
+	GetCommandGroupsController,
+	GetCommandsController,
+	GetCurrentProjectController,
+	GetProjectToImportController,
+	GetProjectToImportFromPackageJsonController,
+	GetSupportedLanguagesController,
+	GetTranslationController,
+	GetUserConfigController,
+	ImportProjectController,
+	OpenProjectController,
+	RemoveCommandController,
+	RemoveCommandFromCommandGroupController,
+	ReorderCommandGroupsController,
+	ReorderCommandsController,
+	RunCommandController,
+	RunCommandGroupController,
+	SaveUserConfigController,
+	StopCommandController,
+	StopCommandGroupController,
+	UpdateCommandGroupController,
+} from "../../../wailsjs/go/main/WailsControllers";
+import { GetOs } from "../../../wailsjs/go/os_internal/UIOsHelper";
+import { GetComputedPath } from "../../../wailsjs/go/path/UiPathHelper";
+import {
+	DownloadLatestRelease,
+	GetCurrentRelease,
+	InstallLatestReleaseAndQuit,
+	IsThereANewRelease,
+} from "../../../wailsjs/go/releases/ReleaseHelper";
+import { BrowserOpenURL, EventsOff, EventsOn } from "../../../wailsjs/runtime";
+
+export const wailsBackend = {
+	data: {
+		addCommand: AddCommandController,
+		duplicateCommand: DuplicateCommandController,
+		editCommand: EditCommandController,
+		reorderCommands: ReorderCommandsController,
+		getAvailableProjects: GetAvailableProjectsController,
+		editCommandGroup: UpdateCommandGroupController,
+		createCommandGroup: CreateCommandGroupController,
+		deleteCommandGroup: DeleteCommandGroupController,
+		reorderCommandGroups: ReorderCommandGroupsController,
+		removeCommandFromGroup: RemoveCommandFromCommandGroupController,
+		runCommandGroup: RunCommandGroupController,
+		stopCommandGroup: StopCommandGroupController,
+		getCommandGroups: GetCommandGroupsController,
+		getCommands: GetCommandsController,
+		getCurrentProject: GetCurrentProjectController,
+		getUserConfig: GetUserConfigController,
+		removeCommand: RemoveCommandController,
+		runCommand: RunCommandController,
+		saveUserConfig: SaveUserConfigController,
+		createProject: CreateProjectController,
+		stopCommand: StopCommandController,
+		openProject: OpenProjectController,
+		closeProject: CloseProjectController,
+		deleteProject: DeleteProjectController,
+		exportProject: ExportProjectController,
+		importProject: ImportProjectController,
+		getProjectToImport: GetProjectToImportController,
+		getProjectToImportFromPackageJson:
+			GetProjectToImportFromPackageJsonController,
+		editProject: EditProjectController,
+	},
+	helpers: {
+		getComputedPath: GetComputedPath,
+		isThereANewRelease: IsThereANewRelease,
+		getCurrentRelease: GetCurrentRelease,
+		downloadLatestRelease: DownloadLatestRelease,
+		installLatestReleaseAndQuit: InstallLatestReleaseAndQuit,
+		getOs: GetOs,
+		askForDirPath: AskForDirPath,
+		openFileFolder: OpenFileFolder,
+	},
+	event: {
+		eventsOn: EventsOn,
+		eventsOff: EventsOff,
+	},
+	externalBrowser: {
+		browserOpenURL: BrowserOpenURL,
+	},
+	translations: {
+		getTranslation: GetTranslationController,
+		getSupportedLanguages: GetSupportedLanguagesController,
+	},
+} satisfies BackendServices;
