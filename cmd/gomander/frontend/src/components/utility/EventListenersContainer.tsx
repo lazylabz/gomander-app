@@ -29,6 +29,11 @@ export const EventListenersContainer = () => {
 
 	useEffect(() => {
 		const interval = setInterval(() => {
+			// Recording writes a fresh array into the store, which re-renders every
+			// command row; on an empty tick that is 33 renders a second for nothing.
+			if (errorBuffer.current.length === 0) {
+				return;
+			}
 			recordCommandsErrors(errorBuffer.current);
 			errorBuffer.current = [];
 		}, ERROR_FLUSH_INTERVAL_MS);
