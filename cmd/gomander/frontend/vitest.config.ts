@@ -10,7 +10,11 @@ export default mergeConfig(
 			coverage: {
 				provider: "v8",
 				include: ["src/**"],
-				exclude: ["src/testing/**", "src/contracts/adapters/inMemory.ts"],
+				exclude: [
+					"src/testing/**",
+					"src/contracts/adapters/inMemory.ts",
+					"src/commandOutput/adapters/recording.ts",
+				],
 			},
 		},
 	}),

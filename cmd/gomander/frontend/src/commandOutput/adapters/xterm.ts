@@ -1,0 +1,126 @@
+import "@xterm/xterm/css/xterm.css";
+import { FitAddon } from "@xterm/addon-fit";
+import type { ISearchOptions } from "@xterm/addon-search";
+import { SearchAddon } from "@xterm/addon-search";
+import { WebLinksAddon } from "@xterm/addon-web-links";
+import { type ITheme, Terminal } from "@xterm/xterm";
+
+import type {
+	OutputTerminal,
+	TerminalFactory,
+	TerminalTheme,
+} from "@/commandOutput/ports.ts";
+import { externalBrowserService } from "@/contracts/service.ts";
+
+const XTERM_THEMES: Record<TerminalTheme, ITheme> = {
+	light: {
+		background: "#ffffff",
+		foreground: "#0a0a0a",
+		selectionBackground: "#ebebeb",
+		selectionInactiveBackground: "#f5f5f5",
+	},
+	dark: { background: "#0a0a0a", foreground: "#fbfbfb" },
+};
+
+type SearchDecorations = NonNullable<ISearchOptions["decorations"]>;
+
+const XTERM_SEARCH_DECORATIONS: Record<TerminalTheme, SearchDecorations> = {
+	light: {
+		matchBackground: "#ffe082",
+		activeMatchBackground: "#f0c000",
+		matchOverviewRuler: "#f0c000",
+		activeMatchColorOverviewRuler: "#c09000",
+	},
+	dark: {
+		matchBackground: "#5d4037",
+		activeMatchBackground: "#f0c000",
+		matchOverviewRuler: "#f0c000",
+		activeMatchColorOverviewRuler: "#ffd54f",
+	},
+};
+
+const openTerminalLink = (_: unknown, uri: string) => {
+	externalBrowserService.browserOpenURL(uri);
+};
+
+export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
+	let theme = initialTheme;
+
+	const terminal = new Terminal({
+		allowProposedApi: true,
+		convertEol: true,
+		scrollback: 10_000,
+		disableStdin: true,
+		fontFamily: "monospace",
+		theme: XTERM_THEMES[theme],
+	});
+
+	const outputTerminal: OutputTerminal = {
+		writeln: (line) => terminal.writeln(line),
+		reset: () => terminal.reset(),
+		setTheme: (nextTheme) => {
+			theme = nextTheme;
+			terminal.options.theme = XTERM_THEMES[nextTheme];
+		},
+		dispose: () => terminal.dispose(),
+
+		attach: (element) => {
+			if (terminal.element) {
+				// Opened before — re-attaching the existing node keeps the scrollback
+				element.appendChild(terminal.element);
+			} else {
+				terminal.open(element);
+			}
+
+			const fit = new FitAddon();
+			const links = new WebLinksAddon(openTerminalLink);
+			const search = new SearchAddon();
+
+			terminal.loadAddon(fit);
+			terminal.loadAddon(links);
+			terminal.loadAddon(search);
+
+			fit.fit();
+
+			return {
+				fit: () => fit.fit(),
+
+				search: {
+					findNext: (query, incremental) => {
+						search.findNext(query, {
+							decorations: XTERM_SEARCH_DECORATIONS[theme],
+							incremental,
+						});
+					},
+					findPrevious: (query) => {
+						search.findPrevious(query, {
+							decorations: XTERM_SEARCH_DECORATIONS[theme],
+						});
+					},
+					clear: () => {
+						search.clearDecorations();
+						search.clearActiveDecoration();
+					},
+					onResults: (listener) => {
+						const handle = search.onDidChangeResults(({ resultCount }) =>
+							listener(resultCount),
+						);
+						return () => handle.dispose();
+					},
+				},
+
+				detach: () => {
+					search.dispose();
+					// Detach the DOM only — the emulator outlives the view
+					if (terminal.element && element.contains(terminal.element)) {
+						element.removeChild(terminal.element);
+					}
+					fit.dispose();
+					links.dispose();
+				},
+			};
+		},
+	};
+
+	return outputTerminal;
+};

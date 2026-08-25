@@ -1,15 +1,24 @@
 import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { RecordingTerminals } from "@/commandOutput/adapters/recording.ts";
+
+import {
+	appendCommandOutput,
+	attachCommandOutput,
+	commandOutputTail,
+} from "@/commandOutput/commandOutput.ts";
 import { resetBackendServices } from "@/contracts/service.ts";
 import { commandGroupStore } from "@/store/commandGroupStore.ts";
-import { getLogTail, recordLogTail } from "@/store/commandLogsTail.ts";
 import { commandStore } from "@/store/commandStore.ts";
-import { terminalStore } from "@/store/terminalStore.ts";
 import { installInMemoryBackend } from "@/testing/backend.ts";
 import { CommandBuilder } from "@/testing/builders/command.ts";
 import { CommandGroupBuilder } from "@/testing/builders/commandGroup.ts";
 import { installTranslations } from "@/testing/i18n.ts";
+import {
+	installRecordingTerminals,
+	resetTerminals,
+} from "@/testing/terminals.ts";
 import { deleteCommand } from "@/useCases/command/deleteCommand.ts";
 
 describe("deleteCommand", () => {
@@ -18,9 +27,12 @@ describe("deleteCommand", () => {
 	const toastSuccess = vi.spyOn(toast, "success");
 	const toastError = vi.spyOn(toast, "error");
 
+	let recording: RecordingTerminals;
+
 	beforeEach(async () => {
 		vi.clearAllMocks();
 		await installTranslations();
+		recording = installRecordingTerminals();
 		commandStore.setState({
 			commands: [],
 			commandsStatus: {},
@@ -31,7 +43,7 @@ describe("deleteCommand", () => {
 
 	afterEach(() => {
 		resetBackendServices();
-		terminalStore.getState().disposeAll();
+		resetTerminals();
 	});
 
 	it("Should delete the command and refresh the commands and the groups", async () => {
@@ -90,15 +102,15 @@ describe("deleteCommand", () => {
 		installInMemoryBackend({
 			commands: [new CommandBuilder().withId("cmd-1").build()],
 		});
-		terminalStore.getState().getOrCreate("cmd-1");
-		recordLogTail("cmd-1", ["a log line"]);
+		attachCommandOutput("cmd-1", document.createElement("div"));
+		appendCommandOutput("cmd-1", ["a log line"]);
 
 		// Act
 		await sut("cmd-1");
 
 		// Assert
-		expect(terminalStore.getState().terminals.has("cmd-1")).toBe(false);
-		expect(getLogTail("cmd-1")).toEqual([]);
+		expect(recording.terminals.get("cmd-1")?.disposed).toBe(true);
+		expect(commandOutputTail("cmd-1")).toEqual([]);
 	});
 
 	it("Should notify the user that the command was deleted", async () => {
