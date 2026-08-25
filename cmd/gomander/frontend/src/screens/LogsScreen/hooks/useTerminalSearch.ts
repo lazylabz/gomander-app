@@ -28,7 +28,9 @@ export const useTerminalSearch = (
 	const [searchQuery, setSearchQuery] = useState("");
 	const [resultCount, setResultCount] = useState(0);
 	useEffect(() => {
-		if (!searchRef.current) return;
+		if (!searchRef.current) {
+			return;
+		}
 		if (!searchQuery) {
 			searchRef.current.clearDecorations();
 			setResultCount(0);
@@ -48,14 +50,18 @@ export const useTerminalSearch = (
 	};
 
 	const nextMatch = () => {
-		if (!searchRef.current || !searchQuery) return;
+		if (!searchRef.current || !searchQuery) {
+			return;
+		}
 		searchRef.current.findNext(searchQuery, {
 			decorations: XTERM_SEARCH_DECORATIONS[theme],
 		});
 	};
 
 	const prevMatch = () => {
-		if (!searchRef.current || !searchQuery) return;
+		if (!searchRef.current || !searchQuery) {
+			return;
+		}
 		searchRef.current.findPrevious(searchQuery, {
 			decorations: XTERM_SEARCH_DECORATIONS[theme],
 		});

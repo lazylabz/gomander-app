@@ -63,7 +63,9 @@ export const terminalStore = createStore<TerminalState>()((set, get) => ({
 
 	disposeAll: () => {
 		const { terminals } = get();
-		for (const term of terminals.values()) term.dispose();
+		for (const term of terminals.values()) {
+			term.dispose();
+		}
 		set({ terminals: new Map(), pendingLogs: new Map() });
 	},
 

@@ -107,7 +107,9 @@ export const AboutModal = ({
 	};
 
 	const handleReleaseNotesClick = () => {
-		if (!newVersion) return;
+		if (!newVersion) {
+			return;
+		}
 		const url = `https://github.com/lazylabz/gomander-app/releases/tag/v${newVersion}`;
 		externalBrowserService.browserOpenURL(url);
 	};
@@ -129,7 +131,9 @@ export const AboutModal = ({
 	};
 
 	const handleDisclaimerOpenChange = (nextOpen: boolean) => {
-		if (nextOpen) return;
+		if (nextOpen) {
+			return;
+		}
 		setInstallDisclaimersModalOpen(false);
 		setOpen(true);
 	};
