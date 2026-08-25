@@ -119,7 +119,6 @@ export const SettingsContextProvider = ({
 		resolver: zodResolver(userSettingsSchema),
 		defaultValues: {
 			environmentPaths: userConfig.environmentPaths,
-			logLineLimit: userConfig.logLineLimit,
 			locale: i18n.language,
 		},
 	});

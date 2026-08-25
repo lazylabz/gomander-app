@@ -12,13 +12,6 @@ export const userSettingsSchema = z.object({
 		}),
 	),
 	locale: z.string(),
-	logLineLimit: z
-		.number()
-		.int()
-		.min(1, { error: () => i18n.t("userSettingsForm.validation.logLimitMin") })
-		.max(5000, {
-			error: () => i18n.t("userSettingsForm.validation.logLimitMax"),
-		}),
 });
 
 export type UserSettingsSchemaType = z.infer<typeof userSettingsSchema>;

@@ -34,7 +34,6 @@ export const saveUserSettingsForm = async (
 		await saveUserConfig({
 			lastOpenedProjectId: userConfig.lastOpenedProjectId,
 			environmentPaths: formData.environmentPaths,
-			logLineLimit: formData.logLineLimit,
 			locale: formData.locale,
 		});
 		toast.success(i18n.t("toast.settings.userSaveSuccess"));
