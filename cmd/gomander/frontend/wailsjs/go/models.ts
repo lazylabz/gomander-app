@@ -94,7 +94,6 @@ export namespace domain {
 	export interface Config {
 	    lastOpenedProjectId: string;
 	    environmentPaths: EnvironmentPath[];
-	    logLineLimit: number;
 	    locale: string;
 	}
 	
@@ -214,11 +213,7 @@ export namespace domain {
 	    "userSettingsForm.themeLight": string;
 	    "userSettingsForm.themeDark": string;
 	    "userSettingsForm.themeDescription": string;
-	    "userSettingsForm.logLimitLabel": string;
-	    "userSettingsForm.logLimitDescription": string;
 	    "userSettingsForm.validation.pathEmpty": string;
-	    "userSettingsForm.validation.logLimitMin": string;
-	    "userSettingsForm.validation.logLimitMax": string;
 	    "projectSettingsForm.sectionTitle": string;
 	    "projectSettingsForm.sectionDescription": string;
 	    "toast.command.runFailed": string;

@@ -139,11 +139,7 @@ type Localization struct {
 	UserSettingsFormThemeLight             string `json:"userSettingsForm.themeLight"`
 	UserSettingsFormThemeDark              string `json:"userSettingsForm.themeDark"`
 	UserSettingsFormThemeDescription       string `json:"userSettingsForm.themeDescription"`
-	UserSettingsFormLogLimitLabel          string `json:"userSettingsForm.logLimitLabel"`
-	UserSettingsFormLogLimitDescription    string `json:"userSettingsForm.logLimitDescription"`
 	UserSettingsFormValidationPathEmpty    string `json:"userSettingsForm.validation.pathEmpty"`
-	UserSettingsFormValidationLogLimitMin  string `json:"userSettingsForm.validation.logLimitMin"`
-	UserSettingsFormValidationLogLimitMax  string `json:"userSettingsForm.validation.logLimitMax"`
 
 	// projectSettingsForm
 	ProjectSettingsFormSectionTitle       string `json:"projectSettingsForm.sectionTitle"`

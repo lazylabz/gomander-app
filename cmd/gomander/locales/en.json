@@ -124,11 +124,7 @@
   "userSettingsForm.themeLight": "Light theme",
   "userSettingsForm.themeDark": "Dark theme",
   "userSettingsForm.themeDescription": "(The system theme will adapt to your operating system's theme settings)",
-  "userSettingsForm.logLimitLabel": "Log line limit",
-  "userSettingsForm.logLimitDescription": "Maximum number of log lines to keep per command (1-5000). The recommended value is 100. Bigger values may impact performance.",
   "userSettingsForm.validation.pathEmpty": "Path cannot be empty",
-  "userSettingsForm.validation.logLimitMin": "Must be at least 1",
-  "userSettingsForm.validation.logLimitMax": "Must be at most 5000",
 
   "projectSettingsForm.sectionTitle": "Project information",
   "projectSettingsForm.sectionDescription": "Configure your project details and basic settings.",
