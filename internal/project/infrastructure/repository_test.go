@@ -4,13 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/glebarez/sqlite"
-	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 
 	"gomander/internal/project/domain"
-	_ "gomander/migrations"
+	"gomander/internal/testdb"
 )
 
 type testHelper struct {
@@ -21,16 +19,12 @@ type testHelper struct {
 func newTestHelper(t *testing.T, preloadedProjects []*ProjectModel) *testHelper {
 	t.Helper()
 
-	repo := arrange(preloadedProjects)
+	repo := arrange(t, preloadedProjects)
 
 	helper := &testHelper{
 		t:    t,
 		repo: repo,
 	}
-
-	t.Cleanup(func() {
-		assert.NoError(t, repo.db.Exec("DELETE FROM project").Error, "Failed to cleanup test database")
-	})
 
 	return helper
 }
@@ -154,29 +148,16 @@ func TestGormProjectRepository_Delete(t *testing.T) {
 	})
 }
 
-func arrange(preloadedProjects []*ProjectModel) (repo *GormProjectRepository) {
-	ctx := context.Background()
+func arrange(t *testing.T, preloadedProjects []*ProjectModel) (repo *GormProjectRepository) {
+	t.Helper()
 
-	gormDb, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-	db, err := gormDb.DB()
-	if err != nil {
-		panic(err)
-	}
-	err = goose.SetDialect("sqlite3")
-	if err != nil {
-		panic(err)
-	}
-	err = goose.UpContext(ctx, db, ".")
-	if err != nil {
-		panic(err)
-	}
+	ctx := context.Background()
+	gormDb := testdb.New(t)
+
 	for _, m := range preloadedProjects {
-		err = gorm.G[ProjectModel](gormDb).Create(ctx, m)
+		err := gorm.G[ProjectModel](gormDb).Create(ctx, m)
 		if err != nil {
-			panic(err)
+			t.Fatalf("failed to preload project: %v", err)
 		}
 	}
 	repo = NewGormProjectRepository(gormDb, ctx)
