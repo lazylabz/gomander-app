@@ -5,11 +5,10 @@ import {
 	resetCommandOutput,
 	setCommandOutputTheme,
 } from "@/commandOutput/commandOutput.ts";
-import { getCommandGroupSectionOpenLocalStorageKey } from "@/constants/localStorage.ts";
 import { useTheme } from "@/contexts/theme.tsx";
 import { eventService } from "@/contracts/service.ts";
 import { Event, type EventData } from "@/contracts/types.ts";
-import { removeKeyFromLocalStorage } from "@/helpers/localStorage.ts";
+import { forgetSidebarSection } from "@/store/sidebarSections.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { detectMissingEnvironmentPathFailure } from "@/useCases/command/detectMissingEnvironmentPathFailure.tsx";
 import { recordCommandsErrors } from "@/useCases/command/recordCommandsErrors.ts";
@@ -68,9 +67,7 @@ export const EventListenersContainer = () => {
 		eventService.eventsOn(
 			Event.COMMAND_GROUP_DELETED,
 			(data: EventData[Event.COMMAND_GROUP_DELETED]) =>
-				removeKeyFromLocalStorage(
-					getCommandGroupSectionOpenLocalStorageKey(data),
-				),
+				forgetSidebarSection(data),
 		);
 
 		eventService.eventsOn(

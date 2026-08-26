@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
-import { getCommandGroupSectionOpenLocalStorageKey } from "@/constants/localStorage.ts";
 import type { Command, CommandGroup } from "@/contracts/types.ts";
 import {
 	ContextMenu,
@@ -23,9 +22,9 @@ import {
 } from "@/design-system/components/ui/sidebar.tsx";
 import { cn } from "@/design-system/lib/utils.ts";
 import { parseError } from "@/helpers/errorHelpers.ts";
-import { useLocalStorageState } from "@/hooks/useLocalStorageState.ts";
 import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
+import { useSidebarSection } from "@/store/sidebarSections.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { deleteCommandGroup } from "@/useCases/commandGroup/deleteCommandGroup.ts";
 import { runCommandGroup } from "@/useCases/commandGroup/runCommandGroup.ts";
@@ -43,12 +42,9 @@ export const CommandGroupSection = ({
 	const { t } = useTranslation();
 	const commandsStatus = useCommandStore((state) => state.commandsStatus);
 
-	const [internalIsOpen, setInternalIsOpen] = useLocalStorageState(
-		getCommandGroupSectionOpenLocalStorageKey(commandGroup.id),
-		false,
-	);
+	const [sectionOpen, setSectionOpen] = useSidebarSection(commandGroup.id);
 
-	const isOpen = internalIsOpen && !isReorderingGroups;
+	const isOpen = sectionOpen && !isReorderingGroups;
 
 	const { attributes, listeners, setNodeRef, transform, transition } =
 		useSortable({ id: commandGroup.id, disabled: !isReorderingGroups });
@@ -137,7 +133,7 @@ export const CommandGroupSection = ({
 						<button
 							className="group flex items-center gap-2 p-2 w-full justify-between"
 							style={{ cursor: isReorderingGroups ? "grab" : "pointer" }}
-							onClick={() => setInternalIsOpen(!internalIsOpen)}
+							onClick={() => setSectionOpen(!sectionOpen)}
 							disabled={isReorderingGroups}
 							{...(isReorderingGroups ? { ...attributes, ...listeners } : {})}
 						>

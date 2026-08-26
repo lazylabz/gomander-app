@@ -83,7 +83,8 @@ src/
 │   ├── commandStore.ts
 │   ├── commandGroupStore.ts
 │   ├── projectStore.ts
-│   └── userConfigurationStore.ts
+│   ├── userConfigurationStore.ts
+│   └── sidebarSections.ts # Which sidebar sections are expanded, persisted
 ├── screens/           # Top-level screen components
 │   ├── ProjectSelectionScreen/
 │   ├── SettingsScreen/
@@ -194,6 +195,19 @@ refreshes commands and groups, and toasts the result
 - `formState.dirtyFields` cannot replace the snapshot comparison: it is measured against the
   form defaults, not against the last saved values, so it would need a `form.reset` after
   every save - which re-keys any `useFieldArray` on screen and steals focus mid-typing
+
+#### 8. Sidebar Section State
+
+- `store/sidebarSections.ts` owns whether a sidebar section is expanded, keyed by section id -
+  a command group's id, or `ALL_COMMANDS_SECTION_ID`. Components use
+  `useSidebarSection(id)`, which hands back a `useState`-shaped pair so a call site names its
+  section once; `isSidebarSectionOpen` / `setSidebarSectionOpen` are the plain pair under it,
+  unit-tested without a renderer the way `createAutosaver` is
+- The key naming, the JSON encoding and the `try`/`catch` around browser storage are
+  implementation. `EventListenersContainer` forgets a deleted group's section by id and
+  imports nothing about storage
+- Browser storage is a private sidecar of this module, not a seam: the test environment
+  provides it, so a port here would have exactly one real adapter
 
 ### Path Aliases
 
