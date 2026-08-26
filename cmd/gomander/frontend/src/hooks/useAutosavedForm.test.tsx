@@ -180,6 +180,31 @@ describe("createAutosaver", () => {
 		consoleError.mockRestore();
 	});
 
+	it("Should still hold values a failed submit dropped as unsaved", async () => {
+		// Arrange a first submit that fails, so its values were never persisted
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
+		submit = vi.fn(async () => {
+			throw new Error("boom");
+		});
+		const sut = buildSut();
+
+		values = { name: "changed" };
+		sut.onChange();
+		await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
+		submit.mockImplementation(async () => {});
+
+		// Act - the form reports the same values again
+		sut.onChange();
+		await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
+
+		// Assert
+		expect(submit).toHaveBeenCalledTimes(2);
+
+		consoleError.mockRestore();
+	});
+
 	it("Should not submit a cancelled window", async () => {
 		// Arrange
 		const sut = buildSut();
