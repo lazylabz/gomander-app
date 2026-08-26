@@ -195,6 +195,18 @@ refreshes commands and groups, and toasts the result
   form defaults, not against the last saved values, so it would need a `form.reset` after
   every save - which re-keys any `useFieldArray` on screen and steals focus mid-typing
 
+#### 8. Sidebar Section State
+
+- `store/sidebarSections.ts` owns whether a sidebar section is expanded, keyed by section id -
+  a command group's id, or `ALL_COMMANDS_SECTION_ID`. It exposes
+  `isSidebarSectionOpen` / `useIsSidebarSectionOpen`, `setSidebarSectionOpen` and
+  `forgetSidebarSection`
+- The key naming, the JSON encoding and the `try`/`catch` around browser storage are
+  implementation. `EventListenersContainer` forgets a deleted group's section by id and
+  imports nothing about storage
+- Browser storage is a private sidecar of this module, not a seam: the test environment
+  provides it, so a port here would have exactly one real adapter
+
 ### Path Aliases
 
 - `@/` maps to `src/` directory

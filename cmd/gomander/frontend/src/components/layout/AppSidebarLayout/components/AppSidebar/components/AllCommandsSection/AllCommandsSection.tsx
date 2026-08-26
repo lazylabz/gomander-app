@@ -11,7 +11,6 @@ import { toast } from "sonner";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
 import { CreateCommandModal } from "@/components/modals/Command/CreateCommandModal.tsx";
-import { ALL_COMMANDS_SECTION_OPEN } from "@/constants/localStorage.ts";
 import {
 	Collapsible,
 	CollapsibleContent,
@@ -30,8 +29,12 @@ import {
 	SidebarMenu,
 	SidebarMenuItem,
 } from "@/design-system/components/ui/sidebar.tsx";
-import { useLocalStorageState } from "@/hooks/useLocalStorageState.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
+import {
+	ALL_COMMANDS_SECTION_ID,
+	setSidebarSectionOpen,
+	useIsSidebarSectionOpen,
+} from "@/store/sidebarSections.ts";
 import { reorderCommands } from "@/useCases/command/reorderCommands.ts";
 
 export const AllCommandsSection = () => {
@@ -40,10 +43,7 @@ export const AllCommandsSection = () => {
 
 	const [modalOpen, setModalOpen] = useState(false);
 
-	const [sectionOpen, setSectionOpen] = useLocalStorageState(
-		ALL_COMMANDS_SECTION_OPEN,
-		false,
-	);
+	const sectionOpen = useIsSidebarSectionOpen(ALL_COMMANDS_SECTION_ID);
 
 	const openCreateCommandModal = () => {
 		setModalOpen(true);
@@ -82,7 +82,9 @@ export const AllCommandsSection = () => {
 			<Collapsible
 				className="group/collapsible"
 				open={sectionOpen}
-				onOpenChange={setSectionOpen}
+				onOpenChange={(open) =>
+					setSidebarSectionOpen(ALL_COMMANDS_SECTION_ID, open)
+				}
 			>
 				<SidebarGroup className="py-0">
 					<ContextMenu>

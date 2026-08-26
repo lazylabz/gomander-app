@@ -1,0 +1,120 @@
+import { act } from "react";
+import { createRoot } from "react-dom/client";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+type SidebarSections = typeof import("@/store/sidebarSections.ts");
+
+// A fresh import re-seeds the module from storage, the way a reload does.
+const load = async (): Promise<SidebarSections> => {
+	vi.resetModules();
+	return await import("@/store/sidebarSections.ts");
+};
+
+describe("sidebarSections", () => {
+	let sut: SidebarSections;
+
+	beforeEach(async () => {
+		// react-dom needs this to accept the act() calls that drive the hook.
+		Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+		localStorage.clear();
+		sut = await load();
+	});
+
+	it("Should report a section as closed when nothing was ever stored", () => {
+		// Assert
+		expect(sut.isSidebarSectionOpen("group-1")).toBe(false);
+	});
+
+	it("Should report a section as open once it is set open", () => {
+		// Act
+		sut.setSidebarSectionOpen("group-1", true);
+
+		// Assert
+		expect(sut.isSidebarSectionOpen("group-1")).toBe(true);
+	});
+
+	it("Should keep each section's state to itself", () => {
+		// Act
+		sut.setSidebarSectionOpen("group-1", true);
+
+		// Assert
+		expect(sut.isSidebarSectionOpen("group-2")).toBe(false);
+	});
+
+	it("Should remember a section's state across a reload", async () => {
+		// Arrange
+		sut.setSidebarSectionOpen("group-1", true);
+
+		// Act
+		const reloaded = await load();
+
+		// Assert
+		expect(reloaded.isSidebarSectionOpen("group-1")).toBe(true);
+	});
+
+	it("Should leave a forgotten section closed after a reload", async () => {
+		// Arrange
+		sut.setSidebarSectionOpen("group-1", true);
+
+		// Act
+		sut.forgetSidebarSection("group-1");
+		const reloaded = await load();
+
+		// Assert
+		expect(reloaded.isSidebarSectionOpen("group-1")).toBe(false);
+	});
+
+	it("Should fall back to closed when the stored state cannot be read", async () => {
+		// Arrange - whatever the module wrote, replaced by something unparseable
+		sut.setSidebarSectionOpen("group-1", true);
+		const key = localStorage.key(0);
+		if (!key) {
+			throw new Error("Nothing was stored");
+		}
+		localStorage.setItem(key, "not json");
+
+		// Act
+		const reloaded = await load();
+
+		// Assert
+		expect(reloaded.isSidebarSectionOpen("group-1")).toBe(false);
+	});
+
+	it("Should stay usable when storage refuses the write", () => {
+		// Arrange
+		const setItem = vi
+			.spyOn(Storage.prototype, "setItem")
+			.mockImplementation(() => {
+				throw new Error("quota exceeded");
+			});
+
+		// Act
+		sut.setSidebarSectionOpen("group-1", true);
+
+		// Assert
+		expect(sut.isSidebarSectionOpen("group-1")).toBe(true);
+
+		setItem.mockRestore();
+	});
+
+	it("Should re-render a component reading a section that opens", async () => {
+		// Arrange
+		let renderedIsOpen: boolean | undefined;
+		const Probe = () => {
+			renderedIsOpen = sut.useIsSidebarSectionOpen("group-1");
+			return null;
+		};
+		const root = createRoot(document.createElement("div"));
+		await act(async () => {
+			root.render(<Probe />);
+		});
+
+		// Act
+		await act(async () => {
+			sut.setSidebarSectionOpen("group-1", true);
+		});
+
+		// Assert
+		expect(renderedIsOpen).toBe(true);
+	});
+});
