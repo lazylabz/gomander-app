@@ -1,32 +1,33 @@
+import { toast } from "sonner";
+
 import { dataService } from "@/contracts/service.ts";
-import type { CommandGroup } from "@/contracts/types.ts";
-import { isDefined } from "@/helpers/mapHelpers.ts";
-import { commandStore } from "@/store/commandStore.ts";
+import i18n from "@/design-system/lib/i18n.ts";
+import { parseError } from "@/helpers/errorHelpers.ts";
+import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
+import { refreshAfterMutation } from "@/queries/refreshAfterMutation.ts";
+import {
+	type CommandGroupWithCommandIds,
+	resolveGroupCommands,
+} from "@/useCases/commandGroup/resolveGroupCommands.ts";
 
-interface EditCommandGroupParams extends Omit<CommandGroup, "commands"> {
-	commands: string[];
-}
+export const editCommandGroup = async (
+	args: CommandGroupWithCommandIds,
+): Promise<boolean> => {
+	try {
+		await dataService.editCommandGroup({
+			id: args.id,
+			projectId: args.projectId,
+			name: args.name,
+			commands: resolveGroupCommands(args.commands),
+			position: args.position,
+		});
 
-export const editCommandGroup = async (args: EditCommandGroupParams) => {
-	const { commands } = commandStore.getState();
-
-	const groupCommands = args.commands
-		.map((commandId) => {
-			const command = commands.find((c) => c.id === commandId);
-			if (!command) {
-				return undefined;
-			}
-			return command;
-		})
-		.filter(isDefined);
-
-	const commandGroup: CommandGroup = {
-		id: args.id,
-		projectId: args.projectId,
-		name: args.name,
-		commands: groupCommands,
-		position: args.position,
-	};
-
-	await dataService.editCommandGroup(commandGroup);
+		toast.success(i18n.t("toast.commandGroup.updateSuccess"));
+		return true;
+	} catch (e) {
+		toast.error(parseError(e, i18n.t("toast.commandGroup.updateFailed")));
+		return false;
+	} finally {
+		await refreshAfterMutation(fetchCommandGroups);
+	}
 };

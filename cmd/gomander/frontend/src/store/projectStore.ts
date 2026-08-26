@@ -7,6 +7,8 @@ type ProjectStore = {
 	isLoaded: boolean;
 	projectInfo: Project | null;
 	setProjectInfo: (project: Project | null) => void;
+	availableProjects: Project[];
+	setAvailableProjects: (projects: Project[]) => void;
 };
 
 export const projectStore = createStore<ProjectStore>()((set) => ({
@@ -14,6 +16,10 @@ export const projectStore = createStore<ProjectStore>()((set) => ({
 	projectInfo: null,
 	setProjectInfo: (projectInfo: Project | null) => {
 		set({ projectInfo: projectInfo, isLoaded: true });
+	},
+	availableProjects: [],
+	setAvailableProjects: (availableProjects: Project[]) => {
+		set({ availableProjects });
 	},
 }));
 
