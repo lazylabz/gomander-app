@@ -16,14 +16,6 @@ const readStoredSections = (): OpenSections => {
 	}
 };
 
-const storeSections = (openSections: OpenSections) => {
-	try {
-		window.localStorage.setItem(STORAGE_KEY, JSON.stringify(openSections));
-	} catch {
-		// Ignore write errors
-	}
-};
-
 type SidebarSectionsStore = {
 	openSections: OpenSections;
 };
@@ -32,25 +24,23 @@ const sidebarSectionsStore = createStore<SidebarSectionsStore>()(() => ({
 	openSections: readStoredSections(),
 }));
 
-const persist = (openSections: OpenSections) => {
-	storeSections(openSections);
+const saveOpenSections = (openSections: OpenSections) => {
+	try {
+		window.localStorage.setItem(STORAGE_KEY, JSON.stringify(openSections));
+	} catch {
+		// Ignore write errors
+	}
 	sidebarSectionsStore.setState({ openSections });
 };
 
 export const isSidebarSectionOpen = (sectionId: string): boolean =>
 	sidebarSectionsStore.getState().openSections[sectionId] ?? false;
 
-export const useIsSidebarSectionOpen = (sectionId: string): boolean =>
-	useStore(
-		sidebarSectionsStore,
-		(state) => state.openSections[sectionId] ?? false,
-	);
-
 export const setSidebarSectionOpen = (
 	sectionId: string,
 	open: boolean,
 ): void => {
-	persist({
+	saveOpenSections({
 		...sidebarSectionsStore.getState().openSections,
 		[sectionId]: open,
 	});
@@ -60,5 +50,18 @@ export const forgetSidebarSection = (sectionId: string): void => {
 	const { [sectionId]: _forgotten, ...remaining } =
 		sidebarSectionsStore.getState().openSections;
 
-	persist(remaining);
+	saveOpenSections(remaining);
+};
+
+// The React binding over the plain pair above, shaped like `useState` so a call
+// site names its section once.
+export const useSidebarSection = (
+	sectionId: string,
+): readonly [boolean, (open: boolean) => void] => {
+	const isOpen = useStore(
+		sidebarSectionsStore,
+		(state) => state.openSections[sectionId] ?? false,
+	);
+
+	return [isOpen, (open: boolean) => setSidebarSectionOpen(sectionId, open)];
 };

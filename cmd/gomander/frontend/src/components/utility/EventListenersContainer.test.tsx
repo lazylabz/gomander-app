@@ -1,5 +1,5 @@
 import { act } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { EventListenersContainer } from "@/components/utility/EventListenersContainer.tsx";
@@ -7,6 +7,7 @@ import type { InMemoryBackend } from "@/contracts/adapters/inMemory.ts";
 import { resetBackendServices } from "@/contracts/service.ts";
 import { Event } from "@/contracts/types.ts";
 import {
+	forgetSidebarSection,
 	isSidebarSectionOpen,
 	setSidebarSectionOpen,
 } from "@/store/sidebarSections.ts";
@@ -16,11 +17,15 @@ import {
 	resetTerminals,
 } from "@/testing/terminals.ts";
 
+const SECTION_IDS = ["group-1", "group-2"];
+
 describe("EventListenersContainer", () => {
 	let backend: InMemoryBackend;
+	let roots: Root[] = [];
 
 	const render = async () => {
 		const root = createRoot(document.createElement("div"));
+		roots.push(root);
 		await act(async () => {
 			root.render(<EventListenersContainer />);
 		});
@@ -29,12 +34,20 @@ describe("EventListenersContainer", () => {
 	beforeEach(() => {
 		// react-dom needs this to accept the act() calls that drive the render.
 		Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-		localStorage.clear();
+		// The store is imported once for the whole file, so its sections have to be
+		// forgotten between tests rather than reloaded away.
+		SECTION_IDS.forEach(forgetSidebarSection);
 		installRecordingTerminals();
 		backend = installInMemoryBackend();
 	});
 
 	afterEach(() => {
+		act(() => {
+			for (const root of roots) {
+				root.unmount();
+			}
+		});
+		roots = [];
 		resetTerminals();
 		resetBackendServices();
 	});

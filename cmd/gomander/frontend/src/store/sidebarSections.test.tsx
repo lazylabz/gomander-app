@@ -67,11 +67,12 @@ describe("sidebarSections", () => {
 	it("Should fall back to closed when the stored state cannot be read", async () => {
 		// Arrange - whatever the module wrote, replaced by something unparseable
 		sut.setSidebarSectionOpen("group-1", true);
-		const key = localStorage.key(0);
-		if (!key) {
-			throw new Error("Nothing was stored");
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+			if (key) {
+				localStorage.setItem(key, "not json");
+			}
 		}
-		localStorage.setItem(key, "not json");
 
 		// Act
 		const reloaded = await load();
@@ -97,11 +98,11 @@ describe("sidebarSections", () => {
 		setItem.mockRestore();
 	});
 
-	it("Should re-render a component reading a section that opens", async () => {
+	it("Should re-render a component whose section is opened elsewhere", async () => {
 		// Arrange
 		let renderedIsOpen: boolean | undefined;
 		const Probe = () => {
-			renderedIsOpen = sut.useIsSidebarSectionOpen("group-1");
+			[renderedIsOpen] = sut.useSidebarSection("group-1");
 			return null;
 		};
 		const root = createRoot(document.createElement("div"));
@@ -116,5 +117,30 @@ describe("sidebarSections", () => {
 
 		// Assert
 		expect(renderedIsOpen).toBe(true);
+
+		act(() => root.unmount());
+	});
+
+	it("Should open a section through the setter the hook hands back", async () => {
+		// Arrange
+		let setRenderedOpen: (open: boolean) => void = () => {};
+		const Probe = () => {
+			[, setRenderedOpen] = sut.useSidebarSection("group-1");
+			return null;
+		};
+		const root = createRoot(document.createElement("div"));
+		await act(async () => {
+			root.render(<Probe />);
+		});
+
+		// Act
+		await act(async () => {
+			setRenderedOpen(true);
+		});
+
+		// Assert
+		expect(sut.isSidebarSectionOpen("group-1")).toBe(true);
+
+		act(() => root.unmount());
 	});
 });

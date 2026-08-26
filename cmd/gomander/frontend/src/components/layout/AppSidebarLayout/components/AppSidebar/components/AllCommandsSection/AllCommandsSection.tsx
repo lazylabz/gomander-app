@@ -32,8 +32,7 @@ import {
 import { useCommandStore } from "@/store/commandStore.ts";
 import {
 	ALL_COMMANDS_SECTION_ID,
-	setSidebarSectionOpen,
-	useIsSidebarSectionOpen,
+	useSidebarSection,
 } from "@/store/sidebarSections.ts";
 import { reorderCommands } from "@/useCases/command/reorderCommands.ts";
 
@@ -43,7 +42,9 @@ export const AllCommandsSection = () => {
 
 	const [modalOpen, setModalOpen] = useState(false);
 
-	const sectionOpen = useIsSidebarSectionOpen(ALL_COMMANDS_SECTION_ID);
+	const [sectionOpen, setSectionOpen] = useSidebarSection(
+		ALL_COMMANDS_SECTION_ID,
+	);
 
 	const openCreateCommandModal = () => {
 		setModalOpen(true);
@@ -82,9 +83,7 @@ export const AllCommandsSection = () => {
 			<Collapsible
 				className="group/collapsible"
 				open={sectionOpen}
-				onOpenChange={(open) =>
-					setSidebarSectionOpen(ALL_COMMANDS_SECTION_ID, open)
-				}
+				onOpenChange={setSectionOpen}
 			>
 				<SidebarGroup className="py-0">
 					<ContextMenu>

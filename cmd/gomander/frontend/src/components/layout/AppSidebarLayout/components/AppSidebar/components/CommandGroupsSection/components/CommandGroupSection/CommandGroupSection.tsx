@@ -24,10 +24,7 @@ import { cn } from "@/design-system/lib/utils.ts";
 import { parseError } from "@/helpers/errorHelpers.ts";
 import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
-import {
-	setSidebarSectionOpen,
-	useIsSidebarSectionOpen,
-} from "@/store/sidebarSections.ts";
+import { useSidebarSection } from "@/store/sidebarSections.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { deleteCommandGroup } from "@/useCases/commandGroup/deleteCommandGroup.ts";
 import { runCommandGroup } from "@/useCases/commandGroup/runCommandGroup.ts";
@@ -45,7 +42,7 @@ export const CommandGroupSection = ({
 	const { t } = useTranslation();
 	const commandsStatus = useCommandStore((state) => state.commandsStatus);
 
-	const sectionOpen = useIsSidebarSectionOpen(commandGroup.id);
+	const [sectionOpen, setSectionOpen] = useSidebarSection(commandGroup.id);
 
 	const isOpen = sectionOpen && !isReorderingGroups;
 
@@ -136,9 +133,7 @@ export const CommandGroupSection = ({
 						<button
 							className="group flex items-center gap-2 p-2 w-full justify-between"
 							style={{ cursor: isReorderingGroups ? "grab" : "pointer" }}
-							onClick={() =>
-								setSidebarSectionOpen(commandGroup.id, !sectionOpen)
-							}
+							onClick={() => setSectionOpen(!sectionOpen)}
 							disabled={isReorderingGroups}
 							{...(isReorderingGroups ? { ...attributes, ...listeners } : {})}
 						>
