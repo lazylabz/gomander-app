@@ -31,16 +31,11 @@ export const createAutosaver = ({
 			return;
 		}
 
-		// Moved forward before the submit so that the form's own submit events do not read
-		// as fresh changes, and back again if the save never landed.
-		const previous = lastSaved;
-		lastSaved = saving;
-
 		try {
 			await submit();
+			lastSaved = saving;
 		} catch (error) {
 			// A save reports its own failures; reaching here means one broke that contract.
-			lastSaved = previous;
 			console.error("Autosave failed:", error);
 		}
 
