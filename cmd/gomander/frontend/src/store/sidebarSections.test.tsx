@@ -1,6 +1,6 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 type SidebarSections = typeof import("@/store/sidebarSections.ts");
 
@@ -18,6 +18,11 @@ describe("sidebarSections", () => {
 		Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 		localStorage.clear();
 		sut = await load();
+	});
+
+	// A storage method left mocked by a failing test would cascade into the rest.
+	afterEach(() => {
+		vi.restoreAllMocks();
 	});
 
 	it("Should report a section as closed when nothing was ever stored", () => {
@@ -64,13 +69,17 @@ describe("sidebarSections", () => {
 		expect(reloaded.isSidebarSectionOpen("group-1")).toBe(false);
 	});
 
-	it("Should fall back to closed when the stored state cannot be read", async () => {
-		// Arrange - whatever the module wrote, replaced by something unparseable
+	// "null" parses without throwing, so it reaches the read rather than the catch.
+	it.each([
+		"not json",
+		"null",
+	])("Should fall back to closed when the stored state reads back as %s", async (corrupted) => {
+		// Arrange - whatever the module wrote, replaced by the corrupted value
 		sut.setSidebarSectionOpen("group-1", true);
 		for (let i = 0; i < localStorage.length; i++) {
 			const key = localStorage.key(i);
 			if (key) {
-				localStorage.setItem(key, "not json");
+				localStorage.setItem(key, corrupted);
 			}
 		}
 
@@ -83,19 +92,15 @@ describe("sidebarSections", () => {
 
 	it("Should stay usable when storage refuses the write", () => {
 		// Arrange
-		const setItem = vi
-			.spyOn(Storage.prototype, "setItem")
-			.mockImplementation(() => {
-				throw new Error("quota exceeded");
-			});
+		vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+			throw new Error("quota exceeded");
+		});
 
 		// Act
 		sut.setSidebarSectionOpen("group-1", true);
 
 		// Assert
 		expect(sut.isSidebarSectionOpen("group-1")).toBe(true);
-
-		setItem.mockRestore();
 	});
 
 	it("Should re-render a component whose section is opened elsewhere", async () => {

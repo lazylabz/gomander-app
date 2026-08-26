@@ -10,7 +10,13 @@ type OpenSections = Record<string, boolean>;
 const readStoredSections = (): OpenSections => {
 	try {
 		const stored = window.localStorage.getItem(STORAGE_KEY);
-		return stored ? (JSON.parse(stored) as OpenSections) : {};
+		const parsed: unknown = stored ? JSON.parse(stored) : null;
+
+		// `JSON.parse("null")` parses fine and would then throw on every read, so
+		// the shape is checked rather than the parse alone.
+		return typeof parsed === "object" && parsed !== null
+			? (parsed as OpenSections)
+			: {};
 	} catch {
 		return {};
 	}

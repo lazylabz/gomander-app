@@ -17,11 +17,18 @@ import {
 	resetTerminals,
 } from "@/testing/terminals.ts";
 
-const SECTION_IDS = ["group-1", "group-2"];
-
 describe("EventListenersContainer", () => {
 	let backend: InMemoryBackend;
 	let roots: Root[] = [];
+	// The store is imported once for the whole file, so what a test opens has to
+	// be forgotten afterwards rather than reloaded away. Recording it here keeps
+	// that automatic for sections a later test invents.
+	let openedSectionIds: string[] = [];
+
+	const openSection = (sectionId: string) => {
+		openedSectionIds.push(sectionId);
+		setSidebarSectionOpen(sectionId, true);
+	};
 
 	const render = async () => {
 		const root = createRoot(document.createElement("div"));
@@ -34,9 +41,6 @@ describe("EventListenersContainer", () => {
 	beforeEach(() => {
 		// react-dom needs this to accept the act() calls that drive the render.
 		Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-		// The store is imported once for the whole file, so its sections have to be
-		// forgotten between tests rather than reloaded away.
-		SECTION_IDS.forEach(forgetSidebarSection);
 		installRecordingTerminals();
 		backend = installInMemoryBackend();
 	});
@@ -48,13 +52,18 @@ describe("EventListenersContainer", () => {
 			}
 		});
 		roots = [];
+
+		for (const sectionId of openedSectionIds) {
+			forgetSidebarSection(sectionId);
+		}
+		openedSectionIds = [];
 		resetTerminals();
 		resetBackendServices();
 	});
 
 	it("Should forget a deleted group's sidebar section", async () => {
 		// Arrange
-		setSidebarSectionOpen("group-1", true);
+		openSection("group-1");
 		await render();
 
 		// Act
@@ -68,8 +77,8 @@ describe("EventListenersContainer", () => {
 
 	it("Should leave the other groups' sidebar sections alone", async () => {
 		// Arrange
-		setSidebarSectionOpen("group-1", true);
-		setSidebarSectionOpen("group-2", true);
+		openSection("group-1");
+		openSection("group-2");
 		await render();
 
 		// Act
