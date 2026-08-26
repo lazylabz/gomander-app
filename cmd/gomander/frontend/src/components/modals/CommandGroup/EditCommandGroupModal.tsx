@@ -57,9 +57,9 @@ export const EditCommandGroupModal = ({
 		try {
 			await editCommandGroup(editedCommandGroup);
 
+			toast.success(t("toast.commandGroup.updateSuccess"));
 			setOpen(false);
 			form.reset();
-			toast.success(t("toast.commandGroup.updateSuccess"));
 		} catch (e) {
 			toast.error(parseError(e, t("toast.commandGroup.updateFailed")));
 		} finally {

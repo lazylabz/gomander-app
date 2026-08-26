@@ -10,6 +10,10 @@ import { CommandLinkField } from "@/components/modals/Command/common/CommandLink
 import { CommandNameField } from "@/components/modals/Command/common/CommandNameField.tsx";
 import { CommandWorkingDirectoryField } from "@/components/modals/Command/common/CommandWorkingDirectoryField.tsx";
 import {
+	toCommand,
+	toFormValues,
+} from "@/components/modals/Command/common/formMapping.ts";
+import {
 	type FormSchemaType,
 	formSchema,
 } from "@/components/modals/Command/common/formSchema.ts";
@@ -44,13 +48,7 @@ export const EditCommandModal = ({
 	const { t } = useTranslation();
 	const form = useForm<FormSchemaType>({
 		resolver: zodResolver(formSchema),
-		values: {
-			name: command?.name || "",
-			command: command?.command || "",
-			workingDirectory: command?.workingDirectory || "",
-			link: command?.link || "",
-			errorPatterns: command?.errorPatterns.join("\n") || "",
-		},
+		values: toFormValues(command),
 	});
 
 	const onSubmit = async (values: FormSchemaType) => {
@@ -58,22 +56,13 @@ export const EditCommandModal = ({
 			return;
 		}
 
-		const edited = await editCommand({
-			...command,
-			// Editable fields
-			name: values.name,
-			command: values.command,
-			workingDirectory: values.workingDirectory,
-			link: values.link,
-			errorPatterns: values.errorPatterns
-				.split("\n")
-				.filter((pattern) => pattern.trim() !== ""),
-		});
+		const edited = await editCommand(toCommand(values, command));
 		if (!edited) {
 			return;
 		}
 
 		setOpen(false);
+		form.reset();
 	};
 
 	const onOpenChange = (open: boolean) => {

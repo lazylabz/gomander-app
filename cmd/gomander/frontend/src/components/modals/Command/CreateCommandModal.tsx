@@ -10,6 +10,10 @@ import { CommandLinkField } from "@/components/modals/Command/common/CommandLink
 import { CommandNameField } from "@/components/modals/Command/common/CommandNameField.tsx";
 import { CommandWorkingDirectoryField } from "@/components/modals/Command/common/CommandWorkingDirectoryField.tsx";
 import {
+	emptyFormValues,
+	toCommand,
+} from "@/components/modals/Command/common/formMapping.ts";
+import {
 	type FormSchemaType,
 	formSchema,
 } from "@/components/modals/Command/common/formSchema.ts";
@@ -44,13 +48,7 @@ export const CreateCommandModal = ({
 
 	const form = useForm<FormSchemaType>({
 		resolver: zodResolver(formSchema),
-		defaultValues: {
-			name: "",
-			command: "",
-			workingDirectory: "",
-			link: "",
-			errorPatterns: "",
-		},
+		defaultValues: emptyFormValues(),
 	});
 
 	const onSubmit = async (values: FormSchemaType) => {
@@ -58,18 +56,13 @@ export const CreateCommandModal = ({
 			return;
 		}
 
-		const created = await createCommand({
-			id: crypto.randomUUID(),
-			projectId: projectId,
-			name: values.name,
-			command: values.command,
-			workingDirectory: values.workingDirectory,
-			position: 0, // Will be set by the backend
-			link: values.link,
-			errorPatterns: values.errorPatterns
-				.split("\n")
-				.filter((pattern) => pattern.trim() !== ""),
-		});
+		const created = await createCommand(
+			toCommand(values, {
+				id: crypto.randomUUID(),
+				projectId: projectId,
+				position: 0, // Will be set by the backend
+			}),
+		);
 		if (!created) {
 			return;
 		}

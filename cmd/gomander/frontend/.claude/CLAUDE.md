@@ -209,6 +209,21 @@ refreshes commands and groups, and toasts the result
 - Browser storage is a private sidecar of this module, not a seam: the test environment
   provides it, so a port here would have exactly one real adapter
 
+#### 9. Modal Forms
+
+- A command form and a `Command` are mapped by `components/modals/Command/common/formMapping.ts`:
+  `emptyFormValues()` is the create modal's blank form, `toFormValues(command)` fills the edit
+  modal's, and `toCommand(values, base)` reads either back with the id, project and position
+  the form does not own. The "one error pattern per line" encoding lives there and nowhere
+  else - a modal that splits or joins it itself is a modal that should be calling this
+- The four create/edit modals close and reset only once the save has succeeded, in that order:
+  `setOpen(false)`, then `form.reset()`. A rejected save reports the error and leaves the modal
+  open with what the user typed still in it
+- Where the success notification comes from still differs by domain: the command mutations own
+  their toast and hand back a boolean the modal branches on, while the command group ones are
+  still awaited in a `try` that toasts at the call site and refreshes in its `finally`. Only
+  the outcome plumbing differs - the close and reset are the same three lines either way
+
 ### Path Aliases
 
 - `@/` maps to `src/` directory
