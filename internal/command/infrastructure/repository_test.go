@@ -4,16 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/glebarez/sqlite"
-
-	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 
 	"gomander/internal/command/domain/test"
 
 	"gomander/internal/command/domain"
-	_ "gomander/migrations"
+	"gomander/internal/testdb"
 )
 
 type testHelper struct {
@@ -24,7 +21,7 @@ type testHelper struct {
 func newTestHelper(t *testing.T, preloaded []*CommandModel) *testHelper {
 	t.Helper() // IMPORTANT: This marks the function as a helper, so error traces will point to the test instead of here
 
-	repo := arrange(preloaded)
+	repo := arrange(t, preloaded)
 
 	helper := &testHelper{
 		t:    t,
@@ -282,34 +279,16 @@ func TestGormCommandRepository_DeleteAll(t *testing.T) {
 	})
 }
 
-func arrange(preloadedCommandModels []*CommandModel) (repo *GormCommandRepository) {
-	// Initialize the database
+func arrange(t *testing.T, preloadedCommandModels []*CommandModel) (repo *GormCommandRepository) {
+	t.Helper()
+
 	ctx := context.Background()
-	gormDb, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-
-	db, err := gormDb.DB()
-	if err != nil {
-		panic(err)
-	}
-
-	// Execute migrations
-	err = goose.SetDialect("sqlite3")
-	if err != nil {
-		panic(err)
-	}
-
-	err = goose.UpContext(ctx, db, ".")
-	if err != nil {
-		panic(err)
-	}
+	gormDb := testdb.New(t)
 
 	for _, m := range preloadedCommandModels {
-		err = gorm.G[CommandModel](gormDb).Create(ctx, m)
+		err := gorm.G[CommandModel](gormDb).Create(ctx, m)
 		if err != nil {
-			panic(err)
+			t.Fatalf("failed to preload command: %v", err)
 		}
 	}
 

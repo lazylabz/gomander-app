@@ -4,13 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/glebarez/sqlite"
-	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 
 	"gomander/internal/config/domain"
-	_ "gomander/migrations"
+	"gomander/internal/testdb"
 )
 
 type testHelper struct {
@@ -23,6 +21,7 @@ func newTestHelper(t *testing.T,
 	t.Helper() // IMPORTANT: This marks the function as a helper, so error traces will point to the test instead of here
 
 	repo := arrange(
+		t,
 		preloadedConfig,
 		preloadedPaths,
 	)
@@ -31,10 +30,6 @@ func newTestHelper(t *testing.T,
 		t:    t,
 		repo: repo,
 	}
-
-	t.Cleanup(func() {
-		assert.NoError(t, repo.db.Exec("DELETE FROM user_config").Error, "Failed to cleanup test database")
-	})
 
 	return helper
 }
@@ -115,35 +110,22 @@ func TestGormConfigRepository_Update(t *testing.T) {
 	})
 }
 
-func arrange(preloadedConfig *ConfigModel, preloadedPaths []*EnvironmentPathModel) (repo *GormConfigRepository) {
-	ctx := context.Background()
+func arrange(t *testing.T, preloadedConfig *ConfigModel, preloadedPaths []*EnvironmentPathModel) (repo *GormConfigRepository) {
+	t.Helper()
 
-	gormDb, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-	db, err := gormDb.DB()
-	if err != nil {
-		panic(err)
-	}
-	err = goose.SetDialect("sqlite3")
-	if err != nil {
-		panic(err)
-	}
-	err = goose.UpContext(ctx, db, ".")
-	if err != nil {
-		panic(err)
-	}
+	ctx := context.Background()
+	gormDb := testdb.New(t)
+
 	if preloadedConfig != nil {
-		err = gorm.G[ConfigModel](gormDb).Create(ctx, preloadedConfig)
+		err := gorm.G[ConfigModel](gormDb).Create(ctx, preloadedConfig)
 		if err != nil {
-			panic(err)
+			t.Fatalf("failed to preload the config: %v", err)
 		}
 	}
 	for _, m := range preloadedPaths {
-		err = gorm.G[EnvironmentPathModel](gormDb).Create(ctx, m)
+		err := gorm.G[EnvironmentPathModel](gormDb).Create(ctx, m)
 		if err != nil {
-			panic(err)
+			t.Fatalf("failed to preload an environment path: %v", err)
 		}
 	}
 	repo = NewGormConfigRepository(gormDb, ctx)

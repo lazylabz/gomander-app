@@ -4,8 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/glebarez/sqlite"
-	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 
@@ -15,7 +13,7 @@ import (
 	"gomander/internal/commandgroup/domain"
 	test2 "gomander/internal/commandgroup/domain/test"
 	"gomander/internal/commandgroup/infrastructure"
-	_ "gomander/migrations" // Import migrations to ensure they are executed
+	"gomander/internal/testdb"
 )
 
 type testHelper struct {
@@ -31,6 +29,7 @@ func newTestHelper(t *testing.T,
 	t.Helper() // IMPORTANT: This marks the function as a helper, so error traces will point to the test instead of here
 
 	repo, gormDb := arrange(
+		t,
 		preloadedCommandModels,
 		preloadedCommandGroupModels,
 		preloadedCommandToCommandGroupModels,
@@ -572,66 +571,34 @@ func TestGormCommandGroupRepository_DeleteAll(t *testing.T) {
 }
 
 func arrange(
+	t *testing.T,
 	preloadedCommandModels []commandinfrastructure.CommandModel,
 	preloadedCommandGroupModels []infrastructure.CommandGroupModel,
 	preloadedCommandToCommandGroupModels []infrastructure.CommandToCommandGroupModel,
 ) (repo *infrastructure.GormCommandGroupRepository, gormDb *gorm.DB) {
-	// Initialize the database
+	t.Helper()
+
 	ctx := context.Background()
-
-	gormDb, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-
-	db, err := gormDb.DB()
-	if err != nil {
-		panic(err)
-	}
-
-	// Execute migrations
-	err = goose.SetDialect("sqlite3")
-	if err != nil {
-		panic(err)
-	}
-
-	err = goose.UpContext(ctx, db, ".")
-	if err != nil {
-		panic(err)
-	}
-
-	// Clean all tables
-	_, err = gorm.G[commandinfrastructure.CommandModel](gormDb).Where("true").Delete(ctx)
-	if err != nil {
-		panic(err)
-	}
-	_, err = gorm.G[infrastructure.CommandToCommandGroupModel](gormDb).Where("true").Delete(ctx)
-	if err != nil {
-		panic(err)
-	}
-	_, err = gorm.G[infrastructure.CommandGroupModel](gormDb).Where("true").Delete(ctx)
-	if err != nil {
-		panic(err)
-	}
+	gormDb = testdb.New(t)
 
 	for _, m := range preloadedCommandModels {
-		err = gorm.G[commandinfrastructure.CommandModel](gormDb).Create(ctx, &m)
+		err := gorm.G[commandinfrastructure.CommandModel](gormDb).Create(ctx, &m)
 		if err != nil {
-			panic(err)
+			t.Fatalf("failed to preload command: %v", err)
 		}
 	}
 
 	for _, m := range preloadedCommandGroupModels {
-		err = gorm.G[infrastructure.CommandGroupModel](gormDb).Create(ctx, &m)
+		err := gorm.G[infrastructure.CommandGroupModel](gormDb).Create(ctx, &m)
 		if err != nil {
-			panic(err)
+			t.Fatalf("failed to preload command group: %v", err)
 		}
 	}
 
 	for _, m := range preloadedCommandToCommandGroupModels {
-		err = gorm.G[infrastructure.CommandToCommandGroupModel](gormDb).Create(ctx, &m)
+		err := gorm.G[infrastructure.CommandToCommandGroupModel](gormDb).Create(ctx, &m)
 		if err != nil {
-			panic(err)
+			t.Fatalf("failed to preload command group relation: %v", err)
 		}
 	}
 

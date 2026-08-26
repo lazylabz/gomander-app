@@ -1,0 +1,247 @@
+// Package apptest drives the Gomander backend the way the desktop app drives
+// it: real use cases, real repositories, a real event bus and a real database,
+// with fakes only where the backend leaves the process - spawning processes,
+// the desktop runtime, and the filesystem.
+//
+// A test written against it arranges data, runs a backend operation through the
+// use case registry, and asserts on what the user or the operating system would
+// see. No repository fake takes part.
+package apptest
+
+import (
+	"context"
+	"testing"
+
+	"github.com/google/uuid"
+
+	commandhandlers "gomander/internal/command/application/handlers"
+	commandusecases "gomander/internal/command/application/usecases"
+	commanddomain "gomander/internal/command/domain"
+	commandinfrastructure "gomander/internal/command/infrastructure"
+	commandgrouphandlers "gomander/internal/commandgroup/application/handlers"
+	commandgroupusecases "gomander/internal/commandgroup/application/usecases"
+	commandgroupdomain "gomander/internal/commandgroup/domain"
+	commandgroupinfrastructure "gomander/internal/commandgroup/infrastructure"
+	configusecases "gomander/internal/config/application/usecases"
+	configdomain "gomander/internal/config/domain"
+	configinfrastructure "gomander/internal/config/infrastructure"
+	"gomander/internal/event"
+	"gomander/internal/eventbus"
+	"gomander/internal/logger"
+	projectusecases "gomander/internal/project/application/usecases"
+	projectdomain "gomander/internal/project/domain"
+	projectinfrastructure "gomander/internal/project/infrastructure"
+	"gomander/internal/testdb"
+	"gomander/internal/usecases"
+
+	internalapp "gomander/internal/app"
+)
+
+// Harness is the seam every backend behaviour is verified through. UseCases is
+// the same registry the Wails controllers and the third-party HTTP server hold.
+type Harness struct {
+	t        *testing.T
+	UseCases usecases.Registry
+
+	// The repositories are here to arrange data, never to assert on it: what a
+	// test asserts is what the app itself can see.
+	commandRepository      commanddomain.Repository
+	commandGroupRepository commandgroupdomain.Repository
+	projectRepository      projectdomain.Repository
+	configRepository       configdomain.Repository
+
+	app           *internalapp.App
+	processRunner *processRunnerFake
+	runtime       *runtimeFake
+	fs            *fsFacadeFake
+}
+
+// New starts a backend with an empty database and no project open.
+//
+// The graph below mirrors buildDeps in cmd/gomander/main.go, which is where the
+// app wires the same pieces together. The localization use cases are the one
+// omission: they read the locale files embedded in the desktop binary, and no
+// backend behaviour depends on them.
+func New(t *testing.T) *Harness {
+	t.Helper()
+
+	ctx := context.Background()
+	db := testdb.New(t)
+
+	runtimeFacade := &runtimeFake{}
+	fsFacade := &fsFacadeFake{files: make(map[string][]byte)}
+	processRunner := &processRunnerFake{}
+
+	l := logger.NewDefaultLogger(ctx, runtimeFacade)
+	ee := event.NewDefaultEventEmitter(ctx, runtimeFacade)
+
+	commandRepo := commandinfrastructure.NewGormCommandRepository(db, ctx)
+	commandGroupRepo := commandgroupinfrastructure.NewGormCommandGroupRepository(db, ctx)
+	projectRepo := projectinfrastructure.NewGormProjectRepository(db, ctx)
+	configRepo := configinfrastructure.NewGormConfigRepository(db, ctx)
+
+	eventBus := eventbus.NewInMemoryEventBus()
+
+	app := internalapp.NewApp(l, processRunner, configRepo, eventBus, internalapp.EventHandlers{
+		CleanCommandGroupsOnCommandDeleted:   commandgrouphandlers.NewCleanCommandGroupsOnCommandDeleted(commandGroupRepo, ee),
+		CleanCommandGroupsOnProjectDeleted:   commandgrouphandlers.NewCleanCommandGroupsOnProjectDeleted(commandGroupRepo, ee),
+		CleanCommandsOnProjectDeleted:        commandhandlers.NewCleanCommandOnProjectDeleted(commandRepo),
+		AddCommandToGroupOnCommandDuplicated: commandgrouphandlers.NewAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo),
+	})
+	app.RegisterHandlers()
+	app.Startup(ctx)
+
+	return &Harness{
+		t: t,
+		UseCases: usecases.Registry{
+			GetUserConfig:  configusecases.NewGetUserConfig(configRepo),
+			SaveUserConfig: configusecases.NewSaveUserConfig(configRepo),
+
+			GetCurrentProject:    projectusecases.NewGetCurrentProject(configRepo, projectRepo),
+			GetAvailableProjects: projectusecases.NewGetAvailableProjects(projectRepo),
+			OpenProject:          projectusecases.NewOpenProject(configRepo, projectRepo),
+			CreateProject:        projectusecases.NewCreateProject(projectRepo),
+			EditProject:          projectusecases.NewEditProject(projectRepo),
+			CloseProject:         projectusecases.NewCloseProject(configRepo),
+			DeleteProject:        projectusecases.NewDeleteProject(projectRepo, eventBus, l),
+			ExportProject:        projectusecases.NewExportProject(ctx, projectRepo, commandRepo, commandGroupRepo, runtimeFacade, fsFacade),
+			ImportProject:        projectusecases.NewImportProject(projectRepo, commandRepo, commandGroupRepo),
+			GetProjectToImport:   projectusecases.NewGetProjectToImport(ctx, runtimeFacade, fsFacade),
+
+			GetCommandGroups:              commandgroupusecases.NewGetCommandGroups(configRepo, commandGroupRepo),
+			CreateCommandGroup:            commandgroupusecases.NewCreateCommandGroup(configRepo, commandGroupRepo),
+			UpdateCommandGroup:            commandgroupusecases.NewUpdateCommandGroup(commandGroupRepo),
+			DeleteCommandGroup:            commandgroupusecases.NewDeleteCommandGroup(commandGroupRepo, ee),
+			RemoveCommandFromCommandGroup: commandgroupusecases.NewRemoveCommandFromCommandGroup(commandGroupRepo),
+			ReorderCommandGroups:          commandgroupusecases.NewReorderCommandGroups(configRepo, commandGroupRepo),
+			RunCommandGroup:               commandgroupusecases.NewRunCommandGroup(configRepo, commandRepo, commandGroupRepo, projectRepo, processRunner),
+			StopCommandGroup:              commandgroupusecases.NewStopCommandGroup(commandGroupRepo, processRunner),
+
+			GetCommands:          commandusecases.NewGetCommands(configRepo, commandRepo),
+			AddCommand:           commandusecases.NewAddCommand(configRepo, commandRepo),
+			DuplicateCommand:     commandusecases.NewDuplicateCommand(configRepo, commandRepo, eventBus),
+			RemoveCommand:        commandusecases.NewRemoveCommand(commandRepo, eventBus),
+			EditCommand:          commandusecases.NewEditCommand(commandRepo),
+			ReorderCommands:      commandusecases.NewReorderCommands(configRepo, commandRepo),
+			RunCommand:           commandusecases.NewRunCommand(configRepo, commandRepo, projectRepo, processRunner),
+			StopCommand:          commandusecases.NewStopCommand(commandRepo, processRunner),
+			GetRunningCommandIds: commandusecases.NewGetRunningCommandIds(processRunner),
+		},
+		commandRepository:      commandRepo,
+		commandGroupRepository: commandGroupRepo,
+		projectRepository:      projectRepo,
+		configRepository:       configRepo,
+		app:                    app,
+		processRunner:          processRunner,
+		runtime:                runtimeFacade,
+		fs:                     fsFacade,
+	}
+}
+
+func (h *Harness) GivenProjects(projects ...projectdomain.Project) {
+	h.t.Helper()
+
+	for _, project := range projects {
+		if err := h.projectRepository.Create(project); err != nil {
+			h.t.Fatalf("failed to arrange project %s: %v", project.Id, err)
+		}
+	}
+}
+
+func (h *Harness) GivenOpenedProject(projectId string) {
+	h.t.Helper()
+
+	config := h.currentConfig()
+	config.LastOpenedProjectId = projectId
+
+	if err := h.configRepository.Update(config); err != nil {
+		h.t.Fatalf("failed to arrange the opened project: %v", err)
+	}
+}
+
+func (h *Harness) GivenCommands(commands ...commanddomain.Command) {
+	h.t.Helper()
+
+	for i := range commands {
+		if err := h.commandRepository.Create(&commands[i]); err != nil {
+			h.t.Fatalf("failed to arrange command %s: %v", commands[i].Id, err)
+		}
+	}
+}
+
+func (h *Harness) GivenCommandGroups(commandGroups ...commandgroupdomain.CommandGroup) {
+	h.t.Helper()
+
+	for i := range commandGroups {
+		if err := h.commandGroupRepository.Create(&commandGroups[i]); err != nil {
+			h.t.Fatalf("failed to arrange command group %s: %v", commandGroups[i].Id, err)
+		}
+	}
+}
+
+func (h *Harness) GivenEnvironmentPaths(paths ...string) {
+	h.t.Helper()
+
+	config := h.currentConfig()
+	config.EnvironmentPaths = make([]configdomain.EnvironmentPath, 0, len(paths))
+	for _, path := range paths {
+		config.EnvironmentPaths = append(config.EnvironmentPaths, configdomain.EnvironmentPath{
+			Id:   uuid.New().String(),
+			Path: path,
+		})
+	}
+
+	if err := h.configRepository.Update(config); err != nil {
+		h.t.Fatalf("failed to arrange the environment paths: %v", err)
+	}
+}
+
+// GivenFileToImport puts a file where the open-file dialog will point the user.
+func (h *Harness) GivenFileToImport(path string, contents []byte) {
+	h.t.Helper()
+
+	h.fs.put(path, contents)
+	h.runtime.openFileDialogPath = path
+}
+
+// GivenExportDestination answers the save-file dialog with path.
+func (h *Harness) GivenExportDestination(path string) {
+	h.t.Helper()
+
+	h.runtime.saveFileDialogPath = path
+}
+
+// ClosingTheApp runs the shutdown the desktop window triggers, and answers
+// whether the app refused to close.
+func (h *Harness) ClosingTheApp() (prevent bool) {
+	h.t.Helper()
+
+	return h.app.OnBeforeClose(context.Background())
+}
+
+func (h *Harness) StartedProcesses() []StartedProcess {
+	return h.processRunner.started()
+}
+
+func (h *Harness) StoppedProcessIds() []string {
+	return h.processRunner.stopped()
+}
+
+func (h *Harness) EmittedEvents() []EmittedEvent {
+	return h.runtime.emitted()
+}
+
+func (h *Harness) ExportedFile(path string) ([]byte, bool) {
+	return h.fs.file(path)
+}
+
+func (h *Harness) currentConfig() *configdomain.Config {
+	h.t.Helper()
+
+	config, err := h.configRepository.GetOrCreate()
+	if err != nil {
+		h.t.Fatalf("failed to read the user config: %v", err)
+	}
+
+	return config
+}

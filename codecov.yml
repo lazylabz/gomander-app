@@ -8,7 +8,8 @@ coverage:
         target: 70%
 
 ignore:
-  - "internal/testutils"
+  - "internal/apptest"
+  - "internal/testdb"
   - "migrations/*.go"
   - "cmd/gomander/controllers.go"
   - "cmd/gomander/main.go"

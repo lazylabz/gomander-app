@@ -156,6 +156,14 @@ Use [conventional commits](https://www.conventionalcommits.org/):
 - Add unit tests for new functionality
 - Test manually in dev mode: `make dev`
 - Verify builds succeed: `make all`
+- `internal/apptest` is the seam backend behaviour is verified through: `apptest.New(t)` wires
+  the real use case registry, repositories, event bus and database, and fakes only the process
+  and OS edges - process spawning, the desktop runtime (events, logs, dialogs) and the
+  filesystem. A test arranges with the domain builders (`GivenProjects`, `GivenCommands`, ...),
+  acts through `h.UseCases`, and asserts on what the user or the OS sees (`StartedProcesses`,
+  `EmittedEvents`, a read use case). Prefer it over stubbing repositories
+- `internal/testdb` owns the in-memory SQLite database plus migrations that both the harness
+  and the repository tests build on
 
 ## Known Limitations
 
