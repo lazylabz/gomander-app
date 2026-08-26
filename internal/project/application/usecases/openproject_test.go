@@ -61,7 +61,7 @@ func TestDefaultOpenProject_Execute(t *testing.T) {
 		sut := usecases.NewOpenProject(nil, mockProjectRepository)
 
 		projectId := "nonexistent"
-		mockProjectRepository.On("Get", projectId).Return(nil, errors.New("project not found"))
+		mockProjectRepository.On("Get", projectId).Return(projectdomain.Project{}, errors.New("project not found"))
 
 		// Act
 		err := sut.Execute(projectId)

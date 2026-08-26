@@ -17,9 +17,6 @@ func (m *MockProjectRepository) GetAll() ([]projectdomain.Project, error) {
 
 func (m *MockProjectRepository) Get(id string) (projectdomain.Project, error) {
 	args := m.Called(id)
-	if args.Get(0) == nil {
-		return projectdomain.Project{}, args.Error(1)
-	}
 	return args.Get(0).(projectdomain.Project), args.Error(1)
 }
 

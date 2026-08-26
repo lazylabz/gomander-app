@@ -645,6 +645,10 @@ func TestThirdPartyIntegrationsServer_StartAndStop(t *testing.T) {
 
 // Driven against the real backend rather than mocked use cases: what these
 // prove is that an operation a missing project used to crash now answers.
+//
+// A missing command or command group still crashes these same endpoints -
+// their repositories report an absent row as (nil, nil) the way this one used
+// to, which is what #254 and #255 fix.
 func TestThirdPartyIntegrationsServer_AgainstTheRealBackend(t *testing.T) {
 	t.Run("POST /commands/{id}/run should report a missing project", func(t *testing.T) {
 		// Arrange

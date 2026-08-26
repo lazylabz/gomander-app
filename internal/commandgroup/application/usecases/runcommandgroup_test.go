@@ -171,7 +171,7 @@ func TestDefaultRunCommandGroup_Execute(t *testing.T) {
 
 		mockCommandGroupRepository.On("Get", cmdGroup.Id).Return(&cmdGroup, nil)
 		mockUserConfigRepository.On("GetOrCreate").Return(&configdomain.Config{LastOpenedProjectId: projectId}, nil)
-		mockProjectRepository.On("Get", projectId).Return(nil, errors.New("failed to get project"))
+		mockProjectRepository.On("Get", projectId).Return(projectdomain.Project{}, errors.New("failed to get project"))
 
 		// Act
 		err := sut.Execute(cmdGroup.Id)

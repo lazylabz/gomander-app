@@ -7,6 +7,7 @@ import (
 
 	"gomander/internal/apptest"
 	commandtest "gomander/internal/command/domain/test"
+	"gomander/internal/domainerrors"
 	"gomander/internal/helpers/array"
 	projecttest "gomander/internal/project/domain/test"
 )
@@ -57,6 +58,22 @@ func TestResolvingTheOpenedProject(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 		assert.Nil(t, current)
+	})
+
+	t.Run("Should refuse to open a project that no longer exists, and leave the open one alone", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+		opened := givenAnOpenedProject(h)
+
+		// Act
+		err := h.UseCases.OpenProject.Execute("deleted-project")
+
+		// Assert
+		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
+
+		current, err := h.UseCases.GetCurrentProject.Execute()
+		assert.NoError(t, err)
+		assert.Equal(t, &opened, current)
 	})
 
 	t.Run("Should be nothing once the opened project has been deleted", func(t *testing.T) {

@@ -174,7 +174,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 			mockFsFacade,
 		)
 
-		mockProjectRepository.On("Get", "test-project-id").Return(nil, assert.AnError)
+		mockProjectRepository.On("Get", "test-project-id").Return(projectdomain.Project{}, assert.AnError)
 
 		// Act
 		_, err := sut.Execute("test-project-id")

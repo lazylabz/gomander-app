@@ -133,7 +133,7 @@ func TestDefaultRunCommand_Execute(t *testing.T) {
 		cmd := test.NewCommandBuilder().WithProjectId(projectId).Build()
 
 		mockCommandRepository.On("Get", cmd.Id).Return(&cmd, nil)
-		mockProjectRepository.On("Get", projectId).Return(nil, errors.New("failed to get project"))
+		mockProjectRepository.On("Get", projectId).Return(projectdomain.Project{}, errors.New("failed to get project"))
 
 		// Act
 		err := sut.Execute(cmd.Id)
