@@ -18,9 +18,9 @@ import {
 	DropdownMenuTrigger,
 } from "@/design-system/components/ui/dropdown-menu.tsx";
 import { parseError } from "@/helpers/errorHelpers.ts";
+import { fetchAvailableProjects } from "@/queries/fetchAvailableProjects.ts";
 import { ScreenRoutes } from "@/routes.ts";
 import { ProjectCard } from "@/screens/ProjectSelectionScreen/components/ProjectCard.tsx";
-import { useGetAvailableProjects } from "@/screens/ProjectSelectionScreen/hooks/useGetAvailableProjects.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { deleteProject } from "@/useCases/project/deleteProject.ts";
 
@@ -38,8 +38,7 @@ export const ProjectSelectionScreen = () => {
 
 	const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false);
 
-	const { availableProjects, fetchAvailableProjects } =
-		useGetAvailableProjects();
+	const availableProjects = useProjectStore((state) => state.availableProjects);
 
 	const openCreateProjectModal = () => {
 		setCreateProjectModalOpen(true);
@@ -54,9 +53,9 @@ export const ProjectSelectionScreen = () => {
 			return;
 		}
 
-		await deleteProject(projectIdBeingDeleted);
-		setProjectIdBeingDeleted(null);
-		await fetchAvailableProjects();
+		if (await deleteProject(projectIdBeingDeleted)) {
+			setProjectIdBeingDeleted(null);
+		}
 	};
 
 	const cancelDeleteProject = () => {
@@ -84,7 +83,7 @@ export const ProjectSelectionScreen = () => {
 
 	useEffect(() => {
 		fetchAvailableProjects();
-	}, [fetchAvailableProjects]);
+	}, []);
 
 	useEffect(() => {
 		if (project) {
@@ -103,7 +102,6 @@ export const ProjectSelectionScreen = () => {
 			/>
 			<ImportProjectModal
 				open={!!projectBeingImported}
-				onSuccess={fetchAvailableProjects}
 				onClose={() => setProjectBeingImported(null)}
 				project={projectBeingImported}
 			/>

@@ -3,7 +3,6 @@ import { CSS } from "@dnd-kit/utilities";
 import { Folder, FolderOpen, Play, Square } from "lucide-react";
 import type { SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
 import type { Command, CommandGroup } from "@/contracts/types.ts";
@@ -21,8 +20,6 @@ import {
 	SidebarMenuItem,
 } from "@/design-system/components/ui/sidebar.tsx";
 import { cn } from "@/design-system/lib/utils.ts";
-import { parseError } from "@/helpers/errorHelpers.ts";
-import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 import { useSidebarSection } from "@/store/sidebarSections.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
@@ -72,11 +69,7 @@ export const CommandGroupSection = ({
 			return;
 		}
 
-		try {
-			await runCommandGroup(commandGroup.id);
-		} catch (e) {
-			toast.error(parseError(e, t("toast.commandGroup.runFailed")));
-		}
+		await runCommandGroup(commandGroup.id);
 	};
 
 	const stop = async (e: SyntheticEvent) => {
@@ -86,25 +79,14 @@ export const CommandGroupSection = ({
 			return;
 		}
 
-		try {
-			await stopCommandGroup(commandGroup.id);
-		} catch (e) {
-			toast.error(parseError(e, t("toast.commandGroup.stopFailed")));
-		}
+		await stopCommandGroup(commandGroup.id);
 	};
 
 	const handleDelete = async () => {
 		if (isReorderingGroups) {
 			return;
 		}
-		try {
-			await deleteCommandGroup(commandGroup.id);
-			toast.success(t("toast.commandGroup.deleteSuccess"));
-		} catch (e) {
-			toast.error(parseError(e, t("toast.commandGroup.deleteFailed")));
-		} finally {
-			fetchCommandGroups();
-		}
+		await deleteCommandGroup(commandGroup.id);
 	};
 
 	const handleEdit = () => {

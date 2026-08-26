@@ -53,8 +53,9 @@ export const AppSidebar = () => {
 	};
 
 	const handleCloseProject = async () => {
-		await closeProject();
-		navigate(ScreenRoutes.ProjectSelection);
+		if (await closeProject()) {
+			navigate(ScreenRoutes.ProjectSelection);
+		}
 	};
 
 	return (

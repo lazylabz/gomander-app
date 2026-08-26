@@ -248,6 +248,9 @@ export namespace domain {
 	    "toast.project.exportSuccess": string;
 	    "toast.project.exportFailed": string;
 	    "toast.project.openFolderAction": string;
+	    "toast.project.deleteSuccess": string;
+	    "toast.project.deleteFailed": string;
+	    "toast.project.closeFailed": string;
 	    "toast.settings.userSaveSuccess": string;
 	    "toast.settings.userSaveFailed": string;
 	    "toast.settings.projectSaveSuccess": string;

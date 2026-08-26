@@ -163,6 +163,9 @@
   "toast.project.exportSuccess": "Project exported successfully",
   "toast.project.exportFailed": "Failed to export the project",
   "toast.project.openFolderAction": "Open containing folder",
+  "toast.project.deleteSuccess": "Project deleted successfully",
+  "toast.project.deleteFailed": "Failed to delete the project",
+  "toast.project.closeFailed": "Failed to close the project",
 
   "toast.settings.userSaveSuccess": "User settings saved successfully",
   "toast.settings.userSaveFailed": "Failed to save user settings",

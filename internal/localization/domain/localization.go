@@ -182,6 +182,9 @@ type Localization struct {
 	ToastProjectExportSuccess    string `json:"toast.project.exportSuccess"`
 	ToastProjectExportFailed     string `json:"toast.project.exportFailed"`
 	ToastProjectOpenFolderAction string `json:"toast.project.openFolderAction"`
+	ToastProjectDeleteSuccess    string `json:"toast.project.deleteSuccess"`
+	ToastProjectDeleteFailed     string `json:"toast.project.deleteFailed"`
+	ToastProjectCloseFailed      string `json:"toast.project.closeFailed"`
 
 	// toast.settings
 	ToastSettingsUserSaveSuccess    string `json:"toast.settings.userSaveSuccess"`

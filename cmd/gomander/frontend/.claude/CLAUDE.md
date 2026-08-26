@@ -82,7 +82,7 @@ src/
 ├── store/             # Zustand state stores (one per domain)
 │   ├── commandStore.ts
 │   ├── commandGroupStore.ts
-│   ├── projectStore.ts
+│   ├── projectStore.ts # The opened project, plus the ones available to open
 │   ├── userConfigurationStore.ts
 │   └── sidebarSections.ts # Which sidebar sections are expanded, persisted
 ├── screens/           # Top-level screen components
@@ -150,8 +150,15 @@ export const useCommandStore = <T>(selector) => useStore(commandStore, selector)
   mutation is a mutation that has not absorbed its outcome yet
 - Refresh through `refreshAfterMutation(...queries)`: the mutation has already
   reported its outcome by then, so a failing refresh must not reject
-- Only `useCases/command/` follows this yet; the `commandGroup` and `project`
-  mutations still leave their outcome at the call site
+- Equivalent mutations refresh the same set: a command's create/edit/delete refresh the
+  commands and, where a group carries a copy, the groups; a group's own mutations refresh
+  the groups alone, since the commands they hold outlive them; a project mutation that
+  changes which projects exist refreshes the available ones, and an edit refreshes the
+  opened project too. `closeProject` and `exportProject` refresh nothing - closing sets the
+  state the change forces, and exporting changes none
+- The whole of `useCases/command/`, `useCases/commandGroup/` and `useCases/project/` follows
+  this. `createProject` is the exception: it is still a `dataService` call from
+  `CreateProjectModal` with an `onSuccess` refresh prop
 
 Example: `useCases/command/deleteCommand.ts` deletes, disposes the terminal,
 refreshes commands and groups, and toasts the result
@@ -219,10 +226,10 @@ refreshes commands and groups, and toasts the result
 - The four create/edit modals close and reset only once the save has succeeded, in that order:
   `setOpen(false)`, then `form.reset()`. A rejected save reports the error and leaves the modal
   open with what the user typed still in it
-- Where the success notification comes from still differs by domain: the command mutations own
-  their toast and hand back a boolean the modal branches on, while the command group ones are
-  still awaited in a `try` that toasts at the call site and refreshes in its `finally`. Only
-  the outcome plumbing differs - the close and reset are the same three lines either way
+- Every one of them reads the same way: the mutation reports its own outcome and hands back a
+  boolean, the modal returns early when it is `false`, and closes and resets when it is not.
+  The import project modal is the same three lines - it just calls `handleOpenChange(false)`,
+  which resets the form on the way out
 
 ### Path Aliases
 

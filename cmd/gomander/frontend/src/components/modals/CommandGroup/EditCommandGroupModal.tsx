@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Group } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { CommandGroupCommandsField } from "@/components/modals/CommandGroup/common/CommandGroupCommandsField/CommandGroupCommandsField.tsx";
 import { CommandGroupNameField } from "@/components/modals/CommandGroup/common/CommandGroupNameField.tsx";
@@ -21,8 +20,6 @@ import {
 	DialogTitle,
 } from "@/design-system/components/ui/dialog.tsx";
 import { Form } from "@/design-system/components/ui/form.tsx";
-import { parseError } from "@/helpers/errorHelpers.ts";
-import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { editCommandGroup } from "@/useCases/commandGroup/editCommandGroup.ts";
 
 export const EditCommandGroupModal = ({
@@ -48,23 +45,17 @@ export const EditCommandGroupModal = ({
 			return;
 		}
 
-		const editedCommandGroup = {
+		const edited = await editCommandGroup({
 			...commandGroup,
 			name: values.name,
 			commands: values.commands,
-		};
-
-		try {
-			await editCommandGroup(editedCommandGroup);
-
-			toast.success(t("toast.commandGroup.updateSuccess"));
-			setOpen(false);
-			form.reset();
-		} catch (e) {
-			toast.error(parseError(e, t("toast.commandGroup.updateFailed")));
-		} finally {
-			fetchCommandGroups();
+		});
+		if (!edited) {
+			return;
 		}
+
+		setOpen(false);
+		form.reset();
 	};
 
 	const onOpenChange = (open: boolean) => {

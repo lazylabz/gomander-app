@@ -1,6 +1,5 @@
 import { EllipsisVertical } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { dataService } from "@/contracts/service.ts";
 import type { Project } from "@/contracts/types.ts";
@@ -10,10 +9,8 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/design-system/components/ui/dropdown-menu.tsx";
-import { parseError } from "@/helpers/errorHelpers.ts";
 import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
-import { ProjectExportSuccessToast } from "@/screens/ProjectSelectionScreen/components/ProjectExportSuccessToast.tsx";
-import { exportProject } from "@/useCases/project/exportProject.ts";
+import { exportProject } from "@/useCases/project/exportProject.tsx";
 
 export const ProjectCard = ({
 	project,
@@ -30,23 +27,7 @@ export const ProjectCard = ({
 	};
 
 	const handleExportProject = async () => {
-		try {
-			const uniqueToastId = crypto.randomUUID();
-
-			const exportFilePath = await exportProject(project.id);
-
-			toast.success(
-				<ProjectExportSuccessToast
-					exportFilePath={exportFilePath}
-					toastId={uniqueToastId}
-				/>,
-				{
-					id: uniqueToastId,
-				},
-			);
-		} catch (e) {
-			toast.error(parseError(e, t("toast.project.exportFailed")));
-		}
+		await exportProject(project.id);
 	};
 
 	return (

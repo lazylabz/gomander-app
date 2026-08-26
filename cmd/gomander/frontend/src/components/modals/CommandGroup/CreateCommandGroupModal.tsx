@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Group } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { CommandGroupCommandsField } from "@/components/modals/CommandGroup/common/CommandGroupCommandsField/CommandGroupCommandsField.tsx";
 import { CommandGroupNameField } from "@/components/modals/CommandGroup/common/CommandGroupNameField.tsx";
@@ -20,8 +19,6 @@ import {
 	DialogTitle,
 } from "@/design-system/components/ui/dialog.tsx";
 import { Form } from "@/design-system/components/ui/form.tsx";
-import { parseError } from "@/helpers/errorHelpers.ts";
-import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { createCommandGroup } from "@/useCases/commandGroup/createCommandGroup.ts";
 
@@ -48,23 +45,18 @@ export const CreateCommandGroupModal = ({
 			return;
 		}
 
-		try {
-			await createCommandGroup({
-				id: crypto.randomUUID(),
-				projectId: projectId,
-				name: values.name,
-				commands: values.commands,
-				position: 0, // Will be set by the backend
-			});
-
-			toast.success(t("toast.commandGroup.createSuccess"));
-			setOpen(false);
-			form.reset();
-		} catch (e) {
-			toast.error(parseError(e, t("toast.commandGroup.createFailed")));
-		} finally {
-			fetchCommandGroups();
+		const created = await createCommandGroup({
+			id: crypto.randomUUID(),
+			projectId: projectId,
+			name: values.name,
+			commands: values.commands,
+		});
+		if (!created) {
+			return;
 		}
+
+		setOpen(false);
+		form.reset();
 	};
 
 	const onOpenChange = (open: boolean) => {

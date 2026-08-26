@@ -7,7 +7,6 @@ import {
 import { ArrowUpDown } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { CommandGroupSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandGroupsSection/components/CommandGroupSection/CommandGroupSection.tsx";
 import { CreateCommandGroupModal } from "@/components/modals/CommandGroup/CreateCommandGroupModal.tsx";
@@ -25,8 +24,6 @@ import {
 	TooltipTrigger,
 } from "@/design-system/components/ui/tooltip.tsx";
 import { cn } from "@/design-system/lib/utils.ts";
-import { parseError } from "@/helpers/errorHelpers.ts";
-import { fetchCommandGroups } from "@/queries/fetchCommandGroups.ts";
 import { useCommandGroupStore } from "@/store/commandGroupStore.ts";
 import { reorderCommandGroups } from "@/useCases/commandGroup/reorderCommandGroups.ts";
 
@@ -66,25 +63,18 @@ export const CommandGroupsSection = () => {
 		}
 	};
 
-	const handleSaveCommandGroupsOrder = async () => {
-		const reorderedCommandGroupIds = commandGroups.map((cg) => cg.id);
-		try {
-			await reorderCommandGroups(reorderedCommandGroupIds);
-			toast.success(t("toast.commandGroup.reorderSuccess"));
-		} catch (e) {
-			toast.error(parseError(e, t("toast.commandGroup.reorderFailed")));
-		} finally {
-			fetchCommandGroups();
+	const toggleReorderingMode = async () => {
+		if (!isReorderingGroups) {
+			setIsReorderingGroups(true);
+			return;
 		}
-	};
 
-	const toggleReorderingMode = () => {
-		setIsReorderingGroups((wasReordering) => {
-			if (wasReordering) {
-				handleSaveCommandGroupsOrder();
-			}
-			return !wasReordering;
-		});
+		// A rejected save restores the persisted order, so the drags are gone
+		// either way; staying in reorder mode is only so the retry does not also
+		// cost re-entering the mode.
+		if (await reorderCommandGroups(commandGroups.map((cg) => cg.id))) {
+			setIsReorderingGroups(false);
+		}
 	};
 
 	return (
