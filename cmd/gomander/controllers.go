@@ -1,24 +1,24 @@
 package main
 
 import (
-	"gomander/internal/app"
 	commanddomain "gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	configdomain "gomander/internal/config/domain"
 	localizationdomain "gomander/internal/localization/domain"
-	"gomander/internal/project/application/usecases"
+	projectusecases "gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
+	"gomander/internal/usecases"
 )
 
 type WailsControllers struct {
-	useCases app.UseCases
+	useCases usecases.Registry
 }
 
 func NewWailsControllers() *WailsControllers {
 	return &WailsControllers{}
 }
 
-func (wc *WailsControllers) loadUseCases(useCases app.UseCases) {
+func (wc *WailsControllers) loadUseCases(useCases usecases.Registry) {
 	wc.useCases = useCases
 }
 
@@ -71,11 +71,11 @@ func (wc *WailsControllers) ImportProjectController(projectJSON projectdomain.Pr
 }
 
 func (wc *WailsControllers) GetProjectToImportController() (*projectdomain.ProjectExportJSONv1, error) {
-	return wc.useCases.GetProjectToImport.Execute(usecases.FileTypeGomander)
+	return wc.useCases.GetProjectToImport.Execute(projectusecases.FileTypeGomander)
 }
 
 func (wc *WailsControllers) GetProjectToImportFromPackageJsonController() (*projectdomain.ProjectExportJSONv1, error) {
-	return wc.useCases.GetProjectToImport.Execute(usecases.FileTypePackageJSON)
+	return wc.useCases.GetProjectToImport.Execute(projectusecases.FileTypePackageJSON)
 }
 
 // CommandGroup controllers

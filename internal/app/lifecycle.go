@@ -4,11 +4,7 @@ import (
 	"context"
 )
 
-// Startup is called when the app starts. The context is saved
-// so we can call the runtime methods
-func (a *App) Startup(ctx context.Context) {
-	a.ctx = ctx
-
+func (a *App) Startup(_ context.Context) {
 	a.logger.Info("Loading configuration...")
 
 	_, err := a.userConfigRepository.GetOrCreate()

@@ -13,17 +13,17 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/cmd/gomander/thirdpartyserver"
-	"gomander/internal/app"
 	commandusecasestest "gomander/internal/command/application/usecases/test"
 	commanddomain "gomander/internal/command/domain"
 	commandgroupusecasestest "gomander/internal/commandgroup/application/usecases/test"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
+	"gomander/internal/usecases"
 )
 
 func TestNewThirdPartyIntegrationsServer_DiscoveryHandler(t *testing.T) {
 	t.Run("GET /discovery should return discovery info", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
+		server := thirdpartyserver.NewThirdPartyIntegrationsServer(usecases.Registry{})
 		err := server.RegisterHandlers()
 		assert.NoError(t, err)
 
@@ -44,7 +44,7 @@ func TestNewThirdPartyIntegrationsServer_DiscoveryHandler(t *testing.T) {
 	})
 	t.Run("POST /discovery should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
+		server := thirdpartyserver.NewThirdPartyIntegrationsServer(usecases.Registry{})
 		err := server.RegisterHandlers()
 		assert.NoError(t, err)
 
@@ -83,7 +83,7 @@ func TestNewThirdPartyIntegrationsServer_GetCommandsHandler(t *testing.T) {
 		mockGetCommands.On("Execute").Return(commands, nil)
 		mockGetRunningCommandIds.On("Execute").Return(runningCommandIds)
 
-		useCases := app.UseCases{
+		useCases := usecases.Registry{
 			GetCommands:          mockGetCommands,
 			GetRunningCommandIds: mockGetRunningCommandIds,
 		}
@@ -127,7 +127,7 @@ func TestNewThirdPartyIntegrationsServer_GetCommandsHandler(t *testing.T) {
 
 	t.Run("POST /commands should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
+		server := thirdpartyserver.NewThirdPartyIntegrationsServer(usecases.Registry{})
 		err := server.RegisterHandlers()
 		assert.NoError(t, err)
 
@@ -150,7 +150,7 @@ func TestNewThirdPartyIntegrationsServer_GetCommandsHandler(t *testing.T) {
 
 		mockGetCommands.On("Execute").Return([]commanddomain.Command{}, expectedError)
 
-		useCases := app.UseCases{
+		useCases := usecases.Registry{
 			GetCommands: mockGetCommands,
 		}
 
@@ -181,7 +181,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandHandler(t *testing.T) {
 
 		mockRunCommand.On("Execute", commandId).Return(nil)
 
-		useCases := app.UseCases{
+		useCases := usecases.Registry{
 			RunCommand: mockRunCommand,
 		}
 
@@ -204,7 +204,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandHandler(t *testing.T) {
 
 	t.Run("GET /commands/{id}/run should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
+		server := thirdpartyserver.NewThirdPartyIntegrationsServer(usecases.Registry{})
 		err := server.RegisterHandlers()
 		assert.NoError(t, err)
 
@@ -228,7 +228,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandHandler(t *testing.T) {
 
 		mockRunCommand.On("Execute", commandId).Return(expectedError)
 
-		useCases := app.UseCases{
+		useCases := usecases.Registry{
 			RunCommand: mockRunCommand,
 		}
 
@@ -259,7 +259,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandHandler(t *testing.T) {
 
 		mockStopCommand.On("Execute", commandId).Return(nil)
 
-		useCases := app.UseCases{
+		useCases := usecases.Registry{
 			StopCommand: mockStopCommand,
 		}
 
@@ -282,7 +282,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandHandler(t *testing.T) {
 
 	t.Run("GET /commands/{id}/stop should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
+		server := thirdpartyserver.NewThirdPartyIntegrationsServer(usecases.Registry{})
 		err := server.RegisterHandlers()
 		assert.NoError(t, err)
 
@@ -306,7 +306,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandHandler(t *testing.T) {
 
 		mockStopCommand.On("Execute", commandId).Return(expectedError)
 
-		useCases := app.UseCases{
+		useCases := usecases.Registry{
 			StopCommand: mockStopCommand,
 		}
 
@@ -337,7 +337,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandGroupHandler(t *testing.T) {
 
 		mockRunCommandGroup.On("Execute", groupId).Return(nil)
 
-		useCases := app.UseCases{
+		useCases := usecases.Registry{
 			RunCommandGroup: mockRunCommandGroup,
 		}
 
@@ -360,7 +360,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandGroupHandler(t *testing.T) {
 
 	t.Run("GET /command-groups/{id}/run should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
+		server := thirdpartyserver.NewThirdPartyIntegrationsServer(usecases.Registry{})
 		err := server.RegisterHandlers()
 		assert.NoError(t, err)
 
@@ -384,7 +384,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandGroupHandler(t *testing.T) {
 
 		mockRunCommandGroup.On("Execute", groupId).Return(expectedError)
 
-		useCases := app.UseCases{
+		useCases := usecases.Registry{
 			RunCommandGroup: mockRunCommandGroup,
 		}
 
@@ -415,7 +415,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandGroupHandler(t *testing.T) {
 
 		mockStopCommandGroup.On("Execute", groupId).Return(nil)
 
-		useCases := app.UseCases{
+		useCases := usecases.Registry{
 			StopCommandGroup: mockStopCommandGroup,
 		}
 
@@ -438,7 +438,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandGroupHandler(t *testing.T) {
 
 	t.Run("GET /command-groups/{id}/stop should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
+		server := thirdpartyserver.NewThirdPartyIntegrationsServer(usecases.Registry{})
 		err := server.RegisterHandlers()
 		assert.NoError(t, err)
 
@@ -462,7 +462,7 @@ func TestNewThirdPartyIntegrationsServer_StopCommandGroupHandler(t *testing.T) {
 
 		mockStopCommandGroup.On("Execute", groupId).Return(expectedError)
 
-		useCases := app.UseCases{
+		useCases := usecases.Registry{
 			StopCommandGroup: mockStopCommandGroup,
 		}
 
@@ -513,7 +513,7 @@ func TestNewThirdPartyIntegrationsServer_GetCommandGroupsHandler(t *testing.T) {
 		mockGetCommandGroups.On("Execute").Return(groups, nil)
 		mockGetRunningCommandIds.On("Execute").Return(runningCommandIds)
 
-		useCases := app.UseCases{
+		useCases := usecases.Registry{
 			GetCommandGroups:     mockGetCommandGroups,
 			GetRunningCommandIds: mockGetRunningCommandIds,
 		}
@@ -560,7 +560,7 @@ func TestNewThirdPartyIntegrationsServer_GetCommandGroupsHandler(t *testing.T) {
 
 	t.Run("POST /command-groups should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
+		server := thirdpartyserver.NewThirdPartyIntegrationsServer(usecases.Registry{})
 		err := server.RegisterHandlers()
 		assert.NoError(t, err)
 
@@ -583,7 +583,7 @@ func TestNewThirdPartyIntegrationsServer_GetCommandGroupsHandler(t *testing.T) {
 
 		mockGetCommandGroups.On("Execute").Return([]commandgroupdomain.CommandGroup{}, expectedError)
 
-		useCases := app.UseCases{
+		useCases := usecases.Registry{
 			GetCommandGroups: mockGetCommandGroups,
 		}
 
@@ -608,7 +608,7 @@ func TestNewThirdPartyIntegrationsServer_GetCommandGroupsHandler(t *testing.T) {
 func TestThirdPartyIntegrationsServer_StartAndStop(t *testing.T) {
 	t.Run("Should start and stop server without errors", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
+		server := thirdpartyserver.NewThirdPartyIntegrationsServer(usecases.Registry{})
 		err := server.RegisterHandlers()
 		assert.NoError(t, err)
 

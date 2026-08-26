@@ -78,7 +78,8 @@ cmd/gomander/
     └── openapi.yaml
 
 internal/                # Core business logic organized by domain
-├── app/                 # Application lifecycle and dependency coordination
+├── app/                 # Application lifecycle: startup, shutdown, event handler registration
+├── usecases/            # Registry of the backend operations the UI and the third-party API reach
 ├── command/             # Command domain (run/stop individual commands)
 │   ├── domain/          # Entities, value objects, repository interfaces
 │   ├── application/     # Use cases and event handlers
@@ -108,7 +109,7 @@ migrations/              # Database migrations (Goose format .go files)
 
 ### Key Architectural Patterns
 
-- **Dependency Injection**: All dependencies are registered in `cmd/gomander/main.go` (`registerDeps` function) and injected through constructors
+- **Dependency Injection**: All dependencies are built in `cmd/gomander/main.go` (`buildDeps` function) and injected through constructors. It returns the lifecycle module (`internal/app`) and the use case registry (`internal/usecases`)
 - **Domain Events**: Side effects are handled via domain events published through the event bus
 - **Repository Pattern**: Data access abstracted behind repository interfaces defined in domain layer
 - **Use Case Pattern**: Each business operation is a separate use case struct with a single `Execute` method
