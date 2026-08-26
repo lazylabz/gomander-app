@@ -8,6 +8,7 @@ import (
 	"gomander/internal/apptest"
 	commandtest "gomander/internal/command/domain/test"
 	commandgrouptest "gomander/internal/commandgroup/domain/test"
+	"gomander/internal/domainerrors"
 	projecttest "gomander/internal/project/domain/test"
 )
 
@@ -59,6 +60,21 @@ func TestRunningACommand(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 		assert.Len(t, h.StartedProcesses(), 1)
+	})
+
+	t.Run("Should report the command's project as missing instead of dying", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		command := commandtest.NewCommandBuilder().WithProjectId("deleted-project").Build()
+		h.GivenCommands(command)
+
+		// Act
+		err := h.UseCases.RunCommand.Execute(command.Id)
+
+		// Assert
+		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
+		assert.Empty(t, h.StartedProcesses())
 	})
 }
 
@@ -136,6 +152,27 @@ func TestRunningACommandGroup(t *testing.T) {
 			{Command: second, EnvironmentPaths: []string{"/usr/local/bin"}, BaseWorkingDirectory: project.WorkingDirectory},
 			{Command: third, EnvironmentPaths: []string{"/usr/local/bin"}, BaseWorkingDirectory: project.WorkingDirectory},
 		}, h.StartedProcesses())
+	})
+
+	t.Run("Should report the group's project as missing instead of dying", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		command := commandtest.NewCommandBuilder().WithProjectId("deleted-project").Build()
+		h.GivenCommands(command)
+
+		group := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId("deleted-project").
+			WithCommands(command).
+			Build()
+		h.GivenCommandGroups(group)
+
+		// Act
+		err := h.UseCases.RunCommandGroup.Execute(group.Id)
+
+		// Assert
+		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
+		assert.Empty(t, h.StartedProcesses())
 	})
 }
 

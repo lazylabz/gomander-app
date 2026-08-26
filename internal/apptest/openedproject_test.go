@@ -59,6 +59,21 @@ func TestResolvingTheOpenedProject(t *testing.T) {
 		assert.Nil(t, current)
 	})
 
+	t.Run("Should be nothing once the opened project has been deleted", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+		project := givenAnOpenedProject(h)
+
+		assert.NoError(t, h.UseCases.DeleteProject.Execute(project.Id))
+
+		// Act
+		current, err := h.UseCases.GetCurrentProject.Execute()
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Nil(t, current)
+	})
+
 	t.Run("Should scope the commands the app shows to the opened project", func(t *testing.T) {
 		// Arrange
 		h := apptest.New(t)

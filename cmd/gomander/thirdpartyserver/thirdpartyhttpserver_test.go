@@ -13,10 +13,13 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/cmd/gomander/thirdpartyserver"
+	"gomander/internal/apptest"
 	commandusecasestest "gomander/internal/command/application/usecases/test"
 	commanddomain "gomander/internal/command/domain"
+	commandtest "gomander/internal/command/domain/test"
 	commandgroupusecasestest "gomander/internal/commandgroup/application/usecases/test"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
+	commandgrouptest "gomander/internal/commandgroup/domain/test"
 	"gomander/internal/usecases"
 )
 
@@ -638,4 +641,63 @@ func TestThirdPartyIntegrationsServer_StartAndStop(t *testing.T) {
 		// Assert - Server stopped without error
 		assert.NoError(t, err)
 	})
+}
+
+// Driven against the real backend rather than mocked use cases: what these
+// prove is that an operation a missing project used to crash now answers.
+func TestThirdPartyIntegrationsServer_AgainstTheRealBackend(t *testing.T) {
+	t.Run("POST /commands/{id}/run should report a missing project", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		command := commandtest.NewCommandBuilder().WithProjectId("deleted-project").Build()
+		h.GivenCommands(command)
+
+		testServer := serving(t, h.UseCases)
+		defer testServer.Close()
+
+		// Act
+		resp, err := http.Post(testServer.URL+"/commands/"+command.Id+"/run", "application/json", nil)
+		assert.NoError(t, err)
+		defer resp.Body.Close()
+
+		// Assert
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	})
+
+	t.Run("POST /command-groups/{id}/run should report a missing project", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		command := commandtest.NewCommandBuilder().WithProjectId("deleted-project").Build()
+		h.GivenCommands(command)
+
+		group := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId("deleted-project").
+			WithCommands(command).
+			Build()
+		h.GivenCommandGroups(group)
+
+		testServer := serving(t, h.UseCases)
+		defer testServer.Close()
+
+		// Act
+		resp, err := http.Post(testServer.URL+"/command-groups/"+group.Id+"/run", "application/json", nil)
+		assert.NoError(t, err)
+		defer resp.Body.Close()
+
+		// Assert
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	})
+}
+
+func serving(t *testing.T, registry usecases.Registry) *httptest.Server {
+	t.Helper()
+
+	server := thirdpartyserver.NewThirdPartyIntegrationsServer(registry)
+	if err := server.RegisterHandlers(); err != nil {
+		t.Fatalf("failed to register the handlers: %v", err)
+	}
+
+	return httptest.NewServer(server.Server.Handler)
 }

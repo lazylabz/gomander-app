@@ -15,12 +15,20 @@ func (m *MockProjectRepository) GetAll() ([]projectdomain.Project, error) {
 	return args.Get(0).([]projectdomain.Project), args.Error(1)
 }
 
-func (m *MockProjectRepository) Get(id string) (*projectdomain.Project, error) {
+func (m *MockProjectRepository) Get(id string) (projectdomain.Project, error) {
 	args := m.Called(id)
 	if args.Get(0) == nil {
-		return nil, args.Error(1)
+		return projectdomain.Project{}, args.Error(1)
 	}
-	return args.Get(0).(*projectdomain.Project), args.Error(1)
+	return args.Get(0).(projectdomain.Project), args.Error(1)
+}
+
+func (m *MockProjectRepository) Find(id string) (projectdomain.Project, bool, error) {
+	args := m.Called(id)
+	if args.Get(0) == nil {
+		return projectdomain.Project{}, args.Bool(1), args.Error(2)
+	}
+	return args.Get(0).(projectdomain.Project), args.Bool(1), args.Error(2)
 }
 
 func (m *MockProjectRepository) Create(project projectdomain.Project) error {

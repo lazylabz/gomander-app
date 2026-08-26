@@ -67,7 +67,7 @@ func TestDefaultRunCommandGroup_Execute(t *testing.T) {
 			Name:             "Test Project",
 			WorkingDirectory: "/working/dir",
 		}
-		mockProjectRepository.On("Get", cmdGroup.ProjectId).Return(&project, nil)
+		mockProjectRepository.On("Get", cmdGroup.ProjectId).Return(project, nil)
 
 		mockRunner.On("RunCommands", cmdGroup.Commands, []string{"/1"}, project.WorkingDirectory).Return(nil)
 
@@ -234,7 +234,7 @@ func TestDefaultRunCommandGroup_Execute(t *testing.T) {
 			Name:             "Test Project",
 			WorkingDirectory: "/working/dir",
 		}
-		mockProjectRepository.On("Get", cmdGroup.ProjectId).Return(&project, nil)
+		mockProjectRepository.On("Get", cmdGroup.ProjectId).Return(project, nil)
 
 		mockRunner.On("RunCommands", cmdGroup.Commands, []string{"/1"}, project.WorkingDirectory).
 			Return(errors.New("failed to run commands"))

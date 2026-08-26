@@ -21,19 +21,19 @@ func TestDefaultGetCurrentProject_Execute(t *testing.T) {
 		mockConfigRepository := new(test2.MockConfigRepository)
 
 		projectId := "project1"
-		project := &projectdomain.Project{Id: projectId, Name: "Test", WorkingDirectory: "/tmp"}
+		project := projectdomain.Project{Id: projectId, Name: "Test", WorkingDirectory: "/tmp"}
 
 		sut := usecases.NewGetCurrentProject(mockConfigRepository, mockProjectRepository)
 
 		mockConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: projectId}, nil)
-		mockProjectRepository.On("Get", projectId).Return(project, nil)
+		mockProjectRepository.On("Find", projectId).Return(project, true, nil)
 
 		// Act
 		got, err := sut.Execute()
 
 		// Assert
 		assert.NoError(t, err)
-		assert.Equal(t, project, got)
+		assert.Equal(t, &project, got)
 		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockConfigRepository)
 	})
 
@@ -53,15 +53,34 @@ func TestDefaultGetCurrentProject_Execute(t *testing.T) {
 		mock.AssertExpectationsForObjects(t, mockConfigRepository)
 	})
 
-	t.Run("Should return an error if project does not exist", func(t *testing.T) {
+	t.Run("Should return nothing if no project is open", func(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)
 		mockConfigRepository := new(test2.MockConfigRepository)
 
 		sut := usecases.NewGetCurrentProject(mockConfigRepository, mockProjectRepository)
 
-		mockConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: "nonexistent"}, nil)
-		mockProjectRepository.On("Get", "nonexistent").Return(nil, errors.New("project not found"))
+		mockConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: ""}, nil)
+		mockProjectRepository.On("Find", "").Return(nil, false, nil)
+
+		// Act
+		got, err := sut.Execute()
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Nil(t, got)
+		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockConfigRepository)
+	})
+
+	t.Run("Should return an error if reading the project fails", func(t *testing.T) {
+		// Arrange
+		mockProjectRepository := new(test.MockProjectRepository)
+		mockConfigRepository := new(test2.MockConfigRepository)
+
+		sut := usecases.NewGetCurrentProject(mockConfigRepository, mockProjectRepository)
+
+		mockConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: "project1"}, nil)
+		mockProjectRepository.On("Find", "project1").Return(nil, false, errors.New("storage error"))
 
 		// Act
 		_, err := sut.Execute()

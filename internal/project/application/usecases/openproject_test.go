@@ -45,7 +45,7 @@ func TestDefaultOpenProject_Execute(t *testing.T) {
 		}
 		mockConfigRepository.On("GetOrCreate").Return(&mockConfig, nil)
 		mockConfigRepository.On("Update", &mockUpdatedConfig).Return(nil)
-		mockProjectRepository.On("Get", projectId2).Return(&projectdomain.Project{Id: projectId2}, nil).Once()
+		mockProjectRepository.On("Get", projectId2).Return(projectdomain.Project{Id: projectId2}, nil).Once()
 
 		// Act
 		err := sut.Execute(projectId2)
@@ -79,7 +79,7 @@ func TestDefaultOpenProject_Execute(t *testing.T) {
 		sut := usecases.NewOpenProject(mockConfigRepository, mockProjectRepository)
 
 		projectId := "project1"
-		mockProjectRepository.On("Get", projectId).Return(nil, nil)
+		mockProjectRepository.On("Get", projectId).Return(projectdomain.Project{Id: projectId}, nil)
 		mockConfigRepository.On("GetOrCreate").Return(nil, errors.New("config error"))
 
 		// Act
@@ -101,7 +101,7 @@ func TestDefaultOpenProject_Execute(t *testing.T) {
 		mockConfig := domain.Config{LastOpenedProjectId: projectId}
 		mockConfigRepository.On("GetOrCreate").Return(&mockConfig, nil)
 		mockConfigRepository.On("Update", mock.Anything).Return(errors.New("update error"))
-		mockProjectRepository.On("Get", projectId).Return(&projectdomain.Project{Id: projectId}, nil)
+		mockProjectRepository.On("Get", projectId).Return(projectdomain.Project{Id: projectId}, nil)
 
 		// Act
 		err := sut.Execute(projectId)
