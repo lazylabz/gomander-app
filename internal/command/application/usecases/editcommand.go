@@ -4,21 +4,17 @@ import (
 	"gomander/internal/command/domain"
 )
 
-type EditCommand interface {
-	Execute(command domain.Command) error
-}
-
-type DefaultEditCommand struct {
+type EditCommand struct {
 	commandRepository domain.Repository
 }
 
-func NewEditCommand(commandRepo domain.Repository) *DefaultEditCommand {
-	return &DefaultEditCommand{
+func NewEditCommand(commandRepo domain.Repository) *EditCommand {
+	return &EditCommand{
 		commandRepository: commandRepo,
 	}
 }
 
-func (uc *DefaultEditCommand) Execute(newCommand domain.Command) error {
+func (uc *EditCommand) Execute(newCommand domain.Command) error {
 	err := uc.commandRepository.Update(&newCommand)
 	if err != nil {
 		return err

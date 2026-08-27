@@ -8,23 +8,19 @@ import (
 	"gomander/internal/eventbus"
 )
 
-type RemoveCommand interface {
-	Execute(commandId string) error
-}
-
-type DefaultRemoveCommand struct {
+type RemoveCommand struct {
 	commandRepository domain.Repository
 	eventBus          eventbus.EventBus
 }
 
-func NewRemoveCommand(commandRepo domain.Repository, eventBus eventbus.EventBus) *DefaultRemoveCommand {
-	return &DefaultRemoveCommand{
+func NewRemoveCommand(commandRepo domain.Repository, eventBus eventbus.EventBus) *RemoveCommand {
+	return &RemoveCommand{
 		commandRepository: commandRepo,
 		eventBus:          eventBus,
 	}
 }
 
-func (uc *DefaultRemoveCommand) Execute(commandId string) error {
+func (uc *RemoveCommand) Execute(commandId string) error {
 	removedCommand, err := uc.commandRepository.Get(commandId)
 	if err != nil {
 		return err
@@ -53,7 +49,7 @@ func (uc *DefaultRemoveCommand) Execute(commandId string) error {
 	return publishErr
 }
 
-func (uc *DefaultRemoveCommand) closeTheGapLeftIn(projectId string) error {
+func (uc *RemoveCommand) closeTheGapLeftIn(projectId string) error {
 	remainingCommands, err := uc.commandRepository.GetAll(projectId)
 	if err != nil {
 		return err

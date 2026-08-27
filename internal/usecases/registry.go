@@ -28,20 +28,20 @@ type Registry struct {
 	GetProjectToImport   projectusecases.GetProjectToImport
 	// Command Groups
 	GetCommandGroups              commandgroupusecases.GetCommandGroups
-	CreateCommandGroup            commandgroupusecases.CreateCommandGroup
-	UpdateCommandGroup            commandgroupusecases.UpdateCommandGroup
-	DeleteCommandGroup            commandgroupusecases.DeleteCommandGroup
-	RemoveCommandFromCommandGroup commandgroupusecases.RemoveCommandFromCommandGroup
-	ReorderCommandGroups          commandgroupusecases.ReorderCommandGroups
+	CreateCommandGroup            *commandgroupusecases.CreateCommandGroup
+	UpdateCommandGroup            *commandgroupusecases.UpdateCommandGroup
+	DeleteCommandGroup            *commandgroupusecases.DeleteCommandGroup
+	RemoveCommandFromCommandGroup *commandgroupusecases.RemoveCommandFromCommandGroup
+	ReorderCommandGroups          *commandgroupusecases.ReorderCommandGroups
 	RunCommandGroup               commandgroupusecases.RunCommandGroup
 	StopCommandGroup              commandgroupusecases.StopCommandGroup
 	// Commands
 	GetCommands          commandusecases.GetCommands
-	AddCommand           commandusecases.AddCommand
-	DuplicateCommand     commandusecases.DuplicateCommand
-	RemoveCommand        commandusecases.RemoveCommand
-	EditCommand          commandusecases.EditCommand
-	ReorderCommands      commandusecases.ReorderCommands
+	AddCommand           *commandusecases.AddCommand
+	DuplicateCommand     *commandusecases.DuplicateCommand
+	RemoveCommand        *commandusecases.RemoveCommand
+	EditCommand          *commandusecases.EditCommand
+	ReorderCommands      *commandusecases.ReorderCommands
 	RunCommand           commandusecases.RunCommand
 	StopCommand          commandusecases.StopCommand
 	GetRunningCommandIds commandusecases.GetRunningCommandIds

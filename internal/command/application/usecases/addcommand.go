@@ -5,23 +5,19 @@ import (
 	"gomander/internal/openedproject"
 )
 
-type AddCommand interface {
-	Execute(command domain.Command) error
-}
-
-type DefaultAddCommand struct {
+type AddCommand struct {
 	openedProject     openedproject.OpenedProject
 	commandRepository domain.Repository
 }
 
-func NewAddCommand(openedProject openedproject.OpenedProject, commandRepo domain.Repository) *DefaultAddCommand {
-	return &DefaultAddCommand{
+func NewAddCommand(openedProject openedproject.OpenedProject, commandRepo domain.Repository) *AddCommand {
+	return &AddCommand{
 		openedProject:     openedProject,
 		commandRepository: commandRepo,
 	}
 }
 
-func (uc *DefaultAddCommand) Execute(newCommand domain.Command) error {
+func (uc *AddCommand) Execute(newCommand domain.Command) error {
 	project, err := uc.openedProject.Get()
 	if err != nil {
 		return err
