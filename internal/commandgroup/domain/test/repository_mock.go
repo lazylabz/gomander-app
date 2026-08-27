@@ -35,20 +35,16 @@ func (m *MockCommandGroupRepository) Delete(commandGroupId string) error {
 	return args.Error(0)
 }
 
-func (m *MockCommandGroupRepository) RemoveCommandFromCommandGroups(commandId string) error {
+func (m *MockCommandGroupRepository) GetAllContaining(commandId string) ([]commandgroupdomain.CommandGroup, error) {
 	args := m.Called(commandId)
-	return args.Error(0)
-}
-
-func (m *MockCommandGroupRepository) DeleteEmpty() ([]commandgroupdomain.CommandGroup, error) {
-	args := m.Called()
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]commandgroupdomain.CommandGroup), args.Error(1)
 }
 
-func (m *MockCommandGroupRepository) DeleteAll(projectId string) ([]string, error) {
-	args := m.Called(projectId)
-	return args.Get(0).([]string), args.Error(1)
+// Atomically runs change against this same mock: the transaction is the real
+// repository's business, and a test that stubs one is testing GORM.
+func (m *MockCommandGroupRepository) Atomically(change func(commandgroupdomain.Repository) error) error {
+	return change(m)
 }

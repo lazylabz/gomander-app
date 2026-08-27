@@ -2,19 +2,20 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 
-	commanddomain "gomander/internal/command/domain"
 	"gomander/internal/command/domain/test"
 	commandinfrastructure "gomander/internal/command/infrastructure"
 	"gomander/internal/commandgroup/domain"
 	test2 "gomander/internal/commandgroup/domain/test"
 	"gomander/internal/commandgroup/infrastructure"
 	"gomander/internal/domainerrors"
-	"gomander/internal/helpers/array"
 	"gomander/internal/testdb"
 )
 
@@ -117,10 +118,77 @@ func TestGormCommandGroupRepository_GetAll(t *testing.T) {
 		}
 
 		assert.Nil(t, err)
-		for i, group := range result {
-			assert.Equal(t, expectedCommandGroups[i], group)
-		}
+		assert.Equal(t, expectedCommandGroups, result)
 	})
+
+	t.Run("Should return a command group that has no commands", func(t *testing.T) {
+		// Arrange
+		projectId := "project1"
+
+		empty := test2.NewCommandGroupBuilder().WithName("Empty").WithProjectId(projectId).WithPosition(0).Build()
+
+		helper := newTestHelper(t, nil, []infrastructure.CommandGroupModel{infrastructure.ToCommandGroupModel(&empty)}, nil)
+
+		// Act
+		result, err := helper.repo.GetAll(projectId)
+
+		// Assert
+		assert.Nil(t, err)
+		assert.Equal(t, []domain.CommandGroup{empty}, result)
+	})
+
+	t.Run("Should read the command groups and their commands in a single query", func(t *testing.T) {
+		// Arrange
+		projectId := "project1"
+
+		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
+		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
+
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd2).Build()
+
+		helper := newTestHelper(
+			t,
+			[]commandinfrastructure.CommandModel{
+				commandinfrastructure.ToCommandModel(&cmd1),
+				commandinfrastructure.ToCommandModel(&cmd2),
+			},
+			[]infrastructure.CommandGroupModel{
+				infrastructure.ToCommandGroupModel(&cmdGroup1),
+				infrastructure.ToCommandGroupModel(&cmdGroup2),
+			},
+			[]infrastructure.CommandToCommandGroupModel{
+				{CommandGroupId: cmdGroup1.Id, CommandId: cmd1.Id, Position: 0},
+				{CommandGroupId: cmdGroup2.Id, CommandId: cmd2.Id, Position: 0},
+			},
+		)
+
+		recorder := &sqlRecorder{Interface: gormlogger.Discard}
+		repo := infrastructure.NewGormCommandGroupRepository(
+			helper.gormDb.Session(&gorm.Session{Logger: recorder}),
+			context.Background(),
+		)
+
+		// Act
+		result, err := repo.GetAll(projectId)
+
+		// Assert
+		assert.Nil(t, err)
+		assert.Equal(t, []domain.CommandGroup{cmdGroup1, cmdGroup2}, result)
+		assert.Len(t, recorder.statements, 1)
+	})
+}
+
+// sqlRecorder keeps every statement GORM executes, so a test can say how many a
+// read costs.
+type sqlRecorder struct {
+	gormlogger.Interface
+	statements []string
+}
+
+func (r *sqlRecorder) Trace(_ context.Context, _ time.Time, statement func() (string, int64), _ error) {
+	sql, _ := statement()
+	r.statements = append(r.statements, sql)
 }
 
 func TestGormCommandGroupRepository_Get(t *testing.T) {
@@ -370,131 +438,9 @@ func TestGormCommandGroupRepository_Delete(t *testing.T) {
 	})
 }
 
-func TestGormCommandGroupRepository_RemoveCommandFromCommandGroups(t *testing.T) {
-	t.Run("Should remove a command from all groups, leaving the rest in order", func(t *testing.T) {
-		projectId := "project1"
-		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
-		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
-		cmd3 := test.NewCommandBuilder().WithName("Command 3").WithProjectId(projectId).Build()
-
-		commandModels := []commandinfrastructure.CommandModel{
-			commandinfrastructure.ToCommandModel(&cmd1),
-			commandinfrastructure.ToCommandModel(&cmd2),
-			commandinfrastructure.ToCommandModel(&cmd3),
-		}
-
-		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1, cmd2, cmd3).Build()
-		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd2, cmd1).Build()
-
-		groupModel1 := infrastructure.ToCommandGroupModel(&cmdGroup1)
-		groupModel2 := infrastructure.ToCommandGroupModel(&cmdGroup2)
-
-		commandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{
-			// CommandGroup 1 associations
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd1.Id,
-				Position:       0,
-			},
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd2.Id,
-				Position:       1,
-			},
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd3.Id,
-				Position:       2,
-			},
-			// CommandGroup 2 associations
-			{
-				CommandGroupId: cmdGroup2.Id,
-				CommandId:      cmd2.Id,
-				Position:       0,
-			},
-			{
-				CommandGroupId: cmdGroup2.Id,
-				CommandId:      cmd1.Id,
-				Position:       1,
-			},
-		}
-
-		helper := newTestHelper(
-			t,
-			commandModels,
-			[]infrastructure.CommandGroupModel{groupModel1, groupModel2},
-			commandToCommandGroupModels,
-		)
-
-		err := helper.repo.RemoveCommandFromCommandGroups(cmd1.Id)
-		assert.Nil(t, err)
-
-		group1, _ := helper.repo.Get(cmdGroup1.Id)
-		group2, _ := helper.repo.Get(cmdGroup2.Id)
-
-		expectedGroup1Commands := []commanddomain.Command{cmd2, cmd3}
-		expectedGroup2Commands := []commanddomain.Command{cmd2}
-
-		assert.Equal(t, expectedGroup1Commands, group1.Commands)
-		assert.Equal(t, expectedGroup2Commands, group2.Commands)
-	})
-}
-
-func TestGormCommandGroupRepository_DeleteEmpty(t *testing.T) {
-	t.Run("Should delete only empty command groups", func(t *testing.T) {
-		projectId := "project1"
-		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
-		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
-
-		commandModels := []commandinfrastructure.CommandModel{
-			commandinfrastructure.ToCommandModel(&cmd1),
-			commandinfrastructure.ToCommandModel(&cmd2),
-		}
-
-		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1, cmd2).Build()
-		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands().Build()
-
-		groupModel1 := infrastructure.ToCommandGroupModel(&cmdGroup1)
-		groupModel2 := infrastructure.ToCommandGroupModel(&cmdGroup2)
-
-		commandToCommandGroupModels1 := []infrastructure.CommandToCommandGroupModel{
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd1.Id,
-				Position:       0,
-			},
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd2.Id,
-				Position:       1,
-			},
-		}
-
-		helper := newTestHelper(
-			t,
-			commandModels,
-			[]infrastructure.CommandGroupModel{groupModel1, groupModel2},
-			commandToCommandGroupModels1,
-		)
-
-		deleted, err := helper.repo.DeleteEmpty()
-		assert.Nil(t, err)
-		assert.Equal(t, []string{cmdGroup2.Id}, array.Map(deleted, func(group domain.CommandGroup) string {
-			return group.Id
-		}))
-		assert.Equal(t, []string{projectId}, array.Map(deleted, func(group domain.CommandGroup) string {
-			return group.ProjectId
-		}))
-
-		_, group1Err := helper.repo.Get(cmdGroup1.Id)
-		_, group2Err := helper.repo.Get(cmdGroup2.Id)
-		assert.NoError(t, group1Err)
-		assert.ErrorIs(t, group2Err, domainerrors.ErrNotFound)
-	})
-}
-
-func TestGormCommandGroupRepository_DeleteAll(t *testing.T) {
-	t.Run("Should delete all command groups and their associations for a project", func(t *testing.T) {
+func TestGormCommandGroupRepository_GetAllContaining(t *testing.T) {
+	t.Run("Should return every command group holding the command, with all of their commands", func(t *testing.T) {
+		// Arrange
 		projectId := "project1"
 		otherProjectId := "project2"
 
@@ -508,70 +454,125 @@ func TestGormCommandGroupRepository_DeleteAll(t *testing.T) {
 			commandinfrastructure.ToCommandModel(&cmd3),
 		}
 
-		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1, cmd2).Build()
-		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd2).Build()
-		cmdGroupOther := test2.NewCommandGroupBuilder().WithName("Other Group").WithProjectId(otherProjectId).WithPosition(0).WithCommands(cmd3).Build()
-
-		groupModel1 := infrastructure.ToCommandGroupModel(&cmdGroup1)
-		groupModel2 := infrastructure.ToCommandGroupModel(&cmdGroup2)
-		groupModelOther := infrastructure.ToCommandGroupModel(&cmdGroupOther)
+		holding := test2.NewCommandGroupBuilder().WithName("Holding").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1).Build()
+		notHolding := test2.NewCommandGroupBuilder().WithName("Not holding").WithProjectId(projectId).WithPosition(1).WithCommands(cmd2).Build()
+		holdingElsewhere := test2.NewCommandGroupBuilder().WithName("Holding elsewhere").WithProjectId(otherProjectId).WithPosition(0).WithCommands(cmd1, cmd3).Build()
 
 		commandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{
-			// CommandGroup 1 associations
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd1.Id,
-				Position:       0,
-			},
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd2.Id,
-				Position:       1,
-			},
-			// CommandGroup 2 associations
-			{
-				CommandGroupId: cmdGroup2.Id,
-				CommandId:      cmd2.Id,
-				Position:       0,
-			},
-			// Other CommandGroup associations
-			{
-				CommandGroupId: cmdGroupOther.Id,
-				CommandId:      cmd3.Id,
-				Position:       0,
-			},
+			{CommandGroupId: holding.Id, CommandId: cmd2.Id, Position: 0},
+			{CommandGroupId: holding.Id, CommandId: cmd1.Id, Position: 1},
+			{CommandGroupId: notHolding.Id, CommandId: cmd2.Id, Position: 0},
+			{CommandGroupId: holdingElsewhere.Id, CommandId: cmd1.Id, Position: 0},
+			{CommandGroupId: holdingElsewhere.Id, CommandId: cmd3.Id, Position: 1},
 		}
 
 		helper := newTestHelper(
 			t,
 			commandModels,
-			[]infrastructure.CommandGroupModel{groupModel1, groupModel2, groupModelOther},
+			[]infrastructure.CommandGroupModel{
+				infrastructure.ToCommandGroupModel(&holding),
+				infrastructure.ToCommandGroupModel(&notHolding),
+				infrastructure.ToCommandGroupModel(&holdingElsewhere),
+			},
 			commandToCommandGroupModels,
 		)
 
-		ids, err := helper.repo.DeleteAll(projectId)
+		// Act
+		result, err := helper.repo.GetAllContaining(cmd1.Id)
+
+		// Assert
 		assert.Nil(t, err)
-		assert.Equal(t, []string{cmdGroup1.Id, cmdGroup2.Id}, ids)
+		assert.ElementsMatch(t, []domain.CommandGroup{holding, holdingElsewhere}, result)
+	})
 
-		// Command groups from the specified project should be deleted
-		_, group1Err := helper.repo.Get(cmdGroup1.Id)
-		_, group2Err := helper.repo.Get(cmdGroup2.Id)
-		assert.ErrorIs(t, group1Err, domainerrors.ErrNotFound)
-		assert.ErrorIs(t, group2Err, domainerrors.ErrNotFound)
+	t.Run("Should return nothing when no command group holds the command", func(t *testing.T) {
+		// Arrange
+		helper := newTestHelper(t, nil, nil, nil)
 
-		// Other group from a different project should remain
-		_, otherErr := helper.repo.Get(cmdGroupOther.Id)
-		assert.NoError(t, otherErr)
+		// Act
+		result, err := helper.repo.GetAllContaining("unheld-command")
 
-		// All associations for the deleted groups should be removed
-		relations, err := gorm.G[infrastructure.CommandToCommandGroupModel](helper.gormDb).Where("command_group_id IN ?", []string{cmdGroup1.Id, cmdGroup2.Id}).Find(context.Background())
+		// Assert
 		assert.Nil(t, err)
-		assert.Len(t, relations, 0)
+		assert.Empty(t, result)
+	})
+}
 
-		// Associations for the other group should remain
-		relationsOther, err := gorm.G[infrastructure.CommandToCommandGroupModel](helper.gormDb).Where("command_group_id = ?", cmdGroupOther.Id).Find(context.Background())
+func TestGormCommandGroupRepository_Atomically(t *testing.T) {
+	t.Run("Should keep the writes made inside it", func(t *testing.T) {
+		// Arrange
+		projectId := "project1"
+		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
+
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd1).Build()
+
+		helper := newTestHelper(
+			t,
+			[]commandinfrastructure.CommandModel{commandinfrastructure.ToCommandModel(&cmd1)},
+			[]infrastructure.CommandGroupModel{
+				infrastructure.ToCommandGroupModel(&cmdGroup1),
+				infrastructure.ToCommandGroupModel(&cmdGroup2),
+			},
+			[]infrastructure.CommandToCommandGroupModel{
+				{CommandGroupId: cmdGroup1.Id, CommandId: cmd1.Id, Position: 0},
+				{CommandGroupId: cmdGroup2.Id, CommandId: cmd1.Id, Position: 0},
+			},
+		)
+
+		// Act
+		err := helper.repo.Atomically(func(repo domain.Repository) error {
+			if err := repo.Delete(cmdGroup1.Id); err != nil {
+				return err
+			}
+			return repo.Delete(cmdGroup2.Id)
+		})
+
+		// Assert
 		assert.Nil(t, err)
-		assert.NotEmpty(t, relationsOther)
+
+		remaining, err := helper.repo.GetAll(projectId)
+		assert.Nil(t, err)
+		assert.Empty(t, remaining)
+	})
+
+	t.Run("Should undo every write it made when one of them fails", func(t *testing.T) {
+		// Arrange
+		projectId := "project1"
+		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
+
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd1).Build()
+
+		helper := newTestHelper(
+			t,
+			[]commandinfrastructure.CommandModel{commandinfrastructure.ToCommandModel(&cmd1)},
+			[]infrastructure.CommandGroupModel{
+				infrastructure.ToCommandGroupModel(&cmdGroup1),
+				infrastructure.ToCommandGroupModel(&cmdGroup2),
+			},
+			[]infrastructure.CommandToCommandGroupModel{
+				{CommandGroupId: cmdGroup1.Id, CommandId: cmd1.Id, Position: 0},
+				{CommandGroupId: cmdGroup2.Id, CommandId: cmd1.Id, Position: 0},
+			},
+		)
+
+		expectedErr := errors.New("the second write failed")
+
+		// Act
+		err := helper.repo.Atomically(func(repo domain.Repository) error {
+			if err := repo.Delete(cmdGroup1.Id); err != nil {
+				return err
+			}
+			return expectedErr
+		})
+
+		// Assert
+		assert.ErrorIs(t, err, expectedErr)
+
+		remaining, err := helper.repo.GetAll(projectId)
+		assert.Nil(t, err)
+		assert.Equal(t, []domain.CommandGroup{cmdGroup1, cmdGroup2}, remaining)
 	})
 }
 

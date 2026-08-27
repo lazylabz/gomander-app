@@ -2,13 +2,12 @@ package infrastructure
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 
 	"gomander/internal/commandgroup/domain"
 	"gomander/internal/domainerrors"
-	"gomander/internal/helpers/array"
 )
 
 type GormCommandGroupRepository struct {
@@ -17,56 +16,70 @@ type GormCommandGroupRepository struct {
 }
 
 func NewGormCommandGroupRepository(db *gorm.DB, ctx context.Context) *GormCommandGroupRepository {
-	err := db.SetupJoinTable(&CommandGroupModel{}, "Commands", &CommandToCommandGroupModel{})
-	if err != nil {
-		panic(err)
-	}
 	return &GormCommandGroupRepository{
 		db:  db,
 		ctx: ctx,
 	}
 }
 
-func (r GormCommandGroupRepository) GetAll(projectId string) ([]domain.CommandGroup, error) {
-	var ids []string
-	err := r.db.Model(&CommandGroupModel{}).
-		Where("project_id = ?", projectId).
-		Order("position ASC").
-		Pluck("id", &ids).Error
+// commandGroupQuery reads Command Groups and their Commands in one go: a Group
+// with three Commands arrives as three rows, and a Group with none as a single
+// row whose command_id is null. Ordering by the join table's position is what a
+// preload cannot do, and is why this is written out rather than built by GORM.
+const commandGroupQuery = `
+SELECT
+	command_group.id,
+	command_group.project_id,
+	command_group.name,
+	command_group.position,
+	command.id AS command_id,
+	COALESCE(command.project_id, '') AS command_project_id,
+	COALESCE(command.name, '') AS command_name,
+	COALESCE(command.command, '') AS command_command,
+	COALESCE(command.working_directory, '') AS command_working_directory,
+	COALESCE(command.position, 0) AS command_position,
+	COALESCE(command.link, '') AS command_link,
+	COALESCE(command.error_patterns, '') AS command_error_patterns
+FROM command_group
+LEFT JOIN command_group_command ON command_group_command.command_group_id = command_group.id
+LEFT JOIN command ON command.id = command_group_command.command_id
+WHERE %s
+ORDER BY command_group.position ASC, command_group.id ASC, command_group_command.position ASC
+`
 
+func (r GormCommandGroupRepository) GetAll(projectId string) ([]domain.CommandGroup, error) {
+	return r.find("command_group.project_id = ?", projectId)
+}
+
+func (r GormCommandGroupRepository) GetAllContaining(commandId string) ([]domain.CommandGroup, error) {
+	return r.find(
+		"command_group.id IN (SELECT command_group_id FROM command_group_command WHERE command_id = ?)",
+		commandId,
+	)
+}
+
+func (r GormCommandGroupRepository) Get(id string) (domain.CommandGroup, error) {
+	commandGroups, err := r.find("command_group.id = ?", id)
+	if err != nil {
+		return domain.CommandGroup{}, err
+	}
+
+	if len(commandGroups) == 0 {
+		return domain.CommandGroup{}, domainerrors.NotFound("command group", id)
+	}
+
+	return commandGroups[0], nil
+}
+
+func (r GormCommandGroupRepository) find(condition string, args ...any) ([]domain.CommandGroup, error) {
+	var rows []commandGroupRow
+
+	err := r.db.WithContext(r.ctx).Raw(fmt.Sprintf(commandGroupQuery, condition), args...).Scan(&rows).Error
 	if err != nil {
 		return nil, err
 	}
 
-	commandGroups := make([]domain.CommandGroup, 0)
-	for _, id := range ids {
-		cg, err := r.Get(id)
-		if err != nil {
-			return nil, err
-		}
-		commandGroups = append(commandGroups, cg)
-	}
-	return commandGroups, nil
-}
-
-func (r GormCommandGroupRepository) Get(id string) (domain.CommandGroup, error) {
-	var cgModel CommandGroupModel
-	err := r.db.Where("id = ?", id).
-		Preload("Commands", func(db *gorm.DB) *gorm.DB {
-			return db.
-				Joins("JOIN command_group_command ON command_group_command.command_id = command.id AND command_group_command.command_group_id = ?", id).
-				Order("command_group_command.position")
-		}).
-		First(&cgModel).Error
-
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return domain.CommandGroup{}, domainerrors.NotFound("command group", id)
-		}
-		return domain.CommandGroup{}, err
-	}
-
-	return ToDomainCommandGroup(cgModel), nil
+	return ToDomainCommandGroups(rows), nil
 }
 
 func (r GormCommandGroupRepository) Create(commandGroup *domain.CommandGroup) error {
@@ -168,75 +181,8 @@ func (r GormCommandGroupRepository) Delete(commandGroupId string) error {
 	return nil
 }
 
-// RemoveCommandFromCommandGroups drops the Command from every Group holding it.
-// The gap it leaves between the surviving rows is nothing to close: these
-// positions only ever order the rows relative to each other, and Update rewrites
-// them from the Commands it is handed.
-func (r GormCommandGroupRepository) RemoveCommandFromCommandGroups(commandId string) error {
-	_, err := gorm.G[CommandToCommandGroupModel](r.db).
-		Where("command_id = ?", commandId).
-		Delete(r.ctx)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r GormCommandGroupRepository) DeleteEmpty() ([]domain.CommandGroup, error) {
-	query := "id NOT IN (SELECT DISTINCT command_group_id FROM command_group_command)"
-
-	entriesToDelete, err := gorm.G[CommandGroupModel](r.db).
-		Where(query).
-		Find(r.ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = gorm.G[CommandGroupModel](r.db).
-		Where(query).
-		Delete(r.ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return array.Map(entriesToDelete, func(entry CommandGroupModel) domain.CommandGroup {
-		return ToDomainCommandGroup(entry)
-	}), nil
-}
-
-func (r GormCommandGroupRepository) DeleteAll(projectId string) ([]string, error) {
-	var commandGroupIds []string
-
-	err := r.db.Transaction(func(tx *gorm.DB) error {
-		commandGroups, err := gorm.G[CommandGroupModel](tx).Where("project_id = ?", projectId).Find(r.ctx)
-		if err != nil {
-			return err
-		}
-
-		commandGroupIds = array.Map(commandGroups, func(commandGroup CommandGroupModel) string {
-			return commandGroup.Id
-		})
-
-		_, err = gorm.G[CommandGroupModel](tx).Where("project_id = ?", projectId).Delete(r.ctx)
-		if err != nil {
-			return err
-		}
-
-		_, err = gorm.G[CommandToCommandGroupModel](tx).Where("command_group_id IN ?", commandGroupIds).Delete(r.ctx)
-		if err != nil {
-			return err
-		}
-
-		return nil
+func (r GormCommandGroupRepository) Atomically(change func(domain.Repository) error) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		return change(NewGormCommandGroupRepository(tx, r.ctx))
 	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return commandGroupIds, nil
 }
