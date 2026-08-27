@@ -8,7 +8,8 @@ import (
 	"gomander/internal/apptest"
 	commandtest "gomander/internal/command/domain/test"
 	commandgrouptest "gomander/internal/commandgroup/domain/test"
-	"gomander/internal/domainerrors"
+	"gomander/internal/execution"
+	"gomander/internal/openedproject"
 	projecttest "gomander/internal/project/domain/test"
 )
 
@@ -34,9 +35,11 @@ func TestRunningACommand(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 		assert.Equal(t, []apptest.StartedProcess{{
-			Command:              command,
-			EnvironmentPaths:     []string{"/usr/local/bin", "/opt/bin"},
-			BaseWorkingDirectory: project.WorkingDirectory,
+			Command: command,
+			Environment: execution.Environment{
+				Paths:                []string{"/usr/local/bin", "/opt/bin"},
+				BaseWorkingDirectory: project.WorkingDirectory,
+			},
 		}}, h.StartedProcesses())
 		assert.Equal(t, []string{command.Id}, h.UseCases.GetRunningCommandIds.Execute())
 	})
@@ -62,7 +65,7 @@ func TestRunningACommand(t *testing.T) {
 		assert.Len(t, h.StartedProcesses(), 1)
 	})
 
-	t.Run("Should report the command's project as missing instead of dying", func(t *testing.T) {
+	t.Run("Should refuse to run while no project is open, instead of dying", func(t *testing.T) {
 		// Arrange
 		h := apptest.New(t)
 
@@ -73,7 +76,7 @@ func TestRunningACommand(t *testing.T) {
 		err := h.UseCases.RunCommand.Execute(command.Id)
 
 		// Assert
-		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
+		assert.ErrorIs(t, err, openedproject.ErrNoneOpen)
 		assert.Empty(t, h.StartedProcesses())
 	})
 }
@@ -147,14 +150,18 @@ func TestRunningACommandGroup(t *testing.T) {
 
 		// Assert
 		assert.NoError(t, err)
+		environment := execution.Environment{
+			Paths:                []string{"/usr/local/bin"},
+			BaseWorkingDirectory: project.WorkingDirectory,
+		}
 		assert.Equal(t, []apptest.StartedProcess{
-			{Command: first, EnvironmentPaths: []string{"/usr/local/bin"}, BaseWorkingDirectory: project.WorkingDirectory},
-			{Command: second, EnvironmentPaths: []string{"/usr/local/bin"}, BaseWorkingDirectory: project.WorkingDirectory},
-			{Command: third, EnvironmentPaths: []string{"/usr/local/bin"}, BaseWorkingDirectory: project.WorkingDirectory},
+			{Command: first, Environment: environment},
+			{Command: second, Environment: environment},
+			{Command: third, Environment: environment},
 		}, h.StartedProcesses())
 	})
 
-	t.Run("Should report the group's project as missing instead of dying", func(t *testing.T) {
+	t.Run("Should refuse to run while no project is open, instead of dying", func(t *testing.T) {
 		// Arrange
 		h := apptest.New(t)
 
@@ -171,7 +178,7 @@ func TestRunningACommandGroup(t *testing.T) {
 		err := h.UseCases.RunCommandGroup.Execute(group.Id)
 
 		// Assert
-		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
+		assert.ErrorIs(t, err, openedproject.ErrNoneOpen)
 		assert.Empty(t, h.StartedProcesses())
 	})
 }
@@ -204,5 +211,41 @@ func TestStoppingACommandGroup(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, []string{first.Id, second.Id}, h.StoppedProcessIds())
 		assert.Empty(t, h.UseCases.GetRunningCommandIds.Execute())
+	})
+}
+
+func TestRunningACommandEitherWay(t *testing.T) {
+	t.Run("Should run it in the same environment alone as it does inside a command group", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		project := projecttest.NewProjectBuilder().WithWorkingDirectory("/work").Build()
+		h.GivenProjects(project)
+		h.GivenOpenedProject(project.Id)
+		h.GivenEnvironmentPaths("/usr/local/bin", "/opt/bin")
+
+		alone := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(0).Build()
+		grouped := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(1).Build()
+		h.GivenCommands(alone, grouped)
+
+		group := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId(project.Id).
+			WithCommands(grouped).
+			Build()
+		h.GivenCommandGroups(group)
+
+		// Act
+		assert.NoError(t, h.UseCases.RunCommand.Execute(alone.Id))
+		assert.NoError(t, h.UseCases.RunCommandGroup.Execute(group.Id))
+
+		// Assert
+		environment := execution.Environment{
+			Paths:                []string{"/usr/local/bin", "/opt/bin"},
+			BaseWorkingDirectory: project.WorkingDirectory,
+		}
+		started := h.StartedProcesses()
+		assert.Len(t, started, 2)
+		assert.Equal(t, environment, started[0].Environment)
+		assert.Equal(t, environment, started[1].Environment)
 	})
 }

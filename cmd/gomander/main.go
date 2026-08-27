@@ -238,7 +238,7 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context) (*internalapp.App, usecases
 	deleteCommandGroup := commandgroupusecases.NewDeleteCommandGroup(commandGroupRepo, ee)
 	removeCommandFromCommandGroup := commandgroupusecases.NewRemoveCommandFromCommandGroup(commandGroupRepo)
 	reorderCommandGroups := commandgroupusecases.NewReorderCommandGroups(openedProject, commandGroupRepo)
-	runCommandGroup := commandgroupusecases.NewRunCommandGroup(configRepo, commandRepo, commandGroupRepo, projectRepo, r)
+	runCommandGroup := commandgroupusecases.NewRunCommandGroup(openedProject, commandGroupRepo, r)
 	stopCommandGroup := commandgroupusecases.NewStopCommandGroup(commandGroupRepo, r)
 	// Commands
 	getCommands := commandusecases.NewGetCommands(openedProject, commandRepo)
@@ -247,7 +247,7 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context) (*internalapp.App, usecases
 	removeCommand := commandusecases.NewRemoveCommand(commandRepo, eventBus)
 	editCommand := commandusecases.NewEditCommand(commandRepo)
 	reorderCommands := commandusecases.NewReorderCommands(openedProject, commandRepo)
-	runCommand := commandusecases.NewRunCommand(configRepo, commandRepo, projectRepo, r)
+	runCommand := commandusecases.NewRunCommand(openedProject, commandRepo, r)
 	stopCommand := commandusecases.NewStopCommand(commandRepo, r)
 	getRunningCommandIds := commandusecases.NewGetRunningCommandIds(r)
 

@@ -10,6 +10,7 @@ import (
 
 	"gomander/internal/command/domain"
 	"gomander/internal/event"
+	"gomander/internal/execution"
 	"gomander/internal/helpers/path"
 	"gomander/internal/logger"
 )
@@ -37,8 +38,8 @@ type DefaultRunner struct {
 }
 
 type Runner interface {
-	RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string) error
-	RunCommands(commands []domain.Command, environmentPaths []string, baseWorkingDirectory string) error
+	RunCommand(command *domain.Command, environment execution.Environment) error
+	RunCommands(commands []domain.Command, environment execution.Environment) error
 	StopRunningCommand(id string) error
 	StopAllRunningCommands() []error
 	StopRunningCommands(commands []domain.Command) error
@@ -53,9 +54,9 @@ func NewDefaultRunner(logger logger.Logger, emitter event.EventEmitter) *Default
 	}
 }
 
-func (c *DefaultRunner) RunCommands(commands []domain.Command, environmentPaths []string, baseWorkingDirectory string) error {
+func (c *DefaultRunner) RunCommands(commands []domain.Command, environment execution.Environment) error {
 	for _, command := range commands {
-		err := c.RunCommand(&command, environmentPaths, baseWorkingDirectory)
+		err := c.RunCommand(&command, environment)
 		if err != nil {
 			return err
 		}
@@ -75,7 +76,7 @@ func (c *DefaultRunner) StopRunningCommands(commands []domain.Command) error {
 }
 
 // RunCommand executes a command and streams its output.
-func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string) error {
+func (c *DefaultRunner) RunCommand(command *domain.Command, environment execution.Environment) error {
 	c.mutex.Lock()
 
 	if _, exists := c.runningCommands[command.Id]; exists {
@@ -89,11 +90,11 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 
 	// Enable color output and set terminal type
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
-	cmd.Dir = path.GetComputedPath(baseWorkingDirectory, command.WorkingDirectory)
+	cmd.Dir = path.GetComputedPath(environment.BaseWorkingDirectory, command.WorkingDirectory)
 
 	// Set project attributes based on OS
 	SetProcAttributes(cmd)
-	SetProcEnv(cmd, environmentPaths)
+	SetProcEnv(cmd, environment.Paths)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {

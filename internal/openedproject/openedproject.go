@@ -8,6 +8,8 @@ import (
 	"errors"
 
 	configdomain "gomander/internal/config/domain"
+	"gomander/internal/execution"
+	"gomander/internal/helpers/array"
 	projectdomain "gomander/internal/project/domain"
 )
 
@@ -21,6 +23,9 @@ type OpenedProject interface {
 	// open is a legitimate outcome.
 	Get() (projectdomain.Project, error)
 	Find() (project projectdomain.Project, open bool, err error)
+	// ExecutionEnvironment is resolved here so that neither the Runner nor
+	// the operations that reach it assemble one of their own.
+	ExecutionEnvironment() (execution.Environment, error)
 	Open(projectId string) error
 	Close() error
 }
@@ -38,15 +43,12 @@ func NewOpenedProject(configRepo configdomain.Repository, projectRepo projectdom
 }
 
 func (op *DefaultOpenedProject) Get() (projectdomain.Project, error) {
-	project, open, err := op.Find()
+	config, err := op.configRepository.GetOrCreate()
 	if err != nil {
 		return projectdomain.Project{}, err
 	}
-	if !open {
-		return projectdomain.Project{}, ErrNoneOpen
-	}
 
-	return project, nil
+	return op.openedIn(config)
 }
 
 func (op *DefaultOpenedProject) Find() (projectdomain.Project, bool, error) {
@@ -56,6 +58,37 @@ func (op *DefaultOpenedProject) Find() (projectdomain.Project, bool, error) {
 	}
 
 	return op.projectRepository.Find(config.LastOpenedProjectId)
+}
+
+func (op *DefaultOpenedProject) ExecutionEnvironment() (execution.Environment, error) {
+	config, err := op.configRepository.GetOrCreate()
+	if err != nil {
+		return execution.Environment{}, err
+	}
+
+	project, err := op.openedIn(config)
+	if err != nil {
+		return execution.Environment{}, err
+	}
+
+	return execution.Environment{
+		Paths: array.Map(config.EnvironmentPaths, func(ep configdomain.EnvironmentPath) string {
+			return ep.Path
+		}),
+		BaseWorkingDirectory: project.WorkingDirectory,
+	}, nil
+}
+
+func (op *DefaultOpenedProject) openedIn(config *configdomain.Config) (projectdomain.Project, error) {
+	project, open, err := op.projectRepository.Find(config.LastOpenedProjectId)
+	if err != nil {
+		return projectdomain.Project{}, err
+	}
+	if !open {
+		return projectdomain.Project{}, ErrNoneOpen
+	}
+
+	return project, nil
 }
 
 func (op *DefaultOpenedProject) Open(projectId string) error {

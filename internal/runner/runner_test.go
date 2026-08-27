@@ -9,6 +9,7 @@ import (
 	commanddomain "gomander/internal/command/domain"
 	"gomander/internal/event"
 	test2 "gomander/internal/event/test"
+	"gomander/internal/execution"
 	"gomander/internal/logger/test"
 	"gomander/internal/runner"
 
@@ -56,7 +57,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 			Command:          "echo 'a'&& echo 'b'&& echo 'c'",
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
-		}, []string{"/test"}, "/test")
+		}, execution.Environment{Paths: []string{"/test"}, BaseWorkingDirectory: "/test"})
 		r.WaitForCommand(commandId)
 
 		// Assert
@@ -89,7 +90,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 			Command:          "definitely-not-a-real-command-12345",
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
-		}, []string{}, "")
+		}, execution.Environment{})
 		r.WaitForCommand(commandId)
 
 		// Assert
@@ -128,7 +129,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 			Command:          infiniteCmd(),
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
-		}, []string{}, "")
+		}, execution.Environment{})
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
@@ -171,7 +172,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
 		}
-		err := r.RunCommand(&command, []string{}, "")
+		err := r.RunCommand(&command, execution.Environment{})
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
@@ -179,7 +180,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		}, 1*time.Second, 20*time.Millisecond)
 
 		// Try to run the same command again
-		err = r.RunCommand(&command, []string{}, "")
+		err = r.RunCommand(&command, execution.Environment{})
 
 		// Assert
 		assert.NoError(t, err)
@@ -223,7 +224,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 			Command:          infiniteCmd(),
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
-		}, []string{}, "")
+		}, execution.Environment{})
 		assert.NoError(t, err)
 
 		err = r.RunCommand(&commanddomain.Command{
@@ -233,7 +234,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 			Command:          infiniteCmd(),
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
-		}, []string{}, "")
+		}, execution.Environment{})
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
@@ -300,7 +301,7 @@ func TestDefaultRunner_RunCommands(t *testing.T) {
 		}
 
 		// Act
-		err := r.RunCommands(commands, []string{"/test"}, "/test")
+		err := r.RunCommands(commands, execution.Environment{Paths: []string{"/test"}, BaseWorkingDirectory: "/test"})
 
 		// Wait for both commands to complete
 		r.WaitForCommand(cmd1Id)
@@ -357,7 +358,7 @@ func TestDefaultRunner_RunCommands(t *testing.T) {
 		}
 
 		// Act
-		err := r.RunCommands(commands, []string{}, "")
+		err := r.RunCommands(commands, execution.Environment{})
 
 		// Wait for the first command to complete
 		r.WaitForCommand(cmd1Id)
@@ -412,10 +413,10 @@ func TestDefaultRunner_StopRunningCommands(t *testing.T) {
 			Position:         1,
 		}
 
-		err := r.RunCommand(&cmd1, []string{}, "")
+		err := r.RunCommand(&cmd1, execution.Environment{})
 		assert.NoError(t, err)
 
-		err = r.RunCommand(&cmd2, []string{}, "")
+		err = r.RunCommand(&cmd2, execution.Environment{})
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
@@ -518,8 +519,8 @@ func TestDefaultRunner_GetRunningCommandIds(t *testing.T) {
 		}
 
 		// Start the commands
-		_ = sut.RunCommand(command1, []string{}, validWorkingDirectory())
-		_ = sut.RunCommand(command2, []string{}, validWorkingDirectory())
+		_ = sut.RunCommand(command1, execution.Environment{BaseWorkingDirectory: validWorkingDirectory()})
+		_ = sut.RunCommand(command2, execution.Environment{BaseWorkingDirectory: validWorkingDirectory()})
 
 		// Give them a moment to start
 		time.Sleep(10 * time.Millisecond)
@@ -586,7 +587,7 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 				"ERROR:",
 				"FATAL:",
 			},
-		}, []string{}, "")
+		}, execution.Environment{})
 
 		r.WaitForCommand(commandId)
 
