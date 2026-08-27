@@ -27,5 +27,13 @@ func (uc *DefaultGetCurrentProject) Execute() (*domain.Project, error) {
 		return nil, err
 	}
 
-	return uc.projectRepository.Get(userConfig.LastOpenedProjectId)
+	project, found, err := uc.projectRepository.Find(userConfig.LastOpenedProjectId)
+	if err != nil {
+		return nil, err
+	}
+	if !found {
+		return nil, nil
+	}
+
+	return &project, nil
 }

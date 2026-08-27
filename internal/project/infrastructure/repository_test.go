@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 
+	"gomander/internal/domainerrors"
 	"gomander/internal/project/domain"
 	"gomander/internal/testdb"
 )
@@ -66,20 +67,47 @@ func TestGormProjectRepository_Get(t *testing.T) {
 
 		// Assert
 		assert.NoError(t, err)
-		assert.NotNil(t, project)
-		assert.Equal(t, "p1", project.Id)
-		assert.Equal(t, project, &expectedProject)
+		assert.Equal(t, expectedProject, project)
 	})
-	t.Run("Should return nil when project does not exist", func(t *testing.T) {
+	t.Run("Should report a project that does not exist as not found", func(t *testing.T) {
 		// Arrange
 		h := newTestHelper(t, nil)
 
 		// Act
-		project, err := h.repo.Get("nonexistent")
+		_, err := h.repo.Get("nonexistent")
+
+		// Assert
+		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
+	})
+}
+
+func TestGormProjectRepository_Find(t *testing.T) {
+	t.Run("Should return the project when it exists", func(t *testing.T) {
+		// Arrange
+		preloadedProjects := []*ProjectModel{
+			{Id: "p1", Name: "Project 1", WorkingDirectory: "/tmp/1"},
+		}
+		expectedProject := domain.Project{Id: "p1", Name: "Project 1", WorkingDirectory: "/tmp/1"}
+		h := newTestHelper(t, preloadedProjects)
+
+		// Act
+		project, found, err := h.repo.Find("p1")
 
 		// Assert
 		assert.NoError(t, err)
-		assert.Nil(t, project)
+		assert.True(t, found)
+		assert.Equal(t, expectedProject, project)
+	})
+	t.Run("Should report absence without an error when the project does not exist", func(t *testing.T) {
+		// Arrange
+		h := newTestHelper(t, nil)
+
+		// Act
+		_, found, err := h.repo.Find("nonexistent")
+
+		// Assert
+		assert.NoError(t, err)
+		assert.False(t, found)
 	})
 }
 
@@ -98,7 +126,6 @@ func TestGormProjectRepository_Create(t *testing.T) {
 		// Verify the project was created
 		project, err := h.repo.Get("p3")
 		assert.NoError(t, err)
-		assert.NotNil(t, project)
 		assert.Equal(t, "p3", project.Id)
 	})
 }
@@ -121,7 +148,6 @@ func TestGormProjectRepository_Update(t *testing.T) {
 		// Verify the project was updated
 		project, err := h.repo.Get("p1")
 		assert.NoError(t, err)
-		assert.NotNil(t, project)
 		assert.Equal(t, "New Name", project.Name)
 		assert.Equal(t, "/tmp/new", project.WorkingDirectory)
 	})
@@ -142,9 +168,9 @@ func TestGormProjectRepository_Delete(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Verify the project was deleted
-		project, err := h.repo.Get("p1")
+		_, found, err := h.repo.Find("p1")
 		assert.NoError(t, err)
-		assert.Nil(t, project)
+		assert.False(t, found)
 	})
 }
 

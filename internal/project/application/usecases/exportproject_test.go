@@ -54,7 +54,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 			mockFsFacade,
 		)
 
-		mockProjectRepository.On("Get", projectId).Return(&project, nil)
+		mockProjectRepository.On("Get", projectId).Return(project, nil)
 		mockCommandRepository.On("GetAll", projectId).Return([]domain.Command{cmd1, cmd2, cmd3}, nil)
 		mockCommandGroupRepository.On("GetAll", projectId).Return([]commandgroupdomain.CommandGroup{cmdGroup1, cmdGroup2}, nil)
 
@@ -116,7 +116,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 			mockFsFacade,
 		)
 
-		mockProjectRepository.On("Get", "test-project-id").Return(&projectdomain.Project{Id: "test-project-id", Name: "Test Project"}, nil)
+		mockProjectRepository.On("Get", "test-project-id").Return(projectdomain.Project{Id: "test-project-id", Name: "Test Project"}, nil)
 		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("", assert.AnError)
 
 		// Act
@@ -146,7 +146,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 			mockFsFacade,
 		)
 
-		mockProjectRepository.On("Get", "test-project-id").Return(&projectdomain.Project{Id: "test-project-id", Name: "Test Project"}, nil)
+		mockProjectRepository.On("Get", "test-project-id").Return(projectdomain.Project{Id: "test-project-id", Name: "Test Project"}, nil)
 		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("", nil)
 
 		// Act
@@ -174,7 +174,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 			mockFsFacade,
 		)
 
-		mockProjectRepository.On("Get", "test-project-id").Return(nil, assert.AnError)
+		mockProjectRepository.On("Get", "test-project-id").Return(projectdomain.Project{}, assert.AnError)
 
 		// Act
 		_, err := sut.Execute("test-project-id")
@@ -202,7 +202,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 			mockFsFacade,
 		)
 
-		mockProjectRepository.On("Get", "test-project-id").Return(&projectdomain.Project{Id: "test-project-id", Name: "Test Project"}, nil)
+		mockProjectRepository.On("Get", "test-project-id").Return(projectdomain.Project{Id: "test-project-id", Name: "Test Project"}, nil)
 		mockCommandRepository.On("GetAll", "test-project-id").Return(make([]domain.Command, 0), assert.AnError)
 		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("/somedir/file.json", nil)
 
@@ -232,7 +232,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 			mockFsFacade,
 		)
 
-		mockProjectRepository.On("Get", "test-project-id").Return(&projectdomain.Project{Id: "test-project-id", Name: "Test Project"}, nil)
+		mockProjectRepository.On("Get", "test-project-id").Return(projectdomain.Project{Id: "test-project-id", Name: "Test Project"}, nil)
 		mockCommandRepository.On("GetAll", "test-project-id").Return([]domain.Command{}, nil)
 		mockCommandGroupRepository.On("GetAll", "test-project-id").Return([]commandgroupdomain.CommandGroup{}, assert.AnError)
 		mockRuntimeFacade.On("SaveFileDialog", mock.Anything, mock.Anything).Return("/somedir/file.json", nil)
@@ -277,7 +277,7 @@ func TestDefaultExportProject_Execute(t *testing.T) {
 			mockFsFacade,
 		)
 
-		mockProjectRepository.On("Get", projectId).Return(&project, nil)
+		mockProjectRepository.On("Get", projectId).Return(project, nil)
 		mockCommandRepository.On("GetAll", projectId).Return([]domain.Command{cmd1, cmd2, cmd3}, nil)
 		mockCommandGroupRepository.On("GetAll", projectId).Return([]commandgroupdomain.CommandGroup{cmdGroup1, cmdGroup2}, nil)
 

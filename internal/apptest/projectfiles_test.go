@@ -8,6 +8,7 @@ import (
 	"gomander/internal/apptest"
 	commandtest "gomander/internal/command/domain/test"
 	commandgrouptest "gomander/internal/commandgroup/domain/test"
+	"gomander/internal/domainerrors"
 	"gomander/internal/helpers/array"
 	projectusecases "gomander/internal/project/application/usecases"
 	projecttest "gomander/internal/project/domain/test"
@@ -82,6 +83,21 @@ func TestExportingAProject(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 		assert.Empty(t, path)
+	})
+
+	t.Run("Should report a project that no longer exists as missing", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		h.GivenExportDestination("/home/user/gomander.json")
+
+		// Act
+		_, err := h.UseCases.ExportProject.Execute("deleted-project")
+
+		// Assert
+		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
+		_, written := h.ExportedFile("/home/user/gomander.json")
+		assert.False(t, written)
 	})
 }
 
