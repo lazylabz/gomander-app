@@ -13,6 +13,7 @@ import (
 	"gomander/internal/commandgroup/domain"
 	test2 "gomander/internal/commandgroup/domain/test"
 	"gomander/internal/commandgroup/infrastructure"
+	"gomander/internal/domainerrors"
 	"gomander/internal/helpers/array"
 	"gomander/internal/testdb"
 )
@@ -189,18 +190,17 @@ func TestGormCommandGroupRepository_Get(t *testing.T) {
 		// Assert
 		assert.Nil(t, err)
 
-		assert.Equal(t, &cmdGroup1, result)
+		assert.Equal(t, cmdGroup1, result)
 	})
-	t.Run("Should return nil if command group does not exist", func(t *testing.T) {
+	t.Run("Should report a command group that does not exist as not found", func(t *testing.T) {
 		// Arrange
 		helper := newTestHelper(t, nil, nil, nil)
 
 		// Act
-		result, err := helper.repo.Get("non-existent-id")
+		_, err := helper.repo.Get("non-existent-id")
 
 		// Assert
-		assert.Nil(t, err)
-		assert.Nil(t, result)
+		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
 	})
 }
 
@@ -235,7 +235,7 @@ func TestGormCommandGroupRepository_Create(t *testing.T) {
 		// Verify the group was created correctly
 		result, err := helper.repo.Get(cmdGroup1.Id)
 		assert.Nil(t, err)
-		assert.Equal(t, &cmdGroup1, result)
+		assert.Equal(t, cmdGroup1, result)
 	})
 }
 
@@ -290,7 +290,7 @@ func TestGormCommandGroupRepository_Update(t *testing.T) {
 
 		result, err := helper.repo.Get(updatedGroup.Id)
 		assert.Nil(t, err)
-		assert.Equal(t, &updatedGroup, result)
+		assert.Equal(t, updatedGroup, result)
 	})
 }
 
@@ -326,9 +326,8 @@ func TestGormCommandGroupRepository_Delete(t *testing.T) {
 		err := helper.repo.Delete(cmdGroup1.Id)
 		assert.Nil(t, err)
 
-		result, err := helper.repo.Get(cmdGroup1.Id)
-		assert.Nil(t, err)
-		assert.Nil(t, result)
+		_, err = helper.repo.Get(cmdGroup1.Id)
+		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
 
 		existingRelations, err := gorm.G[infrastructure.CommandToCommandGroupModel](helper.gormDb).Where("command_group_id = ?", cmdGroup1.Id).Find(context.Background())
 		assert.Nil(t, err)
@@ -487,10 +486,10 @@ func TestGormCommandGroupRepository_DeleteEmpty(t *testing.T) {
 			return group.ProjectId
 		}))
 
-		group1, _ := helper.repo.Get(cmdGroup1.Id)
-		group2, _ := helper.repo.Get(cmdGroup2.Id)
-		assert.NotNil(t, group1)
-		assert.Nil(t, group2)
+		_, group1Err := helper.repo.Get(cmdGroup1.Id)
+		_, group2Err := helper.repo.Get(cmdGroup2.Id)
+		assert.NoError(t, group1Err)
+		assert.ErrorIs(t, group2Err, domainerrors.ErrNotFound)
 	})
 }
 
@@ -555,14 +554,14 @@ func TestGormCommandGroupRepository_DeleteAll(t *testing.T) {
 		assert.Equal(t, []string{cmdGroup1.Id, cmdGroup2.Id}, ids)
 
 		// Command groups from the specified project should be deleted
-		result1, _ := helper.repo.Get(cmdGroup1.Id)
-		result2, _ := helper.repo.Get(cmdGroup2.Id)
-		assert.Nil(t, result1)
-		assert.Nil(t, result2)
+		_, group1Err := helper.repo.Get(cmdGroup1.Id)
+		_, group2Err := helper.repo.Get(cmdGroup2.Id)
+		assert.ErrorIs(t, group1Err, domainerrors.ErrNotFound)
+		assert.ErrorIs(t, group2Err, domainerrors.ErrNotFound)
 
 		// Other group from a different project should remain
-		resultOther, _ := helper.repo.Get(cmdGroupOther.Id)
-		assert.NotNil(t, resultOther)
+		_, otherErr := helper.repo.Get(cmdGroupOther.Id)
+		assert.NoError(t, otherErr)
 
 		// All associations for the deleted groups should be removed
 		relations, err := gorm.G[infrastructure.CommandToCommandGroupModel](helper.gormDb).Where("command_group_id IN ?", []string{cmdGroup1.Id, cmdGroup2.Id}).Find(context.Background())

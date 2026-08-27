@@ -6,8 +6,8 @@ import (
 	"gomander/internal/helpers/array"
 )
 
-func ToDomainCommandGroup(commandGroupModel CommandGroupModel) *domain.CommandGroup {
-	return &domain.CommandGroup{
+func ToDomainCommandGroup(commandGroupModel CommandGroupModel) domain.CommandGroup {
+	return domain.CommandGroup{
 		Id:        commandGroupModel.Id,
 		Name:      commandGroupModel.Name,
 		ProjectId: commandGroupModel.ProjectId,

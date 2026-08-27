@@ -1,7 +1,5 @@
 package eventbus
 
-import "errors"
-
 type Event interface {
 	GetName() string
 }
@@ -35,6 +33,9 @@ func (e *InMemoryEventBus) RegisterHandler(handler EventHandler) {
 // listed under summary, or nil when there were none. Every operation that
 // publishes an event has to report what its handlers did to the user, and this
 // is the one place that decides how that reads.
+//
+// The handler errors stay in the chain: a caller reads the summary, but has to
+// be able to tell a missing entity from a storage failure with errors.Is.
 func Combined(summary string, errs []error) error {
 	if len(errs) == 0 {
 		return nil
@@ -46,7 +47,9 @@ func Combined(summary string, errs []error) error {
 		message += "\n- " + err.Error()
 	}
 
-	return errors.New(message)
+	// Copied and returned by pointer: errors.New answered a comparable pointer,
+	// and a value holding a slice would panic on an == between two of these.
+	return &combinedError{message: message, errs: append([]error(nil), errs...)}
 }
 
 func (e *InMemoryEventBus) PublishSync(event Event) []error {
@@ -67,6 +70,15 @@ func (e *InMemoryEventBus) PublishSync(event Event) []error {
 	}
 	return errs
 }
+
+type combinedError struct {
+	message string
+	errs    []error
+}
+
+func (e *combinedError) Error() string { return e.message }
+
+func (e *combinedError) Unwrap() []error { return e.errs }
 
 // Not used for now
 //

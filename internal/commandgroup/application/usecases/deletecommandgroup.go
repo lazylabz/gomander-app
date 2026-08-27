@@ -36,11 +36,7 @@ func (uc *DeleteCommandGroup) Execute(commandGroupId string) error {
 	// CleanCommandGroupsOnCommandDeleted already reports its own deletions.
 	uc.eventEmitter.EmitEvent(event.CommandGroupDeleted, commandGroupId)
 
-	if deletedCommandGroup != nil {
-		return uc.closeTheGapLeftIn(deletedCommandGroup.ProjectId)
-	}
-
-	return nil
+	return uc.closeTheGapLeftIn(deletedCommandGroup.ProjectId)
 }
 
 func (uc *DeleteCommandGroup) closeTheGapLeftIn(projectId string) error {
