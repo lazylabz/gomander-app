@@ -25,13 +25,13 @@ var ExpectedTerminationLogs = []string{
 	"wait: no child processes",
 }
 
-type RunningCommand struct {
+type runningCommand struct {
 	cmd *exec.Cmd
 	wg  *sync.WaitGroup
 }
 
 type DefaultRunner struct {
-	runningCommands map[string]RunningCommand
+	runningCommands map[string]runningCommand
 	eventEmitter    event.EventEmitter
 	logger          logger.Logger
 	mutex           sync.Mutex
@@ -39,40 +39,17 @@ type DefaultRunner struct {
 
 type Runner interface {
 	RunCommand(command *domain.Command, environment execution.Environment) error
-	RunCommands(commands []domain.Command, environment execution.Environment) error
 	StopRunningCommand(id string) error
 	StopAllRunningCommands() []error
-	StopRunningCommands(commands []domain.Command) error
 	GetRunningCommandIds() []string
 }
 
 func NewDefaultRunner(logger logger.Logger, emitter event.EventEmitter) *DefaultRunner {
 	return &DefaultRunner{
-		runningCommands: make(map[string]RunningCommand),
+		runningCommands: make(map[string]runningCommand),
 		eventEmitter:    emitter,
 		logger:          logger,
 	}
-}
-
-func (c *DefaultRunner) RunCommands(commands []domain.Command, environment execution.Environment) error {
-	for _, command := range commands {
-		err := c.RunCommand(&command, environment)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (c *DefaultRunner) StopRunningCommands(commands []domain.Command) error {
-	for _, command := range commands {
-		err := c.StopRunningCommand(command.Id)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // RunCommand executes a command and streams its output.
@@ -111,7 +88,7 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 	}
 
 	var wg sync.WaitGroup
-	runningCommand := RunningCommand{
+	running := runningCommand{
 		cmd: cmd,
 		wg:  &wg,
 	}
@@ -126,7 +103,7 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 	c.eventEmitter.EmitEvent(event.ProcessStarted, command.Id)
 
 	// Save the command in the runningCommands map
-	c.runningCommands[command.Id] = runningCommand
+	c.runningCommands[command.Id] = running
 	c.mutex.Unlock()
 
 	// Add to WaitGroup before starting goroutines to avoid race conditions
@@ -190,14 +167,14 @@ func (c *DefaultRunner) sendStartingLine(command *domain.Command) {
 
 func (c *DefaultRunner) StopRunningCommand(id string) error {
 	c.mutex.Lock()
-	runningCommand, exists := c.runningCommands[id]
+	running, exists := c.runningCommands[id]
 	c.mutex.Unlock()
 
 	if !exists {
 		return nil
 	}
 
-	return StopProcessGracefully(runningCommand.cmd)
+	return StopProcessGracefully(running.cmd)
 }
 
 func (c *DefaultRunner) StopAllRunningCommands() []error {
@@ -266,22 +243,6 @@ func (c *DefaultRunner) checkLineForErrors(command *domain.Command, line string)
 			c.eventEmitter.EmitEvent(event.CommandErrorDetected, command.Id)
 			break
 		}
-	}
-}
-
-func (c *DefaultRunner) GetRunningCommands() map[string]RunningCommand {
-	return c.runningCommands
-}
-
-func (c *DefaultRunner) WaitForCommand(commandId string) {
-	c.mutex.Lock()
-	runningCommand, exists := c.runningCommands[commandId]
-	c.mutex.Unlock()
-
-	if exists {
-		runningCommand.wg.Wait()
-	} else {
-		return
 	}
 }
 

@@ -39,6 +39,8 @@ type processRunnerFake struct {
 	startedProcesses  []StartedProcess
 	stoppedProcessIds []string
 	runningIds        []string
+	startFailures     map[string]error
+	stopFailures      map[string]error
 }
 
 func (r *processRunnerFake) RunCommand(command *commanddomain.Command, environment execution.Environment) error {
@@ -49,21 +51,15 @@ func (r *processRunnerFake) RunCommand(command *commanddomain.Command, environme
 		return nil
 	}
 
+	if err := r.startFailures[command.Id]; err != nil {
+		return err
+	}
+
 	r.startedProcesses = append(r.startedProcesses, StartedProcess{
 		Command:     *command,
 		Environment: environment,
 	})
 	r.runningIds = append(r.runningIds, command.Id)
-
-	return nil
-}
-
-func (r *processRunnerFake) RunCommands(commands []commanddomain.Command, environment execution.Environment) error {
-	for i := range commands {
-		if err := r.RunCommand(&commands[i], environment); err != nil {
-			return err
-		}
-	}
 
 	return nil
 }
@@ -76,18 +72,12 @@ func (r *processRunnerFake) StopRunningCommand(id string) error {
 		return nil
 	}
 
+	if err := r.stopFailures[id]; err != nil {
+		return err
+	}
+
 	r.stoppedProcessIds = append(r.stoppedProcessIds, id)
 	r.runningIds = slices.DeleteFunc(r.runningIds, func(runningId string) bool { return runningId == id })
-
-	return nil
-}
-
-func (r *processRunnerFake) StopRunningCommands(commands []commanddomain.Command) error {
-	for _, command := range commands {
-		if err := r.StopRunningCommand(command.Id); err != nil {
-			return err
-		}
-	}
 
 	return nil
 }
@@ -112,6 +102,20 @@ func (r *processRunnerFake) GetRunningCommandIds() []string {
 	defer r.mutex.Unlock()
 
 	return append([]string(nil), r.runningIds...)
+}
+
+func (r *processRunnerFake) failStart(commandId string, err error) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	r.startFailures[commandId] = err
+}
+
+func (r *processRunnerFake) failStop(commandId string, err error) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	r.stopFailures[commandId] = err
 }
 
 func (r *processRunnerFake) isRunning(id string) bool {

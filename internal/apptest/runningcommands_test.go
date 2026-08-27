@@ -1,6 +1,7 @@
 package apptest_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -181,6 +182,36 @@ func TestRunningACommandGroup(t *testing.T) {
 		assert.ErrorIs(t, err, openedproject.ErrNoneOpen)
 		assert.Empty(t, h.StartedProcesses())
 	})
+
+	t.Run("Should stop at the first command that will not start, leaving the earlier ones running", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		project := projecttest.NewProjectBuilder().Build()
+		h.GivenProjects(project)
+		h.GivenOpenedProject(project.Id)
+
+		first := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(0).Build()
+		second := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(1).Build()
+		third := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(2).Build()
+		h.GivenCommands(first, second, third)
+
+		group := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId(project.Id).
+			WithCommands(first, second, third).
+			Build()
+		h.GivenCommandGroups(group)
+
+		failure := errors.New("no such working directory")
+		h.GivenProcessThatCannotStart(second.Id, failure)
+
+		// Act
+		err := h.UseCases.RunCommandGroup.Execute(group.Id)
+
+		// Assert
+		assert.ErrorIs(t, err, failure)
+		assert.Equal(t, []string{first.Id}, h.UseCases.GetRunningCommandIds.Execute())
+	})
 }
 
 func TestStoppingACommandGroup(t *testing.T) {
@@ -211,6 +242,38 @@ func TestStoppingACommandGroup(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, []string{first.Id, second.Id}, h.StoppedProcessIds())
 		assert.Empty(t, h.UseCases.GetRunningCommandIds.Execute())
+	})
+
+	t.Run("Should stop at the first command that will not stop", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		project := projecttest.NewProjectBuilder().Build()
+		h.GivenProjects(project)
+		h.GivenOpenedProject(project.Id)
+
+		first := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(0).Build()
+		second := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(1).Build()
+		h.GivenCommands(first, second)
+
+		group := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId(project.Id).
+			WithCommands(first, second).
+			Build()
+		h.GivenCommandGroups(group)
+
+		assert.NoError(t, h.UseCases.RunCommandGroup.Execute(group.Id))
+
+		failure := errors.New("no such process")
+		h.GivenProcessThatCannotStop(first.Id, failure)
+
+		// Act
+		err := h.UseCases.StopCommandGroup.Execute(group.Id)
+
+		// Assert
+		assert.ErrorIs(t, err, failure)
+		assert.Empty(t, h.StoppedProcessIds())
+		assert.Equal(t, []string{first.Id, second.Id}, h.UseCases.GetRunningCommandIds.Execute())
 	})
 }
 

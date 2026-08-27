@@ -11,16 +11,6 @@ type MockRunner struct {
 	mock.Mock
 }
 
-func (m *MockRunner) StopRunningCommands(commands []commanddomain.Command) error {
-	args := m.Called(commands)
-	return args.Error(0)
-}
-
-func (m *MockRunner) RunCommands(commands []commanddomain.Command, environment execution.Environment) error {
-	args := m.Called(commands, environment)
-	return args.Error(0)
-}
-
 func (m *MockRunner) RunCommand(command *commanddomain.Command, environment execution.Environment) error {
 	args := m.Called(command, environment)
 	return args.Error(0)

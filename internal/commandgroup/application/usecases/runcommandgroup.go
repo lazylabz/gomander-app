@@ -39,5 +39,11 @@ func (uc *DefaultRunCommandGroup) Execute(commandGroupId string) error {
 		return err
 	}
 
-	return uc.commandRunner.RunCommands(cmdGroup.Commands, environment)
+	for _, command := range cmdGroup.Commands {
+		if err := uc.commandRunner.RunCommand(&command, environment); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
