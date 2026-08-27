@@ -644,11 +644,11 @@ func TestThirdPartyIntegrationsServer_StartAndStop(t *testing.T) {
 }
 
 // Driven against the real backend rather than mocked use cases: what these
-// prove is that an operation a missing project used to crash now answers.
+// prove is that an operation a missing entity used to crash now answers.
 //
-// A missing command or command group still crashes these same endpoints -
-// their repositories report an absent row as (nil, nil) the way this one used
-// to, which is what #254 and #255 fix.
+// A missing command group still crashes these same endpoints - its repository
+// reports an absent row as (nil, nil) the way the other two used to, which is
+// what #255 fixes.
 func TestThirdPartyIntegrationsServer_AgainstTheRealBackend(t *testing.T) {
 	t.Run("POST /commands/{id}/run should report a missing project", func(t *testing.T) {
 		// Arrange
@@ -667,6 +667,23 @@ func TestThirdPartyIntegrationsServer_AgainstTheRealBackend(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	})
+
+	t.Run("POST /commands/{id}/stop should report a command that is not there", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		testServer := serving(t, h.UseCases)
+		defer testServer.Close()
+
+		// Act
+		resp, err := http.Post(testServer.URL+"/commands/deleted-command/stop", "application/json", nil)
+		assert.NoError(t, err)
+		defer resp.Body.Close()
+
+		// Assert
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		assert.Empty(t, h.StoppedProcessIds())
 	})
 
 	t.Run("POST /command-groups/{id}/run should report a missing project", func(t *testing.T) {

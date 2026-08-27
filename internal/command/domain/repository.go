@@ -1,7 +1,9 @@
 package domain
 
 type Repository interface {
-	Get(commandId string) (*Command, error)
+	// Get reports a missing Command as domainerrors.ErrNotFound, so a nil error
+	// guarantees a usable Command.
+	Get(commandId string) (Command, error)
 	GetAll(projectId string) ([]Command, error)
 	Create(command *Command) error
 	Update(command *Command) error

@@ -39,11 +39,8 @@ func (uc *RemoveCommand) Execute(commandId string) error {
 		uc.eventBus.PublishSync(domainevent.NewCommandDeletedEvent(commandId)),
 	)
 
-	if removedCommand != nil {
-		err = uc.closeTheGapLeftIn(removedCommand.ProjectId)
-		if err != nil {
-			return errors.Join(publishErr, err)
-		}
+	if err = uc.closeTheGapLeftIn(removedCommand.ProjectId); err != nil {
+		return errors.Join(publishErr, err)
 	}
 
 	return publishErr

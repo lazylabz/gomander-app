@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	commanddomain "gomander/internal/command/domain"
 	commanddomainevent "gomander/internal/command/domain/event"
 	"gomander/internal/command/domain/test"
 	"gomander/internal/commandgroup/application/handlers"
@@ -62,7 +63,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 		expectedUpdatedGroup.Commands = append(expectedUpdatedGroup.Commands, duplicatedCommand)
 
 		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(&existingGroup, nil)
-		mockCommandRepo.On("Get", event.CommandId).Return(&duplicatedCommand, nil)
+		mockCommandRepo.On("Get", event.CommandId).Return(duplicatedCommand, nil)
 		mockCommandGroupRepo.On("Update", &expectedUpdatedGroup).Return(nil)
 
 		// Act
@@ -148,7 +149,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(&existingGroup, nil)
 
 		expectedError := errors.New("command not found")
-		mockCommandRepo.On("Get", event.CommandId).Return(nil, expectedError)
+		mockCommandRepo.On("Get", event.CommandId).Return(commanddomain.Command{}, expectedError)
 
 		// Act
 		err := handler.Execute(event)
@@ -178,7 +179,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 		expectedError := errors.New("update error")
 
 		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(&existingGroup, nil)
-		mockCommandRepo.On("Get", event.CommandId).Return(&duplicatedCommand, nil)
+		mockCommandRepo.On("Get", event.CommandId).Return(duplicatedCommand, nil)
 		mockCommandGroupRepo.On("Update", &expectedUpdatedGroup).Return(expectedError)
 
 		// Act

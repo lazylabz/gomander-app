@@ -10,6 +10,7 @@ import (
 	"gomander/internal/command/domain/test"
 
 	"gomander/internal/command/domain"
+	"gomander/internal/domainerrors"
 	"gomander/internal/testdb"
 )
 
@@ -49,19 +50,18 @@ func TestGormCommandRepository_Get(t *testing.T) {
 
 		// Assert
 		assert.NoError(t, err)
-		assert.Equal(t, &expectedCommand, got)
+		assert.Equal(t, expectedCommand, got)
 	})
-	t.Run("Should return nil when it doesn't exists", func(t *testing.T) {
+	t.Run("Should report a command that does not exist as not found", func(t *testing.T) {
 		// Arrange
 		var preloadedCommandModels []*CommandModel
 		h := newTestHelper(t, preloadedCommandModels)
 
 		// Act
-		cmd, err := h.repo.Get("nonexistent")
+		_, err := h.repo.Get("nonexistent")
 
 		// Assert
-		assert.NoError(t, err)
-		assert.Nil(t, cmd)
+		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
 	})
 }
 
@@ -128,7 +128,7 @@ func TestGormCommandRepository_Save(t *testing.T) {
 		// Verify the command was saved
 		actual, err := h.repo.Get("cmd3")
 		assert.NoError(t, err)
-		assert.Equal(t, &cmd, actual)
+		assert.Equal(t, cmd, actual)
 	})
 }
 
@@ -165,7 +165,7 @@ func TestGormCommandRepository_Edit(t *testing.T) {
 		// Verify the command was updated
 		actual, err := h.repo.Get(existingCommandBuilder.Build().Id)
 		assert.NoError(t, err)
-		assert.Equal(t, &editedCommand, actual)
+		assert.Equal(t, editedCommand, actual)
 	})
 }
 
@@ -189,9 +189,8 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Verify the command was deleted
-		deletedCommand, err := h.repo.Get(cmd.Id)
-		assert.NoError(t, err)
-		assert.Nil(t, deletedCommand)
+		_, err = h.repo.Get(cmd.Id)
+		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
 	})
 	t.Run("Should leave the positions of the remaining commands untouched", func(t *testing.T) {
 		// Arrange
@@ -268,14 +267,15 @@ func TestGormCommandRepository_DeleteAll(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Verify project commands were deleted
-		cmd1After, _ := h.repo.Get(cmd1.Id)
-		cmd2After, _ := h.repo.Get(cmd2.Id)
-		assert.Nil(t, cmd1After)
-		assert.Nil(t, cmd2After)
+		_, cmd1Err := h.repo.Get(cmd1.Id)
+		_, cmd2Err := h.repo.Get(cmd2.Id)
+		assert.ErrorIs(t, cmd1Err, domainerrors.ErrNotFound)
+		assert.ErrorIs(t, cmd2Err, domainerrors.ErrNotFound)
 
 		// Verify other project command remains
-		cmdOtherAfter, _ := h.repo.Get(cmdOther.Id)
-		assert.NotNil(t, cmdOtherAfter)
+		cmdOtherAfter, err := h.repo.Get(cmdOther.Id)
+		assert.NoError(t, err)
+		assert.Equal(t, cmdOther, cmdOtherAfter)
 	})
 }
 
