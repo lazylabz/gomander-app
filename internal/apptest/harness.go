@@ -28,6 +28,7 @@ import (
 	"gomander/internal/event"
 	"gomander/internal/eventbus"
 	"gomander/internal/logger"
+	"gomander/internal/openedproject"
 	projectusecases "gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
 	projectinfrastructure "gomander/internal/project/infrastructure"
@@ -49,6 +50,7 @@ type Harness struct {
 	commandGroupRepository commandgroupdomain.Repository
 	projectRepository      projectdomain.Repository
 	configRepository       configdomain.Repository
+	openedProject          openedproject.OpenedProject
 
 	app           *internalapp.App
 	processRunner *processRunnerFake
@@ -82,6 +84,8 @@ func New(t *testing.T) *Harness {
 
 	eventBus := eventbus.NewInMemoryEventBus()
 
+	openedProject := openedproject.NewOpenedProject(configRepo, projectRepo)
+
 	app := internalapp.NewApp(l, processRunner, configRepo, eventBus, internalapp.EventHandlers{
 		CleanCommandGroupsOnCommandDeleted:   commandgrouphandlers.NewCleanCommandGroupsOnCommandDeleted(commandGroupRepo, ee),
 		CleanCommandGroupsOnProjectDeleted:   commandgrouphandlers.NewCleanCommandGroupsOnProjectDeleted(commandGroupRepo, ee),
@@ -97,32 +101,32 @@ func New(t *testing.T) *Harness {
 			GetUserConfig:  configusecases.NewGetUserConfig(configRepo),
 			SaveUserConfig: configusecases.NewSaveUserConfig(configRepo),
 
-			GetCurrentProject:    projectusecases.NewGetCurrentProject(configRepo, projectRepo),
+			GetCurrentProject:    projectusecases.NewGetCurrentProject(openedProject),
 			GetAvailableProjects: projectusecases.NewGetAvailableProjects(projectRepo),
-			OpenProject:          projectusecases.NewOpenProject(configRepo, projectRepo),
+			OpenProject:          projectusecases.NewOpenProject(openedProject),
 			CreateProject:        projectusecases.NewCreateProject(projectRepo),
 			EditProject:          projectusecases.NewEditProject(projectRepo),
-			CloseProject:         projectusecases.NewCloseProject(configRepo),
+			CloseProject:         projectusecases.NewCloseProject(openedProject),
 			DeleteProject:        projectusecases.NewDeleteProject(projectRepo, eventBus, l),
 			ExportProject:        projectusecases.NewExportProject(ctx, projectRepo, commandRepo, commandGroupRepo, runtimeFacade, fsFacade),
 			ImportProject:        projectusecases.NewImportProject(projectRepo, commandRepo, commandGroupRepo),
 			GetProjectToImport:   projectusecases.NewGetProjectToImport(ctx, runtimeFacade, fsFacade),
 
-			GetCommandGroups:              commandgroupusecases.NewGetCommandGroups(configRepo, commandGroupRepo),
-			CreateCommandGroup:            commandgroupusecases.NewCreateCommandGroup(configRepo, commandGroupRepo),
+			GetCommandGroups:              commandgroupusecases.NewGetCommandGroups(openedProject, commandGroupRepo),
+			CreateCommandGroup:            commandgroupusecases.NewCreateCommandGroup(openedProject, commandGroupRepo),
 			UpdateCommandGroup:            commandgroupusecases.NewUpdateCommandGroup(commandGroupRepo),
 			DeleteCommandGroup:            commandgroupusecases.NewDeleteCommandGroup(commandGroupRepo, ee),
 			RemoveCommandFromCommandGroup: commandgroupusecases.NewRemoveCommandFromCommandGroup(commandGroupRepo),
-			ReorderCommandGroups:          commandgroupusecases.NewReorderCommandGroups(configRepo, commandGroupRepo),
+			ReorderCommandGroups:          commandgroupusecases.NewReorderCommandGroups(openedProject, commandGroupRepo),
 			RunCommandGroup:               commandgroupusecases.NewRunCommandGroup(configRepo, commandRepo, commandGroupRepo, projectRepo, processRunner),
 			StopCommandGroup:              commandgroupusecases.NewStopCommandGroup(commandGroupRepo, processRunner),
 
-			GetCommands:          commandusecases.NewGetCommands(configRepo, commandRepo),
-			AddCommand:           commandusecases.NewAddCommand(configRepo, commandRepo),
-			DuplicateCommand:     commandusecases.NewDuplicateCommand(configRepo, commandRepo, eventBus),
+			GetCommands:          commandusecases.NewGetCommands(openedProject, commandRepo),
+			AddCommand:           commandusecases.NewAddCommand(openedProject, commandRepo),
+			DuplicateCommand:     commandusecases.NewDuplicateCommand(openedProject, commandRepo, eventBus),
 			RemoveCommand:        commandusecases.NewRemoveCommand(commandRepo, eventBus),
 			EditCommand:          commandusecases.NewEditCommand(commandRepo),
-			ReorderCommands:      commandusecases.NewReorderCommands(configRepo, commandRepo),
+			ReorderCommands:      commandusecases.NewReorderCommands(openedProject, commandRepo),
 			RunCommand:           commandusecases.NewRunCommand(configRepo, commandRepo, projectRepo, processRunner),
 			StopCommand:          commandusecases.NewStopCommand(commandRepo, processRunner),
 			GetRunningCommandIds: commandusecases.NewGetRunningCommandIds(processRunner),
@@ -131,6 +135,7 @@ func New(t *testing.T) *Harness {
 		commandGroupRepository: commandGroupRepo,
 		projectRepository:      projectRepo,
 		configRepository:       configRepo,
+		openedProject:          openedProject,
 		app:                    app,
 		processRunner:          processRunner,
 		runtime:                runtimeFacade,
@@ -151,10 +156,7 @@ func (h *Harness) GivenProjects(projects ...projectdomain.Project) {
 func (h *Harness) GivenOpenedProject(projectId string) {
 	h.t.Helper()
 
-	config := h.currentConfig()
-	config.LastOpenedProjectId = projectId
-
-	if err := h.configRepository.Update(config); err != nil {
+	if err := h.openedProject.Open(projectId); err != nil {
 		h.t.Fatalf("failed to arrange the opened project: %v", err)
 	}
 }

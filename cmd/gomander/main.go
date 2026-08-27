@@ -25,6 +25,7 @@ import (
 	"gomander/internal/facade"
 	localizationusecases "gomander/internal/localization/application/usecases"
 	"gomander/internal/logger"
+	"gomander/internal/openedproject"
 	projectusecases "gomander/internal/project/application/usecases"
 	projectinfrastructure "gomander/internal/project/infrastructure"
 	"gomander/internal/releases"
@@ -208,6 +209,9 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context) (*internalapp.App, usecases
 	// Initialize event bus
 	eventBus := eventbus.NewInMemoryEventBus()
 
+	// Initialize the opened project
+	openedProject := openedproject.NewOpenedProject(configRepo, projectRepo)
+
 	// Initialize use cases
 
 	// Configuration
@@ -217,32 +221,32 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context) (*internalapp.App, usecases
 	getTranslation := localizationusecases.NewGetTranslation(localeFs)
 	getSupportedLanguages := localizationusecases.NewGetSupportedLanguages(localeFs)
 	// Projects
-	getCurrentProject := projectusecases.NewGetCurrentProject(configRepo, projectRepo)
+	getCurrentProject := projectusecases.NewGetCurrentProject(openedProject)
 	getAvailableProjects := projectusecases.NewGetAvailableProjects(projectRepo)
-	openProject := projectusecases.NewOpenProject(configRepo, projectRepo)
+	openProject := projectusecases.NewOpenProject(openedProject)
 	createProject := projectusecases.NewCreateProject(projectRepo)
 	editProject := projectusecases.NewEditProject(projectRepo)
-	closeProject := projectusecases.NewCloseProject(configRepo)
+	closeProject := projectusecases.NewCloseProject(openedProject)
 	deleteProject := projectusecases.NewDeleteProject(projectRepo, eventBus, l)
 	exportProject := projectusecases.NewExportProject(ctx, projectRepo, commandRepo, commandGroupRepo, facade.DefaultRuntimeFacade{}, facade.DefaultFsFacade{})
 	importProject := projectusecases.NewImportProject(projectRepo, commandRepo, commandGroupRepo)
 	getProjectToImport := projectusecases.NewGetProjectToImport(ctx, facade.DefaultRuntimeFacade{}, facade.DefaultFsFacade{})
 	// Command Groups
-	getCommandGroups := commandgroupusecases.NewGetCommandGroups(configRepo, commandGroupRepo)
-	createCommandGroup := commandgroupusecases.NewCreateCommandGroup(configRepo, commandGroupRepo)
+	getCommandGroups := commandgroupusecases.NewGetCommandGroups(openedProject, commandGroupRepo)
+	createCommandGroup := commandgroupusecases.NewCreateCommandGroup(openedProject, commandGroupRepo)
 	updateCommandGroup := commandgroupusecases.NewUpdateCommandGroup(commandGroupRepo)
 	deleteCommandGroup := commandgroupusecases.NewDeleteCommandGroup(commandGroupRepo, ee)
 	removeCommandFromCommandGroup := commandgroupusecases.NewRemoveCommandFromCommandGroup(commandGroupRepo)
-	reorderCommandGroups := commandgroupusecases.NewReorderCommandGroups(configRepo, commandGroupRepo)
+	reorderCommandGroups := commandgroupusecases.NewReorderCommandGroups(openedProject, commandGroupRepo)
 	runCommandGroup := commandgroupusecases.NewRunCommandGroup(configRepo, commandRepo, commandGroupRepo, projectRepo, r)
 	stopCommandGroup := commandgroupusecases.NewStopCommandGroup(commandGroupRepo, r)
 	// Commands
-	getCommands := commandusecases.NewGetCommands(configRepo, commandRepo)
-	addCommand := commandusecases.NewAddCommand(configRepo, commandRepo)
-	duplicateCommand := commandusecases.NewDuplicateCommand(configRepo, commandRepo, eventBus)
+	getCommands := commandusecases.NewGetCommands(openedProject, commandRepo)
+	addCommand := commandusecases.NewAddCommand(openedProject, commandRepo)
+	duplicateCommand := commandusecases.NewDuplicateCommand(openedProject, commandRepo, eventBus)
 	removeCommand := commandusecases.NewRemoveCommand(commandRepo, eventBus)
 	editCommand := commandusecases.NewEditCommand(commandRepo)
-	reorderCommands := commandusecases.NewReorderCommands(configRepo, commandRepo)
+	reorderCommands := commandusecases.NewReorderCommands(openedProject, commandRepo)
 	runCommand := commandusecases.NewRunCommand(configRepo, commandRepo, projectRepo, r)
 	stopCommand := commandusecases.NewStopCommand(commandRepo, r)
 	getRunningCommandIds := commandusecases.NewGetRunningCommandIds(r)
