@@ -25,9 +25,21 @@ func NewRemoveCommand(commandRepo domain.Repository, eventBus eventbus.EventBus)
 }
 
 func (uc *DefaultRemoveCommand) Execute(commandId string) error {
-	err := uc.commandRepository.Delete(commandId)
+	removedCommand, err := uc.commandRepository.Get(commandId)
 	if err != nil {
 		return err
+	}
+
+	err = uc.commandRepository.Delete(commandId)
+	if err != nil {
+		return err
+	}
+
+	if removedCommand != nil {
+		err = uc.closeTheGapLeftIn(removedCommand.ProjectId)
+		if err != nil {
+			return err
+		}
 	}
 
 	domainEvent := domainevent.NewCommandDeletedEvent(commandId)
@@ -47,4 +59,13 @@ func (uc *DefaultRemoveCommand) Execute(commandId string) error {
 	}
 
 	return nil
+}
+
+func (uc *DefaultRemoveCommand) closeTheGapLeftIn(projectId string) error {
+	remainingCommands, err := uc.commandRepository.GetAll(projectId)
+	if err != nil {
+		return err
+	}
+
+	return domain.Order.CloseGaps(remainingCommands, uc.commandRepository.Update)
 }

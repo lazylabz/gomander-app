@@ -43,14 +43,14 @@ func (uc *DefaultImportProject) Execute(projectJSON projectdomain.ProjectExportJ
 	commandIdsToNewRandomIds := make(map[string]string)
 	newIdsToCommand := make(map[string]domain.Command)
 
-	for i, cmd := range projectJSON.Commands {
+	for _, cmd := range projectJSON.Commands {
 		newCommand := domain.Command{
 			Id:               uuid.New().String(),
 			Name:             cmd.Name,
 			Command:          cmd.Command,
 			WorkingDirectory: cmd.WorkingDirectory,
 			ProjectId:        project.Id,
-			Position:         i,
+			Position:         domain.Order.End(commands),
 		}
 
 		commands = append(commands, newCommand)
@@ -58,12 +58,12 @@ func (uc *DefaultImportProject) Execute(projectJSON projectdomain.ProjectExportJ
 		newIdsToCommand[newCommand.Id] = newCommand
 	}
 
-	for i, group := range projectJSON.CommandGroups {
+	for _, group := range projectJSON.CommandGroups {
 		newGroup := commandgroupdomain.CommandGroup{
 			Id:        uuid.New().String(),
 			Name:      group.Name,
 			ProjectId: project.Id,
-			Position:  i,
+			Position:  commandgroupdomain.Order.End(commandGroups),
 		}
 
 		for _, cmdId := range group.CommandIds {

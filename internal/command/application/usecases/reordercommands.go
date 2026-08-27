@@ -1,10 +1,7 @@
 package usecases
 
 import (
-	"sort"
-
 	"gomander/internal/command/domain"
-	"gomander/internal/helpers/array"
 	"gomander/internal/openedproject"
 )
 
@@ -35,19 +32,5 @@ func (uc *DefaultReorderCommands) Execute(orderedIds []string) error {
 		return err
 	}
 
-	// Sort the existing commands based on the new order
-	sort.Slice(existingCommands, func(i, j int) bool {
-		return array.IndexOf(orderedIds, existingCommands[i].Id) < array.IndexOf(orderedIds, existingCommands[j].Id)
-	})
-
-	// Update the position of each command based on the new order
-	for i := range existingCommands {
-		existingCommands[i].Position = i
-		err := uc.commandRepository.Update(&existingCommands[i])
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return domain.Order.Rearrange(existingCommands, orderedIds, uc.commandRepository.Update)
 }

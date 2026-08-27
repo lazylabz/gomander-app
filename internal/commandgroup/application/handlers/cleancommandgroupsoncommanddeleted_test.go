@@ -9,6 +9,7 @@ import (
 
 	commanddomainevent "gomander/internal/command/domain/event"
 	"gomander/internal/commandgroup/application/handlers"
+	commandgroupdomain "gomander/internal/commandgroup/domain"
 	"gomander/internal/commandgroup/domain/test"
 	event2 "gomander/internal/event"
 	test2 "gomander/internal/event/test"
@@ -25,9 +26,10 @@ func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
 		event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
 
 		mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(nil).Once()
-		deletedCmdGroupId := "cmdGroupId"
-		mockRepo.On("DeleteEmpty").Return([]string{deletedCmdGroupId}, nil).Once()
-		mockEventEmitter.On("EmitEvent", event2.CommandGroupDeleted, deletedCmdGroupId).Return()
+		deletedCmdGroup := test.NewCommandGroupBuilder().WithProjectId("project-1").Build()
+		mockRepo.On("DeleteEmpty").Return([]commandgroupdomain.CommandGroup{deletedCmdGroup}, nil).Once()
+		mockEventEmitter.On("EmitEvent", event2.CommandGroupDeleted, deletedCmdGroup.Id).Return()
+		mockRepo.On("GetAll", "project-1").Return(make([]commandgroupdomain.CommandGroup, 0), nil).Once()
 
 		// Act
 		err := handler.Execute(event)
@@ -64,7 +66,7 @@ func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
 
 		mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(nil).Once()
 		expectedErr := errors.New("delete empty error")
-		mockRepo.On("DeleteEmpty").Return(make([]string, 0), expectedErr).Once()
+		mockRepo.On("DeleteEmpty").Return(make([]commandgroupdomain.CommandGroup, 0), expectedErr).Once()
 
 		// Act
 		err := handler.Execute(event)

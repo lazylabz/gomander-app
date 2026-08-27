@@ -178,6 +178,33 @@ func TestOrderingCommandGroups(t *testing.T) {
 		assert.Equal(t, []int{0, 1}, array.Map(groups, commandGroupPosition))
 	})
 
+	t.Run("Should close the gap when a command group loses its last command", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+		project := givenAnOpenedProject(h)
+
+		kept := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(0).Build()
+		removed := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(1).Build()
+		h.GivenCommands(kept, removed)
+
+		first := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId(project.Id).WithCommands(kept).WithPosition(0).Build()
+		emptied := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId(project.Id).WithCommands(removed).WithPosition(1).Build()
+		third := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId(project.Id).WithCommands(kept).WithPosition(2).Build()
+		h.GivenCommandGroups(first, emptied, third)
+
+		// Act
+		err := h.UseCases.RemoveCommand.Execute(removed.Id)
+
+		// Assert
+		assert.NoError(t, err)
+		groups := commandGroupsOf(t, h)
+		assert.Equal(t, []string{first.Id, third.Id}, array.Map(groups, commandGroupId))
+		assert.Equal(t, []int{0, 1}, array.Map(groups, commandGroupPosition))
+	})
+
 	t.Run("Should close the gap when a command group is deleted", func(t *testing.T) {
 		// Arrange
 		h := apptest.New(t)

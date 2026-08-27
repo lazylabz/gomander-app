@@ -32,8 +32,7 @@ func (uc *DefaultCreateCommandGroup) Execute(commandGroup *domain.CommandGroup) 
 		return err
 	}
 
-	newPosition := len(existingCommandGroups)
-	commandGroup.Position = newPosition
+	commandGroup.Position = domain.Order.End(existingCommandGroups)
 
 	return uc.commandGroupRepository.Create(commandGroup)
 }
