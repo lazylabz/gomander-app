@@ -707,6 +707,23 @@ func TestThirdPartyIntegrationsServer_AgainstTheRealBackend(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 	})
 
+	t.Run("POST /command-groups/{id}/run should report a command group that is not there", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		testServer := serving(t, h.UseCases)
+		defer testServer.Close()
+
+		// Act
+		resp, err := http.Post(testServer.URL+"/command-groups/deleted-command-group/run", "application/json", nil)
+		assert.NoError(t, err)
+		defer resp.Body.Close()
+
+		// Assert
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		assert.Empty(t, h.StartedProcesses())
+	})
+
 	t.Run("POST /command-groups/{id}/stop should report a command group that is not there", func(t *testing.T) {
 		// Arrange
 		h := apptest.New(t)

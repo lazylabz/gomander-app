@@ -47,7 +47,9 @@ func Combined(summary string, errs []error) error {
 		message += "\n- " + err.Error()
 	}
 
-	return combinedError{message: message, errs: errs}
+	// Copied and returned by pointer: errors.New answered a comparable pointer,
+	// and a value holding a slice would panic on an == between two of these.
+	return &combinedError{message: message, errs: append([]error(nil), errs...)}
 }
 
 func (e *InMemoryEventBus) PublishSync(event Event) []error {
@@ -74,9 +76,9 @@ type combinedError struct {
 	errs    []error
 }
 
-func (e combinedError) Error() string { return e.message }
+func (e *combinedError) Error() string { return e.message }
 
-func (e combinedError) Unwrap() []error { return e.errs }
+func (e *combinedError) Unwrap() []error { return e.errs }
 
 // Not used for now
 //

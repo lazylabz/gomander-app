@@ -134,6 +134,15 @@ func TestCombined(t *testing.T) {
 		)
 	})
 
+	t.Run("Should stay comparable, the way the plain error it replaced was", func(t *testing.T) {
+		// Arrange
+		first := eventbus.Combined("Errors occurred while doing something:", []error{errors.New("x")})
+		second := eventbus.Combined("Errors occurred while doing something:", []error{errors.New("y")})
+
+		// Act & Assert: an == between two errors must not panic.
+		assert.NotPanics(t, func() { _ = first == second })
+	})
+
 	t.Run("Should keep each failure in the chain, so a caller can tell them apart", func(t *testing.T) {
 		// Arrange
 		first := errors.New("first went wrong")

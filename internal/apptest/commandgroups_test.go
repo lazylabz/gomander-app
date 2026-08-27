@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"gomander/internal/apptest"
-	commanddomain "gomander/internal/command/domain"
 	commandtest "gomander/internal/command/domain/test"
 	commandgrouptest "gomander/internal/commandgroup/domain/test"
 	"gomander/internal/domainerrors"
@@ -92,6 +91,8 @@ func TestACommandGroupLosingItsLastCommand(t *testing.T) {
 	})
 }
 
+const missingCommandGroupId = "deleted-command-group"
+
 func TestRemovingACommandFromACommandGroup(t *testing.T) {
 	t.Run("Should leave the group with its other commands, and the command itself untouched", func(t *testing.T) {
 		// Arrange
@@ -126,42 +127,40 @@ func TestRemovingACommandFromACommandGroup(t *testing.T) {
 // A Command Group id reaches the backend from UI state that can be stale: the
 // Group it names may be gone by the time the operation runs.
 func TestOperatingOnACommandGroupThatIsNotThere(t *testing.T) {
-	const missingCommandGroupId = "deleted-command-group"
-
 	// The two operations that name a Command as well as a Group are handed one
 	// that is really there, so the absence under test is only ever the Group's.
 	operations := []struct {
 		name    string
-		execute func(h *apptest.Harness, command commanddomain.Command) error
+		execute func(h *apptest.Harness, commandId string) error
 	}{
 		{
 			name: "run it",
-			execute: func(h *apptest.Harness, _ commanddomain.Command) error {
+			execute: func(h *apptest.Harness, _ string) error {
 				return h.UseCases.RunCommandGroup.Execute(missingCommandGroupId)
 			},
 		},
 		{
 			name: "stop it",
-			execute: func(h *apptest.Harness, _ commanddomain.Command) error {
+			execute: func(h *apptest.Harness, _ string) error {
 				return h.UseCases.StopCommandGroup.Execute(missingCommandGroupId)
 			},
 		},
 		{
 			name: "delete it",
-			execute: func(h *apptest.Harness, _ commanddomain.Command) error {
+			execute: func(h *apptest.Harness, _ string) error {
 				return h.UseCases.DeleteCommandGroup.Execute(missingCommandGroupId)
 			},
 		},
 		{
 			name: "remove a command from it",
-			execute: func(h *apptest.Harness, command commanddomain.Command) error {
-				return h.UseCases.RemoveCommandFromCommandGroup.Execute(command.Id, missingCommandGroupId)
+			execute: func(h *apptest.Harness, commandId string) error {
+				return h.UseCases.RemoveCommandFromCommandGroup.Execute(commandId, missingCommandGroupId)
 			},
 		},
 		{
 			name: "duplicate a command into it",
-			execute: func(h *apptest.Harness, command commanddomain.Command) error {
-				return h.UseCases.DuplicateCommand.Execute(command.Id, missingCommandGroupId)
+			execute: func(h *apptest.Harness, commandId string) error {
+				return h.UseCases.DuplicateCommand.Execute(commandId, missingCommandGroupId)
 			},
 		},
 	}
@@ -176,7 +175,7 @@ func TestOperatingOnACommandGroupThatIsNotThere(t *testing.T) {
 			h.GivenCommands(command)
 
 			// Act
-			err := operation.execute(h, command)
+			err := operation.execute(h, command.Id)
 
 			// Assert: the Command Group is what is missing, not the Project or
 			// the Command the operations resolve on the way to it.
@@ -203,7 +202,7 @@ func TestDuplicatingACommandIntoACommandGroupThatIsNotThere(t *testing.T) {
 		h.GivenCommands(original)
 
 		// Act
-		err := h.UseCases.DuplicateCommand.Execute(original.Id, "deleted-command-group")
+		err := h.UseCases.DuplicateCommand.Execute(original.Id, missingCommandGroupId)
 
 		// Assert
 		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
