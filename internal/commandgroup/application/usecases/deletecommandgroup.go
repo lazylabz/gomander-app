@@ -35,14 +35,14 @@ func (uc *DefaultDeleteCommandGroup) Execute(commandGroupId string) error {
 		return err
 	}
 
-	if deletedCommandGroup != nil {
-		err = uc.closeTheGapLeftIn(deletedCommandGroup.ProjectId)
-		if err != nil {
-			return err
-		}
-	}
-
+	// Delete has committed, so the UI is told before the renumbering that
+	// follows gets a chance to fail - the way the cascade in
+	// CleanCommandGroupsOnCommandDeleted already reports its own deletions.
 	uc.eventEmitter.EmitEvent(event.CommandGroupDeleted, commandGroupId)
+
+	if deletedCommandGroup != nil {
+		return uc.closeTheGapLeftIn(deletedCommandGroup.ProjectId)
+	}
 
 	return nil
 }
