@@ -13,6 +13,7 @@ import (
 	"gomander/internal/commandgroup/domain"
 	test2 "gomander/internal/commandgroup/domain/test"
 	"gomander/internal/commandgroup/infrastructure"
+	"gomander/internal/helpers/array"
 	"gomander/internal/testdb"
 )
 
@@ -337,7 +338,7 @@ func TestGormCommandGroupRepository_Delete(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Len(t, existingCommands, 1)
 	})
-	t.Run("Should delete an existing command groups and correctly update positions of other command groups", func(t *testing.T) {
+	t.Run("Should leave the positions of the remaining command groups untouched", func(t *testing.T) {
 		projectId := "project1"
 
 		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).Build()
@@ -364,14 +365,14 @@ func TestGormCommandGroupRepository_Delete(t *testing.T) {
 		resultGroup3, err := helper.repo.Get(group3Model.Id)
 		assert.Nil(t, err)
 
-		// Check if the positions of the remaining command groups are updated correctly
-		assert.Equal(t, resultGroup1.Position, group1Model.Position)
-		assert.Equal(t, resultGroup3.Position, group3Model.Position-1)
+		// Closing the gap is the ordering module's job, not the repository's
+		assert.Equal(t, group1Model.Position, resultGroup1.Position)
+		assert.Equal(t, group3Model.Position, resultGroup3.Position)
 	})
 }
 
 func TestGormCommandGroupRepository_RemoveCommandFromCommandGroups(t *testing.T) {
-	t.Run("Should remove a command from all groups and update positions", func(t *testing.T) {
+	t.Run("Should remove a command from all groups, leaving the rest in order", func(t *testing.T) {
 		projectId := "project1"
 		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
 		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
@@ -477,9 +478,14 @@ func TestGormCommandGroupRepository_DeleteEmpty(t *testing.T) {
 			commandToCommandGroupModels1,
 		)
 
-		ids, err := helper.repo.DeleteEmpty()
+		deleted, err := helper.repo.DeleteEmpty()
 		assert.Nil(t, err)
-		assert.Equal(t, []string{cmdGroup2.Id}, ids)
+		assert.Equal(t, []string{cmdGroup2.Id}, array.Map(deleted, func(group domain.CommandGroup) string {
+			return group.Id
+		}))
+		assert.Equal(t, []string{projectId}, array.Map(deleted, func(group domain.CommandGroup) string {
+			return group.ProjectId
+		}))
 
 		group1, _ := helper.repo.Get(cmdGroup1.Id)
 		group2, _ := helper.repo.Get(cmdGroup2.Id)

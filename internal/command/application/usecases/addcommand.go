@@ -32,8 +32,7 @@ func (uc *DefaultAddCommand) Execute(newCommand domain.Command) error {
 		return err
 	}
 
-	newPosition := len(allCommands)
-	newCommand.Position = newPosition
+	newCommand.Position = domain.Order.End(allCommands)
 
 	err = uc.commandRepository.Create(&newCommand)
 	if err != nil {

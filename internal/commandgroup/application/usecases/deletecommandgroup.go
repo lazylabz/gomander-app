@@ -25,12 +25,33 @@ func NewDeleteCommandGroup(
 }
 
 func (uc *DefaultDeleteCommandGroup) Execute(commandGroupId string) error {
-	err := uc.commandGroupRepository.Delete(commandGroupId)
+	deletedCommandGroup, err := uc.commandGroupRepository.Get(commandGroupId)
 	if err != nil {
 		return err
 	}
 
+	err = uc.commandGroupRepository.Delete(commandGroupId)
+	if err != nil {
+		return err
+	}
+
+	// Delete has committed, so the UI is told before the renumbering that
+	// follows gets a chance to fail - the way the cascade in
+	// CleanCommandGroupsOnCommandDeleted already reports its own deletions.
 	uc.eventEmitter.EmitEvent(event.CommandGroupDeleted, commandGroupId)
 
+	if deletedCommandGroup != nil {
+		return uc.closeTheGapLeftIn(deletedCommandGroup.ProjectId)
+	}
+
 	return nil
+}
+
+func (uc *DefaultDeleteCommandGroup) closeTheGapLeftIn(projectId string) error {
+	remainingCommandGroups, err := uc.commandGroupRepository.GetAll(projectId)
+	if err != nil {
+		return err
+	}
+
+	return domain.Order.CloseGaps(remainingCommandGroups, uc.commandGroupRepository.Update)
 }

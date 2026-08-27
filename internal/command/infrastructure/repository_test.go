@@ -193,7 +193,7 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Nil(t, deletedCommand)
 	})
-	t.Run("Should delete an existing command and adjust other commands positions", func(t *testing.T) {
+	t.Run("Should leave the positions of the remaining commands untouched", func(t *testing.T) {
 		// Arrange
 		projectId := "proj1"
 		cmd1 := test.NewCommandBuilder().
@@ -227,15 +227,15 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 
-		// Verify positions were adjusted correctly
+		// Closing the gap is the ordering module's job, not the repository's
 		cmd1AfterDelete, err := h.repo.Get(cmd1.Id)
 		assert.NoError(t, err)
 
 		cmd3AfterDelete, err := h.repo.Get(cmd3.Id)
 		assert.NoError(t, err)
 
-		assert.Equal(t, cmd1.Position, cmd1AfterDelete.Position, "Expected cmd1 position to remain unchanged")
-		assert.Equal(t, cmd3.Position-1, cmd3AfterDelete.Position, "Expected cmd3 position to be adjusted after deletion of cmd2")
+		assert.Equal(t, cmd1.Position, cmd1AfterDelete.Position)
+		assert.Equal(t, cmd3.Position, cmd3AfterDelete.Position)
 	})
 }
 

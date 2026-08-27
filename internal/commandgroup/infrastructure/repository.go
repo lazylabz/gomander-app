@@ -146,22 +146,12 @@ func (r GormCommandGroupRepository) Update(commandGroup *domain.CommandGroup) er
 }
 
 func (r GormCommandGroupRepository) Delete(commandGroupId string) error {
-	existingGroup, err := gorm.G[CommandGroupModel](r.db).Where("id = ?", commandGroupId).First(r.ctx)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil // If the command group does not exist, nothing to delete
-		}
-		return err
-	}
-
-	err = r.db.Transaction(func(tx *gorm.DB) error {
-		// Delete the command group
-		_, err = gorm.G[CommandGroupModel](tx).Where("id = ?", commandGroupId).Delete(r.ctx)
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		_, err := gorm.G[CommandGroupModel](tx).Where("id = ?", commandGroupId).Delete(r.ctx)
 		if err != nil {
 			return err
 		}
 
-		// Delete all command associations for this command group
 		_, err = gorm.G[CommandToCommandGroupModel](tx).
 			Where("command_group_id = ?", commandGroupId).
 			Delete(r.ctx)
@@ -169,14 +159,6 @@ func (r GormCommandGroupRepository) Delete(commandGroupId string) error {
 			return err
 		}
 
-		// Decrease the position of all command groups with a higher position
-		_, err = gorm.G[CommandGroupModel](tx).
-			Where("project_id = ? AND position > ?", existingGroup.ProjectId, existingGroup.Position).
-			Update(r.ctx, "position", gorm.Expr("position - 1"))
-		if err != nil {
-			return err
-		}
-
 		return nil
 	})
 
@@ -187,38 +169,14 @@ func (r GormCommandGroupRepository) Delete(commandGroupId string) error {
 	return nil
 }
 
+// RemoveCommandFromCommandGroups drops the Command from every Group holding it.
+// The gap it leaves between the surviving rows is nothing to close: these
+// positions only ever order the rows relative to each other, and Update rewrites
+// them from the Commands it is handed.
 func (r GormCommandGroupRepository) RemoveCommandFromCommandGroups(commandId string) error {
-	err := r.db.Transaction(func(tx *gorm.DB) error {
-		// Find all command group associations for the command
-		relations, err := gorm.G[CommandToCommandGroupModel](tx).
-			Where("command_id = ?", commandId).
-			Find(r.ctx)
-
-		if err != nil {
-			return err
-		}
-
-		// Update positions of command groups after the removed command
-		for _, relation := range relations {
-			_, err = gorm.G[CommandToCommandGroupModel](tx).
-				Where("command_group_id = ? AND position > ?", relation.CommandGroupId, relation.Position).
-				Update(r.ctx, "position", gorm.Expr("position - 1"))
-			if err != nil {
-				return err
-			}
-		}
-
-		// Delete the command from all command groups
-		_, err = gorm.G[CommandToCommandGroupModel](tx).
-			Where("command_id = ?", commandId).
-			Delete(r.ctx)
-
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
+	_, err := gorm.G[CommandToCommandGroupModel](r.db).
+		Where("command_id = ?", commandId).
+		Delete(r.ctx)
 
 	if err != nil {
 		return err
@@ -227,7 +185,7 @@ func (r GormCommandGroupRepository) RemoveCommandFromCommandGroups(commandId str
 	return nil
 }
 
-func (r GormCommandGroupRepository) DeleteEmpty() ([]string, error) {
+func (r GormCommandGroupRepository) DeleteEmpty() ([]domain.CommandGroup, error) {
 	query := "id NOT IN (SELECT DISTINCT command_group_id FROM command_group_command)"
 
 	entriesToDelete, err := gorm.G[CommandGroupModel](r.db).
@@ -246,7 +204,9 @@ func (r GormCommandGroupRepository) DeleteEmpty() ([]string, error) {
 		return nil, err
 	}
 
-	return array.Map(entriesToDelete, func(entry CommandGroupModel) string { return entry.Id }), nil
+	return array.Map(entriesToDelete, func(entry CommandGroupModel) domain.CommandGroup {
+		return *ToDomainCommandGroup(entry)
+	}), nil
 }
 
 func (r GormCommandGroupRepository) DeleteAll(projectId string) ([]string, error) {

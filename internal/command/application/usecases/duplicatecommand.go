@@ -50,7 +50,7 @@ func (uc *DefaultDuplicateCommand) Execute(commandId, targetGroupId string) erro
 	// Override specific fields
 	duplicatedCommand.Id = uuid.New().String()
 	duplicatedCommand.Name = originalCommand.Name + " (copy)"
-	duplicatedCommand.Position = len(allCommands)
+	duplicatedCommand.Position = domain.Order.End(allCommands)
 
 	err = uc.commandRepository.Create(&duplicatedCommand)
 	if err != nil {
