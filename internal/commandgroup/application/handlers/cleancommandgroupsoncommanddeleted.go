@@ -38,21 +38,54 @@ func (h *DefaultCleanCommandGroupsOnCommandDeleted) Execute(e eventbus.Event) er
 		return nil
 	}
 
-	err := h.commandGroupRepository.RemoveCommandFromCommandGroups(event.CommandId)
+	cascade, err := h.applyTheCascadeFor(event.CommandId)
 	if err != nil {
 		return err
 	}
 
-	emptiedCommandGroups, err := h.commandGroupRepository.DeleteEmpty()
-	if err != nil {
-		return err
-	}
-
-	for _, commandGroup := range emptiedCommandGroups {
+	// The cascade has committed, so the UI is told before the renumbering that
+	// follows gets a chance to fail.
+	for _, commandGroup := range cascade.Deleted {
 		h.eventEmitter.EmitEvent(internalEvent.CommandGroupDeleted, commandGroup.Id)
 	}
 
-	return h.closeTheGapsLeftIn(projectIdsOf(emptiedCommandGroups))
+	return h.closeTheGapsLeftIn(projectIdsOf(cascade.Deleted))
+}
+
+// applyTheCascadeFor lets the domain decide which Command Groups survive losing
+// the Command, and writes that answer back in one transaction, so a Group is
+// never left holding a Command that is gone.
+func (h *DefaultCleanCommandGroupsOnCommandDeleted) applyTheCascadeFor(commandId string) (commandgroupdomain.Cascade, error) {
+	var cascade commandgroupdomain.Cascade
+
+	err := h.commandGroupRepository.Atomically(func(commandGroupRepository commandgroupdomain.Repository) error {
+		commandGroups, err := commandGroupRepository.GetAllContaining(commandId)
+		if err != nil {
+			return err
+		}
+
+		cascade = commandgroupdomain.RemoveCommandFrom(commandGroups, commandId)
+
+		for i := range cascade.Survived {
+			if err := commandGroupRepository.Update(&cascade.Survived[i]); err != nil {
+				return err
+			}
+		}
+
+		for _, commandGroup := range cascade.Deleted {
+			if err := commandGroupRepository.Delete(commandGroup.Id); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return commandgroupdomain.Cascade{}, err
+	}
+
+	return cascade, nil
 }
 
 func (h *DefaultCleanCommandGroupsOnCommandDeleted) closeTheGapsLeftIn(projectIds []string) error {

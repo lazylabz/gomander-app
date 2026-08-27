@@ -1,13 +1,10 @@
 package infrastructure
 
-import "gomander/internal/command/infrastructure"
-
 type CommandGroupModel struct {
-	Id        string                        `gorm:"primaryKey;column:id"`
-	ProjectId string                        `gorm:"column:project_id"`
-	Name      string                        `gorm:"column:name"`
-	Position  int                           `gorm:"column:position"`
-	Commands  []infrastructure.CommandModel `gorm:"many2many:command_group_command;foreignKey:id;references:id;joinForeignKey:command_group_id;joinReferences:command_id;"`
+	Id        string `gorm:"primaryKey;column:id"`
+	ProjectId string `gorm:"column:project_id"`
+	Name      string `gorm:"column:name"`
+	Position  int    `gorm:"column:position"`
 }
 
 func (CommandGroupModel) TableName() string {
@@ -22,4 +19,24 @@ type CommandToCommandGroupModel struct {
 
 func (CommandToCommandGroupModel) TableName() string {
 	return "command_group_command"
+}
+
+// commandGroupRow is one Command Group paired with one of its Commands, the
+// shape commandGroupQuery reads. CommandId is null when the Group has no
+// Commands, and the remaining Command columns are coalesced so that a null one
+// still scans.
+type commandGroupRow struct {
+	Id        string
+	ProjectId string
+	Name      string
+	Position  int
+
+	CommandId               *string
+	CommandProjectId        string
+	CommandName             string
+	CommandCommand          string
+	CommandWorkingDirectory string
+	CommandPosition         int
+	CommandLink             string
+	CommandErrorPatterns    string
 }

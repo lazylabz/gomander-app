@@ -11,6 +11,7 @@ import (
 	"gomander/internal/domainerrors"
 	"gomander/internal/event"
 	"gomander/internal/helpers/array"
+	projecttest "gomander/internal/project/domain/test"
 )
 
 func TestACommandGroupLosingItsLastCommand(t *testing.T) {
@@ -208,5 +209,59 @@ func TestDuplicatingACommandIntoACommandGroupThatIsNotThere(t *testing.T) {
 		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
 		assert.Equal(t, []string{"build", "build (copy)"}, array.Map(commandsOf(t, h), commandName))
 		assert.Empty(t, commandGroupsOf(t, h))
+	})
+}
+
+func TestDeletingAProject(t *testing.T) {
+	t.Run("Should take its command groups with it, and tell the frontend about each", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+		deleted := projecttest.NewProjectBuilder().Build()
+		h.GivenProjects(deleted)
+		h.GivenOpenedProject(deleted.Id)
+
+		first := commandtest.NewCommandBuilder().WithProjectId(deleted.Id).WithPosition(0).Build()
+		second := commandtest.NewCommandBuilder().WithProjectId(deleted.Id).WithPosition(1).Build()
+		h.GivenCommands(first, second)
+
+		firstGroup := commandgrouptest.NewCommandGroupBuilder().WithProjectId(deleted.Id).WithPosition(0).WithCommands(first).Build()
+		secondGroup := commandgrouptest.NewCommandGroupBuilder().WithProjectId(deleted.Id).WithPosition(1).WithCommands(second).Build()
+		h.GivenCommandGroups(firstGroup, secondGroup)
+
+		// Act
+		err := h.UseCases.DeleteProject.Execute(deleted.Id)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Equal(t, []apptest.EmittedEvent{
+			{Name: event.CommandGroupDeleted, Payload: firstGroup.Id},
+			{Name: event.CommandGroupDeleted, Payload: secondGroup.Id},
+		}, h.EmittedEvents())
+	})
+
+	t.Run("Should leave another project's commands and command groups alone", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+		kept := projecttest.NewProjectBuilder().Build()
+		deleted := projecttest.NewProjectBuilder().Build()
+		h.GivenProjects(kept, deleted)
+
+		keptCommand := commandtest.NewCommandBuilder().WithProjectId(kept.Id).WithPosition(0).Build()
+		deletedCommand := commandtest.NewCommandBuilder().WithProjectId(deleted.Id).WithPosition(0).Build()
+		h.GivenCommands(keptCommand, deletedCommand)
+
+		keptGroup := commandgrouptest.NewCommandGroupBuilder().WithProjectId(kept.Id).WithPosition(0).WithCommands(keptCommand).Build()
+		deletedGroup := commandgrouptest.NewCommandGroupBuilder().WithProjectId(deleted.Id).WithPosition(0).WithCommands(deletedCommand).Build()
+		h.GivenCommandGroups(keptGroup, deletedGroup)
+
+		// Act
+		err := h.UseCases.DeleteProject.Execute(deleted.Id)
+
+		// Assert
+		assert.NoError(t, err)
+
+		h.GivenOpenedProject(kept.Id)
+		assert.Equal(t, []string{keptCommand.Id}, array.Map(commandsOf(t, h), commandId))
+		assert.Equal(t, []string{keptGroup.Id}, array.Map(commandGroupsOf(t, h), commandGroupId))
 	})
 }
