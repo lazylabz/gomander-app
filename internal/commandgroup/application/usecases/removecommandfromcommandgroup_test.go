@@ -13,7 +13,7 @@ import (
 	test2 "gomander/internal/commandgroup/domain/test"
 )
 
-func TestDefaultRemoveCommandFromCommandGroup_Execute(t *testing.T) {
+func TestRemoveCommandFromCommandGroup_Execute(t *testing.T) {
 	t.Run("Should remove command from group", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)

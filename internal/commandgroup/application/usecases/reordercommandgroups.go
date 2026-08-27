@@ -5,23 +5,19 @@ import (
 	"gomander/internal/openedproject"
 )
 
-type ReorderCommandGroups interface {
-	Execute(newOrderedIds []string) error
-}
-
-type DefaultReorderCommandGroups struct {
+type ReorderCommandGroups struct {
 	openedProject          openedproject.OpenedProject
 	commandGroupRepository domain.Repository
 }
 
-func NewReorderCommandGroups(openedProject openedproject.OpenedProject, commandGroupRepo domain.Repository) *DefaultReorderCommandGroups {
-	return &DefaultReorderCommandGroups{
+func NewReorderCommandGroups(openedProject openedproject.OpenedProject, commandGroupRepo domain.Repository) *ReorderCommandGroups {
+	return &ReorderCommandGroups{
 		openedProject:          openedProject,
 		commandGroupRepository: commandGroupRepo,
 	}
 }
 
-func (uc *DefaultReorderCommandGroups) Execute(newOrderedIds []string) error {
+func (uc *ReorderCommandGroups) Execute(newOrderedIds []string) error {
 	project, err := uc.openedProject.Get()
 	if err != nil {
 		return err

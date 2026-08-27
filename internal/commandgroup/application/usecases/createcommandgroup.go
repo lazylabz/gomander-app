@@ -5,23 +5,19 @@ import (
 	"gomander/internal/openedproject"
 )
 
-type CreateCommandGroup interface {
-	Execute(commandGroup *domain.CommandGroup) error
-}
-
-type DefaultCreateCommandGroup struct {
+type CreateCommandGroup struct {
 	openedProject          openedproject.OpenedProject
 	commandGroupRepository domain.Repository
 }
 
-func NewCreateCommandGroup(openedProject openedproject.OpenedProject, commandGroupRepo domain.Repository) *DefaultCreateCommandGroup {
-	return &DefaultCreateCommandGroup{
+func NewCreateCommandGroup(openedProject openedproject.OpenedProject, commandGroupRepo domain.Repository) *CreateCommandGroup {
+	return &CreateCommandGroup{
 		openedProject:          openedProject,
 		commandGroupRepository: commandGroupRepo,
 	}
 }
 
-func (uc *DefaultCreateCommandGroup) Execute(commandGroup *domain.CommandGroup) error {
+func (uc *CreateCommandGroup) Execute(commandGroup *domain.CommandGroup) error {
 	project, err := uc.openedProject.Get()
 	if err != nil {
 		return err

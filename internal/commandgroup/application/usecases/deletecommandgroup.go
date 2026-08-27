@@ -5,11 +5,7 @@ import (
 	"gomander/internal/event"
 )
 
-type DeleteCommandGroup interface {
-	Execute(commandGroupId string) error
-}
-
-type DefaultDeleteCommandGroup struct {
+type DeleteCommandGroup struct {
 	commandGroupRepository domain.Repository
 	eventEmitter           event.EventEmitter
 }
@@ -17,14 +13,14 @@ type DefaultDeleteCommandGroup struct {
 func NewDeleteCommandGroup(
 	commandGroupRepo domain.Repository,
 	eventEmitter event.EventEmitter,
-) *DefaultDeleteCommandGroup {
-	return &DefaultDeleteCommandGroup{
+) *DeleteCommandGroup {
+	return &DeleteCommandGroup{
 		commandGroupRepository: commandGroupRepo,
 		eventEmitter:           eventEmitter,
 	}
 }
 
-func (uc *DefaultDeleteCommandGroup) Execute(commandGroupId string) error {
+func (uc *DeleteCommandGroup) Execute(commandGroupId string) error {
 	deletedCommandGroup, err := uc.commandGroupRepository.Get(commandGroupId)
 	if err != nil {
 		return err
@@ -47,7 +43,7 @@ func (uc *DefaultDeleteCommandGroup) Execute(commandGroupId string) error {
 	return nil
 }
 
-func (uc *DefaultDeleteCommandGroup) closeTheGapLeftIn(projectId string) error {
+func (uc *DeleteCommandGroup) closeTheGapLeftIn(projectId string) error {
 	remainingCommandGroups, err := uc.commandGroupRepository.GetAll(projectId)
 	if err != nil {
 		return err

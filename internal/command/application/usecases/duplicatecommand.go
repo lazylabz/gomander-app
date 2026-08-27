@@ -9,25 +9,21 @@ import (
 	"gomander/internal/openedproject"
 )
 
-type DuplicateCommand interface {
-	Execute(commandId, targetGroupId string) error
-}
-
-type DefaultDuplicateCommand struct {
+type DuplicateCommand struct {
 	openedProject     openedproject.OpenedProject
 	commandRepository domain.Repository
 	eventBus          eventbus.EventBus
 }
 
-func NewDuplicateCommand(openedProject openedproject.OpenedProject, commandRepo domain.Repository, eventBus eventbus.EventBus) *DefaultDuplicateCommand {
-	return &DefaultDuplicateCommand{
+func NewDuplicateCommand(openedProject openedproject.OpenedProject, commandRepo domain.Repository, eventBus eventbus.EventBus) *DuplicateCommand {
+	return &DuplicateCommand{
 		openedProject:     openedProject,
 		commandRepository: commandRepo,
 		eventBus:          eventBus,
 	}
 }
 
-func (uc *DefaultDuplicateCommand) Execute(commandId, targetGroupId string) error {
+func (uc *DuplicateCommand) Execute(commandId, targetGroupId string) error {
 	project, err := uc.openedProject.Get()
 	if err != nil {
 		return err
