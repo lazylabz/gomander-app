@@ -30,9 +30,10 @@ func (uc *DefaultStopCommandGroup) Execute(commandGroupId string) error {
 		return err
 	}
 
-	err = uc.commandRunner.StopRunningCommands(cmdGroup.Commands)
-	if err != nil {
-		return err
+	for _, command := range cmdGroup.Commands {
+		if err := uc.commandRunner.StopRunningCommand(command.Id); err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -72,7 +72,10 @@ func New(t *testing.T) *Harness {
 
 	runtimeFacade := &runtimeFake{}
 	fsFacade := &fsFacadeFake{files: make(map[string][]byte)}
-	processRunner := &processRunnerFake{}
+	processRunner := &processRunnerFake{
+		startFailures: make(map[string]error),
+		stopFailures:  make(map[string]error),
+	}
 
 	l := logger.NewDefaultLogger(ctx, runtimeFacade)
 	ee := event.NewDefaultEventEmitter(ctx, runtimeFacade)
@@ -196,6 +199,17 @@ func (h *Harness) GivenEnvironmentPaths(paths ...string) {
 	if err := h.configRepository.Update(config); err != nil {
 		h.t.Fatalf("failed to arrange the environment paths: %v", err)
 	}
+}
+
+// GivenProcessThatCannotStart makes spawning the Command fail, the way the
+// operating system refuses one whose working directory is gone.
+func (h *Harness) GivenProcessThatCannotStart(commandId string, err error) {
+	h.processRunner.failStart(commandId, err)
+}
+
+// GivenProcessThatCannotStop makes signalling the Command's process fail.
+func (h *Harness) GivenProcessThatCannotStop(commandId string, err error) {
+	h.processRunner.failStop(commandId, err)
 }
 
 // GivenFileToImport puts a file where the open-file dialog will point the user.

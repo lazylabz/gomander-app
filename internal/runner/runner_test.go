@@ -62,7 +62,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 
 		// Assert
 		assert.NoError(t, err)
-		assert.Empty(t, r.GetRunningCommands())
+		assert.Empty(t, r.GetRunningCommandIds())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
 
@@ -95,7 +95,86 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 
 		// Assert
 		assert.NoError(t, err)
-		assert.Empty(t, r.GetRunningCommands())
+		assert.Empty(t, r.GetRunningCommandIds())
+		mock.AssertExpectationsForObjects(t, emitter, logger)
+	})
+
+	t.Run("Should stream the output of several commands running at once", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test2.MockEventEmitter)
+
+		r := runner.NewDefaultRunner(logger, emitter)
+
+		cmd1Id := "1"
+		cmd2Id := "2"
+
+		emitter.On("EmitEvent", event.ProcessStarted, cmd1Id).Return()
+		emitter.On("EmitEvent", event.ProcessFinished, cmd1Id).Maybe().Return()
+		emitter.On("EmitEvent", event.ProcessStarted, cmd2Id).Return()
+		emitter.On("EmitEvent", event.ProcessFinished, cmd2Id).Maybe().Return()
+		emitter.On("EmitEvent", event.NewLogEntry, mock.MatchedBy(func(
+			data map[string]string) bool {
+			return strings.Contains(data["line"], "echo")
+		})).Return()
+
+		mockEmitterLogEntry(emitter, cmd1Id, "command1 output")
+		mockEmitterLogEntry(emitter, cmd2Id, "command2 output")
+
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Debug", mock.Anything).Return()
+
+		// Act
+		err := r.RunCommand(&commanddomain.Command{
+			Id:               cmd1Id,
+			ProjectId:        "project1",
+			Name:             "Test Command 1",
+			Command:          "echo 'command1 output'",
+			WorkingDirectory: validWorkingDirectory(),
+			Position:         0,
+		}, execution.Environment{Paths: []string{"/test"}, BaseWorkingDirectory: "/test"})
+		assert.NoError(t, err)
+
+		err = r.RunCommand(&commanddomain.Command{
+			Id:               cmd2Id,
+			ProjectId:        "project1",
+			Name:             "Test Command 2",
+			Command:          "echo 'command2 output'",
+			WorkingDirectory: validWorkingDirectory(),
+			Position:         1,
+		}, execution.Environment{Paths: []string{"/test"}, BaseWorkingDirectory: "/test"})
+		assert.NoError(t, err)
+
+		r.WaitForCommand(cmd1Id)
+		r.WaitForCommand(cmd2Id)
+
+		// Assert
+		assert.Empty(t, r.GetRunningCommandIds())
+		mock.AssertExpectationsForObjects(t, emitter, logger)
+	})
+
+	t.Run("Should return an error when the working directory does not exist", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test2.MockEventEmitter)
+
+		r := runner.NewDefaultRunner(logger, emitter)
+
+		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
+
+		// Act
+		err := r.RunCommand(&commanddomain.Command{
+			Id:               commandId,
+			ProjectId:        "project1",
+			Name:             "Test",
+			Command:          "echo 'never runs'",
+			WorkingDirectory: "/definitely/not/a/real/directory/12345",
+			Position:         0,
+		}, execution.Environment{})
+
+		// Assert
+		assert.Error(t, err)
+		assert.Empty(t, r.GetRunningCommandIds())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
 }
@@ -133,7 +212,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
-			return assert.NotEmpty(t, r.GetRunningCommands())
+			return assert.NotEmpty(t, r.GetRunningCommandIds())
 		}, 1*time.Second, 20*time.Millisecond)
 
 		time.Sleep(500 * time.Millisecond) // Give some time for the command to start and some logs to be emitted
@@ -143,7 +222,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 
 		// Assert
 		assert.NoError(t, err)
-		assert.Empty(t, r.GetRunningCommands())
+		assert.Empty(t, r.GetRunningCommandIds())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
 
@@ -176,7 +255,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
-			return assert.NotEmpty(t, r.GetRunningCommands())
+			return assert.NotEmpty(t, r.GetRunningCommandIds())
 		}, 1*time.Second, 20*time.Millisecond)
 
 		// Try to run the same command again
@@ -184,12 +263,89 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 
 		// Assert
 		assert.NoError(t, err)
-		assert.Equal(t, 1, len(r.GetRunningCommands()))
+		assert.Len(t, r.GetRunningCommandIds(), 1)
 
 		// Cleanup
 		err = r.StopRunningCommand(commandId)
 		assert.NoError(t, err)
 		r.WaitForCommand(commandId)
+	})
+
+	t.Run("Should stop each of several commands running at once", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test2.MockEventEmitter)
+
+		r := runner.NewDefaultRunner(logger, emitter)
+
+		cmd1Id := "1"
+		cmd2Id := "2"
+
+		emitter.On("EmitEvent", event.ProcessStarted, cmd1Id).Return()
+		emitter.On("EmitEvent", event.ProcessStarted, cmd2Id).Return()
+		emitter.On("EmitEvent", event.ProcessFinished, cmd1Id).Maybe().Return()
+		emitter.On("EmitEvent", event.ProcessFinished, cmd2Id).Maybe().Return()
+		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
+
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Debug", mock.Anything).Return()
+		// Depends on OS
+		logger.On("Error", mock.Anything).Maybe().Return()
+
+		cmd1 := commanddomain.Command{
+			Id:               cmd1Id,
+			ProjectId:        "project1",
+			Name:             "Test 1",
+			Command:          infiniteCmd(),
+			WorkingDirectory: validWorkingDirectory(),
+			Position:         0,
+		}
+		cmd2 := commanddomain.Command{
+			Id:               cmd2Id,
+			ProjectId:        "project1",
+			Name:             "Test 2",
+			Command:          infiniteCmd(),
+			WorkingDirectory: validWorkingDirectory(),
+			Position:         1,
+		}
+
+		assert.NoError(t, r.RunCommand(&cmd1, execution.Environment{}))
+		assert.NoError(t, r.RunCommand(&cmd2, execution.Environment{}))
+
+		assert.Eventually(t, func() bool {
+			return len(r.GetRunningCommandIds()) == 2
+		}, 1*time.Second, 20*time.Millisecond)
+
+		time.Sleep(500 * time.Millisecond) // Give some time for the commands to start
+
+		// Act
+		err := r.StopRunningCommand(cmd1Id)
+		assert.NoError(t, err)
+
+		err = r.StopRunningCommand(cmd2Id)
+		assert.NoError(t, err)
+
+		r.WaitForCommand(cmd1Id)
+		r.WaitForCommand(cmd2Id)
+
+		// Assert
+		assert.Empty(t, r.GetRunningCommandIds())
+		mock.AssertExpectationsForObjects(t, emitter, logger)
+	})
+
+	t.Run("Should not error when stopping a command that is not running", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test2.MockEventEmitter)
+
+		r := runner.NewDefaultRunner(logger, emitter)
+
+		// Act
+		err := r.StopRunningCommand("not-running")
+
+		// Assert
+		assert.NoError(t, err)
+		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
 }
 
@@ -238,7 +394,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Eventually(t, func() bool {
-			return assert.NotEmpty(t, r.GetRunningCommands())
+			return assert.NotEmpty(t, r.GetRunningCommandIds())
 		}, 1*time.Second, 20*time.Millisecond)
 
 		time.Sleep(500 * time.Millisecond) // Give some time for the command to start and some logs to be emitted
@@ -250,229 +406,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 
 		// Assert
 		assert.Empty(t, errs)
-		assert.Empty(t, r.GetRunningCommands())
-	})
-}
-
-func TestDefaultRunner_RunCommands(t *testing.T) {
-	t.Run("Should run multiple commands successfully", func(t *testing.T) {
-		// Arrange
-		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
-
-		r := runner.NewDefaultRunner(logger, emitter)
-
-		cmd1Id := "1"
-		cmd2Id := "2"
-
-		emitter.On("EmitEvent", event.ProcessStarted, cmd1Id).Return()
-		emitter.On("EmitEvent", event.ProcessFinished, cmd1Id).Maybe().Return()
-		emitter.On("EmitEvent", event.ProcessStarted, cmd2Id).Return()
-		emitter.On("EmitEvent", event.ProcessFinished, cmd2Id).Maybe().Return()
-		emitter.On("EmitEvent", event.NewLogEntry, mock.MatchedBy(func(
-			data map[string]string) bool {
-			return strings.Contains(data["line"], "echo")
-		})).Return()
-
-		// Mock log entries for both commands
-		mockEmitterLogEntry(emitter, cmd1Id, "command1 output")
-		mockEmitterLogEntry(emitter, cmd2Id, "command2 output")
-
-		logger.On("Info", mock.Anything).Return()
-		logger.On("Debug", mock.Anything).Return()
-
-		commands := []commanddomain.Command{
-			{
-				Id:               cmd1Id,
-				ProjectId:        "project1",
-				Name:             "Test Command 1",
-				Command:          "echo 'command1 output'",
-				WorkingDirectory: validWorkingDirectory(),
-				Position:         0,
-			},
-			{
-				Id:               cmd2Id,
-				ProjectId:        "project1",
-				Name:             "Test Command 2",
-				Command:          "echo 'command2 output'",
-				WorkingDirectory: validWorkingDirectory(),
-				Position:         1,
-			},
-		}
-
-		// Act
-		err := r.RunCommands(commands, execution.Environment{Paths: []string{"/test"}, BaseWorkingDirectory: "/test"})
-
-		// Wait for both commands to complete
-		r.WaitForCommand(cmd1Id)
-		r.WaitForCommand(cmd2Id)
-
-		// Assert
-		assert.NoError(t, err)
-		assert.Empty(t, r.GetRunningCommands())
-		mock.AssertExpectationsForObjects(t, emitter, logger)
-	})
-
-	t.Run("Should return error if any command fails to execute", func(t *testing.T) {
-		// Arrange
-		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
-
-		r := runner.NewDefaultRunner(logger, emitter)
-
-		cmd1Id := "1"
-		cmd2Id := "2"
-
-		// Mock for the first command to succeed
-		emitter.On("EmitEvent", event.ProcessStarted, cmd1Id).Return()
-		emitter.On("EmitEvent", event.ProcessFinished, cmd1Id).Maybe().Return()
-		emitter.On("EmitEvent", event.ProcessFinished, cmd2Id).Maybe().Return()
-		mockEmitterLogEntry(emitter, cmd1Id, "command1 output")
-
-		// For the second command, we won't set expectations because it should
-		// use a non-existent working directory, causing an error
-		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
-
-		logger.On("Info", mock.Anything).Return()
-		logger.On("Debug", mock.Anything).Return()
-
-		invalidWorkingDir := "/definitely/not/a/real/directory/12345"
-
-		commands := []commanddomain.Command{
-			{
-				Id:               cmd1Id,
-				ProjectId:        "project1",
-				Name:             "Test Command 1",
-				Command:          "echo 'command1 output'",
-				WorkingDirectory: validWorkingDirectory(),
-				Position:         0,
-			},
-			{
-				Id:               cmd2Id,
-				ProjectId:        "project1",
-				Name:             "Test Command 2",
-				Command:          "echo 'command2 output'",
-				WorkingDirectory: invalidWorkingDir,
-				Position:         1,
-			},
-		}
-
-		// Act
-		err := r.RunCommands(commands, execution.Environment{})
-
-		// Wait for the first command to complete
-		r.WaitForCommand(cmd1Id)
-
-		// Assert
-		assert.Error(t, err)
-
-		// Clean up any running commands
-		r.StopAllRunningCommands()
-
-		mock.AssertExpectationsForObjects(t, emitter, logger)
-	})
-}
-
-func TestDefaultRunner_StopRunningCommands(t *testing.T) {
-	t.Run("Should stop multiple running commands", func(t *testing.T) {
-		// Arrange
-		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
-
-		r := runner.NewDefaultRunner(logger, emitter)
-
-		cmd1Id := "1"
-		cmd2Id := "2"
-
-		emitter.On("EmitEvent", event.ProcessStarted, cmd1Id).Return()
-		emitter.On("EmitEvent", event.ProcessStarted, cmd2Id).Return()
-		emitter.On("EmitEvent", event.ProcessFinished, cmd1Id).Maybe().Return()
-		emitter.On("EmitEvent", event.ProcessFinished, cmd2Id).Maybe().Return()
-		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
-
-		logger.On("Info", mock.Anything).Return()
-		logger.On("Debug", mock.Anything).Return()
-		// Depends on OS
-		logger.On("Error", mock.Anything).Maybe().Return()
-
-		// Start two long-running commands
-		cmd1 := commanddomain.Command{
-			Id:               cmd1Id,
-			ProjectId:        "project1",
-			Name:             "Test 1",
-			Command:          infiniteCmd(),
-			WorkingDirectory: validWorkingDirectory(),
-			Position:         0,
-		}
-		cmd2 := commanddomain.Command{
-			Id:               cmd2Id,
-			ProjectId:        "project1",
-			Name:             "Test 2",
-			Command:          infiniteCmd(),
-			WorkingDirectory: validWorkingDirectory(),
-			Position:         1,
-		}
-
-		err := r.RunCommand(&cmd1, execution.Environment{})
-		assert.NoError(t, err)
-
-		err = r.RunCommand(&cmd2, execution.Environment{})
-		assert.NoError(t, err)
-
-		assert.Eventually(t, func() bool {
-			return len(r.GetRunningCommands()) == 2
-		}, 1*time.Second, 20*time.Millisecond)
-
-		time.Sleep(500 * time.Millisecond) // Give some time for the commands to start
-
-		// Act
-		commands := []commanddomain.Command{cmd1, cmd2}
-		err = r.StopRunningCommands(commands)
-
-		// Wait for commands to stop
-		r.WaitForCommand(cmd1Id)
-		r.WaitForCommand(cmd2Id)
-
-		// Assert
-		assert.NoError(t, err)
-		assert.Empty(t, r.GetRunningCommands())
-
-		mock.AssertExpectationsForObjects(t, emitter, logger)
-	})
-
-	t.Run("Should not error when stopping non-running commands", func(t *testing.T) {
-		// Arrange
-		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
-
-		r := runner.NewDefaultRunner(logger, emitter)
-
-		// Define commands that aren't running
-		cmd1 := commanddomain.Command{
-			Id:               "1",
-			ProjectId:        "project1",
-			Name:             "Test 1",
-			Command:          "echo test",
-			WorkingDirectory: validWorkingDirectory(),
-			Position:         0,
-		}
-		cmd2 := commanddomain.Command{
-			Id:               "2",
-			ProjectId:        "project1",
-			Name:             "Test 2",
-			Command:          "echo test",
-			WorkingDirectory: validWorkingDirectory(),
-			Position:         1,
-		}
-
-		// Act - try to stop commands that aren't running
-		commands := []commanddomain.Command{cmd1, cmd2}
-		err := r.StopRunningCommands(commands)
-
-		// Assert
-		assert.NoError(t, err)
-
-		mock.AssertExpectationsForObjects(t, emitter, logger)
+		assert.Empty(t, r.GetRunningCommandIds())
 	})
 }
 
@@ -593,7 +527,7 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 
 		// Assert
 		assert.NoError(t, err)
-		assert.Empty(t, r.GetRunningCommands())
+		assert.Empty(t, r.GetRunningCommandIds())
 
 		// Verify that CommandErrorDetected was called
 		mock.AssertExpectationsForObjects(t, emitter, logger)
