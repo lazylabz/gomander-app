@@ -1,5 +1,7 @@
 package eventbus
 
+import "errors"
+
 type Event interface {
 	GetName() string
 }
@@ -27,6 +29,24 @@ func NewInMemoryEventBus() *InMemoryEventBus {
 func (e *InMemoryEventBus) RegisterHandler(handler EventHandler) {
 	eventName := handler.GetEvent().GetName()
 	e.eventHandlers[eventName] = append(e.eventHandlers[eventName], handler)
+}
+
+// Combined answers the handler failures PublishSync reported as one error,
+// listed under summary, or nil when there were none. Every operation that
+// publishes an event has to report what its handlers did to the user, and this
+// is the one place that decides how that reads.
+func Combined(summary string, errs []error) error {
+	if len(errs) == 0 {
+		return nil
+	}
+
+	message := summary
+
+	for _, err := range errs {
+		message += "\n- " + err.Error()
+	}
+
+	return errors.New(message)
 }
 
 func (e *InMemoryEventBus) PublishSync(event Event) []error {
