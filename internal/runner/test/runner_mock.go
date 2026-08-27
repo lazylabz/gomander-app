@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	commanddomain "gomander/internal/command/domain"
+	"gomander/internal/execution"
 )
 
 type MockRunner struct {
@@ -15,13 +16,13 @@ func (m *MockRunner) StopRunningCommands(commands []commanddomain.Command) error
 	return args.Error(0)
 }
 
-func (m *MockRunner) RunCommands(commands []commanddomain.Command, environmentPaths []string, baseWorkingDirectory string) error {
-	args := m.Called(commands, environmentPaths, baseWorkingDirectory)
+func (m *MockRunner) RunCommands(commands []commanddomain.Command, environment execution.Environment) error {
+	args := m.Called(commands, environment)
 	return args.Error(0)
 }
 
-func (m *MockRunner) RunCommand(command *commanddomain.Command, environmentPaths []string, baseWorkingDirectory string) error {
-	args := m.Called(command, environmentPaths, baseWorkingDirectory)
+func (m *MockRunner) RunCommand(command *commanddomain.Command, environment execution.Environment) error {
+	args := m.Called(command, environment)
 	return args.Error(0)
 }
 

@@ -118,7 +118,7 @@ func New(t *testing.T) *Harness {
 			DeleteCommandGroup:            commandgroupusecases.NewDeleteCommandGroup(commandGroupRepo, ee),
 			RemoveCommandFromCommandGroup: commandgroupusecases.NewRemoveCommandFromCommandGroup(commandGroupRepo),
 			ReorderCommandGroups:          commandgroupusecases.NewReorderCommandGroups(openedProject, commandGroupRepo),
-			RunCommandGroup:               commandgroupusecases.NewRunCommandGroup(configRepo, commandRepo, commandGroupRepo, projectRepo, processRunner),
+			RunCommandGroup:               commandgroupusecases.NewRunCommandGroup(openedProject, commandGroupRepo, processRunner),
 			StopCommandGroup:              commandgroupusecases.NewStopCommandGroup(commandGroupRepo, processRunner),
 
 			GetCommands:          commandusecases.NewGetCommands(openedProject, commandRepo),
@@ -127,7 +127,7 @@ func New(t *testing.T) *Harness {
 			RemoveCommand:        commandusecases.NewRemoveCommand(commandRepo, eventBus),
 			EditCommand:          commandusecases.NewEditCommand(commandRepo),
 			ReorderCommands:      commandusecases.NewReorderCommands(openedProject, commandRepo),
-			RunCommand:           commandusecases.NewRunCommand(configRepo, commandRepo, projectRepo, processRunner),
+			RunCommand:           commandusecases.NewRunCommand(openedProject, commandRepo, processRunner),
 			StopCommand:          commandusecases.NewStopCommand(commandRepo, processRunner),
 			GetRunningCommandIds: commandusecases.NewGetRunningCommandIds(processRunner),
 		},

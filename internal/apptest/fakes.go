@@ -11,12 +11,12 @@ import (
 
 	commanddomain "gomander/internal/command/domain"
 	"gomander/internal/event"
+	"gomander/internal/execution"
 )
 
 type StartedProcess struct {
-	Command              commanddomain.Command
-	EnvironmentPaths     []string
-	BaseWorkingDirectory string
+	Command     commanddomain.Command
+	Environment execution.Environment
 }
 
 type EmittedEvent struct {
@@ -41,7 +41,7 @@ type processRunnerFake struct {
 	runningIds        []string
 }
 
-func (r *processRunnerFake) RunCommand(command *commanddomain.Command, environmentPaths []string, baseWorkingDirectory string) error {
+func (r *processRunnerFake) RunCommand(command *commanddomain.Command, environment execution.Environment) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
@@ -50,18 +50,17 @@ func (r *processRunnerFake) RunCommand(command *commanddomain.Command, environme
 	}
 
 	r.startedProcesses = append(r.startedProcesses, StartedProcess{
-		Command:              *command,
-		EnvironmentPaths:     environmentPaths,
-		BaseWorkingDirectory: baseWorkingDirectory,
+		Command:     *command,
+		Environment: environment,
 	})
 	r.runningIds = append(r.runningIds, command.Id)
 
 	return nil
 }
 
-func (r *processRunnerFake) RunCommands(commands []commanddomain.Command, environmentPaths []string, baseWorkingDirectory string) error {
+func (r *processRunnerFake) RunCommands(commands []commanddomain.Command, environment execution.Environment) error {
 	for i := range commands {
-		if err := r.RunCommand(&commands[i], environmentPaths, baseWorkingDirectory); err != nil {
+		if err := r.RunCommand(&commands[i], environment); err != nil {
 			return err
 		}
 	}
