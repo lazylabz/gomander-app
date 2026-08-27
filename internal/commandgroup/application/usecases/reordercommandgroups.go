@@ -4,8 +4,8 @@ import (
 	"sort"
 
 	"gomander/internal/commandgroup/domain"
-	configdomain "gomander/internal/config/domain"
 	"gomander/internal/helpers/array"
+	"gomander/internal/openedproject"
 )
 
 type ReorderCommandGroups interface {
@@ -13,24 +13,24 @@ type ReorderCommandGroups interface {
 }
 
 type DefaultReorderCommandGroups struct {
-	configRepository       configdomain.Repository
+	openedProject          openedproject.OpenedProject
 	commandGroupRepository domain.Repository
 }
 
-func NewReorderCommandGroups(configRepo configdomain.Repository, commandGroupRepo domain.Repository) *DefaultReorderCommandGroups {
+func NewReorderCommandGroups(openedProject openedproject.OpenedProject, commandGroupRepo domain.Repository) *DefaultReorderCommandGroups {
 	return &DefaultReorderCommandGroups{
-		configRepository:       configRepo,
+		openedProject:          openedProject,
 		commandGroupRepository: commandGroupRepo,
 	}
 }
 
 func (uc *DefaultReorderCommandGroups) Execute(newOrderedIds []string) error {
-	userConfig, err := uc.configRepository.GetOrCreate()
+	project, err := uc.openedProject.Get()
 	if err != nil {
 		return err
 	}
 
-	existingCommandGroups, err := uc.commandGroupRepository.GetAll(userConfig.LastOpenedProjectId)
+	existingCommandGroups, err := uc.commandGroupRepository.GetAll(project.Id)
 	if err != nil {
 		return err
 	}

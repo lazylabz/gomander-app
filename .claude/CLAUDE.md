@@ -86,6 +86,7 @@ internal/                # Core business logic organized by domain
 │   └── infrastructure/  # GORM repository implementations
 ├── commandgroup/        # Command group domain (bundle and run multiple commands)
 ├── project/             # Project domain (organize commands by project)
+├── openedproject/       # Which Project is open: the one place that answers it
 ├── config/              # User configuration domain
 ├── event/               # Domain events system
 ├── eventbus/            # In-memory event bus for domain events

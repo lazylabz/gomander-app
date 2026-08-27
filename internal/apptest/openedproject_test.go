@@ -7,8 +7,10 @@ import (
 
 	"gomander/internal/apptest"
 	commandtest "gomander/internal/command/domain/test"
+	commandgrouptest "gomander/internal/commandgroup/domain/test"
 	"gomander/internal/domainerrors"
 	"gomander/internal/helpers/array"
+	"gomander/internal/openedproject"
 	projecttest "gomander/internal/project/domain/test"
 )
 
@@ -110,4 +112,101 @@ func TestResolvingTheOpenedProject(t *testing.T) {
 		// Assert
 		assert.Equal(t, []string{ownCommand.Id}, array.Map(commands, commandId))
 	})
+
+	t.Run("Should scope the command groups the app shows to the opened project", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		opened := projecttest.NewProjectBuilder().Build()
+		other := projecttest.NewProjectBuilder().Build()
+		h.GivenProjects(opened, other)
+		h.GivenOpenedProject(opened.Id)
+
+		ownCommand := commandtest.NewCommandBuilder().WithProjectId(opened.Id).Build()
+		otherCommand := commandtest.NewCommandBuilder().WithProjectId(other.Id).Build()
+		h.GivenCommands(ownCommand, otherCommand)
+
+		ownGroup := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId(opened.Id).WithCommands(ownCommand).Build()
+		otherGroup := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId(other.Id).WithCommands(otherCommand).Build()
+		h.GivenCommandGroups(ownGroup, otherGroup)
+
+		// Act
+		groups := commandGroupsOf(t, h)
+
+		// Assert
+		assert.Equal(t, []string{ownGroup.Id}, array.Map(groups, commandGroupId))
+	})
+
+	t.Run("Should show no commands and no command groups while no project is open", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		project := projecttest.NewProjectBuilder().Build()
+		h.GivenProjects(project)
+
+		command := commandtest.NewCommandBuilder().WithProjectId(project.Id).Build()
+		h.GivenCommands(command)
+		h.GivenCommandGroups(commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId(project.Id).WithCommands(command).Build())
+
+		// Act & Assert
+		assert.Empty(t, commandsOf(t, h))
+		assert.Empty(t, commandGroupsOf(t, h))
+	})
+}
+
+// The operations below place something in the opened project, so there is
+// nothing they can mean while the user has none open.
+func TestOperatingWithoutAnOpenedProject(t *testing.T) {
+	operations := []struct {
+		name    string
+		execute func(h *apptest.Harness) error
+	}{
+		{
+			name: "add a command",
+			execute: func(h *apptest.Harness) error {
+				return h.UseCases.AddCommand.Execute(commandtest.NewCommandBuilder().Build())
+			},
+		},
+		{
+			name: "duplicate a command",
+			execute: func(h *apptest.Harness) error {
+				return h.UseCases.DuplicateCommand.Execute("any-command", "")
+			},
+		},
+		{
+			name: "reorder the commands",
+			execute: func(h *apptest.Harness) error {
+				return h.UseCases.ReorderCommands.Execute([]string{"any-command"})
+			},
+		},
+		{
+			name: "create a command group",
+			execute: func(h *apptest.Harness) error {
+				group := commandgrouptest.NewCommandGroupBuilder().Build()
+				return h.UseCases.CreateCommandGroup.Execute(&group)
+			},
+		},
+		{
+			name: "reorder the command groups",
+			execute: func(h *apptest.Harness) error {
+				return h.UseCases.ReorderCommandGroups.Execute([]string{"any-group"})
+			},
+		},
+	}
+
+	for _, operation := range operations {
+		t.Run("Should refuse to "+operation.name, func(t *testing.T) {
+			// Arrange
+			h := apptest.New(t)
+
+			// Act
+			err := operation.execute(h)
+
+			// Assert
+			assert.ErrorIs(t, err, openedproject.ErrNoneOpen)
+		})
+	}
 }

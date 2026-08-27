@@ -57,6 +57,31 @@ func TestOrderingCommands(t *testing.T) {
 		assert.NotEqual(t, original.Id, commands[2].Id)
 	})
 
+	t.Run("Should add a duplicated command to the group it was duplicated into", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+		project := givenAnOpenedProject(h)
+
+		original := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(0).Build()
+		h.GivenCommands(original)
+
+		group := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId(project.Id).
+			WithCommands(original).
+			Build()
+		h.GivenCommandGroups(group)
+
+		// Act
+		err := h.UseCases.DuplicateCommand.Execute(original.Id, group.Id)
+
+		// Assert
+		assert.NoError(t, err)
+		commands := commandsOf(t, h)
+		groups := commandGroupsOf(t, h)
+		assert.Len(t, groups, 1)
+		assert.Equal(t, []string{original.Id, commands[1].Id}, array.Map(groups[0].Commands, commandId))
+	})
+
 	t.Run("Should renumber the list when commands are reordered", func(t *testing.T) {
 		// Arrange
 		h := apptest.New(t)

@@ -7,8 +7,8 @@ import (
 
 	"gomander/internal/command/domain"
 	domainevent "gomander/internal/command/domain/event"
-	configdomain "gomander/internal/config/domain"
 	"gomander/internal/eventbus"
+	"gomander/internal/openedproject"
 )
 
 type DuplicateCommand interface {
@@ -16,21 +16,21 @@ type DuplicateCommand interface {
 }
 
 type DefaultDuplicateCommand struct {
-	configRepository  configdomain.Repository
+	openedProject     openedproject.OpenedProject
 	commandRepository domain.Repository
 	eventBus          eventbus.EventBus
 }
 
-func NewDuplicateCommand(configRepo configdomain.Repository, commandRepo domain.Repository, eventBus eventbus.EventBus) *DefaultDuplicateCommand {
+func NewDuplicateCommand(openedProject openedproject.OpenedProject, commandRepo domain.Repository, eventBus eventbus.EventBus) *DefaultDuplicateCommand {
 	return &DefaultDuplicateCommand{
-		configRepository:  configRepo,
+		openedProject:     openedProject,
 		commandRepository: commandRepo,
 		eventBus:          eventBus,
 	}
 }
 
 func (uc *DefaultDuplicateCommand) Execute(commandId, targetGroupId string) error {
-	userConfig, err := uc.configRepository.GetOrCreate()
+	project, err := uc.openedProject.Get()
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func (uc *DefaultDuplicateCommand) Execute(commandId, targetGroupId string) erro
 		return err
 	}
 
-	allCommands, err := uc.commandRepository.GetAll(userConfig.LastOpenedProjectId)
+	allCommands, err := uc.commandRepository.GetAll(project.Id)
 	if err != nil {
 		return err
 	}

@@ -1,7 +1,7 @@
 package usecases
 
 import (
-	configdomain "gomander/internal/config/domain"
+	"gomander/internal/openedproject"
 )
 
 type CloseProject interface {
@@ -9,27 +9,15 @@ type CloseProject interface {
 }
 
 type DefaultCloseProject struct {
-	configRepository configdomain.Repository
+	openedProject openedproject.OpenedProject
 }
 
-func NewCloseProject(configRepo configdomain.Repository) *DefaultCloseProject {
+func NewCloseProject(openedProject openedproject.OpenedProject) *DefaultCloseProject {
 	return &DefaultCloseProject{
-		configRepository: configRepo,
+		openedProject: openedProject,
 	}
 }
 
 func (uc *DefaultCloseProject) Execute() error {
-	config, err := uc.configRepository.GetOrCreate()
-	if err != nil {
-		return err
-	}
-
-	config.LastOpenedProjectId = ""
-
-	err = uc.configRepository.Update(config)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return uc.openedProject.Close()
 }

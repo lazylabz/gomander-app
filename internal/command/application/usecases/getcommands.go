@@ -2,7 +2,7 @@ package usecases
 
 import (
 	"gomander/internal/command/domain"
-	configdomain "gomander/internal/config/domain"
+	"gomander/internal/openedproject"
 )
 
 type GetCommands interface {
@@ -10,21 +10,25 @@ type GetCommands interface {
 }
 
 type DefaultGetCommands struct {
-	configRepository  configdomain.Repository
+	openedProject     openedproject.OpenedProject
 	commandRepository domain.Repository
 }
 
-func NewGetCommands(configRepo configdomain.Repository, commandRepo domain.Repository) *DefaultGetCommands {
+func NewGetCommands(openedProject openedproject.OpenedProject, commandRepo domain.Repository) *DefaultGetCommands {
 	return &DefaultGetCommands{
-		configRepository:  configRepo,
+		openedProject:     openedProject,
 		commandRepository: commandRepo,
 	}
 }
 
 func (uc *DefaultGetCommands) Execute() ([]domain.Command, error) {
-	userConfig, err := uc.configRepository.GetOrCreate()
+	project, open, err := uc.openedProject.Find()
 	if err != nil {
 		return make([]domain.Command, 0), err
 	}
-	return uc.commandRepository.GetAll(userConfig.LastOpenedProjectId)
+	if !open {
+		return make([]domain.Command, 0), nil
+	}
+
+	return uc.commandRepository.GetAll(project.Id)
 }

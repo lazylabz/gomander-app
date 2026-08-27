@@ -2,7 +2,7 @@ package usecases
 
 import (
 	"gomander/internal/commandgroup/domain"
-	configdomain "gomander/internal/config/domain"
+	"gomander/internal/openedproject"
 )
 
 type CreateCommandGroup interface {
@@ -10,24 +10,24 @@ type CreateCommandGroup interface {
 }
 
 type DefaultCreateCommandGroup struct {
-	configRepository       configdomain.Repository
+	openedProject          openedproject.OpenedProject
 	commandGroupRepository domain.Repository
 }
 
-func NewCreateCommandGroup(configRepo configdomain.Repository, commandGroupRepo domain.Repository) *DefaultCreateCommandGroup {
+func NewCreateCommandGroup(openedProject openedproject.OpenedProject, commandGroupRepo domain.Repository) *DefaultCreateCommandGroup {
 	return &DefaultCreateCommandGroup{
-		configRepository:       configRepo,
+		openedProject:          openedProject,
 		commandGroupRepository: commandGroupRepo,
 	}
 }
 
 func (uc *DefaultCreateCommandGroup) Execute(commandGroup *domain.CommandGroup) error {
-	userConfig, err := uc.configRepository.GetOrCreate()
+	project, err := uc.openedProject.Get()
 	if err != nil {
 		return err
 	}
 
-	existingCommandGroups, err := uc.commandGroupRepository.GetAll(userConfig.LastOpenedProjectId)
+	existingCommandGroups, err := uc.commandGroupRepository.GetAll(project.Id)
 	if err != nil {
 		return err
 	}
