@@ -1,8 +1,6 @@
 package usecases
 
 import (
-	"errors"
-
 	"github.com/google/uuid"
 
 	"gomander/internal/command/domain"
@@ -59,19 +57,8 @@ func (uc *DefaultDuplicateCommand) Execute(commandId, targetGroupId string) erro
 
 	domainEvent := domainevent.NewCommandDuplicatedEvent(duplicatedCommand.Id, targetGroupId)
 
-	errs := uc.eventBus.PublishSync(domainEvent)
-
-	if len(errs) > 0 {
-		combinedErrMsg := "Errors occurred while duplicating command:"
-
-		for _, pubErr := range errs {
-			combinedErrMsg += "\n- " + pubErr.Error()
-		}
-
-		err = errors.New(combinedErrMsg)
-
-		return err
-	}
-
-	return nil
+	return eventbus.Combined(
+		"Errors occurred while duplicating command:",
+		uc.eventBus.PublishSync(domainEvent),
+	)
 }

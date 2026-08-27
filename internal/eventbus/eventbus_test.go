@@ -112,3 +112,25 @@ func TestPublishSync_NoHandlers(t *testing.T) {
 		t.Errorf("Expected no errors, got %v", errs)
 	}
 }
+
+func TestCombined(t *testing.T) {
+	t.Run("Should answer no error when no handler failed", func(t *testing.T) {
+		// Act & Assert
+		assert.NoError(t, eventbus.Combined("Errors occurred while doing something:", make([]error, 0)))
+	})
+
+	t.Run("Should list the failures under the summary", func(t *testing.T) {
+		// Arrange
+		errs := []error{errors.New("first went wrong"), errors.New("second went wrong")}
+
+		// Act
+		err := eventbus.Combined("Errors occurred while doing something:", errs)
+
+		// Assert
+		assert.EqualError(
+			t,
+			err,
+			"Errors occurred while doing something:\n- first went wrong\n- second went wrong",
+		)
+	})
+}

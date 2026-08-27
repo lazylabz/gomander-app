@@ -38,7 +38,10 @@ func (uc *DefaultRemoveCommand) Execute(commandId string) error {
 	// The Command is gone, so the handlers that clean up after it run whatever
 	// the renumbering behind them does: a Command Group still holding a deleted
 	// Command is worse than a gap in the sequence.
-	publishErr := uc.publishDeleted(commandId)
+	publishErr := eventbus.Combined(
+		"Errors occurred while removing command:",
+		uc.eventBus.PublishSync(domainevent.NewCommandDeletedEvent(commandId)),
+	)
 
 	if removedCommand != nil {
 		err = uc.closeTheGapLeftIn(removedCommand.ProjectId)
@@ -48,22 +51,6 @@ func (uc *DefaultRemoveCommand) Execute(commandId string) error {
 	}
 
 	return publishErr
-}
-
-func (uc *DefaultRemoveCommand) publishDeleted(commandId string) error {
-	errs := uc.eventBus.PublishSync(domainevent.NewCommandDeletedEvent(commandId))
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	combinedErrMsg := "Errors occurred while removing command:"
-
-	for _, pubErr := range errs {
-		combinedErrMsg += "\n- " + pubErr.Error()
-	}
-
-	return errors.New(combinedErrMsg)
 }
 
 func (uc *DefaultRemoveCommand) closeTheGapLeftIn(projectId string) error {

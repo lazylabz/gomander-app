@@ -1,8 +1,6 @@
 package usecases
 
 import (
-	"errors"
-
 	"gomander/internal/eventbus"
 	"gomander/internal/logger"
 	"gomander/internal/project/domain"
@@ -41,18 +39,9 @@ func (uc *DefaultDeleteProject) Execute(projectId string) error {
 
 	errs := uc.eventBus.PublishSync(domainEvent)
 
-	if len(errs) > 0 {
-		combinedErrMsg := "Errors occurred while removing project:"
-
-		for _, pubErr := range errs {
-			combinedErrMsg += "\n- " + pubErr.Error()
-			uc.logger.Error(pubErr.Error())
-		}
-
-		err = errors.New(combinedErrMsg)
-
-		return err
+	for _, pubErr := range errs {
+		uc.logger.Error(pubErr.Error())
 	}
 
-	return nil
+	return eventbus.Combined("Errors occurred while removing project:", errs)
 }
