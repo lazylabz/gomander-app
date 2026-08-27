@@ -12,9 +12,6 @@ type MockCommandRepository struct {
 
 func (m *MockCommandRepository) Get(id string) (commanddomain.Command, error) {
 	args := m.Called(id)
-	if args.Get(0) == nil {
-		return commanddomain.Command{}, args.Error(1)
-	}
 	return args.Get(0).(commanddomain.Command), args.Error(1)
 }
 
