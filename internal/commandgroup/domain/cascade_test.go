@@ -43,6 +43,24 @@ func TestRemoveCommandFrom(t *testing.T) {
 		}))
 	})
 
+	t.Run("Should make a command group cease to exist when the command is already gone from it", func(t *testing.T) {
+		// The Command row is deleted before the event that brings us here, so a
+		// Command Group that held nothing else arrives already empty. It has
+		// still lost its last Command.
+
+		// Arrange
+		emptied := commandgrouptest.NewCommandGroupBuilder().WithCommands().Build()
+
+		// Act
+		cascade := domain.RemoveCommandFrom([]domain.CommandGroup{emptied}, "already-deleted-command")
+
+		// Assert
+		assert.Empty(t, cascade.Survived)
+		assert.Equal(t, []string{emptied.Id}, array.Map(cascade.Deleted, func(cg domain.CommandGroup) string {
+			return cg.Id
+		}))
+	})
+
 	t.Run("Should decide each command group on its own", func(t *testing.T) {
 		// Arrange
 		removed := commandtest.NewCommandBuilder().Build()

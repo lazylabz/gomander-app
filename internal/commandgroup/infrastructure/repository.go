@@ -74,7 +74,7 @@ func (r GormCommandGroupRepository) Get(id string) (domain.CommandGroup, error) 
 func (r GormCommandGroupRepository) find(condition string, args ...any) ([]domain.CommandGroup, error) {
 	var rows []commandGroupRow
 
-	err := r.db.Raw(fmt.Sprintf(commandGroupQuery, condition), args...).Scan(&rows).Error
+	err := r.db.WithContext(r.ctx).Raw(fmt.Sprintf(commandGroupQuery, condition), args...).Scan(&rows).Error
 	if err != nil {
 		return nil, err
 	}

@@ -16,6 +16,13 @@ type Cascade struct {
 // RemoveCommandFrom drops the Command from every Command Group given and
 // applies the rule that a Command Group with no Commands ceases to exist. It
 // answers only what is left; persisting that answer atomically is the caller's.
+//
+// Give it the Command Groups that held the Command, which
+// Repository.GetAllContaining answers from the join table. The Command row is
+// already deleted by the time this runs, so a Group arrives carrying only its
+// surviving Commands and the filter usually finds nothing to drop: emptiness
+// here means the Command was its last, and a Group empty for any other reason
+// must not be in the input.
 func RemoveCommandFrom(commandGroups []CommandGroup, commandId string) Cascade {
 	cascade := Cascade{
 		Survived: make([]CommandGroup, 0, len(commandGroups)),
