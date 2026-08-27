@@ -133,4 +133,17 @@ func TestCombined(t *testing.T) {
 			"Errors occurred while doing something:\n- first went wrong\n- second went wrong",
 		)
 	})
+
+	t.Run("Should keep each failure in the chain, so a caller can tell them apart", func(t *testing.T) {
+		// Arrange
+		first := errors.New("first went wrong")
+		second := errors.New("second went wrong")
+
+		// Act
+		err := eventbus.Combined("Errors occurred while doing something:", []error{first, second})
+
+		// Assert
+		assert.ErrorIs(t, err, first)
+		assert.ErrorIs(t, err, second)
+	})
 }

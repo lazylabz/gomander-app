@@ -31,5 +31,5 @@ func (uc *RemoveCommandFromCommandGroup) Execute(commandId, commandGroupId strin
 		return cmd.Id != commandId
 	})
 
-	return uc.commandGroupRepository.Update(commandGroup)
+	return uc.commandGroupRepository.Update(&commandGroup)
 }

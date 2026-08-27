@@ -6,8 +6,10 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"gomander/internal/apptest"
+	commanddomain "gomander/internal/command/domain"
 	commandtest "gomander/internal/command/domain/test"
 	commandgrouptest "gomander/internal/commandgroup/domain/test"
+	"gomander/internal/domainerrors"
 	"gomander/internal/event"
 	"gomander/internal/helpers/array"
 )
@@ -87,5 +89,125 @@ func TestACommandGroupLosingItsLastCommand(t *testing.T) {
 		groups := commandGroupsOf(t, h)
 		assert.Len(t, groups, 1)
 		assert.Equal(t, []string{onlyCommand.Id}, array.Map(groups[0].Commands, commandId))
+	})
+}
+
+func TestRemovingACommandFromACommandGroup(t *testing.T) {
+	t.Run("Should leave the group with its other commands, and the command itself untouched", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+		project := givenAnOpenedProject(h)
+
+		removed := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(0).Build()
+		kept := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(1).Build()
+		h.GivenCommands(removed, kept)
+
+		group := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId(project.Id).
+			WithCommands(removed, kept).
+			Build()
+		h.GivenCommandGroups(group)
+
+		// Act
+		err := h.UseCases.RemoveCommandFromCommandGroup.Execute(removed.Id, group.Id)
+
+		// Assert
+		assert.NoError(t, err)
+
+		groups := commandGroupsOf(t, h)
+		assert.Len(t, groups, 1)
+		assert.Equal(t, []string{kept.Id}, array.Map(groups[0].Commands, commandId))
+
+		// Leaving a group is not leaving the project.
+		assert.Equal(t, []string{removed.Id, kept.Id}, array.Map(commandsOf(t, h), commandId))
+	})
+}
+
+// A Command Group id reaches the backend from UI state that can be stale: the
+// Group it names may be gone by the time the operation runs.
+func TestOperatingOnACommandGroupThatIsNotThere(t *testing.T) {
+	const missingCommandGroupId = "deleted-command-group"
+
+	// The two operations that name a Command as well as a Group are handed one
+	// that is really there, so the absence under test is only ever the Group's.
+	operations := []struct {
+		name    string
+		execute func(h *apptest.Harness, command commanddomain.Command) error
+	}{
+		{
+			name: "run it",
+			execute: func(h *apptest.Harness, _ commanddomain.Command) error {
+				return h.UseCases.RunCommandGroup.Execute(missingCommandGroupId)
+			},
+		},
+		{
+			name: "stop it",
+			execute: func(h *apptest.Harness, _ commanddomain.Command) error {
+				return h.UseCases.StopCommandGroup.Execute(missingCommandGroupId)
+			},
+		},
+		{
+			name: "delete it",
+			execute: func(h *apptest.Harness, _ commanddomain.Command) error {
+				return h.UseCases.DeleteCommandGroup.Execute(missingCommandGroupId)
+			},
+		},
+		{
+			name: "remove a command from it",
+			execute: func(h *apptest.Harness, command commanddomain.Command) error {
+				return h.UseCases.RemoveCommandFromCommandGroup.Execute(command.Id, missingCommandGroupId)
+			},
+		},
+		{
+			name: "duplicate a command into it",
+			execute: func(h *apptest.Harness, command commanddomain.Command) error {
+				return h.UseCases.DuplicateCommand.Execute(command.Id, missingCommandGroupId)
+			},
+		},
+	}
+
+	for _, operation := range operations {
+		t.Run("Should refuse to "+operation.name, func(t *testing.T) {
+			// Arrange
+			h := apptest.New(t)
+			project := givenAnOpenedProject(h)
+
+			command := commandtest.NewCommandBuilder().WithProjectId(project.Id).Build()
+			h.GivenCommands(command)
+
+			// Act
+			err := operation.execute(h, command)
+
+			// Assert: the Command Group is what is missing, not the Project or
+			// the Command the operations resolve on the way to it.
+			assert.ErrorIs(t, err, domainerrors.ErrNotFound)
+			assert.ErrorContains(t, err, missingCommandGroupId)
+			assert.Empty(t, h.StartedProcesses())
+			assert.Empty(t, h.StoppedProcessIds())
+			assert.Empty(t, h.EmittedEvents())
+		})
+	}
+}
+
+// Duplicating creates the copy before the event that files it into a Group is
+// published, so a Group that has gone leaves the copy behind, loose in the
+// project. Pinned rather than fixed here: making the two atomic is the cascade
+// work in #241.
+func TestDuplicatingACommandIntoACommandGroupThatIsNotThere(t *testing.T) {
+	t.Run("Should leave the copy in the project it was made in", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+		project := givenAnOpenedProject(h)
+
+		original := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithName("build").Build()
+		h.GivenCommands(original)
+
+		// Act
+		err := h.UseCases.DuplicateCommand.Execute(original.Id, "deleted-command-group")
+
+		// Assert
+		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
+		assert.Equal(t, []string{"build", "build (copy)"}, array.Map(commandsOf(t, h), commandName))
+		assert.Empty(t, commandGroupsOf(t, h))
 	})
 }

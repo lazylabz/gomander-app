@@ -10,12 +10,9 @@ type MockCommandGroupRepository struct {
 	mock.Mock
 }
 
-func (m *MockCommandGroupRepository) Get(id string) (*commandgroupdomain.CommandGroup, error) {
+func (m *MockCommandGroupRepository) Get(id string) (commandgroupdomain.CommandGroup, error) {
 	args := m.Called(id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*commandgroupdomain.CommandGroup), args.Error(1)
+	return args.Get(0).(commandgroupdomain.CommandGroup), args.Error(1)
 }
 
 func (m *MockCommandGroupRepository) GetAll(projectId string) ([]commandgroupdomain.CommandGroup, error) {

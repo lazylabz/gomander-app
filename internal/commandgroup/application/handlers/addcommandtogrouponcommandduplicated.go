@@ -59,7 +59,7 @@ func (h *DefaultAddCommandToGroupOnCommandDuplicated) Execute(e eventbus.Event) 
 
 	commandGroup.Commands = append(commandGroup.Commands, command)
 
-	if err := h.commandGroupRepository.Update(commandGroup); err != nil {
+	if err := h.commandGroupRepository.Update(&commandGroup); err != nil {
 		return err
 	}
 

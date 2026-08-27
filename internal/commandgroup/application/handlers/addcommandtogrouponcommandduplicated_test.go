@@ -11,6 +11,7 @@ import (
 	commanddomainevent "gomander/internal/command/domain/event"
 	"gomander/internal/command/domain/test"
 	"gomander/internal/commandgroup/application/handlers"
+	commandgroupdomain "gomander/internal/commandgroup/domain"
 	test2 "gomander/internal/commandgroup/domain/test"
 )
 
@@ -62,7 +63,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 		expectedUpdatedGroup := existingGroup
 		expectedUpdatedGroup.Commands = append(expectedUpdatedGroup.Commands, duplicatedCommand)
 
-		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(&existingGroup, nil)
+		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(existingGroup, nil)
 		mockCommandRepo.On("Get", event.CommandId).Return(duplicatedCommand, nil)
 		mockCommandGroupRepo.On("Update", &expectedUpdatedGroup).Return(nil)
 
@@ -88,7 +89,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 		duplicatedCommand := test.NewCommandBuilder().WithId("cmd-1").Build()
 		existingGroup := test2.NewCommandGroupBuilder().WithCommands(duplicatedCommand).Build()
 
-		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(&existingGroup, nil)
+		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(existingGroup, nil)
 
 		// Act
 		err := handler.Execute(event)
@@ -125,7 +126,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 		}
 
 		expectedError := errors.New("group not found")
-		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(nil, expectedError)
+		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(commandgroupdomain.CommandGroup{}, expectedError)
 
 		// Act
 		err := handler.Execute(event)
@@ -146,7 +147,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 		}
 
 		existingGroup := test2.NewCommandGroupBuilder().Build()
-		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(&existingGroup, nil)
+		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(existingGroup, nil)
 
 		expectedError := errors.New("command not found")
 		mockCommandRepo.On("Get", event.CommandId).Return(commanddomain.Command{}, expectedError)
@@ -178,7 +179,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 
 		expectedError := errors.New("update error")
 
-		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(&existingGroup, nil)
+		mockCommandGroupRepo.On("Get", event.InsideGroupId).Return(existingGroup, nil)
 		mockCommandRepo.On("Get", event.CommandId).Return(duplicatedCommand, nil)
 		mockCommandGroupRepo.On("Update", &expectedUpdatedGroup).Return(expectedError)
 

@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"gomander/internal/commandgroup/domain"
+	"gomander/internal/domainerrors"
 	"gomander/internal/helpers/array"
 )
 
@@ -43,14 +44,12 @@ func (r GormCommandGroupRepository) GetAll(projectId string) ([]domain.CommandGr
 		if err != nil {
 			return nil, err
 		}
-		if cg != nil {
-			commandGroups = append(commandGroups, *cg)
-		}
+		commandGroups = append(commandGroups, cg)
 	}
 	return commandGroups, nil
 }
 
-func (r GormCommandGroupRepository) Get(id string) (*domain.CommandGroup, error) {
+func (r GormCommandGroupRepository) Get(id string) (domain.CommandGroup, error) {
 	var cgModel CommandGroupModel
 	err := r.db.Where("id = ?", id).
 		Preload("Commands", func(db *gorm.DB) *gorm.DB {
@@ -62,12 +61,12 @@ func (r GormCommandGroupRepository) Get(id string) (*domain.CommandGroup, error)
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
+			return domain.CommandGroup{}, domainerrors.NotFound("command group", id)
 		}
-		return nil, err
+		return domain.CommandGroup{}, err
 	}
 
-	return ToDomainCommandGroup(cgModel), err
+	return ToDomainCommandGroup(cgModel), nil
 }
 
 func (r GormCommandGroupRepository) Create(commandGroup *domain.CommandGroup) error {
@@ -205,7 +204,7 @@ func (r GormCommandGroupRepository) DeleteEmpty() ([]domain.CommandGroup, error)
 	}
 
 	return array.Map(entriesToDelete, func(entry CommandGroupModel) domain.CommandGroup {
-		return *ToDomainCommandGroup(entry)
+		return ToDomainCommandGroup(entry)
 	}), nil
 }
 
