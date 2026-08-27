@@ -60,7 +60,7 @@ var testCases = []struct {
 	},
 }
 
-func TestDefaultGetProjectToImport_Execute(t *testing.T) {
+func TestGetProjectToImport_Execute(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run("Should return project import for "+string(testCase.fileType), func(t *testing.T) {
 			// Arrange

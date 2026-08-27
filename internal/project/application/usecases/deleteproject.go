@@ -7,11 +7,7 @@ import (
 	"gomander/internal/project/domain/event"
 )
 
-type DeleteProject interface {
-	Execute(projectId string) error
-}
-
-type DefaultDeleteProject struct {
+type DeleteProject struct {
 	projectRepository domain.Repository
 	eventBus          eventbus.EventBus
 	logger            logger.Logger
@@ -21,15 +17,15 @@ func NewDeleteProject(
 	projectRepo domain.Repository,
 	eventBus eventbus.EventBus,
 	logger logger.Logger,
-) *DefaultDeleteProject {
-	return &DefaultDeleteProject{
+) *DeleteProject {
+	return &DeleteProject{
 		projectRepository: projectRepo,
 		eventBus:          eventBus,
 		logger:            logger,
 	}
 }
 
-func (uc *DefaultDeleteProject) Execute(projectId string) error {
+func (uc *DeleteProject) Execute(projectId string) error {
 	err := uc.projectRepository.Delete(projectId)
 	if err != nil {
 		return err

@@ -12,7 +12,7 @@ import (
 	"gomander/internal/project/domain/test"
 )
 
-func TestDefaultGetAvailableProjects_Execute(t *testing.T) {
+func TestGetAvailableProjects_Execute(t *testing.T) {
 	t.Run("Should return available projects", func(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)

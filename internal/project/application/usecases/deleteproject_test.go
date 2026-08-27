@@ -14,7 +14,7 @@ import (
 	"gomander/internal/project/domain/test"
 )
 
-func TestDefaultDeleteProject_Execute(t *testing.T) {
+func TestDeleteProject_Execute(t *testing.T) {
 	t.Run("Should delete a project and all its commands", func(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)

@@ -6,21 +6,17 @@ import (
 	"strings"
 )
 
-type GetSupportedLanguages interface {
-	Execute() ([]string, error)
-}
-
-type DefaultGetSupportedLanguages struct {
+type GetSupportedLanguages struct {
 	localeFs fs.FS
 }
 
-func NewGetSupportedLanguages(localeFs fs.FS) *DefaultGetSupportedLanguages {
-	return &DefaultGetSupportedLanguages{
+func NewGetSupportedLanguages(localeFs fs.FS) *GetSupportedLanguages {
+	return &GetSupportedLanguages{
 		localeFs: localeFs,
 	}
 }
 
-func (uc *DefaultGetSupportedLanguages) Execute() ([]string, error) {
+func (uc *GetSupportedLanguages) Execute() ([]string, error) {
 	dirEntries, err := fs.ReadDir(uc.localeFs, "locales")
 	if err != nil {
 		return nil, fmt.Errorf("read locales directory: %w", err)

@@ -13,11 +13,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-type ExportProject interface {
-	Execute(projectId string) (string, error)
-}
-
-type DefaultExportProject struct {
+type ExportProject struct {
 	ctx                    context.Context
 	projectRepository      projectdomain.Repository
 	commandRepository      domain.Repository
@@ -26,8 +22,8 @@ type DefaultExportProject struct {
 	fsFacade               facade.FsFacade
 }
 
-func NewExportProject(ctx context.Context, projectRepo projectdomain.Repository, commandRepo domain.Repository, commandGroupRepo commandgroupdomain.Repository, runtimeFacade facade.RuntimeFacade, fsFacade facade.FsFacade) *DefaultExportProject {
-	return &DefaultExportProject{
+func NewExportProject(ctx context.Context, projectRepo projectdomain.Repository, commandRepo domain.Repository, commandGroupRepo commandgroupdomain.Repository, runtimeFacade facade.RuntimeFacade, fsFacade facade.FsFacade) *ExportProject {
+	return &ExportProject{
 		ctx:                    ctx,
 		projectRepository:      projectRepo,
 		commandRepository:      commandRepo,
@@ -37,7 +33,7 @@ func NewExportProject(ctx context.Context, projectRepo projectdomain.Repository,
 	}
 }
 
-func (uc *DefaultExportProject) Execute(projectId string) (string, error) {
+func (uc *ExportProject) Execute(projectId string) (string, error) {
 	project, err := uc.projectRepository.Get(projectId)
 	if err != nil {
 		return "", err

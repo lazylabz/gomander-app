@@ -14,7 +14,7 @@ import (
 //go:embed testdata
 var fullTestFs embed.FS
 
-func TestDefaultGetSupportedLanguages_Execute(t *testing.T) {
+func TestGetSupportedLanguages_Execute(t *testing.T) {
 	t.Run("Should return list of supported languages from embedded filesystem", func(t *testing.T) {
 		// Arrange
 		testFs, _ := fs.Sub(fullTestFs, "testdata")
