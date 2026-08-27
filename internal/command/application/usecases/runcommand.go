@@ -39,5 +39,5 @@ func (uc *DefaultRunCommand) Execute(commandId string) error {
 		return err
 	}
 
-	return uc.commandRunner.RunCommand(cmd, environment)
+	return uc.commandRunner.RunCommand(&cmd, environment)
 }

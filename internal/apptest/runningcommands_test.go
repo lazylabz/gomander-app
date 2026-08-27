@@ -123,6 +123,29 @@ func TestStoppingACommand(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Empty(t, h.StoppedProcessIds())
 	})
+
+	t.Run("Should report a command whose process will not stop, and leave it running", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		project := givenAnOpenedProject(h)
+
+		command := commandtest.NewCommandBuilder().WithProjectId(project.Id).Build()
+		h.GivenCommands(command)
+
+		assert.NoError(t, h.UseCases.RunCommand.Execute(command.Id))
+
+		failure := errors.New("no such process")
+		h.GivenProcessThatCannotStop(command.Id, failure)
+
+		// Act
+		err := h.UseCases.StopCommand.Execute(command.Id)
+
+		// Assert
+		assert.ErrorIs(t, err, failure)
+		assert.Empty(t, h.StoppedProcessIds())
+		assert.Equal(t, []string{command.Id}, h.UseCases.GetRunningCommandIds.Execute())
+	})
 }
 
 func TestRunningACommandGroup(t *testing.T) {

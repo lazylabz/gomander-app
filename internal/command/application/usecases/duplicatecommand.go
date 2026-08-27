@@ -39,9 +39,7 @@ func (uc *DuplicateCommand) Execute(commandId, targetGroupId string) error {
 		return err
 	}
 
-	duplicatedCommand := *originalCommand
-
-	// Override specific fields
+	duplicatedCommand := originalCommand
 	duplicatedCommand.Id = uuid.New().String()
 	duplicatedCommand.Name = originalCommand.Name + " (copy)"
 	duplicatedCommand.Position = domain.Order.End(allCommands)
