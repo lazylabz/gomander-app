@@ -8,31 +8,26 @@ import (
 	"gomander/internal/helpers/array"
 )
 
-type CleanCommandGroupsOnCommandDeleted interface {
-	Execute(e eventbus.Event) error
-	GetEvent() eventbus.Event
-}
-
-type DefaultCleanCommandGroupsOnCommandDeleted struct {
+type CleanCommandGroupsOnCommandDeleted struct {
 	commandGroupRepository commandgroupdomain.Repository
 	eventEmitter           internalEvent.EventEmitter
 }
 
-func (h *DefaultCleanCommandGroupsOnCommandDeleted) GetEvent() eventbus.Event {
+func (h *CleanCommandGroupsOnCommandDeleted) GetEvent() eventbus.Event {
 	return commanddomainevent.CommandDeletedEvent{}
 }
 
 func NewCleanCommandGroupsOnCommandDeleted(
 	commandGroupRepository commandgroupdomain.Repository,
 	eventEmitter internalEvent.EventEmitter,
-) *DefaultCleanCommandGroupsOnCommandDeleted {
-	return &DefaultCleanCommandGroupsOnCommandDeleted{
+) *CleanCommandGroupsOnCommandDeleted {
+	return &CleanCommandGroupsOnCommandDeleted{
 		commandGroupRepository: commandGroupRepository,
 		eventEmitter:           eventEmitter,
 	}
 }
 
-func (h *DefaultCleanCommandGroupsOnCommandDeleted) Execute(e eventbus.Event) error {
+func (h *CleanCommandGroupsOnCommandDeleted) Execute(e eventbus.Event) error {
 	event, ok := e.(commanddomainevent.CommandDeletedEvent)
 	if !ok {
 		return nil
@@ -55,7 +50,7 @@ func (h *DefaultCleanCommandGroupsOnCommandDeleted) Execute(e eventbus.Event) er
 // applyTheCascadeFor lets the domain decide which Command Groups survive losing
 // the Command, and writes that answer back in one transaction, so a Group is
 // never left holding a Command that is gone.
-func (h *DefaultCleanCommandGroupsOnCommandDeleted) applyTheCascadeFor(commandId string) (commandgroupdomain.Cascade, error) {
+func (h *CleanCommandGroupsOnCommandDeleted) applyTheCascadeFor(commandId string) (commandgroupdomain.Cascade, error) {
 	var cascade commandgroupdomain.Cascade
 
 	err := h.commandGroupRepository.Atomically(func(commandGroupRepository commandgroupdomain.Repository) error {
@@ -88,7 +83,7 @@ func (h *DefaultCleanCommandGroupsOnCommandDeleted) applyTheCascadeFor(commandId
 	return cascade, nil
 }
 
-func (h *DefaultCleanCommandGroupsOnCommandDeleted) closeTheGapsLeftIn(projectIds []string) error {
+func (h *CleanCommandGroupsOnCommandDeleted) closeTheGapsLeftIn(projectIds []string) error {
 	for _, projectId := range projectIds {
 		remainingCommandGroups, err := h.commandGroupRepository.GetAll(projectId)
 		if err != nil {

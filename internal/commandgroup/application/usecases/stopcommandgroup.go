@@ -5,11 +5,7 @@ import (
 	"gomander/internal/runner"
 )
 
-type StopCommandGroup interface {
-	Execute(commandGroupId string) error
-}
-
-type DefaultStopCommandGroup struct {
+type StopCommandGroup struct {
 	commandGroupRepository commandgroupdomain.Repository
 	commandRunner          runner.Runner
 }
@@ -17,14 +13,14 @@ type DefaultStopCommandGroup struct {
 func NewStopCommandGroup(
 	commandGroupRepo commandgroupdomain.Repository,
 	runner runner.Runner,
-) *DefaultStopCommandGroup {
-	return &DefaultStopCommandGroup{
+) *StopCommandGroup {
+	return &StopCommandGroup{
 		commandGroupRepository: commandGroupRepo,
 		commandRunner:          runner,
 	}
 }
 
-func (uc *DefaultStopCommandGroup) Execute(commandGroupId string) error {
+func (uc *StopCommandGroup) Execute(commandGroupId string) error {
 	cmdGroup, err := uc.commandGroupRepository.Get(commandGroupId)
 	if err != nil {
 		return err

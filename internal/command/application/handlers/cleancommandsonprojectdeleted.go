@@ -6,26 +6,21 @@ import (
 	projectdomainevent "gomander/internal/project/domain/event"
 )
 
-type CleanCommandsOnProjectDeleted interface {
-	Execute(e eventbus.Event) error
-	GetEvent() eventbus.Event
-}
-
-type DefaultCleanCommandsOnProjectDeleted struct {
+type CleanCommandsOnProjectDeleted struct {
 	commandRepository commanddomain.Repository
 }
 
-func (h *DefaultCleanCommandsOnProjectDeleted) GetEvent() eventbus.Event {
+func (h *CleanCommandsOnProjectDeleted) GetEvent() eventbus.Event {
 	return projectdomainevent.ProjectDeletedEvent{}
 }
 
-func NewCleanCommandOnProjectDeleted(commandRepository commanddomain.Repository) *DefaultCleanCommandsOnProjectDeleted {
-	return &DefaultCleanCommandsOnProjectDeleted{
+func NewCleanCommandOnProjectDeleted(commandRepository commanddomain.Repository) *CleanCommandsOnProjectDeleted {
+	return &CleanCommandsOnProjectDeleted{
 		commandRepository: commandRepository,
 	}
 }
 
-func (h *DefaultCleanCommandsOnProjectDeleted) Execute(e eventbus.Event) error {
+func (h *CleanCommandsOnProjectDeleted) Execute(e eventbus.Event) error {
 	event, ok := e.(projectdomainevent.ProjectDeletedEvent)
 	if !ok {
 		return nil

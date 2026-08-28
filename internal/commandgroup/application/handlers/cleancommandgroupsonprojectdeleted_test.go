@@ -13,7 +13,7 @@ import (
 
 // What the handler does to the Project's Command Groups is verified at the
 // application seam, in internal/apptest.
-func TestDefaultCleanCommandGroupsOnProjectDeleted(t *testing.T) {
+func TestCleanCommandGroupsOnProjectDeleted(t *testing.T) {
 	t.Run("Should do nothing if the event is of another type", func(t *testing.T) {
 		// Arrange
 		mockRepo := new(test.MockCommandGroupRepository)
@@ -30,7 +30,7 @@ func TestDefaultCleanCommandGroupsOnProjectDeleted(t *testing.T) {
 	})
 }
 
-func TestDefaultCleanCommandGroupsOnProjectDeleted_GetEvent(t *testing.T) {
+func TestCleanCommandGroupsOnProjectDeleted_GetEvent(t *testing.T) {
 	// Arrange
 	sut := handlers.NewCleanCommandGroupsOnProjectDeleted(nil, nil)
 

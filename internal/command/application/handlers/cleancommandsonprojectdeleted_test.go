@@ -17,7 +17,7 @@ func (FakeEvent) GetName() string { return "fake" }
 
 var pjId = "pj-123"
 
-func TestDefaultCleanCommandsOnProjectDeleted(t *testing.T) {
+func TestCleanCommandsOnProjectDeleted(t *testing.T) {
 	t.Run("Should remove command from command groups and delete empty groups", func(t *testing.T) {
 		// Arrange
 		mockRepo := new(test.MockCommandRepository)
@@ -65,7 +65,7 @@ func TestDefaultCleanCommandsOnProjectDeleted(t *testing.T) {
 	})
 }
 
-func TestDefaultCleanCommandsOnProjectDeleted_GetEvent(t *testing.T) {
+func TestCleanCommandsOnProjectDeleted_GetEvent(t *testing.T) {
 	// Arrange
 	handler := handlers.NewCleanCommandOnProjectDeleted(nil)
 
