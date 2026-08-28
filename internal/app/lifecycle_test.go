@@ -25,15 +25,16 @@ func TestApp_Startup(t *testing.T) {
 		mockLogger.On("Info", mock.Anything).Return()
 		mockUserConfigRepository.On("GetOrCreate").Return(&domain.Config{LastOpenedProjectId: "123"}, nil)
 
-		// Act & Assert
-		assert.NotPanics(t, func() {
-			sut.Startup(context.Background())
-		})
+		// Act
+		err := sut.Startup(context.Background())
+
+		// Assert
+		assert.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t, mockUserConfigRepository, mockLogger)
 	})
 
-	t.Run("Should panic if configuration loading fails", func(t *testing.T) {
+	t.Run("Should report an error if configuration loading fails", func(t *testing.T) {
 		// Arrange
 		mockLogger := new(loggertest.MockLogger)
 		mockUserConfigRepository := new(configtest.MockConfigRepository)
@@ -43,10 +44,11 @@ func TestApp_Startup(t *testing.T) {
 		mockLogger.On("Info", mock.Anything).Return()
 		mockUserConfigRepository.On("GetOrCreate").Return(nil, assert.AnError)
 
-		// Act & Assert
-		assert.Panics(t, func() {
-			sut.Startup(context.Background())
-		})
+		// Act
+		err := sut.Startup(context.Background())
+
+		// Assert
+		assert.ErrorIs(t, err, assert.AnError)
 
 		mock.AssertExpectationsForObjects(t, mockUserConfigRepository, mockLogger)
 	})
