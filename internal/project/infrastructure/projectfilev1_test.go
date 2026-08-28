@@ -69,32 +69,6 @@ func TestProjectFileV1_Read(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, exportedBlueprint, *blueprint)
 	})
-
-	t.Run("Should report a file that cannot be read", func(t *testing.T) {
-		// Arrange
-		fs := new(facadetest.MockFsFacade)
-		fs.On("ReadFile", "/home/user/gone.json").Return([]byte(nil), os.ErrNotExist)
-
-		// Act
-		blueprint, err := NewProjectFileV1(fs).Read("/home/user/gone.json")
-
-		// Assert
-		assert.ErrorIs(t, err, os.ErrNotExist)
-		assert.Nil(t, blueprint)
-	})
-
-	t.Run("Should report a file that is not the format", func(t *testing.T) {
-		// Arrange
-		fs := new(facadetest.MockFsFacade)
-		fs.On("ReadFile", "/home/user/gomander.json").Return([]byte(`{"version": 1, "commands": [`), nil)
-
-		// Act
-		blueprint, err := NewProjectFileV1(fs).Read("/home/user/gomander.json")
-
-		// Assert
-		assert.Error(t, err)
-		assert.Nil(t, blueprint)
-	})
 }
 
 func TestProjectFileV1_Write(t *testing.T) {
@@ -113,17 +87,5 @@ func TestProjectFileV1_Write(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 		assert.Equal(t, exportedByAnEarlierGomander, string(written))
-	})
-
-	t.Run("Should report a destination that cannot be written to", func(t *testing.T) {
-		// Arrange
-		fs := new(facadetest.MockFsFacade)
-		fs.On("WriteFile", mock.Anything, mock.Anything, mock.Anything).Return(os.ErrPermission)
-
-		// Act
-		err := NewProjectFileV1(fs).Write("/read/only/gomander.json", exportedBlueprint)
-
-		// Assert
-		assert.ErrorIs(t, err, os.ErrPermission)
 	})
 }

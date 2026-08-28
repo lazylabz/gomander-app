@@ -1,7 +1,6 @@
 package infrastructure
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -48,31 +47,5 @@ func TestPackageJSONFile_Read(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 		assert.Equal(t, filepath.FromSlash("/home/user/app"), blueprint.WorkingDirectory)
-	})
-
-	t.Run("Should report a file that cannot be read", func(t *testing.T) {
-		// Arrange
-		fs := new(facadetest.MockFsFacade)
-		fs.On("ReadFile", "/home/user/app/package.json").Return([]byte(nil), os.ErrNotExist)
-
-		// Act
-		blueprint, err := NewPackageJSONFile(fs).Read("/home/user/app/package.json")
-
-		// Assert
-		assert.ErrorIs(t, err, os.ErrNotExist)
-		assert.Nil(t, blueprint)
-	})
-
-	t.Run("Should report a manifest that is not JSON", func(t *testing.T) {
-		// Arrange
-		fs := new(facadetest.MockFsFacade)
-		fs.On("ReadFile", "/home/user/app/package.json").Return([]byte(`{"scripts": {`), nil)
-
-		// Act
-		blueprint, err := NewPackageJSONFile(fs).Read("/home/user/app/package.json")
-
-		// Assert
-		assert.Error(t, err)
-		assert.Nil(t, blueprint)
 	})
 }

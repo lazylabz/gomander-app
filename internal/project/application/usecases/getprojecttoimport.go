@@ -36,12 +36,13 @@ func NewGetProjectToImport(
 }
 
 func (uc *GetProjectToImport) Execute(fileType FileType) (*projectdomain.Blueprint, error) {
-	reader, known := uc.readers[fileType]
-	if !known {
-		return nil, fmt.Errorf("no reader for file type %q", fileType)
+	reader, canBeRead := uc.readers[fileType]
+	request, canBeAskedFor := openFileRequestByFileType[fileType]
+	if !canBeRead || !canBeAskedFor {
+		return nil, fmt.Errorf("no importable file of type %q", fileType)
 	}
 
-	filePath, err := uc.dialogs.AskForFileToOpen(openFileRequestByFileType[fileType])
+	filePath, err := uc.dialogs.AskForFileToOpen(request)
 	if err != nil {
 		return nil, err
 	}
