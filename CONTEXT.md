@@ -40,6 +40,12 @@ One running instance of a Command, owned by the Runner from spawn to
 termination.
 _Avoid_: execution, run, instance
 
+**Running Commands**:
+The set of Commands the Runner currently holds a Process for. It is what answers
+whether a Command is running and how many of a Command Group's Commands are; no
+consumer decides that for itself.
+_Avoid_: active commands, live commands, running state
+
 **Error Pattern**:
 A substring that marks a line of a Command's output as failing when the line
 contains it. A Command carries a list of them.
