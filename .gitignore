@@ -5,3 +5,4 @@ frontend/dist
 .DS_Store
 **/build/bin
 **/windows/installer/tmp/**
+.claude/worktrees
