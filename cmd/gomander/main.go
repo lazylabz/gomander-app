@@ -93,7 +93,9 @@ func main() {
 			app.RegisterHandlers()
 
 			// Start app
-			app.Startup(ctx)
+			if err := app.Startup(ctx); err != nil {
+				panic(err)
+			}
 
 			// Initialize controllers
 			controllers.loadUseCases(useCases)

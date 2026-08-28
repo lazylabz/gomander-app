@@ -96,7 +96,9 @@ func New(t *testing.T) *Harness {
 		AddCommandToGroupOnCommandDuplicated: commandgrouphandlers.NewAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo),
 	})
 	app.RegisterHandlers()
-	app.Startup(ctx)
+	if err := app.Startup(ctx); err != nil {
+		t.Fatalf("failed to start the app: %v", err)
+	}
 
 	return &Harness{
 		t: t,
