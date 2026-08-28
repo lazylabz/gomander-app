@@ -46,7 +46,16 @@ func SetProcEnv(cmd *exec.Cmd, environmentPaths []string) {
 	cmd.Env = append(cmd.Env, "PATH="+newPath)
 }
 
-func StopProcessGracefully(cmd *exec.Cmd) error {
+// StopProcessGracefully signals the process and waits on exited, which the
+// goroutine owning cmd.Wait closes. It must never call cmd.Wait itself.
+func StopProcessGracefully(cmd *exec.Cmd, exited <-chan struct{}) error {
+	select {
+	case <-exited:
+		// The Command ended on its own while it was being stopped
+		return nil
+	default:
+	}
+
 	pid := strconv.Itoa(cmd.Process.Pid)
 
 	// Try graceful termination
@@ -61,17 +70,11 @@ func StopProcessGracefully(cmd *exec.Cmd) error {
 		return exec.Command("taskkill", "/F", "/T", "/PID", pid).Run()
 	}
 
-	// Wait for graceful shutdown
-	done := make(chan error, 1)
-	go func() {
-		done <- cmd.Wait()
-	}()
-
 	select {
 	case <-time.After(5 * time.Second):
 		// Force kill if needed
 		return exec.Command("taskkill", "/F", "/T", "/PID", pid).Run()
-	case <-done:
+	case <-exited:
 		return nil
 	}
 }

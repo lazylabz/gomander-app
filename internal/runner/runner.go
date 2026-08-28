@@ -26,6 +26,10 @@ var ExpectedTerminationLogs = []string{
 type runningCommand struct {
 	cmd *exec.Cmd
 	wg  *sync.WaitGroup
+	// exited is closed by the goroutine that owns cmd.Wait, so that stopping a
+	// Command can await the exit without calling Wait a second time: os/exec
+	// forbids concurrent Wait on one Cmd.
+	exited chan struct{}
 }
 
 type DefaultRunner struct {
@@ -86,9 +90,11 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 	}
 
 	var wg sync.WaitGroup
+	exited := make(chan struct{})
 	running := runningCommand{
-		cmd: cmd,
-		wg:  &wg,
+		cmd:    cmd,
+		wg:     &wg,
+		exited: exited,
 	}
 
 	c.sendStartingLine(command)
@@ -140,15 +146,14 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 		// Wait for all pipes to finish
 		scanWg.Wait()
 
-		// If the command is still running (StopRunningCommand has not been called, this is a self-ended command), wait for it to finish
-		if cmd.ProcessState == nil {
-			err := cmd.Wait()
-			if err != nil {
-				c.sendStreamLine(command, err.Error())
+		err := cmd.Wait()
+		close(exited)
 
-				if !isExpectedError(err) {
-					c.logger.Error("[ERROR - Waiting for project]: " + err.Error())
-				}
+		if err != nil {
+			c.sendStreamLine(command, err.Error())
+
+			if !isExpectedError(err) {
+				c.logger.Error("[ERROR - Waiting for project]: " + err.Error())
 			}
 		}
 	}()
@@ -169,22 +174,23 @@ func (c *DefaultRunner) StopRunningCommand(id string) error {
 		return nil
 	}
 
-	return StopProcessGracefully(running.cmd)
+	return StopProcessGracefully(running.cmd, running.exited)
 }
 
 func (c *DefaultRunner) StopAllRunningCommands() []error {
+	// Copy under the lock: stopping is slow and the wait goroutines delete from
+	// the map as their Commands end.
+	c.mutex.Lock()
+	commandsToStop := make([]runningCommand, 0, len(c.runningCommands))
+	for _, running := range c.runningCommands {
+		commandsToStop = append(commandsToStop, running)
+	}
+	c.mutex.Unlock()
+
 	errs := make([]error, 0)
 
-	// Create a slice to hold commands to stop
-	// this is necessary because we should not modify the map while iterating over it
-	commandsToStop := make([]*exec.Cmd, 0, len(c.runningCommands))
-
-	for _, cmd := range c.runningCommands {
-		commandsToStop = append(commandsToStop, cmd.cmd)
-	}
-
-	for _, cmd := range commandsToStop {
-		err := StopProcessGracefully(cmd)
+	for _, running := range commandsToStop {
+		err := StopProcessGracefully(running.cmd, running.exited)
 
 		if err != nil {
 			errs = append(errs, err)
