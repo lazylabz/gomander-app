@@ -9,9 +9,12 @@ import (
 	"gomander/internal/helpers/array"
 )
 
-var statusJSON = map[domain.Status]string{
-	domain.Running: "running",
-	domain.Stopped: "stopped",
+func statusJSON(status domain.Status) string {
+	if status == domain.Running {
+		return "running"
+	}
+
+	return "stopped"
 }
 
 func (s *ThirdPartyIntegrationsServer) handleDiscovery(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +47,7 @@ func (s *ThirdPartyIntegrationsServer) handleGetCommands(w http.ResponseWriter, 
 		return map[string]interface{}{
 			"id":     cmd.Id,
 			"name":   cmd.Name,
-			"status": statusJSON[runningCommands.StatusOf(cmd.Id)],
+			"status": statusJSON(runningCommands.StatusOf(cmd.Id)),
 		}
 	})
 
