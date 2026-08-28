@@ -45,7 +45,7 @@ func (h *CleanCommandGroupsOnProjectDeleted) Execute(e eventbus.Event) error {
 	return nil
 }
 
-// deleteTheCommandGroupsOf works in one transaction, so a Project never
+// deleteTheCommandGroupsOf works in one Unit of Work, so a Project never
 // outlives only some of its Command Groups.
 func (h *CleanCommandGroupsOnProjectDeleted) deleteTheCommandGroupsOf(projectId string) ([]commandgroupdomain.CommandGroup, error) {
 	var deleted []commandgroupdomain.CommandGroup

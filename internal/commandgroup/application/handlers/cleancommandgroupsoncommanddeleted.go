@@ -57,7 +57,7 @@ func (h *CleanCommandGroupsOnCommandDeleted) Execute(e eventbus.Event) error {
 }
 
 // applyTheCascadeFor lets the domain decide which Command Groups survive losing
-// the Command, and writes that answer back in one transaction, so a Group is
+// the Command, and writes that answer back in one Unit of Work, so a Group is
 // never left holding a Command that is gone.
 func (h *CleanCommandGroupsOnCommandDeleted) applyTheCascadeFor(commandId string) (commandgroupdomain.Cascade, error) {
 	var cascade commandgroupdomain.Cascade
