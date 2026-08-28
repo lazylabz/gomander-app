@@ -54,7 +54,7 @@ type Harness struct {
 
 	app           *internalapp.App
 	processRunner *processRunnerFake
-	runtime       *runtimeFake
+	events        *eventSinkFake
 	dialogs       *dialogsFake
 	fs            *fsFacadeFake
 }
@@ -71,7 +71,7 @@ func New(t *testing.T) *Harness {
 	ctx := context.Background()
 	db := testdb.New(t)
 
-	runtimeFacade := &runtimeFake{}
+	events := &eventSinkFake{}
 	dialogs := &dialogsFake{}
 	fsFacade := &fsFacadeFake{files: make(map[string][]byte)}
 	processRunner := &processRunnerFake{
@@ -79,8 +79,8 @@ func New(t *testing.T) *Harness {
 		stopFailures:  make(map[string]error),
 	}
 
-	l := logger.NewDefaultLogger(ctx, runtimeFacade)
-	ee := event.NewDefaultEventEmitter(ctx, runtimeFacade)
+	l := logger.NewDefaultLogger(ctx, &logSinkFake{})
+	ee := event.NewDefaultEventEmitter(ctx, events)
 
 	commandRepo := commandinfrastructure.NewGormCommandRepository(db, ctx)
 	commandGroupRepo := commandgroupinfrastructure.NewGormCommandGroupRepository(db, ctx)
@@ -145,7 +145,7 @@ func New(t *testing.T) *Harness {
 		openedProject:          openedProject,
 		app:                    app,
 		processRunner:          processRunner,
-		runtime:                runtimeFacade,
+		events:                 events,
 		dialogs:                dialogs,
 		fs:                     fsFacade,
 	}
@@ -273,7 +273,7 @@ func (h *Harness) StoppedProcessIds() []string {
 }
 
 func (h *Harness) EmittedEvents() []EmittedEvent {
-	return h.runtime.emitted()
+	return h.events.emitted()
 }
 
 func (h *Harness) ExportedFile(path string) ([]byte, bool) {

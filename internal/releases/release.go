@@ -34,9 +34,15 @@ type XMLFeed struct {
 	} `xml:"entry"`
 }
 
+// AppControl is the app's own lifecycle, as far as the update flow needs it:
+// installing a downloaded release means quitting so the new binary can take over.
+type AppControl interface {
+	CloseApp(ctx context.Context)
+}
+
 type ReleaseHelper struct {
 	ctx                   context.Context
-	runtimeFacade         facade.RuntimeFacade
+	appControl            AppControl
 	openFacade            facade.OpenFacade
 	osFacade              facade.OSFacade
 	ioFacade              facade.IOFacade
@@ -45,7 +51,7 @@ type ReleaseHelper struct {
 }
 
 func NewReleaseHelper(
-	runtimeFacade facade.RuntimeFacade,
+	appControl AppControl,
 	openFacade facade.OpenFacade,
 	osFacade facade.OSFacade,
 	ioFacade facade.IOFacade,
@@ -53,7 +59,7 @@ func NewReleaseHelper(
 	binaryDownloadBaseUrl string,
 ) *ReleaseHelper {
 	return &ReleaseHelper{
-		runtimeFacade:         runtimeFacade,
+		appControl:            appControl,
 		openFacade:            openFacade,
 		osFacade:              osFacade,
 		ioFacade:              ioFacade,
@@ -205,6 +211,6 @@ func (rh *ReleaseHelper) InstallLatestReleaseAndQuit(binaryPath string) error {
 	}
 
 	// Close app
-	rh.runtimeFacade.CloseApp(rh.ctx)
+	rh.appControl.CloseApp(rh.ctx)
 	return nil
 }

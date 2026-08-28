@@ -19,6 +19,7 @@ import (
 	"gomander/internal/facade"
 	"gomander/internal/facade/test"
 	"gomander/internal/releases"
+	releasestest "gomander/internal/releases/test"
 )
 
 func TestApp_GetCurrentRelease(t *testing.T) {
@@ -135,7 +136,7 @@ func TestApp_IsThereANewRelease(t *testing.T) {
 		mockIOFacade.On("ReadAll", mock.Anything).Return([]byte(nil), errors.New("read failed"))
 
 		rh := releases.NewReleaseHelper(
-			&test.MockRuntimeFacade{},
+			&releasestest.MockAppControl{},
 			&test.MockOpenFacade{},
 			facade.DefaultOSFacade{},
 			mockIOFacade,
@@ -250,7 +251,7 @@ func TestReleaseHelper_DownloadLatestRelease(t *testing.T) {
 		mockOSFacade.On("Create", mock.Anything).Return(nil, errors.New("create failed"))
 
 		rh := releases.NewReleaseHelper(
-			&test.MockRuntimeFacade{},
+			&releasestest.MockAppControl{},
 			&test.MockOpenFacade{},
 			mockOSFacade,
 			facade.DefaultIOFacade{},
@@ -279,7 +280,7 @@ func TestReleaseHelper_DownloadLatestRelease(t *testing.T) {
 		mockIOFacade.On("Copy", mock.Anything, mock.Anything).Return(int64(0), errors.New("copy failed"))
 
 		rh := releases.NewReleaseHelper(
-			&test.MockRuntimeFacade{},
+			&releasestest.MockAppControl{},
 			&test.MockOpenFacade{},
 			facade.DefaultOSFacade{},
 			mockIOFacade,
@@ -305,14 +306,14 @@ func TestReleaseHelper_InstallLatestReleaseAndQuit(t *testing.T) {
 
 	t.Run("Should return an error when the binary does not exist", func(t *testing.T) {
 		// Arrange
-		mockRuntimeFacade := new(test.MockRuntimeFacade)
+		mockAppControl := new(releasestest.MockAppControl)
 		mockOSFacade := new(test.MockOSFacade)
 		mockOpenFacade := new(test.MockOpenFacade)
 
 		mockOSFacade.On("Stat", binaryPath).Return(nil, os.ErrNotExist)
 
 		rh := releases.NewReleaseHelper(
-			mockRuntimeFacade,
+			mockAppControl,
 			mockOpenFacade,
 			mockOSFacade,
 			facade.DefaultIOFacade{},
@@ -325,7 +326,7 @@ func TestReleaseHelper_InstallLatestReleaseAndQuit(t *testing.T) {
 
 		// Assert
 		assert.ErrorIs(t, err, os.ErrNotExist)
-		mockRuntimeFacade.AssertNotCalled(t, "CloseApp", mock.Anything)
+		mockAppControl.AssertNotCalled(t, "CloseApp", mock.Anything)
 		mockOpenFacade.AssertNotCalled(t, "Run", mock.Anything)
 		mock.AssertExpectationsForObjects(t, mockOSFacade)
 	})
@@ -333,16 +334,16 @@ func TestReleaseHelper_InstallLatestReleaseAndQuit(t *testing.T) {
 	t.Run("Should run the binary and close the app when the binary exists", func(t *testing.T) {
 		// Arrange
 		ctx := context.Background()
-		mockRuntimeFacade := new(test.MockRuntimeFacade)
+		mockAppControl := new(releasestest.MockAppControl)
 		mockOSFacade := new(test.MockOSFacade)
 		mockOpenFacade := new(test.MockOpenFacade)
 
 		mockOSFacade.On("Stat", binaryPath).Return(nil, nil)
 		mockOpenFacade.On("Run", expectedOpenArg(binaryPath)).Return(nil)
-		mockRuntimeFacade.On("CloseApp", ctx).Return()
+		mockAppControl.On("CloseApp", ctx).Return()
 
 		rh := releases.NewReleaseHelper(
-			mockRuntimeFacade,
+			mockAppControl,
 			mockOpenFacade,
 			mockOSFacade,
 			facade.DefaultIOFacade{},
@@ -356,12 +357,12 @@ func TestReleaseHelper_InstallLatestReleaseAndQuit(t *testing.T) {
 
 		// Assert
 		assert.NoError(t, err)
-		mock.AssertExpectationsForObjects(t, mockRuntimeFacade, mockOSFacade, mockOpenFacade)
+		mock.AssertExpectationsForObjects(t, mockAppControl, mockOSFacade, mockOpenFacade)
 	})
 
 	t.Run("Should return the error and not close the app when running the binary fails", func(t *testing.T) {
 		// Arrange
-		mockRuntimeFacade := new(test.MockRuntimeFacade)
+		mockAppControl := new(releasestest.MockAppControl)
 		mockOSFacade := new(test.MockOSFacade)
 		mockOpenFacade := new(test.MockOpenFacade)
 
@@ -369,7 +370,7 @@ func TestReleaseHelper_InstallLatestReleaseAndQuit(t *testing.T) {
 		mockOpenFacade.On("Run", expectedOpenArg(binaryPath)).Return(assert.AnError)
 
 		rh := releases.NewReleaseHelper(
-			mockRuntimeFacade,
+			mockAppControl,
 			mockOpenFacade,
 			mockOSFacade,
 			facade.DefaultIOFacade{},
@@ -383,14 +384,14 @@ func TestReleaseHelper_InstallLatestReleaseAndQuit(t *testing.T) {
 
 		// Assert
 		assert.ErrorIs(t, err, assert.AnError)
-		mockRuntimeFacade.AssertNotCalled(t, "CloseApp", mock.Anything)
+		mockAppControl.AssertNotCalled(t, "CloseApp", mock.Anything)
 		mock.AssertExpectationsForObjects(t, mockOSFacade, mockOpenFacade)
 	})
 }
 
 func newDefaultReleaseHelper(latestReleaseUrl, binaryDownloadBaseUrl string) *releases.ReleaseHelper {
 	return releases.NewReleaseHelper(
-		&test.MockRuntimeFacade{},
+		&releasestest.MockAppControl{},
 		facade.DefaultOpenFacade{},
 		facade.DefaultOSFacade{},
 		facade.DefaultIOFacade{},

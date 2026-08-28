@@ -27,7 +27,6 @@ func TestImportProject_Execute(t *testing.T) {
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		mockFsFacade := new(test4.MockFsFacade)
-		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 
 		cmd1 := test.NewCommandBuilder().
 			WithProjectId(projectId).
@@ -128,7 +127,6 @@ func TestImportProject_Execute(t *testing.T) {
 			mockCommandRepository,
 			mockCommandGroupRepository,
 			mockFsFacade,
-			mockRuntimeFacade,
 		)
 	})
 	t.Run("Should return error if there is a problem saving the project", func(t *testing.T) {
@@ -139,7 +137,6 @@ func TestImportProject_Execute(t *testing.T) {
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		mockFsFacade := new(test4.MockFsFacade)
-		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 
 		projectJSON := projectdomain.ProjectExportJSONv1{
 			Version: 1,
@@ -169,7 +166,6 @@ func TestImportProject_Execute(t *testing.T) {
 			mockCommandRepository,
 			mockCommandGroupRepository,
 			mockFsFacade,
-			mockRuntimeFacade,
 		)
 	})
 	t.Run("Should return error if there is a problem saving the commands", func(t *testing.T) {
@@ -180,7 +176,6 @@ func TestImportProject_Execute(t *testing.T) {
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		mockFsFacade := new(test4.MockFsFacade)
-		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 
 		projectJSON := projectdomain.ProjectExportJSONv1{
 			Version: 1,
@@ -211,7 +206,6 @@ func TestImportProject_Execute(t *testing.T) {
 			mockCommandRepository,
 			mockCommandGroupRepository,
 			mockFsFacade,
-			mockRuntimeFacade,
 		)
 	})
 	t.Run("Should return error if there is a problem saving the command groups", func(t *testing.T) {
@@ -222,7 +216,6 @@ func TestImportProject_Execute(t *testing.T) {
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
 		mockFsFacade := new(test4.MockFsFacade)
-		mockRuntimeFacade := new(test4.MockRuntimeFacade)
 
 		projectJSON := projectdomain.ProjectExportJSONv1{
 			Version: 1,
@@ -254,7 +247,6 @@ func TestImportProject_Execute(t *testing.T) {
 			mockCommandRepository,
 			mockCommandGroupRepository,
 			mockFsFacade,
-			mockRuntimeFacade,
 		)
 	})
 }

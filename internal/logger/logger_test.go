@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"gomander/internal/facade/test"
 	"gomander/internal/logger"
+	"gomander/internal/logger/test"
 )
 
 func TestDefaultLogger_Info(t *testing.T) {
@@ -15,17 +15,17 @@ func TestDefaultLogger_Info(t *testing.T) {
 		// Arrange
 		message := "test info message"
 		ctx := context.Background()
-		mockRuntimeFacade := new(test.MockRuntimeFacade)
+		mockLogSink := new(test.MockLogSink)
 
-		l := logger.NewDefaultLogger(ctx, mockRuntimeFacade)
+		l := logger.NewDefaultLogger(ctx, mockLogSink)
 
-		mockRuntimeFacade.On("LogInfo", ctx, message).Return()
+		mockLogSink.On("LogInfo", ctx, message).Return()
 
 		// Act
 		l.Info(message)
 
 		// Assert
-		mock.AssertExpectationsForObjects(t, mockRuntimeFacade)
+		mock.AssertExpectationsForObjects(t, mockLogSink)
 	})
 }
 
@@ -34,17 +34,17 @@ func TestDefaultLogger_Debug(t *testing.T) {
 		// Arrange
 		message := "test debug message"
 		ctx := context.Background()
-		mockRuntimeFacade := new(test.MockRuntimeFacade)
+		mockLogSink := new(test.MockLogSink)
 
-		l := logger.NewDefaultLogger(ctx, mockRuntimeFacade)
+		l := logger.NewDefaultLogger(ctx, mockLogSink)
 
-		mockRuntimeFacade.On("LogDebug", ctx, message).Return()
+		mockLogSink.On("LogDebug", ctx, message).Return()
 
 		// Act
 		l.Debug(message)
 
 		// Assert
-		mock.AssertExpectationsForObjects(t, mockRuntimeFacade)
+		mock.AssertExpectationsForObjects(t, mockLogSink)
 	})
 }
 
@@ -53,16 +53,16 @@ func TestDefaultLogger_Error(t *testing.T) {
 		// Arrange
 		message := "test error message"
 		ctx := context.Background()
-		mockRuntimeFacade := new(test.MockRuntimeFacade)
+		mockLogSink := new(test.MockLogSink)
 
-		l := logger.NewDefaultLogger(ctx, mockRuntimeFacade)
+		l := logger.NewDefaultLogger(ctx, mockLogSink)
 
-		mockRuntimeFacade.On("LogError", ctx, message).Return()
+		mockLogSink.On("LogError", ctx, message).Return()
 
 		// Act
 		l.Error(message)
 
 		// Assert
-		mock.AssertExpectationsForObjects(t, mockRuntimeFacade)
+		mock.AssertExpectationsForObjects(t, mockLogSink)
 	})
 }
