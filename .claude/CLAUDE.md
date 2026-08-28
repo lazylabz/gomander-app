@@ -26,6 +26,7 @@ Go 1.23+, Wails v2, SQLite through GORM, Goose migrations as `.go` files in
 cmd/gomander/
 ├── main.go              # buildDeps: every dependency is constructed and wired here
 ├── controllers.go       # what the Wails frontend can call
+├── transport/           # the shapes those calls speak, and the mapping to the entities
 ├── frontend/
 └── thirdpartyserver/    # REST API on ports 9001-9100; spec in openapi.yaml
 
