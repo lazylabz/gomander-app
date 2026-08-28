@@ -246,6 +246,14 @@ func (h *Harness) GivenDialogsThatFail(err error) {
 	h.dialogs.failure = err
 }
 
+// GivenADestinationThatCannotBeWritten makes the operating system refuse every
+// write, the way a full disk or a read-only folder does.
+func (h *Harness) GivenADestinationThatCannotBeWritten(err error) {
+	h.t.Helper()
+
+	h.fs.writeFailure = err
+}
+
 // ClosingTheApp runs the shutdown the desktop window triggers, and answers
 // whether the app refused to close.
 func (h *Harness) ClosingTheApp() (prevent bool) {

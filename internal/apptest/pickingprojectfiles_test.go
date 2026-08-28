@@ -155,4 +155,26 @@ func TestPickingAnExportDestination(t *testing.T) {
 		assert.ErrorIs(t, err, refused)
 		assert.Empty(t, path)
 	})
+
+	t.Run("Should report a destination that cannot be written to", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		project := projecttest.NewProjectBuilder().Build()
+		h.GivenProjects(project)
+		h.GivenExportDestination("/read/only/gomander.json")
+
+		refused := errors.New("permission denied")
+		h.GivenADestinationThatCannotBeWritten(refused)
+
+		// Act
+		path, err := h.UseCases.ExportProject.Execute(project.Id)
+
+		// Assert
+		assert.ErrorIs(t, err, refused)
+		assert.Empty(t, path)
+
+		_, written := h.ExportedFile("/read/only/gomander.json")
+		assert.False(t, written)
+	})
 }

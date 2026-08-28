@@ -199,14 +199,26 @@ func (f *dialogsFake) AskForDirectory(_ dialog.PickDirectoryRequest) (string, er
 
 // fsFacadeFake keeps the files the backend reads and writes in memory.
 type fsFacadeFake struct {
-	mutex sync.Mutex
-	files map[string][]byte
+	mutex        sync.Mutex
+	files        map[string][]byte
+	writeFailure error
 }
 
 func (f *fsFacadeFake) WriteFile(path string, data []byte, _ os.FileMode) error {
+	if err := f.failedWrite(); err != nil {
+		return err
+	}
+
 	f.put(path, data)
 
 	return nil
+}
+
+func (f *fsFacadeFake) failedWrite() error {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+
+	return f.writeFailure
 }
 
 func (f *fsFacadeFake) put(path string, data []byte) {
