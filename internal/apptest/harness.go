@@ -55,7 +55,7 @@ type Harness struct {
 	openedProject          openedproject.OpenedProject
 
 	db            *gorm.DB
-	unitOfWork    *unitOfWorkWithFailingWrites
+	failures      *storageFailures
 	app           *internalapp.App
 	processRunner *processRunnerFake
 	runtime       *runtimeFake
@@ -86,13 +86,19 @@ func New(t *testing.T) *Harness {
 	l := logger.NewDefaultLogger(ctx, runtimeFacade)
 	ee := event.NewDefaultEventEmitter(ctx, runtimeFacade)
 
+	failures := &storageFailures{}
+
 	commandRepo := commandinfrastructure.NewGormCommandRepository(db, ctx)
-	commandGroupRepo := commandgroupinfrastructure.NewGormCommandGroupRepository(db, ctx)
+	commandGroupRepo := commandGroupRepositoryThatCanFail{
+		Repository: commandgroupinfrastructure.NewGormCommandGroupRepository(db, ctx),
+		failures:   failures,
+	}
 	projectRepo := projectinfrastructure.NewGormProjectRepository(db, ctx)
 	configRepo := configinfrastructure.NewGormConfigRepository(db, ctx)
 
 	unitOfWork := &unitOfWorkWithFailingWrites{
 		unitOfWork: unitofworkinfrastructure.NewGormUnitOfWork(db, ctx),
+		failures:   failures,
 	}
 
 	eventBus := eventbus.NewInMemoryEventBus()
@@ -152,7 +158,7 @@ func New(t *testing.T) *Harness {
 		configRepository:       configRepo,
 		openedProject:          openedProject,
 		db:                     db,
-		unitOfWork:             unitOfWork,
+		failures:               failures,
 		app:                    app,
 		processRunner:          processRunner,
 		runtime:                runtimeFacade,
@@ -266,13 +272,13 @@ func (h *Harness) GivenADestinationThatCannotBeWritten(err error) {
 	h.fs.writeFailure = err
 }
 
-// GivenStorageThatRefusesCommandGroups makes writing a Command Group fail, the
-// way storage refuses one partway through an operation that writes several
-// things.
-func (h *Harness) GivenStorageThatRefusesCommandGroups(err error) {
+// GivenStorageThatRefusesToWriteCommandGroups makes creating, updating and
+// deleting a Command Group fail, the way storage refuses a write partway
+// through an operation that makes several.
+func (h *Harness) GivenStorageThatRefusesToWriteCommandGroups(err error) {
 	h.t.Helper()
 
-	h.unitOfWork.commandGroupWriteFailure = err
+	h.failures.commandGroupWrite = err
 }
 
 // ClosingTheApp runs the shutdown the desktop window triggers, and answers
@@ -300,9 +306,10 @@ func (h *Harness) ExportedFile(path string) ([]byte, bool) {
 }
 
 type StoredRows struct {
-	Projects      int
-	Commands      int
-	CommandGroups int
+	Projects         int
+	Commands         int
+	CommandGroups    int
+	CommandsInGroups int
 }
 
 // StoredRows counts everything storage holds, whichever Project it belongs to.
@@ -314,9 +321,10 @@ func (h *Harness) StoredRows() StoredRows {
 	h.t.Helper()
 
 	return StoredRows{
-		Projects:      h.countRows(&projectinfrastructure.ProjectModel{}),
-		Commands:      h.countRows(&commandinfrastructure.CommandModel{}),
-		CommandGroups: h.countRows(&commandgroupinfrastructure.CommandGroupModel{}),
+		Projects:         h.countRows(&projectinfrastructure.ProjectModel{}),
+		Commands:         h.countRows(&commandinfrastructure.CommandModel{}),
+		CommandGroups:    h.countRows(&commandgroupinfrastructure.CommandGroupModel{}),
+		CommandsInGroups: h.countRows(&commandgroupinfrastructure.CommandToCommandGroupModel{}),
 	}
 }
 

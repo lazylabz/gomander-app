@@ -30,7 +30,7 @@ func TestAFailedImport(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, toImport)
 
-		h.GivenStorageThatRefusesCommandGroups(assert.AnError)
+		h.GivenStorageThatRefusesToWriteCommandGroups(assert.AnError)
 
 		// Act
 		err = h.UseCases.ImportProject.Execute(*toImport, "Imported", "/work")

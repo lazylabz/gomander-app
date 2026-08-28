@@ -13,9 +13,10 @@ import (
 	projectdomain "gomander/internal/project/domain"
 )
 
-// Repositories are the repositories a Unit of Work binds to its transaction.
-// They answer exactly like the ones wired into the app, so a caller reads and
-// writes through them the way it would outside one.
+// Repositories are the repositories a Unit of Work binds to its transaction,
+// and the only ones an operation may touch while inside it: the app holds a
+// single database connection, so a repository built outside waits for the one
+// the Unit of Work is holding, and waits forever.
 type Repositories struct {
 	Projects      projectdomain.Repository
 	Commands      commanddomain.Repository
