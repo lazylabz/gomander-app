@@ -6,6 +6,7 @@ import {
 	type TerminalFactory,
 	type TerminalTheme,
 } from "@/commandOutput/ports.ts";
+import { LogEntryKind } from "@/contracts/types.ts";
 
 export const FLUSH_INTERVAL_MS = 30;
 
@@ -41,6 +42,11 @@ const formatTimestamp = (d: Date): string =>
 // Dim-gray ANSI prefix; the raw line keeps its own formatting.
 const prependTimestamp = (line: string, timestamp: string): string =>
 	`\x1b[90m[${timestamp}]\x1b[0m ${line}`;
+
+// Bold cyan, so the command the user launched reads apart from the output it
+// goes on to print. The runner sends the command text plain; the styling is
+// decided here, where the timestamp above is decided too.
+const asCommandLine = (line: string): string => `\x1b[1;36m${line}\x1b[0m`;
 
 const outputFor = (commandId: string): CommandOutput => {
 	const existing = outputs.get(commandId);
@@ -126,6 +132,15 @@ export const appendCommandOutput = (
 	output.buffered.push(...lines);
 	startFlushing();
 };
+
+export const appendCommandLogEntry = (
+	commandId: string,
+	line: string,
+	kind: LogEntryKind,
+): void =>
+	appendCommandOutput(commandId, [
+		kind === LogEntryKind.COMMAND ? asCommandLine(line) : line,
+	]);
 
 export const attachCommandOutput = (
 	commandId: string,

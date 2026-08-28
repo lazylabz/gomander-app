@@ -6,7 +6,7 @@ import {
 	eventService,
 	resetBackendServices,
 } from "@/contracts/service.ts";
-import { Event, type EventData } from "@/contracts/types.ts";
+import { Event, type EventData, LogEntryKind } from "@/contracts/types.ts";
 import { installInMemoryBackend } from "@/testing/backend.ts";
 import { CommandBuilder } from "@/testing/builders/command.ts";
 
@@ -46,10 +46,16 @@ describe("the backend seam", () => {
 		eventService.eventsOn(Event.NEW_LOG_ENTRY, (data) => received.push(data));
 
 		// Act
-		backend.emit(Event.NEW_LOG_ENTRY, { id: "cmd-1", line: "hello" });
+		backend.emit(Event.NEW_LOG_ENTRY, {
+			id: "cmd-1",
+			line: "hello",
+			kind: LogEntryKind.OUTPUT,
+		});
 
 		// Assert
-		expect(received).toEqual([{ id: "cmd-1", line: "hello" }]);
+		expect(received).toEqual([
+			{ id: "cmd-1", line: "hello", kind: LogEntryKind.OUTPUT },
+		]);
 	});
 
 	it.each([
