@@ -9,7 +9,7 @@ import (
 	"gomander/internal/runner/test"
 )
 
-func TestDefaultGetRunningCommandIds_Execute(t *testing.T) {
+func TestGetRunningCommandIds_Execute(t *testing.T) {
 	t.Run("Should return empty list when there are no running commands", func(t *testing.T) {
 		// Arrange
 		mockRunner := new(test.MockRunner)

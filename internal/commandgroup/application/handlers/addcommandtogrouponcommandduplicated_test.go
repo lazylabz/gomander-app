@@ -15,7 +15,7 @@ import (
 	test2 "gomander/internal/commandgroup/domain/test"
 )
 
-func TestDefaultAddCommandToGroupOnCommandDuplicated_GetEvent(t *testing.T) {
+func TestAddCommandToGroupOnCommandDuplicated_GetEvent(t *testing.T) {
 	// Arrange
 	handler := handlers.NewAddCommandToGroupOnCommandDuplicated(nil, nil)
 
@@ -27,7 +27,7 @@ func TestDefaultAddCommandToGroupOnCommandDuplicated_GetEvent(t *testing.T) {
 	assert.True(t, ok)
 }
 
-func TestDefaultAddCommandToGroupOnCommandDuplicated(t *testing.T) {
+func TestAddCommandToGroupOnCommandDuplicated(t *testing.T) {
 	t.Run("Should do nothing if command was not duplicated inside a group", func(t *testing.T) {
 		// Arrange
 		mockCommandRepo := new(test.MockCommandRepository)

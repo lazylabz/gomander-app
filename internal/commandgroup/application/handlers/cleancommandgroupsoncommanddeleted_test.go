@@ -14,7 +14,7 @@ import (
 // What the handler does to the Command Groups is verified at the application
 // seam, in internal/apptest: it takes several of them to say anything true
 // about a rule that spans several of them.
-func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
+func TestCleanCommandGroupsOnCommandDeleted(t *testing.T) {
 	t.Run("Should do nothing if the event is of another type", func(t *testing.T) {
 		// Arrange
 		mockRepo := new(test.MockCommandGroupRepository)
@@ -31,7 +31,7 @@ func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
 	})
 }
 
-func TestDefaultCleanCommandGroupsOnCommandDeleted_GetEvent(t *testing.T) {
+func TestCleanCommandGroupsOnCommandDeleted_GetEvent(t *testing.T) {
 	// Arrange
 	sut := handlers.NewCleanCommandGroupsOnCommandDeleted(nil, nil)
 

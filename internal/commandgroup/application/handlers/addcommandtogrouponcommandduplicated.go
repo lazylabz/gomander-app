@@ -7,31 +7,26 @@ import (
 	"gomander/internal/eventbus"
 )
 
-type AddCommandToGroupOnCommandDuplicated interface {
-	Execute(e eventbus.Event) error
-	GetEvent() eventbus.Event
-}
-
-type DefaultAddCommandToGroupOnCommandDuplicated struct {
+type AddCommandToGroupOnCommandDuplicated struct {
 	commandRepository      commanddomain.Repository
 	commandGroupRepository commandgroupdomain.Repository
 }
 
-func (h *DefaultAddCommandToGroupOnCommandDuplicated) GetEvent() eventbus.Event {
+func (h *AddCommandToGroupOnCommandDuplicated) GetEvent() eventbus.Event {
 	return commanddomainevent.CommandDuplicatedEvent{}
 }
 
 func NewAddCommandToGroupOnCommandDuplicated(
 	commandRepository commanddomain.Repository,
 	commandGroupRepository commandgroupdomain.Repository,
-) *DefaultAddCommandToGroupOnCommandDuplicated {
-	return &DefaultAddCommandToGroupOnCommandDuplicated{
+) *AddCommandToGroupOnCommandDuplicated {
+	return &AddCommandToGroupOnCommandDuplicated{
 		commandRepository:      commandRepository,
 		commandGroupRepository: commandGroupRepository,
 	}
 }
 
-func (h *DefaultAddCommandToGroupOnCommandDuplicated) Execute(e eventbus.Event) error {
+func (h *AddCommandToGroupOnCommandDuplicated) Execute(e eventbus.Event) error {
 	event, ok := e.(commanddomainevent.CommandDuplicatedEvent)
 	if !ok {
 		return nil

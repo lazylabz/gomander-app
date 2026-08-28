@@ -1,8 +1,6 @@
 package app
 
 import (
-	commandhandlers "gomander/internal/command/application/handlers"
-	commandgrouphandlers "gomander/internal/commandgroup/application/handlers"
 	configdomain "gomander/internal/config/domain"
 	"gomander/internal/eventbus"
 	"gomander/internal/logger"
@@ -10,10 +8,10 @@ import (
 )
 
 type EventHandlers struct {
-	CleanCommandGroupsOnCommandDeleted   commandgrouphandlers.CleanCommandGroupsOnCommandDeleted
-	CleanCommandGroupsOnProjectDeleted   commandgrouphandlers.CleanCommandGroupsOnProjectDeleted
-	CleanCommandsOnProjectDeleted        commandhandlers.CleanCommandsOnProjectDeleted
-	AddCommandToGroupOnCommandDuplicated commandgrouphandlers.AddCommandToGroupOnCommandDuplicated
+	CleanCommandGroupsOnCommandDeleted   eventbus.EventHandler
+	CleanCommandGroupsOnProjectDeleted   eventbus.EventHandler
+	CleanCommandsOnProjectDeleted        eventbus.EventHandler
+	AddCommandToGroupOnCommandDuplicated eventbus.EventHandler
 }
 
 type App struct {

@@ -7,31 +7,26 @@ import (
 	projectdomainevent "gomander/internal/project/domain/event"
 )
 
-type CleanCommandGroupsOnProjectDeleted interface {
-	Execute(e eventbus.Event) error
-	GetEvent() eventbus.Event
-}
-
-type DefaultCleanCommandGroupsOnProjectDeleted struct {
+type CleanCommandGroupsOnProjectDeleted struct {
 	commandGroupRepository commandgroupdomain.Repository
 	eventEmitter           internalEvent.EventEmitter
 }
 
-func (h *DefaultCleanCommandGroupsOnProjectDeleted) GetEvent() eventbus.Event {
+func (h *CleanCommandGroupsOnProjectDeleted) GetEvent() eventbus.Event {
 	return projectdomainevent.ProjectDeletedEvent{}
 }
 
 func NewCleanCommandGroupsOnProjectDeleted(
 	commandGroupRepository commandgroupdomain.Repository,
 	eventEmitter internalEvent.EventEmitter,
-) *DefaultCleanCommandGroupsOnProjectDeleted {
-	return &DefaultCleanCommandGroupsOnProjectDeleted{
+) *CleanCommandGroupsOnProjectDeleted {
+	return &CleanCommandGroupsOnProjectDeleted{
 		commandGroupRepository: commandGroupRepository,
 		eventEmitter:           eventEmitter,
 	}
 }
 
-func (h *DefaultCleanCommandGroupsOnProjectDeleted) Execute(e eventbus.Event) error {
+func (h *CleanCommandGroupsOnProjectDeleted) Execute(e eventbus.Event) error {
 	event, ok := e.(projectdomainevent.ProjectDeletedEvent)
 	if !ok {
 		return nil
@@ -51,7 +46,7 @@ func (h *DefaultCleanCommandGroupsOnProjectDeleted) Execute(e eventbus.Event) er
 
 // deleteTheCommandGroupsOf works in one transaction, so a Project never
 // outlives only some of its Command Groups.
-func (h *DefaultCleanCommandGroupsOnProjectDeleted) deleteTheCommandGroupsOf(projectId string) ([]commandgroupdomain.CommandGroup, error) {
+func (h *CleanCommandGroupsOnProjectDeleted) deleteTheCommandGroupsOf(projectId string) ([]commandgroupdomain.CommandGroup, error) {
 	var deleted []commandgroupdomain.CommandGroup
 
 	err := h.commandGroupRepository.Atomically(func(commandGroupRepository commandgroupdomain.Repository) error {

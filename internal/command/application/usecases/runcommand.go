@@ -6,11 +6,7 @@ import (
 	"gomander/internal/runner"
 )
 
-type RunCommand interface {
-	Execute(commandId string) error
-}
-
-type DefaultRunCommand struct {
+type RunCommand struct {
 	openedProject     openedproject.OpenedProject
 	commandRepository domain.Repository
 	commandRunner     runner.Runner
@@ -20,15 +16,15 @@ func NewRunCommand(
 	openedProject openedproject.OpenedProject,
 	commandRepo domain.Repository,
 	runner runner.Runner,
-) *DefaultRunCommand {
-	return &DefaultRunCommand{
+) *RunCommand {
+	return &RunCommand{
 		openedProject:     openedProject,
 		commandRepository: commandRepo,
 		commandRunner:     runner,
 	}
 }
 
-func (uc *DefaultRunCommand) Execute(commandId string) error {
+func (uc *RunCommand) Execute(commandId string) error {
 	cmd, err := uc.commandRepository.Get(commandId)
 	if err != nil {
 		return err
