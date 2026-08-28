@@ -248,20 +248,20 @@ export const createInMemoryBackend = (
 					state.currentProject = snapshot(project);
 				}
 			},
+			getCurrentRelease: async () => state.currentRelease,
+			checkForNewRelease: async () => state.newRelease,
+			downloadRelease: async (release) => {
+				state.downloadedReleases.push(release);
+				return `/downloads/${release}`;
+			},
+			installReleaseAndQuit: async (binaryPath) => {
+				state.installedBinaryPath = binaryPath;
+			},
 		},
 
 		helpers: {
 			getComputedPath: async (baseWorkingDirectory, workingDirectory) =>
 				[baseWorkingDirectory, workingDirectory].filter(Boolean).join("/"),
-			isThereANewRelease: async () => state.newRelease,
-			getCurrentRelease: async () => state.currentRelease,
-			downloadLatestRelease: async (release) => {
-				state.downloadedReleases.push(release);
-				return `/downloads/${release}`;
-			},
-			installLatestReleaseAndQuit: async (binaryPath) => {
-				state.installedBinaryPath = binaryPath;
-			},
 			getOs: async () => state.os,
 			askForDirPath: async () => state.pickedDirPath,
 			openFileFolder: async (path) => {

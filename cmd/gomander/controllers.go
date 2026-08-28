@@ -157,6 +157,24 @@ func (wc *WailsControllers) StopCommandController(commandId string) error {
 	return wc.useCases.StopCommand.Execute(commandId)
 }
 
+// Release controllers
+
+func (wc *WailsControllers) GetCurrentReleaseController() string {
+	return wc.useCases.GetCurrentRelease.Execute()
+}
+
+func (wc *WailsControllers) CheckForNewReleaseController() (string, error) {
+	return wc.useCases.CheckForNewRelease.Execute()
+}
+
+func (wc *WailsControllers) DownloadReleaseController(version string) (string, error) {
+	return wc.useCases.DownloadRelease.Execute(version)
+}
+
+func (wc *WailsControllers) InstallReleaseAndQuitController(binaryPath string) error {
+	return wc.useCases.InstallReleaseAndQuit.Execute(binaryPath)
+}
+
 // Localization controllers
 
 func (wc *WailsControllers) GetTranslationController(locale string) (*localizationdomain.Localization, error) {

@@ -29,7 +29,8 @@ import (
 	"gomander/internal/openedproject"
 	projectusecases "gomander/internal/project/application/usecases"
 	projectinfrastructure "gomander/internal/project/infrastructure"
-	"gomander/internal/releases"
+	releaseusecases "gomander/internal/releases/application/usecases"
+	releaseinfrastructure "gomander/internal/releases/infrastructure"
 	"gomander/internal/runner"
 	"gomander/internal/uihelpers/fs"
 	"gomander/internal/uihelpers/os_internal"
@@ -63,14 +64,6 @@ func main() {
 	dialogs := dialog.NewWailsDialogs()
 	uiFsHelper := fs.NewUIFsHelper(dialogs, facade.DefaultRuntimeFacade{})
 	uiOsHelper := os_internal.NewUIOsHelper()
-	releaseHelper := releases.NewReleaseHelper(
-		facade.DefaultRuntimeFacade{},
-		facade.DefaultOpenFacade{},
-		facade.DefaultOSFacade{},
-		facade.DefaultIOFacade{},
-		releases.DefaultLatestReleaseUrl,
-		releases.DefaultBinaryDownloadBaseUrl,
-	)
 
 	// Create instance of controllers
 	controllers := NewWailsControllers()
@@ -106,9 +99,6 @@ func main() {
 			// Initialize controllers
 			controllers.loadUseCases(useCases)
 
-			// Load context into helpers
-			releases.SetReleaseHelperContext(releaseHelper, ctx)
-
 			// Start http server for 3rd party integrations
 			server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
 
@@ -123,7 +113,6 @@ func main() {
 		Bind: []interface{}{
 			uiPathHelper,
 			controllers,
-			releaseHelper,
 			uiFsHelper,
 			uiOsHelper,
 		},
@@ -200,6 +189,10 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*i
 	l := logger.NewDefaultLogger(ctx, facade.DefaultRuntimeFacade{})
 	ee := event.NewDefaultEventEmitter(ctx, facade.DefaultRuntimeFacade{})
 	r := runner.NewDefaultRunner(l, ee)
+	releaseFeed := releaseinfrastructure.NewGithubReleaseFeed(ctx, facade.DefaultIOFacade{}, releaseinfrastructure.DefaultLatestReleaseUrl)
+	releaseDownloader := releaseinfrastructure.NewGithubReleaseDownloader(ctx, facade.DefaultOSFacade{}, facade.DefaultIOFacade{}, releaseinfrastructure.DefaultBinaryDownloadBaseUrl)
+	releaseInstaller := releaseinfrastructure.NewOSReleaseInstaller(facade.DefaultOSFacade{}, facade.DefaultOpenFacade{})
+	appControl := releaseinfrastructure.NewShellAppControl(ctx, facade.DefaultRuntimeFacade{})
 
 	// Initialize repos
 	commandRepo := commmandinfrastructure.NewGormCommandRepository(gormDb, ctx)
@@ -264,6 +257,11 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*i
 	runCommand := commandusecases.NewRunCommand(openedProject, commandRepo, r)
 	stopCommand := commandusecases.NewStopCommand(commandRepo, r)
 	getRunningCommandIds := commandusecases.NewGetRunningCommandIds(r)
+	// Releases
+	getCurrentRelease := releaseusecases.NewGetCurrentRelease()
+	checkForNewRelease := releaseusecases.NewCheckForNewRelease(releaseFeed)
+	downloadRelease := releaseusecases.NewDownloadRelease(releaseDownloader)
+	installReleaseAndQuit := releaseusecases.NewInstallReleaseAndQuit(releaseInstaller, appControl)
 
 	app := internalapp.NewApp(l, r, configRepo, eventBus, internalapp.EventHandlers{
 		CleanCommandGroupsOnCommandDeleted:   cleanCommandGroupsOnCommandDeleted,
@@ -309,5 +307,10 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*i
 		RunCommand:           runCommand,
 		StopCommand:          stopCommand,
 		GetRunningCommandIds: getRunningCommandIds,
+		// Releases
+		GetCurrentRelease:     getCurrentRelease,
+		CheckForNewRelease:    checkForNewRelease,
+		DownloadRelease:       downloadRelease,
+		InstallReleaseAndQuit: installReleaseAndQuit,
 	}
 }

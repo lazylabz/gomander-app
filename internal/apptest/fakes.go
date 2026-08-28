@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"slices"
 	"sync"
 
@@ -246,6 +247,60 @@ func (f *fsFacadeFake) file(path string) ([]byte, bool) {
 	data, exists := f.files[path]
 
 	return data, exists
+}
+
+// releaseFeedFake stands in for the feed the app's own releases are published
+// to: the version a test has published, or the failure reaching it reports.
+type releaseFeedFake struct {
+	latestRelease string
+	failure       error
+}
+
+func (f *releaseFeedFake) GetLatestRelease() (string, error) {
+	if f.failure != nil {
+		return "", f.failure
+	}
+
+	return f.latestRelease, nil
+}
+
+// releaseDownloaderFake downloads nothing: it records the versions it was asked
+// for and answers with the path the binary would have landed at.
+type releaseDownloaderFake struct {
+	downloadedVersions []string
+}
+
+func (f *releaseDownloaderFake) Download(version string) (string, error) {
+	f.downloadedVersions = append(f.downloadedVersions, version)
+
+	return filepath.Join(os.TempDir(), "gomander-"+version), nil
+}
+
+// releaseInstallerFake stands in for handing a downloaded binary to the
+// operating system, which is the last thing that happens before the app quits.
+type releaseInstallerFake struct {
+	installedBinaries []string
+	failure           error
+}
+
+func (f *releaseInstallerFake) Install(binaryPath string) error {
+	if f.failure != nil {
+		return f.failure
+	}
+
+	f.installedBinaries = append(f.installedBinaries, binaryPath)
+
+	return nil
+}
+
+// appControlFake records the quit an install asks for instead of closing the
+// window the test is not running in.
+type appControlFake struct {
+	closed bool
+}
+
+func (f *appControlFake) CloseApp() {
+	f.closed = true
 }
 
 // storageFailures is what a test has made storage refuse. The repositories

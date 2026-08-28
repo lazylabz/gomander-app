@@ -6,6 +6,10 @@ export function AddCommandController(arg1) {
   return window['go']['main']['WailsControllers']['AddCommandController'](arg1);
 }
 
+export function CheckForNewReleaseController() {
+  return window['go']['main']['WailsControllers']['CheckForNewReleaseController']();
+}
+
 export function CloseProjectController() {
   return window['go']['main']['WailsControllers']['CloseProjectController']();
 }
@@ -24,6 +28,10 @@ export function DeleteCommandGroupController(arg1) {
 
 export function DeleteProjectController(arg1) {
   return window['go']['main']['WailsControllers']['DeleteProjectController'](arg1);
+}
+
+export function DownloadReleaseController(arg1) {
+  return window['go']['main']['WailsControllers']['DownloadReleaseController'](arg1);
 }
 
 export function DuplicateCommandController(arg1, arg2) {
@@ -58,6 +66,10 @@ export function GetCurrentProjectController() {
   return window['go']['main']['WailsControllers']['GetCurrentProjectController']();
 }
 
+export function GetCurrentReleaseController() {
+  return window['go']['main']['WailsControllers']['GetCurrentReleaseController']();
+}
+
 export function GetProjectToImportController() {
   return window['go']['main']['WailsControllers']['GetProjectToImportController']();
 }
@@ -80,6 +92,10 @@ export function GetUserConfigController() {
 
 export function ImportProjectController(arg1, arg2, arg3) {
   return window['go']['main']['WailsControllers']['ImportProjectController'](arg1, arg2, arg3);
+}
+
+export function InstallReleaseAndQuitController(arg1) {
+  return window['go']['main']['WailsControllers']['InstallReleaseAndQuitController'](arg1);
 }
 
 export function OpenProjectController(arg1) {

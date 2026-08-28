@@ -43,6 +43,10 @@ export type DataService = {
 	getProjectToImport: () => Promise<ProjectExport>;
 	getProjectToImportFromPackageJson: () => Promise<ProjectExport>;
 	editProject: (project: Project) => Promise<void>;
+	getCurrentRelease: () => Promise<string>;
+	checkForNewRelease: () => Promise<string>;
+	downloadRelease: (release: string) => Promise<string>;
+	installReleaseAndQuit: (binaryPath: string) => Promise<void>;
 };
 
 export type HelpersService = {
@@ -50,10 +54,6 @@ export type HelpersService = {
 		baseWorkingDirectory: string,
 		workingDirectory: string,
 	) => Promise<string>;
-	isThereANewRelease: () => Promise<string>;
-	getCurrentRelease: () => Promise<string>;
-	downloadLatestRelease: (release: string) => Promise<string>;
-	installLatestReleaseAndQuit: (binaryPath: string) => Promise<void>;
 	getOs: () => Promise<string>;
 	askForDirPath: () => Promise<string>;
 	openFileFolder: (path: string) => Promise<void>;

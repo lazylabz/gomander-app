@@ -33,6 +33,7 @@ import (
 	projectusecases "gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
 	projectinfrastructure "gomander/internal/project/infrastructure"
+	releaseusecases "gomander/internal/releases/application/usecases"
 	"gomander/internal/testdb"
 	unitofworkinfrastructure "gomander/internal/unitofwork/infrastructure"
 	"gomander/internal/usecases"
@@ -54,13 +55,17 @@ type Harness struct {
 	configRepository       configdomain.Repository
 	openedProject          openedproject.OpenedProject
 
-	db            *gorm.DB
-	failures      *storageFailures
-	app           *internalapp.App
-	processRunner *processRunnerFake
-	events        *eventSinkFake
-	dialogs       *dialogsFake
-	fs            *fsFacadeFake
+	db                *gorm.DB
+	failures          *storageFailures
+	app               *internalapp.App
+	processRunner     *processRunnerFake
+	events            *eventSinkFake
+	dialogs           *dialogsFake
+	fs                *fsFacadeFake
+	releaseFeed       *releaseFeedFake
+	releaseInstaller  *releaseInstallerFake
+	releaseDownloader *releaseDownloaderFake
+	appControl        *appControlFake
 }
 
 // New starts a backend with an empty database and no project open.
@@ -82,6 +87,10 @@ func New(t *testing.T) *Harness {
 		startFailures: make(map[string]error),
 		stopFailures:  make(map[string]error),
 	}
+	releaseFeed := &releaseFeedFake{}
+	releaseDownloader := &releaseDownloaderFake{}
+	releaseInstaller := &releaseInstallerFake{}
+	appControl := &appControlFake{}
 
 	l := logger.NewDefaultLogger(ctx, &logSinkFake{})
 	ee := event.NewDefaultEventEmitter(ctx, events)
@@ -156,6 +165,11 @@ func New(t *testing.T) *Harness {
 			RunCommand:           commandusecases.NewRunCommand(openedProject, commandRepo, processRunner),
 			StopCommand:          commandusecases.NewStopCommand(commandRepo, processRunner),
 			GetRunningCommandIds: commandusecases.NewGetRunningCommandIds(processRunner),
+
+			GetCurrentRelease:     releaseusecases.NewGetCurrentRelease(),
+			CheckForNewRelease:    releaseusecases.NewCheckForNewRelease(releaseFeed),
+			DownloadRelease:       releaseusecases.NewDownloadRelease(releaseDownloader),
+			InstallReleaseAndQuit: releaseusecases.NewInstallReleaseAndQuit(releaseInstaller, appControl),
 		},
 		commandRepository:      commandRepo,
 		commandGroupRepository: commandGroupRepo,
@@ -169,6 +183,10 @@ func New(t *testing.T) *Harness {
 		events:                 events,
 		dialogs:                dialogs,
 		fs:                     fsFacade,
+		releaseFeed:            releaseFeed,
+		releaseDownloader:      releaseDownloader,
+		releaseInstaller:       releaseInstaller,
+		appControl:             appControl,
 	}
 }
 
@@ -284,6 +302,44 @@ func (h *Harness) GivenStorageThatRefusesToWriteCommandGroups(err error) {
 	h.t.Helper()
 
 	h.failures.commandGroupWrite = err
+}
+
+// GivenPublishedRelease makes the release feed answer with version, the way it
+// does once that release is out.
+func (h *Harness) GivenPublishedRelease(version string) {
+	h.t.Helper()
+
+	h.releaseFeed.latestRelease = version
+}
+
+// GivenAReleaseFeedThatCannotBeRead makes checking for a new release fail, the
+// way it does with no network.
+func (h *Harness) GivenAReleaseFeedThatCannotBeRead(err error) {
+	h.t.Helper()
+
+	h.releaseFeed.failure = err
+}
+
+// GivenAnInstallThatFails makes the operating system refuse the downloaded
+// binary.
+func (h *Harness) GivenAnInstallThatFails(err error) {
+	h.t.Helper()
+
+	h.releaseInstaller.failure = err
+}
+
+func (h *Harness) DownloadedReleases() []string {
+	return h.releaseDownloader.downloadedVersions
+}
+
+func (h *Harness) InstalledBinaries() []string {
+	return h.releaseInstaller.installedBinaries
+}
+
+// AppQuit answers whether the app was asked to quit, which is how an install
+// hands over to the release it just installed.
+func (h *Harness) AppQuit() bool {
+	return h.appControl.closed
 }
 
 // ClosingTheApp runs the shutdown the desktop window triggers, and answers

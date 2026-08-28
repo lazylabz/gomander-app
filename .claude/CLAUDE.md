@@ -12,8 +12,8 @@ monitoring and organising the shell commands of a project.
 - **[frontend](../cmd/gomander/frontend/.claude/CLAUDE.md)** — everything under
   `cmd/gomander/frontend/`.
 - Package docs carry the why for their own package — `openedproject`, `execution`,
-  `ordering`, `commandgroup/domain`, `apptest`, `domainerrors`. A new rationale goes
-  next to the code it explains, not into this file.
+  `ordering`, `commandgroup/domain`, `apptest`, `domainerrors`, `releases`. A new
+  rationale goes next to the code it explains, not into this file.
 
 ## Stack
 

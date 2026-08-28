@@ -8,7 +8,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { helpersService } from "@/contracts/service.ts";
+import { dataService } from "@/contracts/service.ts";
 import { parseError } from "@/helpers/errorHelpers.ts";
 
 export type UpdateStatus = "idle" | "downloading" | "downloaded" | "installing";
@@ -47,14 +47,14 @@ export const VersionProvider = ({
 	>(null);
 
 	const fetchCurrentRelease = useCallback(async () => {
-		const release = await helpersService.getCurrentRelease();
+		const release = await dataService.getCurrentRelease();
 		setCurrentRelease(release);
 	}, []);
 
 	const checkNewRelease = useCallback(async () => {
 		setErrorLoadingNewVersion(null);
 		try {
-			const release = await helpersService.isThereANewRelease();
+			const release = await dataService.checkForNewRelease();
 			setNewRelease(release || null);
 		} catch (err) {
 			setErrorLoadingNewVersion(err as Error);
@@ -75,7 +75,7 @@ export const VersionProvider = ({
 
 		setUpdateStatus("downloading");
 		try {
-			const binaryPath = await helpersService.downloadLatestRelease(newRelease);
+			const binaryPath = await dataService.downloadRelease(newRelease);
 			setDownloadedBinaryPath(binaryPath);
 			setUpdateStatus("downloaded");
 		} catch (err) {
@@ -91,7 +91,7 @@ export const VersionProvider = ({
 
 		setUpdateStatus("installing");
 		try {
-			await helpersService.installLatestReleaseAndQuit(downloadedBinaryPath);
+			await dataService.installReleaseAndQuit(downloadedBinaryPath);
 		} catch (err) {
 			setUpdateStatus("downloaded");
 			toast.error(parseError(err, t("toast.version.installFailed")));
