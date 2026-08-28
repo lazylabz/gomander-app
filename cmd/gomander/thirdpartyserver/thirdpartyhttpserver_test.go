@@ -173,6 +173,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandHandler(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		assert.Empty(t, h.StartedProcesses())
 	})
 }
 
@@ -304,6 +305,7 @@ func TestNewThirdPartyIntegrationsServer_RunCommandGroupHandler(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		assert.Empty(t, h.StartedProcesses())
 	})
 
 	t.Run("POST /command-groups/{id}/run should report a command group that is not there", func(t *testing.T) {
