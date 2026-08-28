@@ -6,12 +6,17 @@ import (
 	"os"
 	"os/exec"
 	"sync"
+	"time"
 
 	"gomander/internal/command/domain"
 	"gomander/internal/event"
 	"gomander/internal/execution"
 	"gomander/internal/logger"
 )
+
+// pipeDrainGrace is how long the scanners get to drain what the process left
+// buffered before the runner stops reading.
+const pipeDrainGrace = 2 * time.Second
 
 var ExpectedTerminationLogs = []string{
 	"signal: terminated",
@@ -75,19 +80,26 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 	SetProcAttributes(cmd)
 	SetProcEnv(cmd, environment.Paths)
 
-	stdout, err := cmd.StdoutPipe()
+	// The pipes are ours rather than cmd.StdoutPipe's: those are closed by
+	// cmd.Wait, which forces Wait to run after the scanners are done, and a
+	// descendant that outlives the kill would then block Wait forever.
+	stdout, stdoutWriter, err := os.Pipe()
 	if err != nil {
 		c.sendStreamLine(command, err.Error())
 		c.mutex.Unlock()
 		return err
 	}
 
-	stderr, err := cmd.StderrPipe()
+	stderr, stderrWriter, err := os.Pipe()
 	if err != nil {
+		closeAll(stdout, stdoutWriter)
 		c.sendStreamLine(command, err.Error())
 		c.mutex.Unlock()
 		return err
 	}
+
+	cmd.Stdout = stdoutWriter
+	cmd.Stderr = stderrWriter
 
 	var wg sync.WaitGroup
 	exited := make(chan struct{})
@@ -99,10 +111,15 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 
 	c.sendStartingLine(command)
 	if err := cmd.Start(); err != nil {
+		closeAll(stdout, stdoutWriter, stderr, stderrWriter)
 		c.sendStreamLine(command, err.Error())
 		c.mutex.Unlock()
 		return err
 	}
+
+	// Only the process holds the write ends now, so the scanners see EOF when it
+	// and every descendant of it are gone.
+	closeAll(stdoutWriter, stderrWriter)
 
 	c.eventEmitter.EmitEvent(event.ProcessStarted, command.Id)
 
@@ -143,18 +160,21 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 			c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
 		}()
 
-		// Wait for all pipes to finish
-		scanWg.Wait()
-
 		err := cmd.Wait()
 		close(exited)
 
-		if err != nil {
-			c.sendStreamLine(command, err.Error())
+		// A descendant that escaped the kill can hold the write ends open, so the
+		// scanners get a grace period to drain what is buffered and are then cut off.
+		if !waitFor(&scanWg, pipeDrainGrace) {
+			closeAll(stdout, stderr)
+			scanWg.Wait()
+		}
 
-			if !isExpectedError(err) {
-				c.logger.Error("[ERROR - Waiting for project]: " + err.Error())
-			}
+		// An expected termination is what stopping a Command looks like, not
+		// something to report on its terminal.
+		if err != nil && !isExpectedError(err) {
+			c.sendStreamLine(command, err.Error())
+			c.logger.Error("[ERROR - Waiting for project]: " + err.Error())
 		}
 	}()
 
@@ -198,6 +218,38 @@ func (c *DefaultRunner) StopAllRunningCommands() []error {
 	}
 
 	return errs
+}
+
+// alreadyExited reports whether the goroutine owning cmd.Wait has seen the
+// process end.
+func alreadyExited(exited <-chan struct{}) bool {
+	select {
+	case <-exited:
+		return true
+	default:
+		return false
+	}
+}
+
+func waitFor(wg *sync.WaitGroup, timeout time.Duration) bool {
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		return true
+	case <-time.After(timeout):
+		return false
+	}
+}
+
+func closeAll(files ...*os.File) {
+	for _, f := range files {
+		_ = f.Close()
+	}
 }
 
 // isExpectedError checks if the error is one of the expected termination logs.

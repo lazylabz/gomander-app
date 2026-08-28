@@ -1,6 +1,7 @@
 package runner_test
 
 import (
+	"os/exec"
 	"runtime"
 	"strings"
 	"testing"
@@ -227,6 +228,48 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
 
+	t.Run("Should not write a termination error to the output of a stopped command", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test2.MockEventEmitter)
+
+		r := runner.NewDefaultRunner(logger, emitter)
+
+		commandId := "1"
+
+		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
+		emitter.On("EmitEvent", event.ProcessFinished, commandId).Maybe().Return()
+		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
+
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Debug", mock.Anything).Return()
+		logger.On("Error", mock.Anything).Maybe().Return()
+
+		// Act
+		err := r.RunCommand(&commanddomain.Command{
+			Id:               commandId,
+			ProjectId:        commandId,
+			Name:             "Test",
+			Command:          infiniteCmd(),
+			WorkingDirectory: validWorkingDirectory(),
+			Position:         0,
+		}, execution.Environment{})
+		assert.NoError(t, err)
+
+		assert.Eventually(t, func() bool {
+			return assert.NotEmpty(t, r.GetRunningCommandIds())
+		}, 1*time.Second, 20*time.Millisecond)
+
+		assert.NoError(t, r.StopRunningCommand(commandId))
+		r.WaitForCommand(commandId)
+
+		// Assert
+		for _, line := range streamedLines(emitter) {
+			assert.NotContains(t, runner.ExpectedTerminationLogs, line,
+				"stopping a Command is not an error the user should read in its output")
+		}
+	})
+
 	t.Run("Should not throw if trying to run an already running command", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
@@ -332,6 +375,64 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		// Assert
 		assert.Empty(t, r.GetRunningCommandIds())
 		mock.AssertExpectationsForObjects(t, emitter, logger)
+	})
+
+	t.Run("Should finish tearing down when a descendant outlives the process group", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("the process group is a unix concept; on windows every grandchild already outlives taskkill /PID")
+		}
+		if _, err := exec.LookPath("python3"); err != nil {
+			t.Skip("needs python3 to leave the process group")
+		}
+
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test2.MockEventEmitter)
+
+		r := runner.NewDefaultRunner(logger, emitter)
+
+		commandId := "1"
+
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Debug", mock.Anything).Return()
+		logger.On("Error", mock.Anything).Maybe().Return()
+		emitter.On("EmitEvent", mock.Anything, mock.Anything).Return()
+
+		// The python child calls setsid, so it leaves the group the runner signals
+		// while still holding the stdout it inherited.
+		escapes := "python3 -c 'import os,time; os.setsid(); time.sleep(30)' & " + infiniteCmd()
+
+		// Act
+		assert.NoError(t, r.RunCommand(&commanddomain.Command{
+			Id:               commandId,
+			ProjectId:        commandId,
+			Name:             "Test",
+			Command:          escapes,
+			WorkingDirectory: validWorkingDirectory(),
+			Position:         0,
+		}, execution.Environment{}))
+
+		assert.Eventually(t, func() bool {
+			return assert.NotEmpty(t, r.GetRunningCommandIds())
+		}, 1*time.Second, 20*time.Millisecond)
+
+		time.Sleep(500 * time.Millisecond) // Give the descendant time to be spawned
+
+		assert.NoError(t, r.StopRunningCommand(commandId))
+
+		tornDown := make(chan struct{})
+		go func() {
+			r.WaitForCommand(commandId)
+			close(tornDown)
+		}()
+
+		// Assert
+		select {
+		case <-tornDown:
+		case <-time.After(15 * time.Second):
+			t.Fatal("the survivor held the output pipe open, so the Command never finished tearing down")
+		}
+		assert.Empty(t, r.GetRunningCommandIds())
 	})
 
 	t.Run("Should not error when stopping a command that is not running", func(t *testing.T) {
@@ -535,6 +636,21 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 		// Verify that CommandErrorDetected was called
 		mock.AssertExpectationsForObjects(t, emitter, logger)
 	})
+}
+
+// streamedLines is what the runner wrote to the Command's terminal. Safe to
+// read once WaitForCommand has returned: nothing is emitting any more.
+func streamedLines(emitter *test2.MockEventEmitter) []string {
+	lines := make([]string, 0)
+
+	for _, call := range emitter.Calls {
+		if call.Method != "EmitEvent" || call.Arguments.Get(0) != event.NewLogEntry {
+			continue
+		}
+		lines = append(lines, call.Arguments.Get(1).(map[string]string)["line"])
+	}
+
+	return lines
 }
 
 func infiniteCmd() string {
