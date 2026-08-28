@@ -6,8 +6,7 @@
 // The package name is load-bearing rather than descriptive: Wails names the
 // generated TypeScript namespace after the Go package of the types a bound
 // method mentions, so calling this package anything else would move every
-// model in models.ts. The frontend pays for that move once, in the change that
-// takes the serialization tags off the entities.
+// model in models.ts.
 package domain
 
 import (

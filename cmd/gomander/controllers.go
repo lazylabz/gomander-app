@@ -66,25 +66,25 @@ func (wc *WailsControllers) ExportProjectController(projectId string) (string, e
 	return wc.useCases.ExportProject.Execute(projectId)
 }
 
-func (wc *WailsControllers) ImportProjectController(blueprint ProjectBlueprint, name, workingDirectory string) error {
-	return wc.useCases.ImportProject.Execute(blueprint.toDomain(), name, workingDirectory)
+func (wc *WailsControllers) ImportProjectController(blueprint transport.ProjectBlueprint, name, workingDirectory string) error {
+	return wc.useCases.ImportProject.Execute(blueprint.ToDomain(), name, workingDirectory)
 }
 
-func (wc *WailsControllers) GetProjectToImportController() (*ProjectBlueprint, error) {
+func (wc *WailsControllers) GetProjectToImportController() (*transport.ProjectBlueprint, error) {
 	return wc.projectToImport(projectusecases.FileTypeGomander)
 }
 
-func (wc *WailsControllers) GetProjectToImportFromPackageJsonController() (*ProjectBlueprint, error) {
+func (wc *WailsControllers) GetProjectToImportFromPackageJsonController() (*transport.ProjectBlueprint, error) {
 	return wc.projectToImport(projectusecases.FileTypePackageJSON)
 }
 
-func (wc *WailsControllers) projectToImport(fileType projectusecases.FileType) (*ProjectBlueprint, error) {
+func (wc *WailsControllers) projectToImport(fileType projectusecases.FileType) (*transport.ProjectBlueprint, error) {
 	blueprint, err := wc.useCases.GetProjectToImport.Execute(fileType)
 	if err != nil || blueprint == nil {
 		return nil, err
 	}
 
-	dto := newProjectBlueprint(*blueprint)
+	dto := transport.FromBlueprint(*blueprint)
 
 	return &dto, nil
 }
