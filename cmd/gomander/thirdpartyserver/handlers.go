@@ -9,6 +9,14 @@ import (
 	"gomander/internal/helpers/array"
 )
 
+func statusJSON(status domain.Status) string {
+	if status == domain.Running {
+		return "running"
+	}
+
+	return "stopped"
+}
+
 func (s *ThirdPartyIntegrationsServer) handleDiscovery(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -33,18 +41,13 @@ func (s *ThirdPartyIntegrationsServer) handleGetCommands(w http.ResponseWriter, 
 		http.Error(w, "Failed to get commands", http.StatusInternalServerError)
 		return
 	}
-	runningCommandsIds := s.useCases.GetRunningCommandIds.Execute()
+	runningCommands := domain.NewRunningCommands(s.useCases.GetRunningCommandIds.Execute())
 
 	mappedCommands := array.Map(commands, func(cmd domain.Command) map[string]interface{} {
-		status := "stopped"
-		if array.Contains(runningCommandsIds, cmd.Id) {
-			status = "running"
-		}
-
 		return map[string]interface{}{
 			"id":     cmd.Id,
 			"name":   cmd.Name,
-			"status": status,
+			"status": statusJSON(runningCommands.StatusOf(cmd.Id)),
 		}
 	})
 
@@ -99,16 +102,14 @@ func (s *ThirdPartyIntegrationsServer) handleGetCommandGroups(w http.ResponseWri
 		http.Error(w, "Failed to get command groups", http.StatusInternalServerError)
 		return
 	}
-	runningGroupsIds := s.useCases.GetRunningCommandIds.Execute()
+	runningCommands := domain.NewRunningCommands(s.useCases.GetRunningCommandIds.Execute())
 
 	mappedGroups := array.Map(groups, func(group domain2.CommandGroup) map[string]interface{} {
 		return map[string]interface{}{
-			"id":       group.Id,
-			"name":     group.Name,
-			"commands": len(group.Commands),
-			"runningCommands": len(array.Filter(group.Commands, func(cmd domain.Command) bool {
-				return array.Contains(runningGroupsIds, cmd.Id)
-			})),
+			"id":              group.Id,
+			"name":            group.Name,
+			"commands":        len(group.Commands),
+			"runningCommands": runningCommands.CountIn(group.Commands),
 		}
 	})
 
