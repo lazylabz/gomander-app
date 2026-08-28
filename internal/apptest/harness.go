@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 
 	commandhandlers "gomander/internal/command/application/handlers"
 	commandusecases "gomander/internal/command/application/usecases"
@@ -33,6 +34,7 @@ import (
 	projectdomain "gomander/internal/project/domain"
 	projectinfrastructure "gomander/internal/project/infrastructure"
 	"gomander/internal/testdb"
+	unitofworkinfrastructure "gomander/internal/unitofwork/infrastructure"
 	"gomander/internal/usecases"
 
 	internalapp "gomander/internal/app"
@@ -52,6 +54,8 @@ type Harness struct {
 	configRepository       configdomain.Repository
 	openedProject          openedproject.OpenedProject
 
+	db            *gorm.DB
+	unitOfWork    *unitOfWorkWithFailingWrites
 	app           *internalapp.App
 	processRunner *processRunnerFake
 	runtime       *runtimeFake
@@ -87,6 +91,10 @@ func New(t *testing.T) *Harness {
 	projectRepo := projectinfrastructure.NewGormProjectRepository(db, ctx)
 	configRepo := configinfrastructure.NewGormConfigRepository(db, ctx)
 
+	unitOfWork := &unitOfWorkWithFailingWrites{
+		unitOfWork: unitofworkinfrastructure.NewGormUnitOfWork(db, ctx),
+	}
+
 	eventBus := eventbus.NewInMemoryEventBus()
 
 	openedProject := openedproject.NewOpenedProject(configRepo, projectRepo)
@@ -116,7 +124,7 @@ func New(t *testing.T) *Harness {
 			CloseProject:         projectusecases.NewCloseProject(openedProject),
 			DeleteProject:        projectusecases.NewDeleteProject(projectRepo, eventBus, l),
 			ExportProject:        projectusecases.NewExportProject(projectRepo, commandRepo, commandGroupRepo, dialogs, fsFacade),
-			ImportProject:        projectusecases.NewImportProject(projectRepo, commandRepo, commandGroupRepo),
+			ImportProject:        projectusecases.NewImportProject(unitOfWork),
 			GetProjectToImport:   projectusecases.NewGetProjectToImport(dialogs, fsFacade),
 
 			GetCommandGroups:              commandgroupusecases.NewGetCommandGroups(openedProject, commandGroupRepo),
@@ -143,6 +151,8 @@ func New(t *testing.T) *Harness {
 		projectRepository:      projectRepo,
 		configRepository:       configRepo,
 		openedProject:          openedProject,
+		db:                     db,
+		unitOfWork:             unitOfWork,
 		app:                    app,
 		processRunner:          processRunner,
 		runtime:                runtimeFacade,
@@ -256,6 +266,15 @@ func (h *Harness) GivenADestinationThatCannotBeWritten(err error) {
 	h.fs.writeFailure = err
 }
 
+// GivenStorageThatRefusesCommandGroups makes writing a Command Group fail, the
+// way storage refuses one partway through an operation that writes several
+// things.
+func (h *Harness) GivenStorageThatRefusesCommandGroups(err error) {
+	h.t.Helper()
+
+	h.unitOfWork.commandGroupWriteFailure = err
+}
+
 // ClosingTheApp runs the shutdown the desktop window triggers, and answers
 // whether the app refused to close.
 func (h *Harness) ClosingTheApp() (prevent bool) {
@@ -278,6 +297,38 @@ func (h *Harness) EmittedEvents() []EmittedEvent {
 
 func (h *Harness) ExportedFile(path string) ([]byte, bool) {
 	return h.fs.file(path)
+}
+
+type StoredRows struct {
+	Projects      int
+	Commands      int
+	CommandGroups int
+}
+
+// StoredRows counts everything storage holds, whichever Project it belongs to.
+// It is the one assertion no use case can make: a Project whose creation was
+// undone has an id nothing outside the operation ever learned, so rows left
+// orphaned behind it are unreachable through the app and only a count shows
+// they are gone.
+func (h *Harness) StoredRows() StoredRows {
+	h.t.Helper()
+
+	return StoredRows{
+		Projects:      h.countRows(&projectinfrastructure.ProjectModel{}),
+		Commands:      h.countRows(&commandinfrastructure.CommandModel{}),
+		CommandGroups: h.countRows(&commandgroupinfrastructure.CommandGroupModel{}),
+	}
+}
+
+func (h *Harness) countRows(model interface{}) int {
+	h.t.Helper()
+
+	var count int64
+	if err := h.db.Model(model).Count(&count).Error; err != nil {
+		h.t.Fatalf("failed to count the stored rows: %v", err)
+	}
+
+	return int(count)
 }
 
 func (h *Harness) currentConfig() *configdomain.Config {

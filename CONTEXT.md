@@ -55,3 +55,9 @@ Where a thing sits among its siblings — a Command among its Project's Commands
 a Command Group among its Project's Groups. Positions are dense: 0, 1, 2 … with
 no gaps.
 _Avoid_: order, index, sort order
+
+**Unit of Work**:
+One transaction spanning several repositories: everything an operation writes
+inside it lands, or none of it does. It is what makes atomicity a property of
+the operation rather than of a single repository.
+_Avoid_: transaction (that is the database's word for the mechanism)

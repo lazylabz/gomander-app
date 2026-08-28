@@ -15,6 +15,7 @@ import (
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
 	test3 "gomander/internal/project/domain/test"
+	unitofworktest "gomander/internal/unitofwork/test"
 )
 
 func TestImportProject_Execute(t *testing.T) {
@@ -75,7 +76,7 @@ func TestImportProject_Execute(t *testing.T) {
 			}),
 		}
 
-		sut := usecases.NewImportProject(mockProjectRepository, mockCommandRepository, mockCommandGroupRepository)
+		sut := usecases.NewImportProject(unitofworktest.NewMockUnitOfWork(mockProjectRepository, mockCommandRepository, mockCommandGroupRepository))
 
 		var newProjectId string
 
@@ -153,7 +154,7 @@ func TestImportProject_Execute(t *testing.T) {
 			},
 		}
 
-		sut := usecases.NewImportProject(mockProjectRepository, mockCommandRepository, mockCommandGroupRepository)
+		sut := usecases.NewImportProject(unitofworktest.NewMockUnitOfWork(mockProjectRepository, mockCommandRepository, mockCommandGroupRepository))
 
 		mockProjectRepository.On("Create", mock.Anything).Return(assert.AnError).Once()
 
@@ -194,7 +195,7 @@ func TestImportProject_Execute(t *testing.T) {
 			},
 		}
 
-		sut := usecases.NewImportProject(mockProjectRepository, mockCommandRepository, mockCommandGroupRepository)
+		sut := usecases.NewImportProject(unitofworktest.NewMockUnitOfWork(mockProjectRepository, mockCommandRepository, mockCommandGroupRepository))
 
 		mockProjectRepository.On("Create", mock.Anything).Return(nil)
 		mockCommandRepository.On("Create", mock.Anything).Return(assert.AnError)
@@ -236,7 +237,7 @@ func TestImportProject_Execute(t *testing.T) {
 			},
 		}
 
-		sut := usecases.NewImportProject(mockProjectRepository, mockCommandRepository, mockCommandGroupRepository)
+		sut := usecases.NewImportProject(unitofworktest.NewMockUnitOfWork(mockProjectRepository, mockCommandRepository, mockCommandGroupRepository))
 
 		mockProjectRepository.On("Create", mock.Anything).Return(nil)
 		mockCommandRepository.On("Create", mock.Anything).Return(nil)

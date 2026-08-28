@@ -39,6 +39,7 @@ internal/
 ├── openedproject/       # which Project is open
 ├── execution/           # the environment a Command runs in
 ├── ordering/            # dense Positions within a list
+├── unitofwork/          # one transaction spanning several repositories
 ├── runner/              # spawns Commands, streams their output
 ├── event/ eventbus/     # domain events and the in-memory bus
 ├── domainerrors/        # the errors every entity domain reports

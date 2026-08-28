@@ -8,9 +8,11 @@ import (
 	"sync"
 
 	commanddomain "gomander/internal/command/domain"
+	commandgroupdomain "gomander/internal/commandgroup/domain"
 	"gomander/internal/dialog"
 	"gomander/internal/event"
 	"gomander/internal/execution"
+	"gomander/internal/unitofwork"
 )
 
 type StartedProcess struct {
@@ -244,4 +246,35 @@ func (f *fsFacadeFake) file(path string) ([]byte, bool) {
 	data, exists := f.files[path]
 
 	return data, exists
+}
+
+// unitOfWorkWithFailingWrites runs the real Unit of Work and lets a test make
+// one write inside it fail, the way storage refuses one partway through an
+// operation. Nothing below it is faked: what a test arranges this for is the
+// rollback the real transaction performs.
+type unitOfWorkWithFailingWrites struct {
+	unitOfWork               unitofwork.UnitOfWork
+	commandGroupWriteFailure error
+}
+
+func (u *unitOfWorkWithFailingWrites) Do(change func(unitofwork.Repositories) error) error {
+	return u.unitOfWork.Do(func(repositories unitofwork.Repositories) error {
+		if u.commandGroupWriteFailure != nil {
+			repositories.CommandGroups = commandGroupRepositoryThatCannotWrite{
+				Repository: repositories.CommandGroups,
+				failure:    u.commandGroupWriteFailure,
+			}
+		}
+
+		return change(repositories)
+	})
+}
+
+type commandGroupRepositoryThatCannotWrite struct {
+	commandgroupdomain.Repository
+	failure error
+}
+
+func (r commandGroupRepositoryThatCannotWrite) Create(*commandgroupdomain.CommandGroup) error {
+	return r.failure
 }
