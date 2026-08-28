@@ -5,21 +5,17 @@ import (
 	"gomander/internal/project/domain"
 )
 
-type GetCurrentProject interface {
-	Execute() (*domain.Project, error)
-}
-
-type DefaultGetCurrentProject struct {
+type GetCurrentProject struct {
 	openedProject openedproject.OpenedProject
 }
 
-func NewGetCurrentProject(openedProject openedproject.OpenedProject) *DefaultGetCurrentProject {
-	return &DefaultGetCurrentProject{
+func NewGetCurrentProject(openedProject openedproject.OpenedProject) *GetCurrentProject {
+	return &GetCurrentProject{
 		openedProject: openedProject,
 	}
 }
 
-func (uc *DefaultGetCurrentProject) Execute() (*domain.Project, error) {
+func (uc *GetCurrentProject) Execute() (*domain.Project, error) {
 	project, open, err := uc.openedProject.Find()
 	if err != nil {
 		return nil, err

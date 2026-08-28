@@ -17,7 +17,7 @@ import (
 	test3 "gomander/internal/project/domain/test"
 )
 
-func TestDefaultImportProject_Execute(t *testing.T) {
+func TestImportProject_Execute(t *testing.T) {
 	t.Run("Should import the project", func(t *testing.T) {
 		// Arrange
 		projectId := "test-project-id"

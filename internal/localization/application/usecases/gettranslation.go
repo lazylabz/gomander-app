@@ -8,21 +8,17 @@ import (
 	"gomander/internal/localization/domain"
 )
 
-type GetTranslation interface {
-	Execute(locale string) (*domain.Localization, error)
-}
-
-type DefaultGetTranslation struct {
+type GetTranslation struct {
 	localeFs fs.FS
 }
 
-func NewGetTranslation(localeFs fs.FS) *DefaultGetTranslation {
-	return &DefaultGetTranslation{
+func NewGetTranslation(localeFs fs.FS) *GetTranslation {
+	return &GetTranslation{
 		localeFs: localeFs,
 	}
 }
 
-func (uc *DefaultGetTranslation) Execute(locale string) (*domain.Localization, error) {
+func (uc *GetTranslation) Execute(locale string) (*domain.Localization, error) {
 	localeJson, err := fs.ReadFile(uc.localeFs, fmt.Sprintf("locales/%s.json", locale))
 	if err != nil {
 		return nil, fmt.Errorf("read locale json: %w", err)

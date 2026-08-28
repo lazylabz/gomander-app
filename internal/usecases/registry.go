@@ -10,22 +10,22 @@ import (
 
 type Registry struct {
 	// Configuration
-	GetUserConfig  configusecases.GetUserConfig
-	SaveUserConfig configusecases.SaveUserConfig
+	GetUserConfig  *configusecases.GetUserConfig
+	SaveUserConfig *configusecases.SaveUserConfig
 	// Localization
-	GetTranslation        localizationusecases.GetTranslation
-	GetSupportedLanguages localizationusecases.GetSupportedLanguages
+	GetTranslation        *localizationusecases.GetTranslation
+	GetSupportedLanguages *localizationusecases.GetSupportedLanguages
 	// Projects
-	GetCurrentProject    projectusecases.GetCurrentProject
-	GetAvailableProjects projectusecases.GetAvailableProjects
-	OpenProject          projectusecases.OpenProject
-	CreateProject        projectusecases.CreateProject
-	EditProject          projectusecases.EditProject
-	CloseProject         projectusecases.CloseProject
-	DeleteProject        projectusecases.DeleteProject
-	ExportProject        projectusecases.ExportProject
-	ImportProject        projectusecases.ImportProject
-	GetProjectToImport   projectusecases.GetProjectToImport
+	GetCurrentProject    *projectusecases.GetCurrentProject
+	GetAvailableProjects *projectusecases.GetAvailableProjects
+	OpenProject          *projectusecases.OpenProject
+	CreateProject        *projectusecases.CreateProject
+	EditProject          *projectusecases.EditProject
+	CloseProject         *projectusecases.CloseProject
+	DeleteProject        *projectusecases.DeleteProject
+	ExportProject        *projectusecases.ExportProject
+	ImportProject        *projectusecases.ImportProject
+	GetProjectToImport   *projectusecases.GetProjectToImport
 	// Command Groups
 	GetCommandGroups              commandgroupusecases.GetCommandGroups
 	CreateCommandGroup            *commandgroupusecases.CreateCommandGroup

@@ -8,11 +8,7 @@ import (
 	projectdomain "gomander/internal/project/domain"
 )
 
-type ImportProject interface {
-	Execute(projectJSON projectdomain.ProjectExportJSONv1, name, workingDirectory string) error
-}
-
-type DefaultImportProject struct {
+type ImportProject struct {
 	projectRepository      projectdomain.Repository
 	commandRepository      domain.Repository
 	commandGroupRepository commandgroupdomain.Repository
@@ -22,15 +18,15 @@ func NewImportProject(
 	projectRepo projectdomain.Repository,
 	commandRepo domain.Repository,
 	commandGroupRepo commandgroupdomain.Repository,
-) *DefaultImportProject {
-	return &DefaultImportProject{
+) *ImportProject {
+	return &ImportProject{
 		projectRepository:      projectRepo,
 		commandRepository:      commandRepo,
 		commandGroupRepository: commandGroupRepo,
 	}
 }
 
-func (uc *DefaultImportProject) Execute(projectJSON projectdomain.ProjectExportJSONv1, name, workingDirectory string) error {
+func (uc *ImportProject) Execute(projectJSON projectdomain.ProjectExportJSONv1, name, workingDirectory string) error {
 	project := projectdomain.Project{
 		Id:               uuid.New().String(),
 		Name:             name,

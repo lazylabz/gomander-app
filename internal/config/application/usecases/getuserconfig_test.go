@@ -10,7 +10,7 @@ import (
 	"gomander/internal/config/domain/test"
 )
 
-func TestDefaultGetUserConfig_Execute(t *testing.T) {
+func TestGetUserConfig_Execute(t *testing.T) {
 	// Arrange
 	mockRepository := new(test.MockConfigRepository)
 

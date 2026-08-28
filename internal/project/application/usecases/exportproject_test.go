@@ -21,7 +21,7 @@ import (
 	test3 "gomander/internal/project/domain/test"
 )
 
-func TestDefaultExportProject_Execute(t *testing.T) {
+func TestExportProject_Execute(t *testing.T) {
 	t.Run("Should export the project to the selected file", func(t *testing.T) {
 		// Arrange
 		projectId := "test-project-id"

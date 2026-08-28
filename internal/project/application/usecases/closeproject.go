@@ -4,20 +4,16 @@ import (
 	"gomander/internal/openedproject"
 )
 
-type CloseProject interface {
-	Execute() error
-}
-
-type DefaultCloseProject struct {
+type CloseProject struct {
 	openedProject openedproject.OpenedProject
 }
 
-func NewCloseProject(openedProject openedproject.OpenedProject) *DefaultCloseProject {
-	return &DefaultCloseProject{
+func NewCloseProject(openedProject openedproject.OpenedProject) *CloseProject {
+	return &CloseProject{
 		openedProject: openedProject,
 	}
 }
 
-func (uc *DefaultCloseProject) Execute() error {
+func (uc *CloseProject) Execute() error {
 	return uc.openedProject.Close()
 }

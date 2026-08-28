@@ -19,11 +19,7 @@ const (
 	FileTypePackageJSON FileType = "package_json"
 )
 
-type GetProjectToImport interface {
-	Execute(fileType FileType) (*projectdomain.ProjectExportJSONv1, error)
-}
-
-type DefaultGetProjectToImport struct {
+type GetProjectToImport struct {
 	ctx           context.Context
 	runtimeFacade facade.RuntimeFacade
 	fsFacade      facade.FsFacade
@@ -33,15 +29,15 @@ func NewGetProjectToImport(
 	ctx context.Context,
 	runtimeFacade facade.RuntimeFacade,
 	fsFacade facade.FsFacade,
-) *DefaultGetProjectToImport {
-	return &DefaultGetProjectToImport{
+) *GetProjectToImport {
+	return &GetProjectToImport{
 		ctx:           ctx,
 		runtimeFacade: runtimeFacade,
 		fsFacade:      fsFacade,
 	}
 }
 
-func (uc *DefaultGetProjectToImport) Execute(fileType FileType) (*projectdomain.ProjectExportJSONv1, error) {
+func (uc *GetProjectToImport) Execute(fileType FileType) (*projectdomain.ProjectExportJSONv1, error) {
 	var projectJSON *projectdomain.ProjectExportJSONv1
 
 	options := OpenDialogOptionsByFileType[fileType]

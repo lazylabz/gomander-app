@@ -4,20 +4,16 @@ import (
 	"gomander/internal/project/domain"
 )
 
-type CreateProject interface {
-	Execute(project domain.Project) error
-}
-
-type DefaultCreateProject struct {
+type CreateProject struct {
 	projectRepository domain.Repository
 }
 
-func NewCreateProject(projectRepo domain.Repository) *DefaultCreateProject {
-	return &DefaultCreateProject{
+func NewCreateProject(projectRepo domain.Repository) *CreateProject {
+	return &CreateProject{
 		projectRepository: projectRepo,
 	}
 }
 
-func (uc *DefaultCreateProject) Execute(project domain.Project) error {
+func (uc *CreateProject) Execute(project domain.Project) error {
 	return uc.projectRepository.Create(project)
 }
