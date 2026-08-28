@@ -20,9 +20,4 @@ type Repository interface {
 	Create(commandGroup *CommandGroup) error
 	Update(commandGroup *CommandGroup) error
 	Delete(commandGroupId string) error
-	// Atomically runs change against a Repository bound to a single
-	// transaction: every write inside it lands, or none of them does. It is how
-	// a rule the domain decides over several Command Groups reaches storage in
-	// one piece.
-	Atomically(change func(Repository) error) error
 }

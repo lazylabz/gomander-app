@@ -6,6 +6,7 @@ import (
 	internalEvent "gomander/internal/event"
 	"gomander/internal/eventbus"
 	"gomander/internal/helpers/array"
+	"gomander/internal/unitofwork"
 )
 
 // EventEmitter tells the UI what a handler has already committed.
@@ -14,6 +15,7 @@ type EventEmitter interface {
 }
 
 type CleanCommandGroupsOnCommandDeleted struct {
+	unitOfWork             unitofwork.UnitOfWork
 	commandGroupRepository commandgroupdomain.Repository
 	eventEmitter           EventEmitter
 }
@@ -23,10 +25,12 @@ func (h *CleanCommandGroupsOnCommandDeleted) GetEvent() eventbus.Event {
 }
 
 func NewCleanCommandGroupsOnCommandDeleted(
+	unitOfWork unitofwork.UnitOfWork,
 	commandGroupRepository commandgroupdomain.Repository,
 	eventEmitter EventEmitter,
 ) *CleanCommandGroupsOnCommandDeleted {
 	return &CleanCommandGroupsOnCommandDeleted{
+		unitOfWork:             unitOfWork,
 		commandGroupRepository: commandGroupRepository,
 		eventEmitter:           eventEmitter,
 	}
@@ -58,8 +62,8 @@ func (h *CleanCommandGroupsOnCommandDeleted) Execute(e eventbus.Event) error {
 func (h *CleanCommandGroupsOnCommandDeleted) applyTheCascadeFor(commandId string) (commandgroupdomain.Cascade, error) {
 	var cascade commandgroupdomain.Cascade
 
-	err := h.commandGroupRepository.Atomically(func(commandGroupRepository commandgroupdomain.Repository) error {
-		commandGroups, err := commandGroupRepository.GetAllContaining(commandId)
+	err := h.unitOfWork.Do(func(repositories unitofwork.Repositories) error {
+		commandGroups, err := repositories.CommandGroups.GetAllContaining(commandId)
 		if err != nil {
 			return err
 		}
@@ -67,13 +71,13 @@ func (h *CleanCommandGroupsOnCommandDeleted) applyTheCascadeFor(commandId string
 		cascade = commandgroupdomain.RemoveCommandFrom(commandGroups, commandId)
 
 		for i := range cascade.Survived {
-			if err := commandGroupRepository.Update(&cascade.Survived[i]); err != nil {
+			if err := repositories.CommandGroups.Update(&cascade.Survived[i]); err != nil {
 				return err
 			}
 		}
 
 		for _, commandGroup := range cascade.Deleted {
-			if err := commandGroupRepository.Delete(commandGroup.Id); err != nil {
+			if err := repositories.CommandGroups.Delete(commandGroup.Id); err != nil {
 				return err
 			}
 		}

@@ -214,9 +214,3 @@ func (r GormCommandGroupRepository) Delete(commandGroupId string) error {
 
 	return nil
 }
-
-func (r GormCommandGroupRepository) Atomically(change func(domain.Repository) error) error {
-	return r.db.Transaction(func(tx *gorm.DB) error {
-		return change(NewGormCommandGroupRepository(tx, r.ctx))
-	})
-}

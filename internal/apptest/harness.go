@@ -117,8 +117,8 @@ func New(t *testing.T) *Harness {
 	openedProject := openedproject.NewOpenedProject(configRepo, projectRepo)
 
 	app := internalapp.NewApp(l, processRunner, configRepo, eventBus, internalapp.EventHandlers{
-		CleanCommandGroupsOnCommandDeleted:   commandgrouphandlers.NewCleanCommandGroupsOnCommandDeleted(commandGroupRepo, ee),
-		CleanCommandGroupsOnProjectDeleted:   commandgrouphandlers.NewCleanCommandGroupsOnProjectDeleted(commandGroupRepo, ee),
+		CleanCommandGroupsOnCommandDeleted:   commandgrouphandlers.NewCleanCommandGroupsOnCommandDeleted(unitOfWork, commandGroupRepo, ee),
+		CleanCommandGroupsOnProjectDeleted:   commandgrouphandlers.NewCleanCommandGroupsOnProjectDeleted(unitOfWork, ee),
 		CleanCommandsOnProjectDeleted:        commandhandlers.NewCleanCommandOnProjectDeleted(commandRepo),
 		AddCommandToGroupOnCommandDuplicated: commandgrouphandlers.NewAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo),
 	})

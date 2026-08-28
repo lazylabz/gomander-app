@@ -5,11 +5,12 @@ import (
 	internalEvent "gomander/internal/event"
 	"gomander/internal/eventbus"
 	projectdomainevent "gomander/internal/project/domain/event"
+	"gomander/internal/unitofwork"
 )
 
 type CleanCommandGroupsOnProjectDeleted struct {
-	commandGroupRepository commandgroupdomain.Repository
-	eventEmitter           EventEmitter
+	unitOfWork   unitofwork.UnitOfWork
+	eventEmitter EventEmitter
 }
 
 func (h *CleanCommandGroupsOnProjectDeleted) GetEvent() eventbus.Event {
@@ -17,12 +18,12 @@ func (h *CleanCommandGroupsOnProjectDeleted) GetEvent() eventbus.Event {
 }
 
 func NewCleanCommandGroupsOnProjectDeleted(
-	commandGroupRepository commandgroupdomain.Repository,
+	unitOfWork unitofwork.UnitOfWork,
 	eventEmitter EventEmitter,
 ) *CleanCommandGroupsOnProjectDeleted {
 	return &CleanCommandGroupsOnProjectDeleted{
-		commandGroupRepository: commandGroupRepository,
-		eventEmitter:           eventEmitter,
+		unitOfWork:   unitOfWork,
+		eventEmitter: eventEmitter,
 	}
 }
 
@@ -49,14 +50,14 @@ func (h *CleanCommandGroupsOnProjectDeleted) Execute(e eventbus.Event) error {
 func (h *CleanCommandGroupsOnProjectDeleted) deleteTheCommandGroupsOf(projectId string) ([]commandgroupdomain.CommandGroup, error) {
 	var deleted []commandgroupdomain.CommandGroup
 
-	err := h.commandGroupRepository.Atomically(func(commandGroupRepository commandgroupdomain.Repository) error {
-		commandGroups, err := commandGroupRepository.GetAll(projectId)
+	err := h.unitOfWork.Do(func(repositories unitofwork.Repositories) error {
+		commandGroups, err := repositories.CommandGroups.GetAll(projectId)
 		if err != nil {
 			return err
 		}
 
 		for _, commandGroup := range commandGroups {
-			if err := commandGroupRepository.Delete(commandGroup.Id); err != nil {
+			if err := repositories.CommandGroups.Delete(commandGroup.Id); err != nil {
 				return err
 			}
 		}
