@@ -1,13 +1,12 @@
 package usecases
 
 import (
-	"context"
 	"encoding/json"
 	"path"
 
 	"github.com/google/uuid"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"gomander/internal/dialog"
 	"gomander/internal/facade"
 	projectdomain "gomander/internal/project/domain"
 )
@@ -20,29 +19,24 @@ const (
 )
 
 type GetProjectToImport struct {
-	ctx           context.Context
-	runtimeFacade facade.RuntimeFacade
-	fsFacade      facade.FsFacade
+	dialogs  dialog.Dialogs
+	fsFacade facade.FsFacade
 }
 
 func NewGetProjectToImport(
-	ctx context.Context,
-	runtimeFacade facade.RuntimeFacade,
+	dialogs dialog.Dialogs,
 	fsFacade facade.FsFacade,
 ) *GetProjectToImport {
 	return &GetProjectToImport{
-		ctx:           ctx,
-		runtimeFacade: runtimeFacade,
-		fsFacade:      fsFacade,
+		dialogs:  dialogs,
+		fsFacade: fsFacade,
 	}
 }
 
 func (uc *GetProjectToImport) Execute(fileType FileType) (*projectdomain.ProjectExportJSONv1, error) {
 	var projectJSON *projectdomain.ProjectExportJSONv1
 
-	options := OpenDialogOptionsByFileType[fileType]
-
-	filePath, err := uc.runtimeFacade.OpenFileDialog(uc.ctx, options)
+	filePath, err := uc.dialogs.AskForFileToOpen(OpenFileRequestByFileType[fileType])
 	if err != nil {
 		return nil, err
 	}
@@ -67,14 +61,14 @@ func (uc *GetProjectToImport) Execute(fileType FileType) (*projectdomain.Project
 	return projectJSON, nil
 }
 
-var OpenDialogOptionsByFileType = map[FileType]runtime.OpenDialogOptions{
+var OpenFileRequestByFileType = map[FileType]dialog.OpenFileRequest{
 	FileTypeGomander: {
 		Title:   "Select an exported Gomander project file",
-		Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}},
+		Filters: []dialog.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}},
 	},
 	FileTypePackageJSON: {
 		Title:   "Select a package.json file",
-		Filters: []runtime.FileFilter{{DisplayName: "package.json", Pattern: "*.json"}},
+		Filters: []dialog.FileFilter{{DisplayName: "package.json", Pattern: "*.json"}},
 	},
 }
 

@@ -1,31 +1,26 @@
 package fs
 
 import (
-	"context"
 	"path/filepath"
 
-	"github.com/wailsapp/wails/v2/pkg/runtime"
-
+	"gomander/internal/dialog"
 	"gomander/internal/facade"
 )
 
 type UIFsHelper struct {
+	dialogs dialog.Dialogs
 	runtime facade.RuntimeFacade
-	ctx     context.Context
 }
 
-func NewUIFsHelper(runtime facade.RuntimeFacade) *UIFsHelper {
+func NewUIFsHelper(dialogs dialog.Dialogs, runtime facade.RuntimeFacade) *UIFsHelper {
 	return &UIFsHelper{
+		dialogs: dialogs,
 		runtime: runtime,
 	}
 }
 
-func SetUIFsHelperContext(h *UIFsHelper, ctx context.Context) {
-	h.ctx = ctx
-}
-
 func (h *UIFsHelper) AskForDirPath() (string, error) {
-	return h.runtime.OpenDirectoryDialog(h.ctx, runtime.OpenDialogOptions{})
+	return h.dialogs.AskForDirectory(dialog.PickDirectoryRequest{})
 }
 
 func (h *UIFsHelper) OpenFileFolder(filePath string) error {

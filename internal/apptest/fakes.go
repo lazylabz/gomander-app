@@ -7,9 +7,8 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/wailsapp/wails/v2/pkg/runtime"
-
 	commanddomain "gomander/internal/command/domain"
+	"gomander/internal/dialog"
 	"gomander/internal/event"
 	"gomander/internal/execution"
 )
@@ -137,12 +136,10 @@ func (r *processRunnerFake) stopped() []string {
 }
 
 // runtimeFake stands in for the desktop runtime: the event emitter the frontend
-// listens to, the log sink, and the file dialogs the user answers.
+// listens to and the log sink.
 type runtimeFake struct {
-	mutex              sync.Mutex
-	emittedEvents      []EmittedEvent
-	saveFileDialogPath string
-	openFileDialogPath string
+	mutex         sync.Mutex
+	emittedEvents []EmittedEvent
 }
 
 func (f *runtimeFake) EventsEmit(_ context.Context, eventName string, payload interface{}) {
@@ -159,18 +156,6 @@ func (f *runtimeFake) emitted() []EmittedEvent {
 	return append([]EmittedEvent(nil), f.emittedEvents...)
 }
 
-func (f *runtimeFake) SaveFileDialog(_ context.Context, _ runtime.SaveDialogOptions) (string, error) {
-	return f.saveFileDialogPath, nil
-}
-
-func (f *runtimeFake) OpenFileDialog(_ context.Context, _ runtime.OpenDialogOptions) (string, error) {
-	return f.openFileDialogPath, nil
-}
-
-func (f *runtimeFake) OpenDirectoryDialog(_ context.Context, _ runtime.OpenDialogOptions) (string, error) {
-	return "", nil
-}
-
 func (f *runtimeFake) LogInfo(_ context.Context, _ string)  {}
 func (f *runtimeFake) LogDebug(_ context.Context, _ string) {}
 func (f *runtimeFake) LogError(_ context.Context, _ string) {}
@@ -178,6 +163,39 @@ func (f *runtimeFake) LogError(_ context.Context, _ string) {}
 func (f *runtimeFake) OpenFolderInFileManager(_ string) error { return nil }
 
 func (f *runtimeFake) CloseApp(_ context.Context) {}
+
+// dialogsFake answers the file dialogs in the user's place: with the path they
+// would have picked, with an empty path when they cancel, or with the failure
+// the desktop toolkit reports when it cannot put a dialog on screen at all.
+type dialogsFake struct {
+	saveFilePath string
+	openFilePath string
+	failure      error
+}
+
+func (f *dialogsFake) AskForFileToOpen(_ dialog.OpenFileRequest) (string, error) {
+	if f.failure != nil {
+		return "", f.failure
+	}
+
+	return f.openFilePath, nil
+}
+
+func (f *dialogsFake) AskWhereToSaveFile(_ dialog.SaveFileRequest) (string, error) {
+	if f.failure != nil {
+		return "", f.failure
+	}
+
+	return f.saveFilePath, nil
+}
+
+func (f *dialogsFake) AskForDirectory(_ dialog.PickDirectoryRequest) (string, error) {
+	if f.failure != nil {
+		return "", f.failure
+	}
+
+	return "", nil
+}
 
 // fsFacadeFake keeps the files the backend reads and writes in memory.
 type fsFacadeFake struct {

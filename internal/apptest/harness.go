@@ -55,6 +55,7 @@ type Harness struct {
 	app           *internalapp.App
 	processRunner *processRunnerFake
 	runtime       *runtimeFake
+	dialogs       *dialogsFake
 	fs            *fsFacadeFake
 }
 
@@ -71,6 +72,7 @@ func New(t *testing.T) *Harness {
 	db := testdb.New(t)
 
 	runtimeFacade := &runtimeFake{}
+	dialogs := &dialogsFake{}
 	fsFacade := &fsFacadeFake{files: make(map[string][]byte)}
 	processRunner := &processRunnerFake{
 		startFailures: make(map[string]error),
@@ -111,9 +113,9 @@ func New(t *testing.T) *Harness {
 			EditProject:          projectusecases.NewEditProject(projectRepo),
 			CloseProject:         projectusecases.NewCloseProject(openedProject),
 			DeleteProject:        projectusecases.NewDeleteProject(projectRepo, eventBus, l),
-			ExportProject:        projectusecases.NewExportProject(ctx, projectRepo, commandRepo, commandGroupRepo, runtimeFacade, fsFacade),
+			ExportProject:        projectusecases.NewExportProject(projectRepo, commandRepo, commandGroupRepo, dialogs, fsFacade),
 			ImportProject:        projectusecases.NewImportProject(projectRepo, commandRepo, commandGroupRepo),
-			GetProjectToImport:   projectusecases.NewGetProjectToImport(ctx, runtimeFacade, fsFacade),
+			GetProjectToImport:   projectusecases.NewGetProjectToImport(dialogs, fsFacade),
 
 			GetCommandGroups:              commandgroupusecases.NewGetCommandGroups(openedProject, commandGroupRepo),
 			CreateCommandGroup:            commandgroupusecases.NewCreateCommandGroup(openedProject, commandGroupRepo),
@@ -142,6 +144,7 @@ func New(t *testing.T) *Harness {
 		app:                    app,
 		processRunner:          processRunner,
 		runtime:                runtimeFacade,
+		dialogs:                dialogs,
 		fs:                     fsFacade,
 	}
 }
@@ -217,14 +220,30 @@ func (h *Harness) GivenFileToImport(path string, contents []byte) {
 	h.t.Helper()
 
 	h.fs.put(path, contents)
-	h.runtime.openFileDialogPath = path
+	h.dialogs.openFilePath = path
+}
+
+// GivenMissingFileToImport points the open-file dialog at a path the
+// filesystem has no file at.
+func (h *Harness) GivenMissingFileToImport(path string) {
+	h.t.Helper()
+
+	h.dialogs.openFilePath = path
 }
 
 // GivenExportDestination answers the save-file dialog with path.
 func (h *Harness) GivenExportDestination(path string) {
 	h.t.Helper()
 
-	h.runtime.saveFileDialogPath = path
+	h.dialogs.saveFilePath = path
+}
+
+// GivenDialogsThatFail makes the desktop toolkit refuse to put any dialog on
+// screen.
+func (h *Harness) GivenDialogsThatFail(err error) {
+	h.t.Helper()
+
+	h.dialogs.failure = err
 }
 
 // ClosingTheApp runs the shutdown the desktop window triggers, and answers

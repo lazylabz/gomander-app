@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/stretchr/testify/mock"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type MockRuntimeFacade struct {
@@ -25,21 +24,6 @@ func (m *MockRuntimeFacade) LogDebug(ctx context.Context, message string) {
 
 func (m *MockRuntimeFacade) LogError(ctx context.Context, message string) {
 	m.Called(ctx, message)
-}
-
-func (m *MockRuntimeFacade) SaveFileDialog(ctx context.Context, dialogOptions runtime.SaveDialogOptions) (string, error) {
-	args := m.Called(ctx, dialogOptions)
-	return args.String(0), args.Error(1)
-}
-
-func (m *MockRuntimeFacade) OpenFileDialog(ctx context.Context, dialogOptions runtime.OpenDialogOptions) (string, error) {
-	args := m.Called(ctx, dialogOptions)
-	return args.String(0), args.Error(1)
-}
-
-func (m *MockRuntimeFacade) OpenDirectoryDialog(ctx context.Context, dialogOptions runtime.OpenDialogOptions) (string, error) {
-	args := m.Called(ctx, dialogOptions)
-	return args.String(0), args.Error(1)
 }
 
 func (m *MockRuntimeFacade) OpenFolderInFileManager(path string) error {

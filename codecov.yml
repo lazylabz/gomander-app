@@ -15,5 +15,6 @@ ignore:
   - "cmd/gomander/main.go"
   - "internal/app/app.go"
   - "**/*facade.go"
+  - "internal/dialog/wailsdialogs.go"
   - "**/*_testbuilder.go"
   - "**/*_mock.go"
