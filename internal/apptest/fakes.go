@@ -135,34 +135,34 @@ func (r *processRunnerFake) stopped() []string {
 	return append([]string(nil), r.stoppedProcessIds...)
 }
 
-// runtimeFake stands in for the desktop runtime: the event emitter the frontend
-// listens to and the log sink.
-type runtimeFake struct {
+// eventSinkFake stands in for the desktop runtime's event sink: what the
+// frontend would be listening to, recorded so a test can assert on it.
+type eventSinkFake struct {
 	mutex         sync.Mutex
 	emittedEvents []EmittedEvent
 }
 
-func (f *runtimeFake) EventsEmit(_ context.Context, eventName string, payload interface{}) {
+func (f *eventSinkFake) EventsEmit(_ context.Context, eventName string, payload interface{}) {
 	f.mutex.Lock()
 	defer f.mutex.Unlock()
 
 	f.emittedEvents = append(f.emittedEvents, EmittedEvent{Name: event.Event(eventName), Payload: payload})
 }
 
-func (f *runtimeFake) emitted() []EmittedEvent {
+func (f *eventSinkFake) emitted() []EmittedEvent {
 	f.mutex.Lock()
 	defer f.mutex.Unlock()
 
 	return append([]EmittedEvent(nil), f.emittedEvents...)
 }
 
-func (f *runtimeFake) LogInfo(_ context.Context, _ string)  {}
-func (f *runtimeFake) LogDebug(_ context.Context, _ string) {}
-func (f *runtimeFake) LogError(_ context.Context, _ string) {}
+// logSinkFake swallows the log lines the desktop runtime would have written:
+// nothing a test asserts on goes through the logger.
+type logSinkFake struct{}
 
-func (f *runtimeFake) OpenFolderInFileManager(_ string) error { return nil }
-
-func (f *runtimeFake) CloseApp(_ context.Context) {}
+func (f *logSinkFake) LogInfo(_ context.Context, _ string)  {}
+func (f *logSinkFake) LogDebug(_ context.Context, _ string) {}
+func (f *logSinkFake) LogError(_ context.Context, _ string) {}
 
 // dialogsFake answers the file dialogs in the user's place: with the path they
 // would have picked, with an empty path when they cancel, or with the failure

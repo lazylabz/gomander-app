@@ -4,18 +4,23 @@ import (
 	"path/filepath"
 
 	"gomander/internal/dialog"
-	"gomander/internal/facade"
 )
 
-type UIFsHelper struct {
-	dialogs dialog.Dialogs
-	runtime facade.RuntimeFacade
+// FileManager reveals a path in whatever the operating system uses to browse
+// files.
+type FileManager interface {
+	OpenFolder(path string) error
 }
 
-func NewUIFsHelper(dialogs dialog.Dialogs, runtime facade.RuntimeFacade) *UIFsHelper {
+type UIFsHelper struct {
+	dialogs     dialog.Dialogs
+	fileManager FileManager
+}
+
+func NewUIFsHelper(dialogs dialog.Dialogs, fileManager FileManager) *UIFsHelper {
 	return &UIFsHelper{
-		dialogs: dialogs,
-		runtime: runtime,
+		dialogs:     dialogs,
+		fileManager: fileManager,
 	}
 }
 
@@ -27,5 +32,5 @@ func (h *UIFsHelper) OpenFileFolder(filePath string) error {
 	cleanPath := filepath.Clean(filePath)
 	folderPath := filepath.Dir(cleanPath)
 
-	return h.runtime.OpenFolderInFileManager(folderPath)
+	return h.fileManager.OpenFolder(folderPath)
 }
