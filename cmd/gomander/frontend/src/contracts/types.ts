@@ -22,10 +22,19 @@ export enum Event {
 	COMMAND_ERROR_DETECTED = event.Event.COMMAND_ERROR_DETECTED,
 }
 
+// Which of a command's two kinds of line arrived: the command's own text, sent
+// once as it starts, or a line the process printed. How each one looks is
+// decided in commandOutput, not by the backend that sends it.
+export enum LogEntryKind {
+	COMMAND = "command",
+	OUTPUT = "output",
+}
+
 export type EventData = {
 	[Event.NEW_LOG_ENTRY]: {
 		id: string;
 		line: string;
+		kind: LogEntryKind;
 	};
 	[Event.PROCESS_FINISHED]: string;
 	[Event.PROCESS_STARTED]: string;

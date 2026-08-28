@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { RecordingTerminals } from "@/commandOutput/adapters/recording.ts";
 import {
+	appendCommandLogEntry,
 	appendCommandOutput,
 	attachCommandOutput,
 	commandOutputTail,
@@ -12,6 +13,7 @@ import {
 	setCommandOutputTheme,
 } from "@/commandOutput/commandOutput.ts";
 import { TERMINAL_SCROLLBACK } from "@/commandOutput/ports.ts";
+import { LogEntryKind } from "@/contracts/types.ts";
 import {
 	installRecordingTerminals,
 	resetTerminals,
@@ -135,6 +137,36 @@ describe("the command output pipeline", () => {
 			expect(terminalOf("cmd-1").written).toEqual([
 				"\x1b[90m[09:07:02]\x1b[0m first",
 				"\x1b[90m[09:07:41]\x1b[0m second",
+			]);
+		});
+	});
+
+	describe("log entries", () => {
+		it("Should write a command log entry in bold cyan", () => {
+			// Arrange
+			attachCommandOutput("cmd-1", document.createElement("div"));
+
+			// Act
+			appendCommandLogEntry("cmd-1", "pnpm dev", LogEntryKind.COMMAND);
+			flush();
+
+			// Assert
+			expect(terminalOf("cmd-1").written).toEqual([
+				"\x1b[90m[09:07:02]\x1b[0m \x1b[1;36mpnpm dev\x1b[0m",
+			]);
+		});
+
+		it("Should write an output log entry as it arrived", () => {
+			// Arrange
+			attachCommandOutput("cmd-1", document.createElement("div"));
+
+			// Act
+			appendCommandLogEntry("cmd-1", "ready in 42 ms", LogEntryKind.OUTPUT);
+			flush();
+
+			// Assert
+			expect(terminalOf("cmd-1").written).toEqual([
+				"\x1b[90m[09:07:02]\x1b[0m ready in 42 ms",
 			]);
 		});
 	});

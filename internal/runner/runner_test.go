@@ -40,11 +40,12 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		mockEmitterLogEntry(emitter, commandId, "b")
 		mockEmitterLogEntry(emitter, commandId, "c")
 
-		// Check first line
-		emitter.On("EmitEvent", event.NewLogEntry, mock.MatchedBy(func(
-			data map[string]string) bool {
-			return strings.Contains(data["line"], "echo")
-		})).Return()
+		// The opening line is the Command's own text, with no presentation on it
+		emitter.On("EmitEvent", event.NewLogEntry, map[string]string{
+			"id":   commandId,
+			"line": "echo 'a'&& echo 'b'&& echo 'c'",
+			"kind": "command",
+		}).Return()
 
 		logger.On("Info", mock.Anything).Return()
 		logger.On("Debug", mock.Anything).Return()
@@ -477,11 +478,13 @@ func mockEmitterLogEntry(emitter *test2.MockEventEmitter, id string, line string
 		emitter.On("EmitEvent", event.NewLogEntry, map[string]string{
 			"id":   id,
 			"line": "'" + line + "'",
+			"kind": "output",
 		}).Return()
 	} else {
 		emitter.On("EmitEvent", event.NewLogEntry, map[string]string{
 			"id":   id,
 			"line": line,
+			"kind": "output",
 		}).Return()
 	}
 }

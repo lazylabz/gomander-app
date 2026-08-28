@@ -159,10 +159,7 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 }
 
 func (c *DefaultRunner) sendStartingLine(command *domain.Command) {
-	c.eventEmitter.EmitEvent(event.NewLogEntry, map[string]string{
-		"id":   command.Id,
-		"line": "\033[1;36m" + command.Command + "\033[0m",
-	})
+	c.emitLogEntry(command, command.Command, event.CommandLogEntry)
 }
 
 func (c *DefaultRunner) StopRunningCommand(id string) error {
@@ -223,9 +220,14 @@ func (c *DefaultRunner) streamOutput(command *domain.Command, pipeReader io.Read
 func (c *DefaultRunner) sendStreamLine(command *domain.Command, line string) {
 	c.processStreamLine(command, line)
 
+	c.emitLogEntry(command, line, event.OutputLogEntry)
+}
+
+func (c *DefaultRunner) emitLogEntry(command *domain.Command, line string, kind event.LogEntryKind) {
 	c.eventEmitter.EmitEvent(event.NewLogEntry, map[string]string{
 		"id":   command.Id,
 		"line": line,
+		"kind": string(kind),
 	})
 }
 

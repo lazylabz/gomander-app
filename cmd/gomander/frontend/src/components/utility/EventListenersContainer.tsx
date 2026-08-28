@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef } from "react";
 
 import {
-	appendCommandOutput,
+	appendCommandLogEntry,
 	resetCommandOutput,
 	setCommandOutputTheme,
 } from "@/commandOutput/commandOutput.ts";
@@ -45,7 +45,7 @@ export const EventListenersContainer = () => {
 		eventService.eventsOn(
 			Event.NEW_LOG_ENTRY,
 			(data: EventData[Event.NEW_LOG_ENTRY]) =>
-				appendCommandOutput(data.id, [data.line]),
+				appendCommandLogEntry(data.id, data.line, data.kind),
 		);
 
 		eventService.eventsOn(
