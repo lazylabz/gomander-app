@@ -20,6 +20,24 @@ func (m *MockCommandGroupRepository) GetAll(projectId string) ([]commandgroupdom
 	return args.Get(0).([]commandgroupdomain.CommandGroup), args.Error(1)
 }
 
+func (m *MockCommandGroupRepository) GetWithCommandIds(id string) (commandgroupdomain.CommandGroupWithCommandIds, error) {
+	args := m.Called(id)
+	return args.Get(0).(commandgroupdomain.CommandGroupWithCommandIds), args.Error(1)
+}
+
+func (m *MockCommandGroupRepository) GetAllWithCommandIds(projectId string) ([]commandgroupdomain.CommandGroupWithCommandIds, error) {
+	args := m.Called(projectId)
+	return args.Get(0).([]commandgroupdomain.CommandGroupWithCommandIds), args.Error(1)
+}
+
+func (m *MockCommandGroupRepository) GetAllContainingWithCommandIds(commandId string) ([]commandgroupdomain.CommandGroupWithCommandIds, error) {
+	args := m.Called(commandId)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]commandgroupdomain.CommandGroupWithCommandIds), args.Error(1)
+}
+
 func (m *MockCommandGroupRepository) Create(commandGroup *commandgroupdomain.CommandGroup) error {
 	args := m.Called(commandGroup)
 	return args.Error(0)

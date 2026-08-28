@@ -76,3 +76,32 @@ func (row commandGroupRow) command() (commanddomain.Command, bool) {
 		ErrorPatterns:    row.CommandErrorPatterns,
 	}), true
 }
+
+// ToDomainCommandGroupsWithCommandIds folds the rows of
+// commandGroupIdentityQuery back into Command Groups, keeping the order the
+// query put them in - both the Groups and, within each, the Commands it names.
+func ToDomainCommandGroupsWithCommandIds(rows []commandGroupIdentityRow) []domain.CommandGroupWithCommandIds {
+	commandGroups := make([]domain.CommandGroupWithCommandIds, 0)
+	indexById := make(map[string]int)
+
+	for _, row := range rows {
+		index, alreadyRead := indexById[row.Id]
+		if !alreadyRead {
+			index = len(commandGroups)
+			indexById[row.Id] = index
+			commandGroups = append(commandGroups, domain.CommandGroupWithCommandIds{
+				Id:         row.Id,
+				ProjectId:  row.ProjectId,
+				Name:       row.Name,
+				Position:   row.Position,
+				CommandIds: make([]string, 0),
+			})
+		}
+
+		if row.CommandId != nil {
+			commandGroups[index].CommandIds = append(commandGroups[index].CommandIds, *row.CommandId)
+		}
+	}
+
+	return commandGroups
+}
