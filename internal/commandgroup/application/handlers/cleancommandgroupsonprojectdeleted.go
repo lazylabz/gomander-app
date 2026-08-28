@@ -9,7 +9,7 @@ import (
 
 type CleanCommandGroupsOnProjectDeleted struct {
 	commandGroupRepository commandgroupdomain.Repository
-	eventEmitter           internalEvent.EventEmitter
+	eventEmitter           EventEmitter
 }
 
 func (h *CleanCommandGroupsOnProjectDeleted) GetEvent() eventbus.Event {
@@ -18,7 +18,7 @@ func (h *CleanCommandGroupsOnProjectDeleted) GetEvent() eventbus.Event {
 
 func NewCleanCommandGroupsOnProjectDeleted(
 	commandGroupRepository commandgroupdomain.Repository,
-	eventEmitter internalEvent.EventEmitter,
+	eventEmitter EventEmitter,
 ) *CleanCommandGroupsOnProjectDeleted {
 	return &CleanCommandGroupsOnProjectDeleted{
 		commandGroupRepository: commandGroupRepository,

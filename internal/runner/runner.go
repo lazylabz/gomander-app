@@ -11,7 +11,6 @@ import (
 	"gomander/internal/command/domain"
 	"gomander/internal/event"
 	"gomander/internal/execution"
-	"gomander/internal/logger"
 )
 
 // pipeDrainGrace is how long the scanners get to drain what the process left
@@ -37,21 +36,26 @@ type runningCommand struct {
 	exited chan struct{}
 }
 
+// Logger is where the runner reports what a Command's process is doing.
+type Logger interface {
+	Info(message string)
+	Debug(message string)
+	Error(message string)
+}
+
+// EventEmitter carries a Process's life and output to whoever is watching it.
+type EventEmitter interface {
+	EmitEvent(event event.Event, payload interface{})
+}
+
 type DefaultRunner struct {
 	runningCommands map[string]runningCommand
-	eventEmitter    event.EventEmitter
-	logger          logger.Logger
+	eventEmitter    EventEmitter
+	logger          Logger
 	mutex           sync.Mutex
 }
 
-type Runner interface {
-	RunCommand(command *domain.Command, environment execution.Environment) error
-	StopRunningCommand(id string) error
-	StopAllRunningCommands() []error
-	GetRunningCommandIds() []string
-}
-
-func NewDefaultRunner(logger logger.Logger, emitter event.EventEmitter) *DefaultRunner {
+func NewDefaultRunner(logger Logger, emitter EventEmitter) *DefaultRunner {
 	return &DefaultRunner{
 		runningCommands: make(map[string]runningCommand),
 		eventEmitter:    emitter,

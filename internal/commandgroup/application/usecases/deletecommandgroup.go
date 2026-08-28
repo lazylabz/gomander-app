@@ -5,14 +5,19 @@ import (
 	"gomander/internal/event"
 )
 
+// EventEmitter tells the UI what a use case has already committed.
+type EventEmitter interface {
+	EmitEvent(event event.Event, payload interface{})
+}
+
 type DeleteCommandGroup struct {
 	commandGroupRepository domain.Repository
-	eventEmitter           event.EventEmitter
+	eventEmitter           EventEmitter
 }
 
 func NewDeleteCommandGroup(
 	commandGroupRepo domain.Repository,
-	eventEmitter event.EventEmitter,
+	eventEmitter EventEmitter,
 ) *DeleteCommandGroup {
 	return &DeleteCommandGroup{
 		commandGroupRepository: commandGroupRepo,

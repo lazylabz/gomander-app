@@ -9,10 +9,9 @@ import (
 
 	commanddomain "gomander/internal/command/domain"
 	"gomander/internal/event"
-	test2 "gomander/internal/event/test"
 	"gomander/internal/execution"
-	"gomander/internal/logger/test"
 	"gomander/internal/runner"
+	"gomander/internal/runner/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -31,7 +30,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 	t.Run("Should run command with success and emit events for each line", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
+		emitter := new(test.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -71,7 +70,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 	t.Run("Should log error when executing an invalid command", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
+		emitter := new(test.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -104,7 +103,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 	t.Run("Should stream the output of several commands running at once", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
+		emitter := new(test.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -158,7 +157,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 	t.Run("Should return an error when the working directory does not exist", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
+		emitter := new(test.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -185,7 +184,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 	t.Run("Should stop running command", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
+		emitter := new(test.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -231,7 +230,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 	t.Run("Should not write a termination error to the output of a stopped command", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
+		emitter := new(test.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -286,7 +285,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 	t.Run("Should not throw if trying to run an already running command", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
+		emitter := new(test.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 		commandId := "1"
@@ -331,7 +330,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 	t.Run("Should stop each of several commands running at once", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
+		emitter := new(test.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -400,7 +399,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
+		emitter := new(test.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -451,7 +450,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 	t.Run("Should not error when stopping a command that is not running", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
+		emitter := new(test.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -468,7 +467,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 	t.Run("Should stop all running commands", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
+		emitter := new(test.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -533,7 +532,7 @@ func TestDefaultRunner_GetRunningCommandIds(t *testing.T) {
 		logger.On("Debug", mock.Anything).Return()
 		logger.On("Error", mock.Anything).Return()
 
-		emitter := new(test2.MockEventEmitter)
+		emitter := new(test.MockEventEmitter)
 		emitter.On("EmitEvent", mock.Anything, mock.Anything).Return()
 
 		sut := runner.NewDefaultRunner(logger, emitter)
@@ -552,7 +551,7 @@ func TestDefaultRunner_GetRunningCommandIds(t *testing.T) {
 		logger.On("Debug", mock.Anything).Return()
 		logger.On("Error", mock.Anything).Return()
 
-		emitter := new(test2.MockEventEmitter)
+		emitter := new(test.MockEventEmitter)
 		emitter.On("EmitEvent", mock.Anything, mock.Anything).Return()
 
 		sut := runner.NewDefaultRunner(logger, emitter)
@@ -587,7 +586,7 @@ func TestDefaultRunner_GetRunningCommandIds(t *testing.T) {
 	})
 }
 
-func mockEmitterLogEntry(emitter *test2.MockEventEmitter, id string, line string) {
+func mockEmitterLogEntry(emitter *test.MockEventEmitter, id string, line string) {
 	if runtime.GOOS == "windows" {
 		emitter.On("EmitEvent", event.NewLogEntry, map[string]string{
 			"id":   id,
@@ -607,7 +606,7 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 	t.Run("Should emit CommandErrorDetected event when error pattern is matched", func(t *testing.T) {
 		// Arrange
 		logger := new(test.MockLogger)
-		emitter := new(test2.MockEventEmitter)
+		emitter := new(test.MockEventEmitter)
 
 		r := runner.NewDefaultRunner(logger, emitter)
 
@@ -654,7 +653,7 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 // streamedLines is what the runner wrote to the Command's terminal. Only read
 // it once ProcessFinished has arrived: that is what orders these calls against
 // the goroutine making them.
-func streamedLines(emitter *test2.MockEventEmitter) []string {
+func streamedLines(emitter *test.MockEventEmitter) []string {
 	lines := make([]string, 0)
 
 	for _, call := range emitter.Calls {

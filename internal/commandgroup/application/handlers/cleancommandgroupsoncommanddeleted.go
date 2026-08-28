@@ -8,9 +8,14 @@ import (
 	"gomander/internal/helpers/array"
 )
 
+// EventEmitter tells the UI what a handler has already committed.
+type EventEmitter interface {
+	EmitEvent(event internalEvent.Event, payload interface{})
+}
+
 type CleanCommandGroupsOnCommandDeleted struct {
 	commandGroupRepository commandgroupdomain.Repository
-	eventEmitter           internalEvent.EventEmitter
+	eventEmitter           EventEmitter
 }
 
 func (h *CleanCommandGroupsOnCommandDeleted) GetEvent() eventbus.Event {
@@ -19,7 +24,7 @@ func (h *CleanCommandGroupsOnCommandDeleted) GetEvent() eventbus.Event {
 
 func NewCleanCommandGroupsOnCommandDeleted(
 	commandGroupRepository commandgroupdomain.Repository,
-	eventEmitter internalEvent.EventEmitter,
+	eventEmitter EventEmitter,
 ) *CleanCommandGroupsOnCommandDeleted {
 	return &CleanCommandGroupsOnCommandDeleted{
 		commandGroupRepository: commandGroupRepository,

@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"gomander/internal/commandgroup/application/handlers"
+	handlerstest "gomander/internal/commandgroup/application/handlers/test"
 	"gomander/internal/commandgroup/domain/test"
-	test2 "gomander/internal/event/test"
 	projectdomainevent "gomander/internal/project/domain/event"
 )
 
@@ -17,7 +17,7 @@ func TestCleanCommandGroupsOnProjectDeleted(t *testing.T) {
 	t.Run("Should do nothing if the event is of another type", func(t *testing.T) {
 		// Arrange
 		mockRepo := new(test.MockCommandGroupRepository)
-		mockEventEmitter := new(test2.MockEventEmitter)
+		mockEventEmitter := new(handlerstest.MockEventEmitter)
 		sut := handlers.NewCleanCommandGroupsOnProjectDeleted(mockRepo, mockEventEmitter)
 
 		// Act

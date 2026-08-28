@@ -11,12 +11,6 @@ type LogSink interface {
 	LogError(ctx context.Context, message string)
 }
 
-type Logger interface {
-	Info(message string)
-	Debug(message string)
-	Error(message string)
-}
-
 type DefaultLogger struct {
 	ctx  context.Context
 	sink LogSink

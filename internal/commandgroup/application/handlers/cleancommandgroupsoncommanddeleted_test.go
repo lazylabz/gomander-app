@@ -7,8 +7,8 @@ import (
 
 	commanddomainevent "gomander/internal/command/domain/event"
 	"gomander/internal/commandgroup/application/handlers"
+	handlerstest "gomander/internal/commandgroup/application/handlers/test"
 	"gomander/internal/commandgroup/domain/test"
-	test2 "gomander/internal/event/test"
 )
 
 // What the handler does to the Command Groups is verified at the application
@@ -18,7 +18,7 @@ func TestCleanCommandGroupsOnCommandDeleted(t *testing.T) {
 	t.Run("Should do nothing if the event is of another type", func(t *testing.T) {
 		// Arrange
 		mockRepo := new(test.MockCommandGroupRepository)
-		mockEventEmitter := new(test2.MockEventEmitter)
+		mockEventEmitter := new(handlerstest.MockEventEmitter)
 		sut := handlers.NewCleanCommandGroupsOnCommandDeleted(mockRepo, mockEventEmitter)
 
 		// Act

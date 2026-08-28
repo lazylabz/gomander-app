@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"gomander/internal/command/application/usecases"
-	"gomander/internal/runner/test"
+	"gomander/internal/execution/test"
 )
 
 func TestGetRunningCommandIds_Execute(t *testing.T) {
