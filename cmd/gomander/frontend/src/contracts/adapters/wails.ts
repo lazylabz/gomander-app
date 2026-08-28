@@ -5,11 +5,13 @@ import {
 } from "../../../wailsjs/go/fs/UIFsHelper";
 import {
 	AddCommandController,
+	CheckForNewReleaseController,
 	CloseProjectController,
 	CreateCommandGroupController,
 	CreateProjectController,
 	DeleteCommandGroupController,
 	DeleteProjectController,
+	DownloadReleaseController,
 	DuplicateCommandController,
 	EditCommandController,
 	EditProjectController,
@@ -18,12 +20,14 @@ import {
 	GetCommandGroupsController,
 	GetCommandsController,
 	GetCurrentProjectController,
+	GetCurrentReleaseController,
 	GetProjectToImportController,
 	GetProjectToImportFromPackageJsonController,
 	GetSupportedLanguagesController,
 	GetTranslationController,
 	GetUserConfigController,
 	ImportProjectController,
+	InstallReleaseAndQuitController,
 	OpenProjectController,
 	RemoveCommandController,
 	RemoveCommandFromCommandGroupController,
@@ -38,12 +42,6 @@ import {
 } from "../../../wailsjs/go/main/WailsControllers";
 import { GetOs } from "../../../wailsjs/go/os_internal/UIOsHelper";
 import { GetComputedPath } from "../../../wailsjs/go/path/UiPathHelper";
-import {
-	DownloadLatestRelease,
-	GetCurrentRelease,
-	InstallLatestReleaseAndQuit,
-	IsThereANewRelease,
-} from "../../../wailsjs/go/releases/ReleaseHelper";
 import { BrowserOpenURL, EventsOff, EventsOn } from "../../../wailsjs/runtime";
 
 export const wailsBackend = {
@@ -78,13 +76,13 @@ export const wailsBackend = {
 		getProjectToImportFromPackageJson:
 			GetProjectToImportFromPackageJsonController,
 		editProject: EditProjectController,
+		getCurrentRelease: GetCurrentReleaseController,
+		checkForNewRelease: CheckForNewReleaseController,
+		downloadRelease: DownloadReleaseController,
+		installReleaseAndQuit: InstallReleaseAndQuitController,
 	},
 	helpers: {
 		getComputedPath: GetComputedPath,
-		isThereANewRelease: IsThereANewRelease,
-		getCurrentRelease: GetCurrentRelease,
-		downloadLatestRelease: DownloadLatestRelease,
-		installLatestReleaseAndQuit: InstallLatestReleaseAndQuit,
 		getOs: GetOs,
 		askForDirPath: AskForDirPath,
 		openFileFolder: OpenFileFolder,

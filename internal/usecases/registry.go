@@ -6,6 +6,7 @@ import (
 	configusecases "gomander/internal/config/application/usecases"
 	localizationusecases "gomander/internal/localization/application/usecases"
 	projectusecases "gomander/internal/project/application/usecases"
+	releaseusecases "gomander/internal/releases/application/usecases"
 )
 
 type Registry struct {
@@ -45,4 +46,9 @@ type Registry struct {
 	RunCommand           *commandusecases.RunCommand
 	StopCommand          *commandusecases.StopCommand
 	GetRunningCommandIds *commandusecases.GetRunningCommandIds
+	// Releases
+	GetCurrentRelease     *releaseusecases.GetCurrentRelease
+	CheckForNewRelease    *releaseusecases.CheckForNewRelease
+	DownloadRelease       *releaseusecases.DownloadRelease
+	InstallReleaseAndQuit *releaseusecases.InstallReleaseAndQuit
 }

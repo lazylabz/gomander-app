@@ -70,6 +70,12 @@ a Command Group among its Project's Groups, a Command among the Commands its
 Command Group holds. Positions are dense: 0, 1, 2 … with no gaps.
 _Avoid_: order, index, sort order
 
+**Release**:
+A published version of Gomander. The app knows the one it is running, asks the
+release feed for the latest published one, and updates by downloading that one's
+binary and handing it to the operating system.
+_Avoid_: version (that is the number a Release is named by), update, build
+
 **Unit of Work**:
 One transaction spanning several repositories: everything an operation writes
 inside it lands, or none of it does. It is what makes atomicity a property of

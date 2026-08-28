@@ -5,6 +5,8 @@ import {main} from '../models';
 
 export function AddCommandController(arg1:domain.Command):Promise<void>;
 
+export function CheckForNewReleaseController():Promise<string>;
+
 export function CloseProjectController():Promise<void>;
 
 export function CreateCommandGroupController(arg1:domain.CommandGroup):Promise<void>;
@@ -14,6 +16,8 @@ export function CreateProjectController(arg1:domain.Project):Promise<void>;
 export function DeleteCommandGroupController(arg1:string):Promise<void>;
 
 export function DeleteProjectController(arg1:string):Promise<void>;
+
+export function DownloadReleaseController(arg1:string):Promise<string>;
 
 export function DuplicateCommandController(arg1:string,arg2:string):Promise<void>;
 
@@ -31,6 +35,8 @@ export function GetCommandsController():Promise<Array<domain.Command>>;
 
 export function GetCurrentProjectController():Promise<domain.Project>;
 
+export function GetCurrentReleaseController():Promise<string>;
+
 export function GetProjectToImportController():Promise<main.ProjectBlueprint>;
 
 export function GetProjectToImportFromPackageJsonController():Promise<main.ProjectBlueprint>;
@@ -42,6 +48,8 @@ export function GetTranslationController(arg1:string):Promise<domain.Localizatio
 export function GetUserConfigController():Promise<domain.Config>;
 
 export function ImportProjectController(arg1:main.ProjectBlueprint,arg2:string,arg3:string):Promise<void>;
+
+export function InstallReleaseAndQuitController(arg1:string):Promise<void>;
 
 export function OpenProjectController(arg1:string):Promise<void>;
 
