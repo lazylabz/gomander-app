@@ -52,6 +52,6 @@ last.
 
 **Position**:
 Where a thing sits among its siblings — a Command among its Project's Commands,
-a Command Group among its Project's Groups. Positions are dense: 0, 1, 2 … with
-no gaps.
+a Command Group among its Project's Groups, a Command among the Commands its
+Command Group holds. Positions are dense: 0, 1, 2 … with no gaps.
 _Avoid_: order, index, sort order

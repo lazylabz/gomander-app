@@ -4,6 +4,7 @@ import (
 	commanddomain "gomander/internal/command/domain"
 	"gomander/internal/command/infrastructure"
 	"gomander/internal/commandgroup/domain"
+	"gomander/internal/helpers/array"
 )
 
 func ToCommandGroupModel(domainCommandGroup *domain.CommandGroup) CommandGroupModel {
@@ -13,6 +14,21 @@ func ToCommandGroupModel(domainCommandGroup *domain.CommandGroup) CommandGroupMo
 		ProjectId: domainCommandGroup.ProjectId,
 		Position:  domainCommandGroup.Position,
 	}
+}
+
+// ToCommandToCommandGroupModels turns the Command Group's own answer about
+// where its Commands sit into the rows that hold it.
+func ToCommandToCommandGroupModels(domainCommandGroup *domain.CommandGroup) []CommandToCommandGroupModel {
+	return array.Map(
+		domainCommandGroup.CommandPlacements(),
+		func(placement domain.CommandPlacement) CommandToCommandGroupModel {
+			return CommandToCommandGroupModel{
+				CommandGroupId: domainCommandGroup.Id,
+				CommandId:      placement.CommandId,
+				Position:       placement.Position,
+			}
+		},
+	)
 }
 
 // ToDomainCommandGroups folds the rows of commandGroupQuery back into Command

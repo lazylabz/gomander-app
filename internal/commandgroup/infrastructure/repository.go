@@ -91,22 +91,7 @@ func (r GormCommandGroupRepository) Create(commandGroup *domain.CommandGroup) er
 			return err
 		}
 
-		if len(commandGroup.Commands) > 0 {
-			// Create command associations
-			for i, cmd := range commandGroup.Commands {
-				cmdToGroup := CommandToCommandGroupModel{
-					CommandId:      cmd.Id,
-					CommandGroupId: commandGroupModel.Id,
-					Position:       i,
-				}
-				err = gorm.G[CommandToCommandGroupModel](tx).Create(r.ctx, &cmdToGroup)
-				if err != nil {
-					return err
-				}
-			}
-		}
-
-		return nil
+		return r.writeCommandPlacements(tx, commandGroup)
 	})
 
 	if err != nil {
@@ -134,24 +119,21 @@ func (r GormCommandGroupRepository) Update(commandGroup *domain.CommandGroup) er
 			return err
 		}
 
-		// Create new command associations
-		for i, cmd := range commandGroup.Commands {
-			cmdToGroup := CommandToCommandGroupModel{
-				CommandId:      cmd.Id,
-				CommandGroupId: commandGroupModel.Id,
-				Position:       i,
-			}
-			err = gorm.G[CommandToCommandGroupModel](tx).Create(r.ctx, &cmdToGroup)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
+		return r.writeCommandPlacements(tx, commandGroup)
 	})
 
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (r GormCommandGroupRepository) writeCommandPlacements(tx *gorm.DB, commandGroup *domain.CommandGroup) error {
+	for _, model := range ToCommandToCommandGroupModels(commandGroup) {
+		if err := gorm.G[CommandToCommandGroupModel](tx).Create(r.ctx, &model); err != nil {
+			return err
+		}
 	}
 
 	return nil
