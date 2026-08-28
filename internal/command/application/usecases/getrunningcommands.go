@@ -1,12 +1,12 @@
 package usecases
 
-import "gomander/internal/runner"
+import "gomander/internal/execution"
 
 type GetRunningCommandIds struct {
-	runner runner.Runner
+	runner execution.Runner
 }
 
-func NewGetRunningCommandIds(runner runner.Runner) *GetRunningCommandIds {
+func NewGetRunningCommandIds(runner execution.Runner) *GetRunningCommandIds {
 	return &GetRunningCommandIds{
 		runner: runner,
 	}

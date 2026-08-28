@@ -10,10 +10,6 @@ type EventSink interface {
 	EventsEmit(ctx context.Context, eventName string, payload interface{})
 }
 
-type EventEmitter interface {
-	EmitEvent(event Event, payload interface{})
-}
-
 type DefaultEventEmitter struct {
 	ctx  context.Context
 	sink EventSink

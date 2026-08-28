@@ -37,7 +37,7 @@ internal/
 ├── project/             #  │
 ├── config/              # ─┘ user configuration
 ├── openedproject/       # which Project is open
-├── execution/           # the environment a Command runs in
+├── execution/           # the environment a Command runs in, and the Runner port
 ├── ordering/            # dense Positions within a list
 ├── unitofwork/          # one transaction spanning several repositories
 ├── runner/              # spawns Commands, streams their output

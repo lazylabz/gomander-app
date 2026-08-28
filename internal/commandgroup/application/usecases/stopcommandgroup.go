@@ -2,17 +2,17 @@ package usecases
 
 import (
 	commandgroupdomain "gomander/internal/commandgroup/domain"
-	"gomander/internal/runner"
+	"gomander/internal/execution"
 )
 
 type StopCommandGroup struct {
 	commandGroupRepository commandgroupdomain.Repository
-	commandRunner          runner.Runner
+	commandRunner          execution.Runner
 }
 
 func NewStopCommandGroup(
 	commandGroupRepo commandgroupdomain.Repository,
-	runner runner.Runner,
+	runner execution.Runner,
 ) *StopCommandGroup {
 	return &StopCommandGroup{
 		commandGroupRepository: commandGroupRepo,

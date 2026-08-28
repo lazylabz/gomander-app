@@ -2,15 +2,15 @@ package usecases
 
 import (
 	"gomander/internal/command/domain"
-	"gomander/internal/runner"
+	"gomander/internal/execution"
 )
 
 type StopCommand struct {
 	commandRepository domain.Repository
-	commandRunner     runner.Runner
+	commandRunner     execution.Runner
 }
 
-func NewStopCommand(commandRepo domain.Repository, runner runner.Runner) *StopCommand {
+func NewStopCommand(commandRepo domain.Repository, runner execution.Runner) *StopCommand {
 	return &StopCommand{
 		commandRepository: commandRepo,
 		commandRunner:     runner,

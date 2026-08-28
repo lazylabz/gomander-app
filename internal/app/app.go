@@ -3,9 +3,14 @@ package app
 import (
 	configdomain "gomander/internal/config/domain"
 	"gomander/internal/eventbus"
-	"gomander/internal/logger"
-	"gomander/internal/runner"
+	"gomander/internal/execution"
 )
+
+// Logger is where the app reports the startup and shutdown it goes through.
+type Logger interface {
+	Info(message string)
+	Error(message string)
+}
 
 type EventHandlers struct {
 	CleanCommandGroupsOnCommandDeleted   eventbus.EventHandler
@@ -15,16 +20,16 @@ type EventHandlers struct {
 }
 
 type App struct {
-	logger               logger.Logger
-	commandRunner        runner.Runner
+	logger               Logger
+	commandRunner        execution.Runner
 	userConfigRepository configdomain.Repository
 	eventBus             eventbus.EventBus
 	eventHandlers        EventHandlers
 }
 
 func NewApp(
-	logger logger.Logger,
-	commandRunner runner.Runner,
+	logger Logger,
+	commandRunner execution.Runner,
 	userConfigRepository configdomain.Repository,
 	eventBus eventbus.EventBus,
 	eventHandlers EventHandlers,

@@ -8,16 +8,16 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"gomander/internal/app"
+	appmocks "gomander/internal/app/test"
 	"gomander/internal/config/domain"
 	configtest "gomander/internal/config/domain/test"
-	loggertest "gomander/internal/logger/test"
-	runnertest "gomander/internal/runner/test"
+	executiontest "gomander/internal/execution/test"
 )
 
 func TestApp_Startup(t *testing.T) {
 	t.Run("Should successfully load configuration", func(t *testing.T) {
 		// Arrange
-		mockLogger := new(loggertest.MockLogger)
+		mockLogger := new(appmocks.MockLogger)
 		mockUserConfigRepository := new(configtest.MockConfigRepository)
 
 		sut := app.NewApp(mockLogger, nil, mockUserConfigRepository, nil, app.EventHandlers{})
@@ -36,7 +36,7 @@ func TestApp_Startup(t *testing.T) {
 
 	t.Run("Should report an error if configuration loading fails", func(t *testing.T) {
 		// Arrange
-		mockLogger := new(loggertest.MockLogger)
+		mockLogger := new(appmocks.MockLogger)
 		mockUserConfigRepository := new(configtest.MockConfigRepository)
 
 		sut := app.NewApp(mockLogger, nil, mockUserConfigRepository, nil, app.EventHandlers{})
@@ -57,8 +57,8 @@ func TestApp_Startup(t *testing.T) {
 func TestApp_OnBeforeClose(t *testing.T) {
 	t.Run("Should stop all running commands and stop successfully", func(t *testing.T) {
 		// Arrange
-		mockCommandRunner := new(runnertest.MockRunner)
-		mockLogger := new(loggertest.MockLogger)
+		mockCommandRunner := new(executiontest.MockRunner)
+		mockLogger := new(appmocks.MockLogger)
 
 		sut := app.NewApp(mockLogger, mockCommandRunner, nil, nil, app.EventHandlers{})
 
@@ -74,8 +74,8 @@ func TestApp_OnBeforeClose(t *testing.T) {
 
 	t.Run("Should prevent closing if there are errors stopping commands", func(t *testing.T) {
 		// Arrange
-		mockCommandRunner := new(runnertest.MockRunner)
-		mockLogger := new(loggertest.MockLogger)
+		mockCommandRunner := new(executiontest.MockRunner)
+		mockLogger := new(appmocks.MockLogger)
 
 		sut := app.NewApp(mockLogger, mockCommandRunner, nil, nil, app.EventHandlers{})
 

@@ -2,20 +2,20 @@ package usecases
 
 import (
 	"gomander/internal/command/domain"
+	"gomander/internal/execution"
 	"gomander/internal/openedproject"
-	"gomander/internal/runner"
 )
 
 type RunCommand struct {
 	openedProject     openedproject.OpenedProject
 	commandRepository domain.Repository
-	commandRunner     runner.Runner
+	commandRunner     execution.Runner
 }
 
 func NewRunCommand(
 	openedProject openedproject.OpenedProject,
 	commandRepo domain.Repository,
-	runner runner.Runner,
+	runner execution.Runner,
 ) *RunCommand {
 	return &RunCommand{
 		openedProject:     openedProject,
