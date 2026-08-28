@@ -46,7 +46,7 @@ internal/
 ├── releases/            # update checks and platform binaries
 ├── facade/              # fs, io, os, open and Wails runtime, so tests can fake them
 ├── dialog/              # asking the user for a path, and the Wails adapter that does
-├── uihelpers/ helpers/  # what the frontend calls directly; array and path utilities
+├── uihelpers/ helpers/  # what the frontend calls directly; array utilities
 ├── apptest/             # the seam backend behaviour is verified through
 └── testdb/              # in-memory SQLite plus migrations
 
