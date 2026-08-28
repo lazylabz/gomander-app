@@ -128,7 +128,7 @@ func New(t *testing.T) *Harness {
 			CreateProject:        projectusecases.NewCreateProject(projectRepo),
 			EditProject:          projectusecases.NewEditProject(projectRepo),
 			CloseProject:         projectusecases.NewCloseProject(openedProject),
-			DeleteProject:        projectusecases.NewDeleteProject(projectRepo, eventBus, l),
+			DeleteProject:        projectusecases.NewDeleteProject(projectRepo, eventBus),
 			ExportProject:        projectusecases.NewExportProject(projectRepo, commandRepo, commandGroupRepo, dialogs, fsFacade),
 			ImportProject:        projectusecases.NewImportProject(unitOfWork),
 			GetProjectToImport:   projectusecases.NewGetProjectToImport(dialogs, fsFacade),

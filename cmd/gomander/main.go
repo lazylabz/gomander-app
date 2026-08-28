@@ -237,7 +237,7 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*i
 	createProject := projectusecases.NewCreateProject(projectRepo)
 	editProject := projectusecases.NewEditProject(projectRepo)
 	closeProject := projectusecases.NewCloseProject(openedProject)
-	deleteProject := projectusecases.NewDeleteProject(projectRepo, eventBus, l)
+	deleteProject := projectusecases.NewDeleteProject(projectRepo, eventBus)
 	exportProject := projectusecases.NewExportProject(projectRepo, commandRepo, commandGroupRepo, dialogs, facade.DefaultFsFacade{})
 	importProject := projectusecases.NewImportProject(unitOfWork)
 	getProjectToImport := projectusecases.NewGetProjectToImport(dialogs, facade.DefaultFsFacade{})
