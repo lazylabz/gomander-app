@@ -46,7 +46,13 @@ func SetProcEnv(cmd *exec.Cmd, environmentPaths []string) {
 	cmd.Env = append(cmd.Env, "PATH="+newPath)
 }
 
-func StopProcessGracefully(cmd *exec.Cmd) error {
+// StopProcessGracefully signals the process and waits on exited, which the
+// goroutine owning cmd.Wait closes. It must never call cmd.Wait itself.
+func StopProcessGracefully(cmd *exec.Cmd, exited <-chan struct{}) error {
+	if alreadyExited(exited) {
+		return nil
+	}
+
 	pid := strconv.Itoa(cmd.Process.Pid)
 
 	// Try graceful termination
@@ -58,22 +64,26 @@ func StopProcessGracefully(cmd *exec.Cmd) error {
 	err := killCmd.Run()
 	if err != nil {
 		// Fallback to force kill
-		return exec.Command("taskkill", "/F", "/T", "/PID", pid).Run()
+		return forceKill(pid, exited)
 	}
-
-	// Wait for graceful shutdown
-	done := make(chan error, 1)
-	go func() {
-		done <- cmd.Wait()
-	}()
 
 	select {
 	case <-time.After(5 * time.Second):
 		// Force kill if needed
-		return exec.Command("taskkill", "/F", "/T", "/PID", pid).Run()
-	case <-done:
+		return forceKill(pid, exited)
+	case <-exited:
 		return nil
 	}
+}
+
+// forceKill reports success when the Command is already gone: taskkill fails
+// with "process not found" on a process that ended as it was being stopped.
+func forceKill(pid string, exited <-chan struct{}) error {
+	err := exec.Command("taskkill", "/F", "/T", "/PID", pid).Run()
+	if err != nil && alreadyExited(exited) {
+		return nil
+	}
+	return err
 }
 
 func GetCommand(cmdStr string) *exec.Cmd {

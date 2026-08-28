@@ -3,6 +3,7 @@
 package runner
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"strings"
@@ -44,27 +45,39 @@ func SetProcEnv(cmd *exec.Cmd, environmentPaths []string) {
 	cmd.Env = append(cmd.Env, "PATH="+newPath)
 }
 
-func StopProcessGracefully(cmd *exec.Cmd) error {
+// StopProcessGracefully signals the process group and waits on exited, which the
+// goroutine owning cmd.Wait closes. It must never call cmd.Wait itself.
+func StopProcessGracefully(cmd *exec.Cmd, exited <-chan struct{}) error {
+	if alreadyExited(exited) {
+		return nil
+	}
+
 	// Try graceful termination first
 	err := syscall.Kill(-cmd.Process.Pid, syscall.SIGTERM)
 	if err != nil {
+		if errors.Is(err, syscall.ESRCH) {
+			// The Command ended on its own as it was being stopped
+			return nil
+		}
 		// Fallback to force kill
-		return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+		return forceKill(cmd)
 	}
-
-	// Wait a bit for graceful shutdown
-	done := make(chan error, 1)
-	go func() {
-		done <- cmd.Wait()
-	}()
 
 	select {
 	case <-time.After(5 * time.Second):
 		// Force kill if graceful shutdown takes too long
-		return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
-	case <-done:
+		return forceKill(cmd)
+	case <-exited:
 		return nil
 	}
+}
+
+func forceKill(cmd *exec.Cmd) error {
+	err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+	if errors.Is(err, syscall.ESRCH) {
+		return nil
+	}
+	return err
 }
 
 func GetCommand(cmdStr string) *exec.Cmd {
