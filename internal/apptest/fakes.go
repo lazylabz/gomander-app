@@ -8,9 +8,11 @@ import (
 	"sync"
 
 	commanddomain "gomander/internal/command/domain"
+	commandgroupdomain "gomander/internal/commandgroup/domain"
 	"gomander/internal/dialog"
 	"gomander/internal/event"
 	"gomander/internal/execution"
+	"gomander/internal/unitofwork"
 )
 
 type StartedProcess struct {
@@ -244,4 +246,68 @@ func (f *fsFacadeFake) file(path string) ([]byte, bool) {
 	data, exists := f.files[path]
 
 	return data, exists
+}
+
+// storageFailures is what a test has made storage refuse. The repositories
+// share it by pointer, so arranging a failure reaches every path a Command
+// Group can be written through - directly, or through a Unit of Work.
+type storageFailures struct {
+	commandGroupWrite error
+}
+
+// unitOfWorkWithFailingWrites runs the real Unit of Work and lets a test make
+// a write inside it fail, the way storage refuses one partway through an
+// operation. Nothing below it is faked: what a test arranges this for is the
+// rollback the real transaction performs.
+type unitOfWorkWithFailingWrites struct {
+	unitOfWork unitofwork.UnitOfWork
+	failures   *storageFailures
+}
+
+func (u *unitOfWorkWithFailingWrites) Do(change func(unitofwork.Repositories) error) error {
+	return u.unitOfWork.Do(func(repositories unitofwork.Repositories) error {
+		repositories.CommandGroups = commandGroupRepositoryThatCanFail{
+			Repository: repositories.CommandGroups,
+			failures:   u.failures,
+		}
+
+		return change(repositories)
+	})
+}
+
+// commandGroupRepositoryThatCanFail refuses every write a test has arranged a
+// failure for, and answers like the repository it wraps otherwise.
+type commandGroupRepositoryThatCanFail struct {
+	commandgroupdomain.Repository
+	failures *storageFailures
+}
+
+func (r commandGroupRepositoryThatCanFail) Create(commandGroup *commandgroupdomain.CommandGroup) error {
+	if r.failures.commandGroupWrite != nil {
+		return r.failures.commandGroupWrite
+	}
+
+	return r.Repository.Create(commandGroup)
+}
+
+func (r commandGroupRepositoryThatCanFail) Update(commandGroup *commandgroupdomain.CommandGroup) error {
+	if r.failures.commandGroupWrite != nil {
+		return r.failures.commandGroupWrite
+	}
+
+	return r.Repository.Update(commandGroup)
+}
+
+func (r commandGroupRepositoryThatCanFail) Delete(commandGroupId string) error {
+	if r.failures.commandGroupWrite != nil {
+		return r.failures.commandGroupWrite
+	}
+
+	return r.Repository.Delete(commandGroupId)
+}
+
+func (r commandGroupRepositoryThatCanFail) Atomically(change func(commandgroupdomain.Repository) error) error {
+	return r.Repository.Atomically(func(repository commandgroupdomain.Repository) error {
+		return change(commandGroupRepositoryThatCanFail{Repository: repository, failures: r.failures})
+	})
 }

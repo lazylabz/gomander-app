@@ -34,6 +34,7 @@ import (
 	"gomander/internal/uihelpers/fs"
 	"gomander/internal/uihelpers/os_internal"
 	"gomander/internal/uihelpers/path"
+	unitofworkinfrastructure "gomander/internal/unitofwork/infrastructure"
 	"gomander/internal/usecases"
 
 	"github.com/wailsapp/wails/v2"
@@ -206,6 +207,9 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*i
 	projectRepo := projectinfrastructure.NewGormProjectRepository(gormDb, ctx)
 	configRepo := configinfrastructure.NewGormConfigRepository(gormDb, ctx)
 
+	// Initialize the unit of work
+	unitOfWork := unitofworkinfrastructure.NewGormUnitOfWork(gormDb, ctx)
+
 	// Initialize event handlers
 	cleanCommandGroupsOnCommandDeleted := commandgrouphandlers.NewCleanCommandGroupsOnCommandDeleted(commandGroupRepo, ee)
 	cleanCommandGroupsOnProjectDeleted := commandgrouphandlers.NewCleanCommandGroupsOnProjectDeleted(commandGroupRepo, ee)
@@ -235,7 +239,7 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*i
 	closeProject := projectusecases.NewCloseProject(openedProject)
 	deleteProject := projectusecases.NewDeleteProject(projectRepo, eventBus, l)
 	exportProject := projectusecases.NewExportProject(projectRepo, commandRepo, commandGroupRepo, dialogs, facade.DefaultFsFacade{})
-	importProject := projectusecases.NewImportProject(projectRepo, commandRepo, commandGroupRepo)
+	importProject := projectusecases.NewImportProject(unitOfWork)
 	getProjectToImport := projectusecases.NewGetProjectToImport(dialogs, facade.DefaultFsFacade{})
 	// Command Groups
 	getCommandGroups := commandgroupusecases.NewGetCommandGroups(openedProject, commandGroupRepo)

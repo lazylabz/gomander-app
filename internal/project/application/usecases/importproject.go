@@ -6,23 +6,16 @@ import (
 	"gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	projectdomain "gomander/internal/project/domain"
+	"gomander/internal/unitofwork"
 )
 
 type ImportProject struct {
-	projectRepository      projectdomain.Repository
-	commandRepository      domain.Repository
-	commandGroupRepository commandgroupdomain.Repository
+	unitOfWork unitofwork.UnitOfWork
 }
 
-func NewImportProject(
-	projectRepo projectdomain.Repository,
-	commandRepo domain.Repository,
-	commandGroupRepo commandgroupdomain.Repository,
-) *ImportProject {
+func NewImportProject(unitOfWork unitofwork.UnitOfWork) *ImportProject {
 	return &ImportProject{
-		projectRepository:      projectRepo,
-		commandRepository:      commandRepo,
-		commandGroupRepository: commandGroupRepo,
+		unitOfWork: unitOfWork,
 	}
 }
 
@@ -71,25 +64,23 @@ func (uc *ImportProject) Execute(projectJSON projectdomain.ProjectExportJSONv1, 
 		commandGroups = append(commandGroups, newGroup)
 	}
 
-	// Persist everything
-	err := uc.projectRepository.Create(project)
-	if err != nil {
-		return err
-	}
-
-	for _, command := range commands {
-		err = uc.commandRepository.Create(&command)
-		if err != nil {
+	return uc.unitOfWork.Do(func(repositories unitofwork.Repositories) error {
+		if err := repositories.Projects.Create(project); err != nil {
 			return err
 		}
-	}
 
-	for _, group := range commandGroups {
-		err = uc.commandGroupRepository.Create(&group)
-		if err != nil {
-			return err
+		for _, command := range commands {
+			if err := repositories.Commands.Create(&command); err != nil {
+				return err
+			}
 		}
-	}
 
-	return nil
+		for _, group := range commandGroups {
+			if err := repositories.CommandGroups.Create(&group); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
