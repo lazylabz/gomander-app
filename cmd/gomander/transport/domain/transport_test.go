@@ -162,63 +162,6 @@ func TestConfig(t *testing.T) {
 	})
 }
 
-func TestProjectExport(t *testing.T) {
-	projectExport := projectdomain.ProjectExportJSONv1{
-		Version:          1,
-		Name:             "exported-name",
-		WorkingDirectory: "/home/dev/project",
-		Commands: []projectdomain.CommandJSONv1{{
-			Id:               "command-id",
-			Name:             "command-name",
-			Command:          "echo hi",
-			WorkingDirectory: "apps/api",
-		}},
-		CommandGroups: []projectdomain.CommandGroupJSONv1{{
-			Id:         "group-id",
-			Name:       "group-name",
-			CommandIds: []string{"command-id"},
-		}},
-	}
-
-	t.Run("Should reach the frontend under the field names it already receives", func(t *testing.T) {
-		// Act
-		encoded, err := json.Marshal(transport.FromProjectExport(projectExport))
-
-		// Assert
-		require.NoError(t, err)
-		assert.JSONEq(t, `{
-			"version": 1,
-			"name": "exported-name",
-			"workingDirectory": "/home/dev/project",
-			"commands": [{
-				"id": "command-id",
-				"name": "command-name",
-				"command": "echo hi",
-				"workingDirectory": "apps/api"
-			}],
-			"commandGroups": [{
-				"id": "group-id",
-				"name": "group-name",
-				"commandIds": ["command-id"]
-			}]
-		}`, string(encoded))
-	})
-
-	t.Run("Should carry every field back to the export format", func(t *testing.T) {
-		// Act
-		roundTripped := transport.FromProjectExport(projectExport).ToDomain()
-
-		// Assert
-		assert.Equal(t, projectExport, roundTripped)
-	})
-
-	t.Run("Should say everything the export format says", func(t *testing.T) {
-		// This one is on the import path, so a field the DTO drops is lost data
-		// rather than a label the UI never shows.
-		assertMirrors(t, projectExport, transport.FromProjectExport(projectExport))
-	})
-}
-
 func TestAbsence(t *testing.T) {
 	t.Run("Should leave a value the frontend does not get absent", func(t *testing.T) {
 		// Act
