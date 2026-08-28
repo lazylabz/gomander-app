@@ -25,6 +25,14 @@ The single Project the user currently has open. Having none open is a legitimate
 state, not a failure.
 _Avoid_: current project, active project, selected project
 
+**Project Blueprint**:
+What a Project looks like before it exists: a name, a working directory, and the
+Commands and Command Groups to create. Reading an importable file produces one and
+an export describes one; the file format that carries it is not part of it. The Ids
+it carries name its own Commands so a Command Group can list its members, and mean
+nothing once the Project is stored.
+_Avoid_: project export, project JSON, import format
+
 **Execution Environment**:
 The paths and base working directory a Command runs in, resolved from the Opened
 Project before the Runner is involved. Bare "execution" is ambiguous — it reads

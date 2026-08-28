@@ -42,7 +42,6 @@ export type InMemoryBackend = BackendServices & {
 };
 
 const emptyProjectExport: ProjectExport = {
-	version: 1,
 	name: "",
 	workingDirectory: "",
 	commands: [],

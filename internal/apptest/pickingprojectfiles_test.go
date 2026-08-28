@@ -3,6 +3,7 @@ package apptest_test
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,7 +29,7 @@ func TestPickingAProjectFileToImport(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 		assert.Equal(t, "My NPM Project", toImport.Name)
-		assert.Equal(t, "/home/user/app", toImport.WorkingDirectory)
+		assert.Equal(t, filepath.FromSlash("/home/user/app"), toImport.WorkingDirectory)
 		assert.Len(t, toImport.Commands, 1)
 		assert.NotEmpty(t, toImport.Commands[0].Id)
 		assert.Equal(t, "start", toImport.Commands[0].Name)

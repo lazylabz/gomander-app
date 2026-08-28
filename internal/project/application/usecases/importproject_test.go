@@ -10,7 +10,6 @@ import (
 	"gomander/internal/command/domain/test"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	test2 "gomander/internal/commandgroup/domain/test"
-	test4 "gomander/internal/facade/test"
 	"gomander/internal/helpers/array"
 	"gomander/internal/project/application/usecases"
 	projectdomain "gomander/internal/project/domain"
@@ -26,8 +25,6 @@ func TestImportProject_Execute(t *testing.T) {
 		mockProjectRepository := new(test3.MockProjectRepository)
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
-
-		mockFsFacade := new(test4.MockFsFacade)
 
 		cmd1 := test.NewCommandBuilder().
 			WithProjectId(projectId).
@@ -56,19 +53,18 @@ func TestImportProject_Execute(t *testing.T) {
 		commands := []domain.Command{cmd1, cmd2, cmd3}
 		commandGroups := []commandgroupdomain.CommandGroup{cmdGroup1, cmdGroup2}
 
-		projectJSON := projectdomain.ProjectExportJSONv1{
-			Version: 1,
-			Name:    "test",
-			Commands: array.Map(commands, func(cmd domain.Command) projectdomain.CommandJSONv1 {
-				return projectdomain.CommandJSONv1{
+		blueprint := projectdomain.Blueprint{
+			Name: "test",
+			Commands: array.Map(commands, func(cmd domain.Command) projectdomain.BlueprintCommand {
+				return projectdomain.BlueprintCommand{
 					Id:               cmd.Id,
 					Name:             cmd.Name,
 					Command:          cmd.Command,
 					WorkingDirectory: cmd.WorkingDirectory,
 				}
 			}),
-			CommandGroups: array.Map(commandGroups, func(group commandgroupdomain.CommandGroup) projectdomain.CommandGroupJSONv1 {
-				return projectdomain.CommandGroupJSONv1{
+			CommandGroups: array.Map(commandGroups, func(group commandgroupdomain.CommandGroup) projectdomain.BlueprintCommandGroup {
+				return projectdomain.BlueprintCommandGroup{
 					Name:       group.Name,
 					CommandIds: array.Map(group.Commands, func(cmd domain.Command) string { return cmd.Id }),
 				}
@@ -96,7 +92,7 @@ func TestImportProject_Execute(t *testing.T) {
 		}).Return(nil)
 
 		// Act
-		err := sut.Execute(projectJSON, newName, newWorkingDirectory)
+		err := sut.Execute(blueprint, newName, newWorkingDirectory)
 
 		// Assert
 		assert.NoError(t, err)
@@ -127,7 +123,6 @@ func TestImportProject_Execute(t *testing.T) {
 			mockProjectRepository,
 			mockCommandRepository,
 			mockCommandGroupRepository,
-			mockFsFacade,
 		)
 	})
 	t.Run("Should return error if there is a problem saving the project", func(t *testing.T) {
@@ -137,16 +132,13 @@ func TestImportProject_Execute(t *testing.T) {
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(test4.MockFsFacade)
-
-		projectJSON := projectdomain.ProjectExportJSONv1{
-			Version: 1,
-			Name:    "test",
-			Commands: []projectdomain.CommandJSONv1{
+		blueprint := projectdomain.Blueprint{
+			Name: "test",
+			Commands: []projectdomain.BlueprintCommand{
 				{Id: "cmd1", Name: "Command 1", Command: "echo 1", WorkingDirectory: "/1"},
 				{Id: "cmd2", Name: "Command 2", Command: "echo 2", WorkingDirectory: "/2"},
 			},
-			CommandGroups: []projectdomain.CommandGroupJSONv1{
+			CommandGroups: []projectdomain.BlueprintCommandGroup{
 				{Name: "Group 1", CommandIds: []string{"cmd1", "cmd2"}},
 			},
 		}
@@ -156,7 +148,7 @@ func TestImportProject_Execute(t *testing.T) {
 		mockProjectRepository.On("Create", mock.Anything).Return(assert.AnError).Once()
 
 		// Act
-		err := sut.Execute(projectJSON, "Imported Project", "/imported/project/dir")
+		err := sut.Execute(blueprint, "Imported Project", "/imported/project/dir")
 
 		// Assert
 		assert.Error(t, err)
@@ -166,7 +158,6 @@ func TestImportProject_Execute(t *testing.T) {
 			mockProjectRepository,
 			mockCommandRepository,
 			mockCommandGroupRepository,
-			mockFsFacade,
 		)
 	})
 	t.Run("Should return error if there is a problem saving the commands", func(t *testing.T) {
@@ -176,16 +167,13 @@ func TestImportProject_Execute(t *testing.T) {
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(test4.MockFsFacade)
-
-		projectJSON := projectdomain.ProjectExportJSONv1{
-			Version: 1,
-			Name:    "test",
-			Commands: []projectdomain.CommandJSONv1{
+		blueprint := projectdomain.Blueprint{
+			Name: "test",
+			Commands: []projectdomain.BlueprintCommand{
 				{Id: "cmd1", Name: "Command 1", Command: "echo 1", WorkingDirectory: "/1"},
 				{Id: "cmd2", Name: "Command 2", Command: "echo 2", WorkingDirectory: "/2"},
 			},
-			CommandGroups: []projectdomain.CommandGroupJSONv1{
+			CommandGroups: []projectdomain.BlueprintCommandGroup{
 				{Name: "Group 1", CommandIds: []string{"cmd1", "cmd2"}},
 			},
 		}
@@ -196,7 +184,7 @@ func TestImportProject_Execute(t *testing.T) {
 		mockCommandRepository.On("Create", mock.Anything).Return(assert.AnError)
 
 		// Act
-		err := sut.Execute(projectJSON, "Imported Project", "/imported/project/dir")
+		err := sut.Execute(blueprint, "Imported Project", "/imported/project/dir")
 
 		// Assert
 		assert.Error(t, err)
@@ -206,7 +194,6 @@ func TestImportProject_Execute(t *testing.T) {
 			mockProjectRepository,
 			mockCommandRepository,
 			mockCommandGroupRepository,
-			mockFsFacade,
 		)
 	})
 	t.Run("Should return error if there is a problem saving the command groups", func(t *testing.T) {
@@ -216,16 +203,13 @@ func TestImportProject_Execute(t *testing.T) {
 		mockCommandRepository := new(test.MockCommandRepository)
 		mockCommandGroupRepository := new(test2.MockCommandGroupRepository)
 
-		mockFsFacade := new(test4.MockFsFacade)
-
-		projectJSON := projectdomain.ProjectExportJSONv1{
-			Version: 1,
-			Name:    "test",
-			Commands: []projectdomain.CommandJSONv1{
+		blueprint := projectdomain.Blueprint{
+			Name: "test",
+			Commands: []projectdomain.BlueprintCommand{
 				{Id: "cmd1", Name: "Command 1", Command: "echo 1", WorkingDirectory: "/1"},
 				{Id: "cmd2", Name: "Command 2", Command: "echo 2", WorkingDirectory: "/2"},
 			},
-			CommandGroups: []projectdomain.CommandGroupJSONv1{
+			CommandGroups: []projectdomain.BlueprintCommandGroup{
 				{Name: "Group 1", CommandIds: []string{"cmd1", "cmd2"}},
 			},
 		}
@@ -237,7 +221,7 @@ func TestImportProject_Execute(t *testing.T) {
 		mockCommandGroupRepository.On("Create", mock.Anything).Return(assert.AnError)
 
 		// Act
-		err := sut.Execute(projectJSON, "Imported Project", "/imported/project/dir")
+		err := sut.Execute(blueprint, "Imported Project", "/imported/project/dir")
 
 		// Assert
 		assert.Error(t, err)
@@ -247,7 +231,6 @@ func TestImportProject_Execute(t *testing.T) {
 			mockProjectRepository,
 			mockCommandRepository,
 			mockCommandGroupRepository,
-			mockFsFacade,
 		)
 	})
 }

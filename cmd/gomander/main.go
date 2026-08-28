@@ -238,9 +238,13 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*i
 	editProject := projectusecases.NewEditProject(projectRepo)
 	closeProject := projectusecases.NewCloseProject(openedProject)
 	deleteProject := projectusecases.NewDeleteProject(projectRepo, eventBus)
-	exportProject := projectusecases.NewExportProject(projectRepo, commandRepo, commandGroupRepo, dialogs, facade.DefaultFsFacade{})
+	projectFileV1 := projectinfrastructure.NewProjectFileV1(facade.DefaultFsFacade{})
+	exportProject := projectusecases.NewExportProject(projectRepo, commandRepo, commandGroupRepo, dialogs, projectFileV1)
 	importProject := projectusecases.NewImportProject(unitOfWork)
-	getProjectToImport := projectusecases.NewGetProjectToImport(dialogs, facade.DefaultFsFacade{})
+	getProjectToImport := projectusecases.NewGetProjectToImport(dialogs, map[projectusecases.FileType]projectusecases.BlueprintReader{
+		projectusecases.FileTypeGomander:    projectFileV1,
+		projectusecases.FileTypePackageJSON: projectinfrastructure.NewPackageJSONFile(facade.DefaultFsFacade{}),
+	})
 	// Command Groups
 	getCommandGroups := commandgroupusecases.NewGetCommandGroups(openedProject, commandGroupRepo)
 	createCommandGroup := commandgroupusecases.NewCreateCommandGroup(openedProject, commandGroupRepo)
