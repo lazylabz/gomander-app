@@ -53,6 +53,10 @@ func TestCommand(t *testing.T) {
 		// Assert
 		assert.Equal(t, command, roundTripped)
 	})
+
+	t.Run("Should say everything the entity says", func(t *testing.T) {
+		assertMirrors(t, command, transport.FromCommand(command))
+	})
 }
 
 func TestCommandGroup(t *testing.T) {
@@ -86,6 +90,10 @@ func TestCommandGroup(t *testing.T) {
 		// Assert
 		assert.Equal(t, commandGroup, roundTripped)
 	})
+
+	t.Run("Should say everything the entity says", func(t *testing.T) {
+		assertMirrors(t, commandGroup, transport.FromCommandGroup(commandGroup))
+	})
 }
 
 func TestProject(t *testing.T) {
@@ -115,6 +123,10 @@ func TestProject(t *testing.T) {
 		// Assert
 		assert.Equal(t, project, roundTripped)
 	})
+
+	t.Run("Should say everything the entity says", func(t *testing.T) {
+		assertMirrors(t, project, transport.FromProject(project))
+	})
 }
 
 func TestConfig(t *testing.T) {
@@ -143,6 +155,10 @@ func TestConfig(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, config, roundTripped)
+	})
+
+	t.Run("Should say everything the entity says", func(t *testing.T) {
+		assertMirrors(t, config, transport.FromConfig(config))
 	})
 }
 
@@ -195,6 +211,12 @@ func TestProjectExport(t *testing.T) {
 		// Assert
 		assert.Equal(t, projectExport, roundTripped)
 	})
+
+	t.Run("Should say everything the export format says", func(t *testing.T) {
+		// This one is on the import path, so a field the DTO drops is lost data
+		// rather than a label the UI never shows.
+		assertMirrors(t, projectExport, transport.FromProjectExport(projectExport))
+	})
 }
 
 func TestAbsence(t *testing.T) {
@@ -217,4 +239,21 @@ func TestAbsence(t *testing.T) {
 		assert.Equal(t, "null", string(absent))
 		assert.Equal(t, "[]", string(empty))
 	})
+}
+
+// assertMirrors catches a field the source carries and the DTO does not, which
+// the compiler cannot: a keyed struct literal stays valid when a field is added
+// to the type it builds, so the mapping would drop it silently. Comparing the
+// two serialized forms only works while both sides still carry the same tags —
+// the change that takes the tags off the entities retires this check, and the
+// literals above become the only pin the wire needs.
+func assertMirrors(t *testing.T, source, dto any) {
+	t.Helper()
+
+	sourceJSON, err := json.Marshal(source)
+	require.NoError(t, err)
+	dtoJSON, err := json.Marshal(dto)
+	require.NoError(t, err)
+
+	assert.JSONEq(t, string(sourceJSON), string(dtoJSON))
 }
