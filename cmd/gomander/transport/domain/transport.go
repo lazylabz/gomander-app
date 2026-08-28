@@ -3,6 +3,12 @@
 // signature names a type from here, so what the UI sees is stated in one place
 // and renaming a field of an entity cannot quietly reshape it.
 //
+// The translation catalogue is the one exception left: it still travels as
+// localizationdomain.Localization, whose tags are the i18n keys the frontend
+// indexes rather than a naming decision this package could make. It is a
+// serialization format wearing an entity's clothes, and moving it out of
+// domain/ is its own change.
+//
 // The package name is load-bearing rather than descriptive: Wails names the
 // generated TypeScript namespace after the Go package of the types a bound
 // method mentions, so calling this package anything else would move every
