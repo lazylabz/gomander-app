@@ -5,13 +5,11 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"strings"
 	"sync"
 
 	"gomander/internal/command/domain"
 	"gomander/internal/event"
 	"gomander/internal/execution"
-	"gomander/internal/helpers/path"
 	"gomander/internal/logger"
 )
 
@@ -67,7 +65,7 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 
 	// Enable color output and set terminal type
 	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
-	cmd.Dir = path.GetComputedPath(environment.BaseWorkingDirectory, command.WorkingDirectory)
+	cmd.Dir = command.ResolveWorkingDirectory(environment.BaseWorkingDirectory)
 
 	// Set project attributes based on OS
 	SetProcAttributes(cmd)
@@ -218,7 +216,9 @@ func (c *DefaultRunner) streamOutput(command *domain.Command, pipeReader io.Read
 }
 
 func (c *DefaultRunner) sendStreamLine(command *domain.Command, line string) {
-	c.processStreamLine(command, line)
+	if command.MatchesErrorPattern(line) {
+		c.eventEmitter.EmitEvent(event.CommandErrorDetected, command.Id)
+	}
 
 	c.emitLogEntry(command, line, event.OutputLogEntry)
 }
@@ -229,23 +229,6 @@ func (c *DefaultRunner) emitLogEntry(command *domain.Command, line string, kind 
 		"line": line,
 		"kind": string(kind),
 	})
-}
-
-func (c *DefaultRunner) processStreamLine(command *domain.Command, line string) {
-	c.checkLineForErrors(command, line)
-}
-
-func (c *DefaultRunner) checkLineForErrors(command *domain.Command, line string) {
-	errorPatterns := command.ErrorPatterns
-
-	for _, pattern := range errorPatterns {
-		matchString := strings.Contains(line, pattern)
-
-		if matchString {
-			c.eventEmitter.EmitEvent(event.CommandErrorDetected, command.Id)
-			break
-		}
-	}
 }
 
 func (c *DefaultRunner) GetRunningCommandIds() []string {
