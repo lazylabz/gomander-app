@@ -2,6 +2,7 @@ package domain_test
 
 import (
 	"encoding/json"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -53,6 +54,10 @@ func TestCommand(t *testing.T) {
 		// Assert
 		assert.Equal(t, command, roundTripped)
 	})
+
+	t.Run("Should say everything the entity says", func(t *testing.T) {
+		assertMirrors(t, command, transport.FromCommand(command))
+	})
 }
 
 func TestCommandGroup(t *testing.T) {
@@ -86,6 +91,10 @@ func TestCommandGroup(t *testing.T) {
 		// Assert
 		assert.Equal(t, commandGroup, roundTripped)
 	})
+
+	t.Run("Should say everything the entity says", func(t *testing.T) {
+		assertMirrors(t, commandGroup, transport.FromCommandGroup(commandGroup))
+	})
 }
 
 func TestProject(t *testing.T) {
@@ -114,6 +123,10 @@ func TestProject(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, project, roundTripped)
+	})
+
+	t.Run("Should say everything the entity says", func(t *testing.T) {
+		assertMirrors(t, project, transport.FromProject(project))
 	})
 }
 
@@ -144,6 +157,10 @@ func TestConfig(t *testing.T) {
 		// Assert
 		assert.Equal(t, config, roundTripped)
 	})
+
+	t.Run("Should say everything the entity says", func(t *testing.T) {
+		assertMirrors(t, config, transport.FromConfig(config))
+	})
 }
 
 func TestAbsence(t *testing.T) {
@@ -166,4 +183,24 @@ func TestAbsence(t *testing.T) {
 		assert.Equal(t, "null", string(absent))
 		assert.Equal(t, "[]", string(empty))
 	})
+}
+
+// assertMirrors catches a field the entity carries and the DTO does not, which
+// the compiler cannot: a keyed struct literal stays valid when a field is added
+// to the type it builds, so the mapping would drop the new one silently. It
+// compares field names rather than the two serialized forms, because only the
+// DTO carries serialization tags now.
+func assertMirrors(t *testing.T, entity, dto any) {
+	t.Helper()
+
+	assert.Equal(t, fieldNames(entity), fieldNames(dto))
+}
+
+func fieldNames(value any) []string {
+	structType := reflect.TypeOf(value)
+	names := make([]string, 0, structType.NumField())
+	for i := range structType.NumField() {
+		names = append(names, structType.Field(i).Name)
+	}
+	return names
 }

@@ -25,9 +25,11 @@ type CommandGroupBlueprint struct {
 	CommandIds []string `json:"commandIds"`
 }
 
-// FromBlueprint maps the two lists with array.Map rather than mapSlice: a
-// Blueprint read from a file with no commands carries nil, and the frontend
-// iterates both lists unguarded, so they have to arrive as [] and never null.
+// A Blueprint read from an export file with no commands carries nil, and the
+// frontend iterates both lists unguarded, so the mappings below reach for
+// array.Map rather than the package's nil-preserving mapSlice: the lists have
+// to arrive as [] and never null. Both directions do it, so a Blueprint that
+// makes the round trip comes back the shape it left as.
 func FromBlueprint(blueprint projectdomain.Blueprint) ProjectBlueprint {
 	return ProjectBlueprint{
 		Name:             blueprint.Name,
