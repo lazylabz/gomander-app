@@ -44,6 +44,20 @@ func TestGithubReleaseFeed_GetLatestRelease(t *testing.T) {
 		assert.Empty(t, version)
 	})
 
+	t.Run("Should return an error when the latest entry has no version", func(t *testing.T) {
+		// Arrange
+		ts := feedServing(t, http.StatusOK, "<feed><entry><title></title></entry></feed>")
+
+		feed := infrastructure.NewGithubReleaseFeed(context.Background(), facade.DefaultIOFacade{}, ts.URL)
+
+		// Act
+		version, err := feed.GetLatestRelease()
+
+		// Assert
+		assert.ErrorContains(t, err, "no version")
+		assert.Empty(t, version)
+	})
+
 	t.Run("Should return an error when the feed answers with a non-200 status code", func(t *testing.T) {
 		// Arrange
 		ts := feedServing(t, http.StatusInternalServerError, "")

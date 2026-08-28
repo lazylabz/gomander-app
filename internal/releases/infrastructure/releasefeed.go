@@ -68,5 +68,11 @@ func (f *GithubReleaseFeed) GetLatestRelease() (version string, err error) {
 		return "", nil
 	}
 
+	// An entry with no title is a broken feed, not an empty one: reporting it as
+	// the empty version would read as "you are up to date".
+	if releasesXml.Entry[0].Title == "" {
+		return "", errors.New("the latest entry in the feed has no version")
+	}
+
 	return releasesXml.Entry[0].Title, nil
 }

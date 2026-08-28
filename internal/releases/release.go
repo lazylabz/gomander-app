@@ -11,7 +11,7 @@ const CurrentRelease = "v1.8.0"
 
 // ReleaseFeed is where the app learns which Releases have been published. It
 // answers with the latest one's version, or with an empty string when the feed
-// lists none.
+// lists none - a feed it cannot make sense of is an error, not an empty one.
 type ReleaseFeed interface {
 	GetLatestRelease() (version string, err error)
 }
