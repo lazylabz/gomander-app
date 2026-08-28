@@ -7,8 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	test3 "gomander/internal/eventbus/test"
-	test2 "gomander/internal/logger/test"
+	eventbustest "gomander/internal/eventbus/test"
 	"gomander/internal/project/application/usecases"
 	"gomander/internal/project/domain/event"
 	"gomander/internal/project/domain/test"
@@ -18,13 +17,11 @@ func TestDeleteProject_Execute(t *testing.T) {
 	t.Run("Should delete a project and all its commands", func(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)
-		mockLogger := new(test2.MockLogger)
-		mockEventBus := new(test3.MockEventBus)
+		mockEventBus := new(eventbustest.MockEventBus)
 
 		sut := usecases.NewDeleteProject(
 			mockProjectRepository,
 			mockEventBus,
-			mockLogger,
 		)
 
 		projectId := "1"
@@ -37,19 +34,17 @@ func TestDeleteProject_Execute(t *testing.T) {
 
 		// Assert
 		assert.NoError(t, err)
-		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockLogger, mockEventBus)
+		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockEventBus)
 	})
 
 	t.Run("Should return an error if deleting the project fails", func(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)
-		mockEventBus := new(test3.MockEventBus)
-		mockLogger := new(test2.MockLogger)
+		mockEventBus := new(eventbustest.MockEventBus)
 
 		sut := usecases.NewDeleteProject(
 			mockProjectRepository,
 			mockEventBus,
-			mockLogger,
 		)
 
 		projectId := "1"
@@ -61,33 +56,30 @@ func TestDeleteProject_Execute(t *testing.T) {
 
 		// Assert
 		assert.Error(t, err)
-		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockLogger)
+		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockEventBus)
 	})
 
-	t.Run("Should return an error if an async event handler fails", func(t *testing.T) {
+	t.Run("Should report a failing handler only through the returned error", func(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)
-		mockLogger := new(test2.MockLogger)
-		mockEventBus := new(test3.MockEventBus)
+		mockEventBus := new(eventbustest.MockEventBus)
 
 		sut := usecases.NewDeleteProject(
 			mockProjectRepository,
 			mockEventBus,
-			mockLogger,
 		)
 
 		projectId := "1"
+		handlerErr := errors.New("handler error")
 
 		mockProjectRepository.On("Delete", projectId).Return(nil)
-		mockEventBus.On("PublishSync", event.NewProjectDeletedEvent(projectId)).Return([]error{errors.New("handler error")})
-
-		mockLogger.On("Error", mock.Anything).Return()
+		mockEventBus.On("PublishSync", event.NewProjectDeletedEvent(projectId)).Return([]error{handlerErr})
 
 		// Act
 		err := sut.Execute(projectId)
 
 		// Assert
-		assert.Error(t, err)
-		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockLogger, mockEventBus)
+		assert.ErrorIs(t, err, handlerErr)
+		mock.AssertExpectationsForObjects(t, mockProjectRepository, mockEventBus)
 	})
 }
