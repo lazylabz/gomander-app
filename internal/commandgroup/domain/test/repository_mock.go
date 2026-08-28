@@ -27,6 +27,9 @@ func (m *MockCommandGroupRepository) GetWithCommandIds(id string) (commandgroupd
 
 func (m *MockCommandGroupRepository) GetAllWithCommandIds(projectId string) ([]commandgroupdomain.CommandGroupWithCommandIds, error) {
 	args := m.Called(projectId)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).([]commandgroupdomain.CommandGroupWithCommandIds), args.Error(1)
 }
 
