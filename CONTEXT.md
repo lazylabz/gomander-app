@@ -76,6 +76,13 @@ release feed for the latest published one, and updates by downloading that one's
 binary and handing it to the operating system.
 _Avoid_: version (that is the number a Release is named by), update, build
 
+**Transport DTO**:
+The shape a controller hands to the frontend, or takes from it, together with
+the mapping to and from the entity behind it. It is what the wire is allowed to
+depend on, so that renaming a field of an entity is a compiler error rather than
+a silent break in the UI.
+_Avoid_: model, payload, view model
+
 **Unit of Work**:
 One transaction spanning several repositories: everything an operation writes
 inside it lands, or none of it does. It is what makes atomicity a property of
