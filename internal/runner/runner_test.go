@@ -237,8 +237,16 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 
 		commandId := "1"
 
+		// ProcessFinished is the last thing the runner does for a Command, and
+		// WaitForCommand is not a barrier for it: the id leaves runningCommands
+		// before the event is emitted, so WaitForCommand returns while it is
+		// still in flight.
+		finished := make(chan struct{})
+
 		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
-		emitter.On("EmitEvent", event.ProcessFinished, commandId).Maybe().Return()
+		emitter.On("EmitEvent", event.ProcessFinished, commandId).Run(func(mock.Arguments) {
+			close(finished)
+		}).Return()
 		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
 
 		logger.On("Info", mock.Anything).Return()
@@ -261,7 +269,12 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		}, 1*time.Second, 20*time.Millisecond)
 
 		assert.NoError(t, r.StopRunningCommand(commandId))
-		r.WaitForCommand(commandId)
+
+		select {
+		case <-finished:
+		case <-time.After(15 * time.Second):
+			t.Fatal("the Command never finished")
+		}
 
 		// Assert
 		for _, line := range streamedLines(emitter) {
@@ -638,8 +651,9 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 	})
 }
 
-// streamedLines is what the runner wrote to the Command's terminal. Safe to
-// read once WaitForCommand has returned: nothing is emitting any more.
+// streamedLines is what the runner wrote to the Command's terminal. Only read
+// it once ProcessFinished has arrived: that is what orders these calls against
+// the goroutine making them.
 func streamedLines(emitter *test2.MockEventEmitter) []string {
 	lines := make([]string, 0)
 
