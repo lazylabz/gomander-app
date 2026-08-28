@@ -1,8 +1,9 @@
 // Package ordering owns where a thing sits in a list: a Command among its
-// Project's Commands, a Command Group among its Project's Groups. Positions run
-// 0, 1, 2 … with no gaps, and this is the only place that decides them - an
-// operation says it wants to append, to rearrange or to close the gap a removal
-// left, and the sequence comes out dense either way.
+// Project's Commands, a Command Group among its Project's Groups, a Command
+// among the Commands its Command Group holds. Positions run 0, 1, 2 … with no
+// gaps, and this is the only place that decides them - an operation says it
+// wants to append, to rearrange or to close the gap a removal left, and the
+// sequence comes out dense either way.
 package ordering
 
 import (
@@ -11,9 +12,10 @@ import (
 )
 
 // List is one kind of ordered thing - a Command among its Project's Commands, a
-// Command Group among its Project's Groups - described by how to read its id and
-// how to read and write its Position. Each domain declares one, and every
-// operation on that domain's order goes through it.
+// Command Group among its Project's Groups, a Command among the Commands its
+// Command Group holds - described by how to read its id and how to read and
+// write its Position. Each domain declares one, and every operation on that
+// domain's order goes through it.
 type List[T any] struct {
 	idOf       func(T) string
 	positionOf func(T) int
