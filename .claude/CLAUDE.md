@@ -45,7 +45,8 @@ internal/
 ├── localization/        # translations served to the frontend
 ├── releases/            # update checks and platform binaries
 ├── facade/              # fs, io, os, open and Wails runtime, so tests can fake them
-├── uihelpers/ helpers/  # dialogs and paths; array and path utilities
+├── dialog/              # asking the user for a path, and the Wails adapter that does
+├── uihelpers/ helpers/  # what the frontend calls directly; array and path utilities
 ├── apptest/             # the seam backend behaviour is verified through
 └── testdb/              # in-memory SQLite plus migrations
 

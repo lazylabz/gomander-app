@@ -21,6 +21,7 @@ import (
 	commandgroupinfrastructure "gomander/internal/commandgroup/infrastructure"
 	configusecases "gomander/internal/config/application/usecases"
 	configinfrastructure "gomander/internal/config/infrastructure"
+	"gomander/internal/dialog"
 	"gomander/internal/eventbus"
 	"gomander/internal/facade"
 	localizationusecases "gomander/internal/localization/application/usecases"
@@ -58,7 +59,8 @@ func main() {
 
 	// Create instance of helpers
 	uiPathHelper := path.NewUiPathHelper()
-	uiFsHelper := fs.NewUIFsHelper(facade.DefaultRuntimeFacade{})
+	dialogs := dialog.NewWailsDialogs()
+	uiFsHelper := fs.NewUIFsHelper(dialogs, facade.DefaultRuntimeFacade{})
 	uiOsHelper := os_internal.NewUIOsHelper()
 	releaseHelper := releases.NewReleaseHelper(
 		facade.DefaultRuntimeFacade{},
@@ -85,9 +87,12 @@ func main() {
 			// Initialize the database
 			gormDb := configDB(ctx)
 
+			// Load context into the desktop adapters
+			dialog.SetWailsDialogsContext(dialogs, ctx)
+
 			// Build deps
 			var useCases usecases.Registry
-			app, useCases = buildDeps(gormDb, ctx)
+			app, useCases = buildDeps(gormDb, ctx, dialogs)
 
 			// Register event handlers
 			app.RegisterHandlers()
@@ -101,7 +106,6 @@ func main() {
 			controllers.loadUseCases(useCases)
 
 			// Load context into helpers
-			fs.SetUIFsHelperContext(uiFsHelper, ctx)
 			releases.SetReleaseHelperContext(releaseHelper, ctx)
 
 			// Start http server for 3rd party integrations
@@ -190,7 +194,7 @@ func getDbFile() string {
 	return dbLocation
 }
 
-func buildDeps(gormDb *gorm.DB, ctx context.Context) (*internalapp.App, usecases.Registry) {
+func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*internalapp.App, usecases.Registry) {
 	// Initialize deps
 	l := logger.NewDefaultLogger(ctx, facade.DefaultRuntimeFacade{})
 	ee := event.NewDefaultEventEmitter(ctx, facade.DefaultRuntimeFacade{})
@@ -230,9 +234,9 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context) (*internalapp.App, usecases
 	editProject := projectusecases.NewEditProject(projectRepo)
 	closeProject := projectusecases.NewCloseProject(openedProject)
 	deleteProject := projectusecases.NewDeleteProject(projectRepo, eventBus, l)
-	exportProject := projectusecases.NewExportProject(ctx, projectRepo, commandRepo, commandGroupRepo, facade.DefaultRuntimeFacade{}, facade.DefaultFsFacade{})
+	exportProject := projectusecases.NewExportProject(projectRepo, commandRepo, commandGroupRepo, dialogs, facade.DefaultFsFacade{})
 	importProject := projectusecases.NewImportProject(projectRepo, commandRepo, commandGroupRepo)
-	getProjectToImport := projectusecases.NewGetProjectToImport(ctx, facade.DefaultRuntimeFacade{}, facade.DefaultFsFacade{})
+	getProjectToImport := projectusecases.NewGetProjectToImport(dialogs, facade.DefaultFsFacade{})
 	// Command Groups
 	getCommandGroups := commandgroupusecases.NewGetCommandGroups(openedProject, commandGroupRepo)
 	createCommandGroup := commandgroupusecases.NewCreateCommandGroup(openedProject, commandGroupRepo)

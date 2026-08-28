@@ -1,52 +1,39 @@
 package fs_test
 
 import (
-	"context"
 	"errors"
 	stdruntime "runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"gomander/internal/dialog"
+	dialogtest "gomander/internal/dialog/test"
 	"gomander/internal/facade/test"
 	"gomander/internal/uihelpers/fs"
 )
 
 func TestUIFsHelper_NewUIFsHelper(t *testing.T) {
 	// Arrange
+	mockDialogs := new(dialogtest.MockDialogs)
 	mockRuntime := new(test.MockRuntimeFacade)
 
 	// Act
-	helper := fs.NewUIFsHelper(mockRuntime)
+	helper := fs.NewUIFsHelper(mockDialogs, mockRuntime)
 
 	// Assert
 	assert.NotNil(t, helper)
 }
 
-func TestUIFsHelper_SetContext(t *testing.T) {
-	// Arrange
-	mockRuntime := new(test.MockRuntimeFacade)
-	helper := fs.NewUIFsHelper(mockRuntime)
-	ctx := context.Background()
-
-	// Act
-	fs.SetUIFsHelperContext(helper, ctx)
-
-	// No Assert needed as this is a simple setter method
-	// The method doesn't return anything and just sets an internal field
-}
-
 func TestUIFsHelper_AskForDirPath(t *testing.T) {
 	t.Run("Should return directory path when successful", func(t *testing.T) {
 		// Arrange
+		mockDialogs := new(dialogtest.MockDialogs)
 		mockRuntime := new(test.MockRuntimeFacade)
-		helper := fs.NewUIFsHelper(mockRuntime)
-		ctx := context.Background()
-		fs.SetUIFsHelperContext(helper, ctx)
+		helper := fs.NewUIFsHelper(mockDialogs, mockRuntime)
 
 		expectedPath := "/some/directory/path"
-		mockRuntime.On("OpenDirectoryDialog", ctx, runtime.OpenDialogOptions{}).Return(expectedPath, nil)
+		mockDialogs.On("AskForDirectory", dialog.PickDirectoryRequest{}).Return(expectedPath, nil)
 
 		// Act
 		path, err := helper.AskForDirPath()
@@ -54,18 +41,17 @@ func TestUIFsHelper_AskForDirPath(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 		assert.Equal(t, expectedPath, path)
-		mockRuntime.AssertExpectations(t)
+		mockDialogs.AssertExpectations(t)
 	})
 
-	t.Run("Should return error when OpenDirectoryDialog fails", func(t *testing.T) {
+	t.Run("Should return error when asking for a directory fails", func(t *testing.T) {
 		// Arrange
+		mockDialogs := new(dialogtest.MockDialogs)
 		mockRuntime := new(test.MockRuntimeFacade)
-		helper := fs.NewUIFsHelper(mockRuntime)
-		ctx := context.Background()
-		fs.SetUIFsHelperContext(helper, ctx)
+		helper := fs.NewUIFsHelper(mockDialogs, mockRuntime)
 
 		expectedError := errors.New("dialog error")
-		mockRuntime.On("OpenDirectoryDialog", ctx, runtime.OpenDialogOptions{}).Return("", expectedError)
+		mockDialogs.On("AskForDirectory", dialog.PickDirectoryRequest{}).Return("", expectedError)
 
 		// Act
 		path, err := helper.AskForDirPath()
@@ -74,16 +60,15 @@ func TestUIFsHelper_AskForDirPath(t *testing.T) {
 		assert.Error(t, err)
 		assert.Equal(t, expectedError, err)
 		assert.Empty(t, path)
-		mockRuntime.AssertExpectations(t)
+		mockDialogs.AssertExpectations(t)
 	})
 }
 
-func TestUIFsHelper_OpenDirectoryDialog(t *testing.T) {
+func TestUIFsHelper_OpenFileFolder(t *testing.T) {
 	// Arrange
+	mockDialogs := new(dialogtest.MockDialogs)
 	mockRuntime := new(test.MockRuntimeFacade)
-	helper := fs.NewUIFsHelper(mockRuntime)
-	ctx := context.Background()
-	fs.SetUIFsHelperContext(helper, ctx)
+	helper := fs.NewUIFsHelper(mockDialogs, mockRuntime)
 
 	filePath := "/some/directory/file.txt"
 	expectedFolderPath := "/some/directory"

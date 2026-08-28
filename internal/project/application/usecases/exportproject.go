@@ -1,34 +1,30 @@
 package usecases
 
 import (
-	"context"
 	"encoding/json"
 
 	"gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
+	"gomander/internal/dialog"
 	"gomander/internal/facade"
 	"gomander/internal/helpers/array"
 	projectdomain "gomander/internal/project/domain"
-
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type ExportProject struct {
-	ctx                    context.Context
 	projectRepository      projectdomain.Repository
 	commandRepository      domain.Repository
 	commandGroupRepository commandgroupdomain.Repository
-	runtimeFacade          facade.RuntimeFacade
+	dialogs                dialog.Dialogs
 	fsFacade               facade.FsFacade
 }
 
-func NewExportProject(ctx context.Context, projectRepo projectdomain.Repository, commandRepo domain.Repository, commandGroupRepo commandgroupdomain.Repository, runtimeFacade facade.RuntimeFacade, fsFacade facade.FsFacade) *ExportProject {
+func NewExportProject(projectRepo projectdomain.Repository, commandRepo domain.Repository, commandGroupRepo commandgroupdomain.Repository, dialogs dialog.Dialogs, fsFacade facade.FsFacade) *ExportProject {
 	return &ExportProject{
-		ctx:                    ctx,
 		projectRepository:      projectRepo,
 		commandRepository:      commandRepo,
 		commandGroupRepository: commandGroupRepo,
-		runtimeFacade:          runtimeFacade,
+		dialogs:                dialogs,
 		fsFacade:               fsFacade,
 	}
 }
@@ -39,7 +35,7 @@ func (uc *ExportProject) Execute(projectId string) (string, error) {
 		return "", err
 	}
 
-	filePath, err := uc.runtimeFacade.SaveFileDialog(uc.ctx, runtime.SaveDialogOptions{
+	filePath, err := uc.dialogs.AskWhereToSaveFile(dialog.SaveFileRequest{
 		Title:                "Select a destination",
 		CanCreateDirectories: true,
 		DefaultFilename:      project.Name + ".json",
