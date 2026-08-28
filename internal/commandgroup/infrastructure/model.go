@@ -40,3 +40,15 @@ type commandGroupRow struct {
 	CommandLink             string
 	CommandErrorPatterns    string
 }
+
+// commandGroupIdentityRow is one Command Group paired with the id of one of the
+// Commands it holds, the shape commandGroupIdentityQuery reads. CommandId is
+// null when the Group holds none.
+type commandGroupIdentityRow struct {
+	Id        string
+	ProjectId string
+	Name      string
+	Position  int
+
+	CommandId *string
+}

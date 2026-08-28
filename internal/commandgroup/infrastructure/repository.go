@@ -47,6 +47,23 @@ WHERE %s
 ORDER BY command_group.position ASC, command_group.id ASC, command_group_command.position ASC
 `
 
+// commandGroupIdentityQuery reads the same Command Groups as
+// commandGroupQuery, naming the Commands they hold instead of hydrating them.
+// It joins the membership table alone, so a Command Group still names a Command
+// whose row is gone.
+const commandGroupIdentityQuery = `
+SELECT
+	command_group.id,
+	command_group.project_id,
+	command_group.name,
+	command_group.position,
+	command_group_command.command_id
+FROM command_group
+LEFT JOIN command_group_command ON command_group_command.command_group_id = command_group.id
+WHERE %s
+ORDER BY command_group.position ASC, command_group.id ASC, command_group_command.position ASC
+`
+
 func (r GormCommandGroupRepository) GetAll(projectId string) ([]domain.CommandGroup, error) {
 	return r.find("command_group.project_id = ?", projectId)
 }
@@ -80,6 +97,41 @@ func (r GormCommandGroupRepository) find(condition string, args ...any) ([]domai
 	}
 
 	return ToDomainCommandGroups(rows), nil
+}
+
+func (r GormCommandGroupRepository) GetAllWithCommandIds(projectId string) ([]domain.CommandGroupWithCommandIds, error) {
+	return r.findWithCommandIds("command_group.project_id = ?", projectId)
+}
+
+func (r GormCommandGroupRepository) GetAllContainingWithCommandIds(commandId string) ([]domain.CommandGroupWithCommandIds, error) {
+	return r.findWithCommandIds(
+		"command_group.id IN (SELECT command_group_id FROM command_group_command WHERE command_id = ?)",
+		commandId,
+	)
+}
+
+func (r GormCommandGroupRepository) GetWithCommandIds(id string) (domain.CommandGroupWithCommandIds, error) {
+	commandGroups, err := r.findWithCommandIds("command_group.id = ?", id)
+	if err != nil {
+		return domain.CommandGroupWithCommandIds{}, err
+	}
+
+	if len(commandGroups) == 0 {
+		return domain.CommandGroupWithCommandIds{}, domainerrors.NotFound("command group", id)
+	}
+
+	return commandGroups[0], nil
+}
+
+func (r GormCommandGroupRepository) findWithCommandIds(condition string, args ...any) ([]domain.CommandGroupWithCommandIds, error) {
+	var rows []commandGroupIdentityRow
+
+	err := r.db.WithContext(r.ctx).Raw(fmt.Sprintf(commandGroupIdentityQuery, condition), args...).Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return ToDomainCommandGroupsWithCommandIds(rows), nil
 }
 
 func (r GormCommandGroupRepository) Create(commandGroup *domain.CommandGroup) error {

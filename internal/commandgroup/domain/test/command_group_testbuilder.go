@@ -5,6 +5,7 @@ import (
 
 	"gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
+	"gomander/internal/helpers/array"
 )
 
 type CommandGroupData struct {
@@ -63,6 +64,18 @@ func (b *CommandGroupBuilder) Build() commandgroupdomain.CommandGroup {
 		Name:      b.data.Name,
 		Commands:  b.data.Commands,
 		Position:  b.data.Position,
+	}
+}
+
+// BuildWithCommandIds is the same Command Group in the form that names the
+// Commands it holds instead of carrying them.
+func (b *CommandGroupBuilder) BuildWithCommandIds() commandgroupdomain.CommandGroupWithCommandIds {
+	return commandgroupdomain.CommandGroupWithCommandIds{
+		Id:         b.data.Id,
+		ProjectId:  b.data.ProjectId,
+		Name:       b.data.Name,
+		CommandIds: array.Map(b.data.Commands, func(command domain.Command) string { return command.Id }),
+		Position:   b.data.Position,
 	}
 }
 
