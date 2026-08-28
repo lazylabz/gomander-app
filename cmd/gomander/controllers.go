@@ -66,16 +66,27 @@ func (wc *WailsControllers) ExportProjectController(projectId string) (string, e
 	return wc.useCases.ExportProject.Execute(projectId)
 }
 
-func (wc *WailsControllers) ImportProjectController(projectJSON projectdomain.ProjectExportJSONv1, name, workingDirectory string) error {
-	return wc.useCases.ImportProject.Execute(projectJSON, name, workingDirectory)
+func (wc *WailsControllers) ImportProjectController(blueprint ProjectBlueprint, name, workingDirectory string) error {
+	return wc.useCases.ImportProject.Execute(blueprint.toDomain(), name, workingDirectory)
 }
 
-func (wc *WailsControllers) GetProjectToImportController() (*projectdomain.ProjectExportJSONv1, error) {
-	return wc.useCases.GetProjectToImport.Execute(projectusecases.FileTypeGomander)
+func (wc *WailsControllers) GetProjectToImportController() (*ProjectBlueprint, error) {
+	return wc.projectToImport(projectusecases.FileTypeGomander)
 }
 
-func (wc *WailsControllers) GetProjectToImportFromPackageJsonController() (*projectdomain.ProjectExportJSONv1, error) {
-	return wc.useCases.GetProjectToImport.Execute(projectusecases.FileTypePackageJSON)
+func (wc *WailsControllers) GetProjectToImportFromPackageJsonController() (*ProjectBlueprint, error) {
+	return wc.projectToImport(projectusecases.FileTypePackageJSON)
+}
+
+func (wc *WailsControllers) projectToImport(fileType projectusecases.FileType) (*ProjectBlueprint, error) {
+	blueprint, err := wc.useCases.GetProjectToImport.Execute(fileType)
+	if err != nil || blueprint == nil {
+		return nil, err
+	}
+
+	dto := newProjectBlueprint(*blueprint)
+
+	return &dto, nil
 }
 
 // CommandGroup controllers

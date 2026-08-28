@@ -6,17 +6,11 @@ import type {
 
 export class ProjectExportBuilder {
 	private data: ProjectExport = {
-		version: 1,
 		name: "Test Project",
 		workingDirectory: "/app",
 		commands: [],
 		commandGroups: [],
 	};
-
-	withVersion(version: number): this {
-		this.data.version = version;
-		return this;
-	}
 
 	withName(name: string): this {
 		this.data.name = name;

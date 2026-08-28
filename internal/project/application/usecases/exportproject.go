@@ -1,31 +1,34 @@
 package usecases
 
 import (
-	"encoding/json"
-
 	"gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	"gomander/internal/dialog"
-	"gomander/internal/facade"
 	"gomander/internal/helpers/array"
 	projectdomain "gomander/internal/project/domain"
 )
+
+// BlueprintWriter writes a Project to the file the user picked, in whatever
+// format that file is.
+type BlueprintWriter interface {
+	Write(filePath string, blueprint projectdomain.Blueprint) error
+}
 
 type ExportProject struct {
 	projectRepository      projectdomain.Repository
 	commandRepository      domain.Repository
 	commandGroupRepository commandgroupdomain.Repository
 	dialogs                dialog.Dialogs
-	fsFacade               facade.FsFacade
+	files                  BlueprintWriter
 }
 
-func NewExportProject(projectRepo projectdomain.Repository, commandRepo domain.Repository, commandGroupRepo commandgroupdomain.Repository, dialogs dialog.Dialogs, fsFacade facade.FsFacade) *ExportProject {
+func NewExportProject(projectRepo projectdomain.Repository, commandRepo domain.Repository, commandGroupRepo commandgroupdomain.Repository, dialogs dialog.Dialogs, files BlueprintWriter) *ExportProject {
 	return &ExportProject{
 		projectRepository:      projectRepo,
 		commandRepository:      commandRepo,
 		commandGroupRepository: commandGroupRepo,
 		dialogs:                dialogs,
-		fsFacade:               fsFacade,
+		files:                  files,
 	}
 }
 
@@ -59,14 +62,14 @@ func (uc *ExportProject) Execute(projectId string) (string, error) {
 		return "", err
 	}
 
-	exportData := projectdomain.ProjectExportJSONv1{
-		Version: 1,
-		Name:    project.Name,
+	// An export carries no working directory: it is the one thing the user is
+	// asked for again when the file is imported somewhere else.
+	blueprint := projectdomain.Blueprint{
+		Name: project.Name,
 	}
 
-	// Prepare commands for export
 	for _, cmd := range commands {
-		exportData.Commands = append(exportData.Commands, projectdomain.CommandJSONv1{
+		blueprint.Commands = append(blueprint.Commands, projectdomain.BlueprintCommand{
 			Id:               cmd.Id,
 			Name:             cmd.Name,
 			Command:          cmd.Command,
@@ -74,24 +77,15 @@ func (uc *ExportProject) Execute(projectId string) (string, error) {
 		})
 	}
 
-	// Prepare command groups for export
 	for _, group := range commandGroups {
-		exportData.CommandGroups = append(exportData.CommandGroups, projectdomain.CommandGroupJSONv1{
+		blueprint.CommandGroups = append(blueprint.CommandGroups, projectdomain.BlueprintCommandGroup{
 			Id:         group.Id,
 			Name:       group.Name,
 			CommandIds: array.Map(group.Commands, func(cmd domain.Command) string { return cmd.Id }),
 		})
 	}
 
-	// Marshal to JSON with indentation for readability
-	jsonData, err := json.MarshalIndent(exportData, "", "  ")
-	if err != nil {
-		return "", err
-	}
-
-	// Write to file
-	err = uc.fsFacade.WriteFile(filePath, jsonData, 0644)
-	if err != nil {
+	if err := uc.files.Write(filePath, blueprint); err != nil {
 		return "", err
 	}
 

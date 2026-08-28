@@ -17,17 +17,6 @@ export namespace domain {
 	    commands: Command[];
 	    position: number;
 	}
-	export interface CommandGroupJSONv1 {
-	    id: string;
-	    name: string;
-	    commandIds: string[];
-	}
-	export interface CommandJSONv1 {
-	    id: string;
-	    name: string;
-	    command: string;
-	    workingDirectory: string;
-	}
 	export interface EnvironmentPath {
 	    id: string;
 	    path: string;
@@ -214,13 +203,6 @@ export namespace domain {
 	    name: string;
 	    workingDirectory: string;
 	}
-	export interface ProjectExportJSONv1 {
-	    version: number;
-	    name: string;
-	    workingDirectory: string;
-	    commands: CommandJSONv1[];
-	    commandGroups: CommandGroupJSONv1[];
-	}
 
 }
 
@@ -232,6 +214,28 @@ export namespace event {
 	    NEW_LOG_ENTRY = "new_log_entry",
 	    COMMAND_GROUP_DELETED = "command_group_deleted",
 	    COMMAND_ERROR_DETECTED = "command_error_detected",
+	}
+
+}
+
+export namespace main {
+	
+	export interface CommandBlueprint {
+	    id: string;
+	    name: string;
+	    command: string;
+	    workingDirectory: string;
+	}
+	export interface CommandGroupBlueprint {
+	    id: string;
+	    name: string;
+	    commandIds: string[];
+	}
+	export interface ProjectBlueprint {
+	    name: string;
+	    workingDirectory: string;
+	    commands: CommandBlueprint[];
+	    commandGroups: CommandGroupBlueprint[];
 	}
 
 }

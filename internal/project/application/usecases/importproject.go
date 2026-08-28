@@ -19,20 +19,21 @@ func NewImportProject(unitOfWork unitofwork.UnitOfWork) *ImportProject {
 	}
 }
 
-func (uc *ImportProject) Execute(projectJSON projectdomain.ProjectExportJSONv1, name, workingDirectory string) error {
+func (uc *ImportProject) Execute(blueprint projectdomain.Blueprint, name, workingDirectory string) error {
 	project := projectdomain.Project{
 		Id:               uuid.New().String(),
 		Name:             name,
 		WorkingDirectory: workingDirectory,
 	}
 
-	commands := make([]domain.Command, 0, len(projectJSON.Commands))
-	commandGroups := make([]commandgroupdomain.CommandGroup, 0, len(projectJSON.CommandGroups))
+	commands := make([]domain.Command, 0, len(blueprint.Commands))
+	commandGroups := make([]commandgroupdomain.CommandGroup, 0, len(blueprint.CommandGroups))
 
-	commandIdsToNewRandomIds := make(map[string]string)
-	newIdsToCommand := make(map[string]domain.Command)
+	// The Ids a Blueprint carries only name its own Commands; the ones stored
+	// are new, so a Group has to be told which is which.
+	commandsByBlueprintId := make(map[string]domain.Command, len(blueprint.Commands))
 
-	for _, cmd := range projectJSON.Commands {
+	for _, cmd := range blueprint.Commands {
 		newCommand := domain.Command{
 			Id:               uuid.New().String(),
 			Name:             cmd.Name,
@@ -43,11 +44,10 @@ func (uc *ImportProject) Execute(projectJSON projectdomain.ProjectExportJSONv1, 
 		}
 
 		commands = append(commands, newCommand)
-		commandIdsToNewRandomIds[cmd.Id] = newCommand.Id
-		newIdsToCommand[newCommand.Id] = newCommand
+		commandsByBlueprintId[cmd.Id] = newCommand
 	}
 
-	for _, group := range projectJSON.CommandGroups {
+	for _, group := range blueprint.CommandGroups {
 		newGroup := commandgroupdomain.CommandGroup{
 			Id:        uuid.New().String(),
 			Name:      group.Name,
@@ -56,8 +56,8 @@ func (uc *ImportProject) Execute(projectJSON projectdomain.ProjectExportJSONv1, 
 		}
 
 		for _, cmdId := range group.CommandIds {
-			if newCmdId, exists := commandIdsToNewRandomIds[cmdId]; exists {
-				newGroup.Commands = append(newGroup.Commands, newIdsToCommand[newCmdId])
+			if command, exists := commandsByBlueprintId[cmdId]; exists {
+				newGroup.Commands = append(newGroup.Commands, command)
 			}
 		}
 
