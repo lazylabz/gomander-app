@@ -53,8 +53,6 @@ var assets embed.FS
 //go:embed locales
 var localeFs embed.FS
 
-const ConfigFolderPathName = "gomander"
-
 func main() {
 	// The app can only be built once Wails hands us its context, so OnStartup fills this in
 	var app *internalapp.App
@@ -173,7 +171,7 @@ func getDbFile() string {
 		panic(err)
 	}
 
-	configFolderPath := filepath.Join(userConfig, ConfigFolderPathName)
+	configFolderPath := filepath.Join(userConfig, appConfig.configFolderName)
 	err = os.MkdirAll(configFolderPath, os.ModePerm)
 	if err != nil {
 		panic(err)
@@ -188,7 +186,7 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*i
 	// Initialize deps
 	l := logger.NewDefaultLogger(ctx, facade.DefaultRuntimeFacade{})
 	ee := event.NewDefaultEventEmitter(ctx, facade.DefaultRuntimeFacade{})
-	r := runner.NewDefaultRunner(l, ee)
+	r := runner.NewDefaultRunner(l, ee, appConfig.runner)
 	releaseFeed := releaseinfrastructure.NewGithubReleaseFeed(ctx, facade.DefaultIOFacade{}, releaseinfrastructure.DefaultLatestReleaseUrl)
 	releaseDownloader := releaseinfrastructure.NewGithubReleaseDownloader(ctx, facade.DefaultOSFacade{}, facade.DefaultIOFacade{}, releaseinfrastructure.DefaultBinaryDownloadBaseUrl)
 	releaseInstaller := releaseinfrastructure.NewOSReleaseInstaller(facade.DefaultOSFacade{}, facade.DefaultOpenFacade{})

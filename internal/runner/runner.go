@@ -3,8 +3,6 @@ package runner
 import (
 	"bufio"
 	"io"
-	"os"
-	"os/exec"
 	"sync"
 	"time"
 
@@ -28,11 +26,10 @@ var ExpectedTerminationLogs = []string{
 }
 
 type runningCommand struct {
-	cmd *exec.Cmd
-	wg  *sync.WaitGroup
-	// exited is closed by the goroutine that owns cmd.Wait, so that stopping a
-	// Command can await the exit without calling Wait a second time: os/exec
-	// forbids concurrent Wait on one Cmd.
+	process commandProcess
+	wg      *sync.WaitGroup
+	// exited is closed by the goroutine that owns process.Wait, so stopping a
+	// Command can await the exit without calling Wait a second time.
 	exited chan struct{}
 }
 
@@ -52,14 +49,16 @@ type DefaultRunner struct {
 	runningCommands map[string]runningCommand
 	eventEmitter    EventEmitter
 	logger          Logger
+	config          Config
 	mutex           sync.Mutex
 }
 
-func NewDefaultRunner(logger Logger, emitter EventEmitter) *DefaultRunner {
+func NewDefaultRunner(logger Logger, emitter EventEmitter, config Config) *DefaultRunner {
 	return &DefaultRunner{
 		runningCommands: make(map[string]runningCommand),
 		eventEmitter:    emitter,
 		logger:          logger,
+		config:          config,
 	}
 }
 
@@ -73,57 +72,28 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 		return nil
 	}
 
-	// Get the command object based on the project string and OS
-	cmd := GetCommand(command.Command)
-
-	// Enable color output and set terminal type
-	cmd.Env = append(os.Environ(), "FORCE_COLOR=1", "TERM=xterm-256color")
-	cmd.Dir = command.ResolveWorkingDirectory(environment.BaseWorkingDirectory)
-
-	// Set project attributes based on OS
-	SetProcAttributes(cmd)
-	SetProcEnv(cmd, environment.Paths)
-
-	// The pipes are ours rather than cmd.StdoutPipe's: those are closed by
-	// cmd.Wait, which forces Wait to run after the scanners are done, and a
-	// descendant that outlives the kill would then block Wait forever.
-	stdout, stdoutWriter, err := os.Pipe()
-	if err != nil {
-		c.sendStreamLine(command, err.Error())
-		c.mutex.Unlock()
-		return err
-	}
-
-	stderr, stderrWriter, err := os.Pipe()
-	if err != nil {
-		closeAll(stdout, stdoutWriter)
-		c.sendStreamLine(command, err.Error())
-		c.mutex.Unlock()
-		return err
-	}
-
-	cmd.Stdout = stdoutWriter
-	cmd.Stderr = stderrWriter
+	process := newCommandProcess(
+		command.Command,
+		command.ResolveWorkingDirectory(environment.BaseWorkingDirectory),
+		commandEnvironment(environment.Paths),
+		c.config,
+	)
 
 	var wg sync.WaitGroup
 	exited := make(chan struct{})
 	running := runningCommand{
-		cmd:    cmd,
-		wg:     &wg,
-		exited: exited,
+		process: process,
+		wg:      &wg,
+		exited:  exited,
 	}
 
 	c.sendStartingLine(command)
-	if err := cmd.Start(); err != nil {
-		closeAll(stdout, stdoutWriter, stderr, stderrWriter)
+	readers, err := process.Start()
+	if err != nil {
 		c.sendStreamLine(command, err.Error())
 		c.mutex.Unlock()
 		return err
 	}
-
-	// Only the process holds the write ends now, so the scanners see EOF when it
-	// and every descendant of it are gone.
-	closeAll(stdoutWriter, stderrWriter)
 
 	c.eventEmitter.EmitEvent(event.ProcessStarted, command.Id)
 
@@ -132,24 +102,19 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 	c.mutex.Unlock()
 
 	// Add to WaitGroup before starting goroutines to avoid race conditions
-	wg.Add(3) // stdout, stderr, and wait goroutines
+	wg.Add(len(readers) + 1)
 
 	var scanWg sync.WaitGroup
 
-	scanWg.Add(2) // For stdout and stderr streaming
-
-	// Stream stdout
-	go func() {
-		defer scanWg.Done()
-		defer wg.Done()
-		c.streamOutput(command, stdout)
-	}()
-	// Stream stderr
-	go func() {
-		defer scanWg.Done()
-		defer wg.Done()
-		c.streamOutput(command, stderr)
-	}()
+	scanWg.Add(len(readers))
+	for _, reader := range readers {
+		go func(reader io.ReadCloser) {
+			defer reader.Close()
+			defer scanWg.Done()
+			defer wg.Done()
+			c.streamOutput(command, process, reader)
+		}(reader)
+	}
 
 	// Wait in background until the command finishes, because it ends naturally or because it is stopped.
 	go func() {
@@ -164,13 +129,13 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 			c.eventEmitter.EmitEvent(event.ProcessFinished, command.Id)
 		}()
 
-		err := cmd.Wait()
+		err := process.Wait()
 		close(exited)
 
 		// A descendant that escaped the kill can hold the write ends open, so the
 		// scanners get a grace period to drain what is buffered and are then cut off.
 		if !waitFor(&scanWg, pipeDrainGrace) {
-			closeAll(stdout, stderr)
+			closeProcessReaders(readers)
 			scanWg.Wait()
 		}
 
@@ -198,7 +163,7 @@ func (c *DefaultRunner) StopRunningCommand(id string) error {
 		return nil
 	}
 
-	return StopProcessGracefully(running.cmd, running.exited)
+	return stopProcessGracefully(running.process, running.exited)
 }
 
 func (c *DefaultRunner) StopAllRunningCommands() []error {
@@ -214,7 +179,7 @@ func (c *DefaultRunner) StopAllRunningCommands() []error {
 	errs := make([]error, 0)
 
 	for _, running := range commandsToStop {
-		err := StopProcessGracefully(running.cmd, running.exited)
+		err := stopProcessGracefully(running.process, running.exited)
 
 		if err != nil {
 			errs = append(errs, err)
@@ -250,12 +215,6 @@ func waitFor(wg *sync.WaitGroup, timeout time.Duration) bool {
 	}
 }
 
-func closeAll(files ...*os.File) {
-	for _, f := range files {
-		_ = f.Close()
-	}
-}
-
 // isExpectedError checks if the error is one of the expected termination logs.
 func isExpectedError(err error) bool {
 	for _, expected := range ExpectedTerminationLogs {
@@ -266,12 +225,15 @@ func isExpectedError(err error) bool {
 	return false
 }
 
-func (c *DefaultRunner) streamOutput(command *domain.Command, pipeReader io.ReadCloser) {
+func (c *DefaultRunner) streamOutput(command *domain.Command, process commandProcess, pipeReader io.ReadCloser) {
 	scanner := bufio.NewScanner(pipeReader)
 	scanner.Buffer(make([]byte, 1024), 1024*1024) // Set buffer size to 1MB
 
 	for scanner.Scan() {
 		line := scanner.Text()
+		if process.shouldSkipOutputLine(line) {
+			continue
+		}
 		c.logger.Debug(line)
 		c.sendStreamLine(command, line)
 	}

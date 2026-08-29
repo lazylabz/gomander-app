@@ -32,7 +32,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter, runner.Config{})
 
 		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
 		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
@@ -72,7 +72,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter, runner.Config{})
 
 		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
 		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
@@ -105,7 +105,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter, runner.Config{})
 
 		cmd1Id := "1"
 		cmd2Id := "2"
@@ -159,7 +159,7 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter, runner.Config{})
 
 		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
 
@@ -186,7 +186,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter, runner.Config{})
 
 		commandId := "1"
 
@@ -232,7 +232,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter, runner.Config{})
 
 		commandId := "1"
 
@@ -287,7 +287,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter, runner.Config{})
 		commandId := "1"
 
 		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
@@ -332,7 +332,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter, runner.Config{})
 
 		cmd1Id := "1"
 		cmd2Id := "2"
@@ -401,7 +401,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter, runner.Config{})
 
 		commandId := "1"
 
@@ -452,7 +452,7 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter, runner.Config{})
 
 		// Act
 		err := r.StopRunningCommand("not-running")
@@ -469,7 +469,7 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter, runner.Config{})
 
 		cmd1Id := "1"
 		cmd2Id := "2"
@@ -535,7 +535,7 @@ func TestDefaultRunner_GetRunningCommandIds(t *testing.T) {
 		emitter := new(test.MockEventEmitter)
 		emitter.On("EmitEvent", mock.Anything, mock.Anything).Return()
 
-		sut := runner.NewDefaultRunner(logger, emitter)
+		sut := runner.NewDefaultRunner(logger, emitter, runner.Config{})
 
 		// Act
 		result := sut.GetRunningCommandIds()
@@ -554,7 +554,7 @@ func TestDefaultRunner_GetRunningCommandIds(t *testing.T) {
 		emitter := new(test.MockEventEmitter)
 		emitter.On("EmitEvent", mock.Anything, mock.Anything).Return()
 
-		sut := runner.NewDefaultRunner(logger, emitter)
+		sut := runner.NewDefaultRunner(logger, emitter, runner.Config{})
 
 		// Create a few commands that will run for a short time
 		command1 := &commanddomain.Command{
@@ -608,7 +608,7 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		r := runner.NewDefaultRunner(logger, emitter, runner.Config{})
 
 		commandId := "error-pattern-test"
 
