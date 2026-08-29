@@ -1,6 +1,7 @@
 import { xtermTerminal } from "@/commandOutput/adapters/xterm.ts";
 import {
 	type AttachedTerminal,
+	type CopyText,
 	type OutputTerminal,
 	TERMINAL_SCROLLBACK,
 	type TerminalFactory,
@@ -145,11 +146,12 @@ export const appendCommandLogEntry = (
 export const attachCommandOutput = (
 	commandId: string,
 	element: HTMLElement,
+	copyText: CopyText = () => {},
 ): AttachedTerminal => {
 	const output = outputFor(commandId);
 	output.terminal ??= createTerminal(commandId, currentTheme);
 
-	const attached = output.terminal.attach(element);
+	const attached = output.terminal.attach(element, copyText);
 
 	// Backfilled after the emulator is on screen: written earlier, the lines
 	// would be laid out against the default terminal size rather than this one.

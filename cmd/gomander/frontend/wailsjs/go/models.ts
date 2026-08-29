@@ -38,6 +38,7 @@ export namespace domain {
 	    "common.add": string;
 	    "common.advanced": string;
 	    "common.close": string;
+	    "common.copy": string;
 	    "sidebar.project.close": string;
 	    "sidebar.commands.title": string;
 	    "sidebar.commands.add": string;
@@ -188,6 +189,7 @@ export namespace domain {
 	    "toast.version.checkError": string;
 	    "toast.version.downloadFailed": string;
 	    "toast.version.installFailed": string;
+	    "toast.clipboard.copyFailed": string;
 	    "toast.missingPath.message": string;
 	    "toast.missingPath.action": string;
 	    "modal.missingPath.title": string;

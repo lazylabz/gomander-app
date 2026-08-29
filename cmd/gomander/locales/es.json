@@ -9,6 +9,7 @@
   "common.add": "Añadir",
   "common.advanced": "Avanzado",
   "common.close": "Cerrar",
+  "common.copy": "Copiar",
 
   "sidebar.project.close": "Cerrar",
   "sidebar.commands.title": "Comandos",
@@ -175,6 +176,8 @@
   "toast.version.checkError": "Error al comprobar nuevas versiones",
   "toast.version.downloadFailed": "Error al descargar la actualización",
   "toast.version.installFailed": "Error al instalar la actualización",
+
+  "toast.clipboard.copyFailed": "Error al copiar al portapapeles",
 
   "toast.missingPath.message": "Puede que un comando haya fallado porque no se encontró su ejecutable en tus rutas de entorno.",
   "toast.missingPath.action": "Más información",

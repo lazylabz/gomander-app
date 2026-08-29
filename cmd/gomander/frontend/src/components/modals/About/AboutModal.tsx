@@ -29,6 +29,7 @@ import {
 } from "@/design-system/components/ui/dialog.tsx";
 import { cn } from "@/design-system/lib/utils.ts";
 import { GithubIcon } from "@/icons/GithubIcon.tsx";
+import { copyTextToClipboard } from "@/useCases/clipboard/copyTextToClipboard.ts";
 
 type OS = "darwin" | "linux" | "windows";
 
@@ -120,9 +121,10 @@ export const AboutModal = ({
 	};
 
 	const handleCopyCommand = async () => {
-		await navigator.clipboard.writeText(MACOS_QUARANTINE_COMMAND);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
+		if (await copyTextToClipboard(MACOS_QUARANTINE_COMMAND)) {
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		}
 	};
 
 	const handleInstallClick = () => {

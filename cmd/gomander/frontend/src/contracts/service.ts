@@ -1,6 +1,7 @@
 import { wailsBackend } from "@/contracts/adapters/wails.ts";
 import type {
 	BackendServices,
+	ClipboardService,
 	DataService,
 	EventService,
 	ExternalBrowserService,
@@ -16,6 +17,7 @@ export let helpersService: HelpersService = wailsBackend.helpers;
 export let eventService: EventService = wailsBackend.event;
 export let externalBrowserService: ExternalBrowserService =
 	wailsBackend.externalBrowser;
+export let clipboardService: ClipboardService = wailsBackend.clipboard;
 export let translationsService: TranslationsService = wailsBackend.translations;
 
 export const setBackendServices = (backend: BackendServices): void => {
@@ -23,6 +25,7 @@ export const setBackendServices = (backend: BackendServices): void => {
 	helpersService = backend.helpers;
 	eventService = backend.event;
 	externalBrowserService = backend.externalBrowser;
+	clipboardService = backend.clipboard;
 	translationsService = backend.translations;
 };
 

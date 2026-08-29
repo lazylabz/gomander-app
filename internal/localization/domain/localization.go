@@ -12,6 +12,7 @@ type Localization struct {
 	CommonAdd       string `json:"common.add"`
 	CommonAdvanced  string `json:"common.advanced"`
 	CommonClose     string `json:"common.close"`
+	CommonCopy      string `json:"common.copy"`
 
 	// sidebar
 	SidebarProjectClose              string `json:"sidebar.project.close"`
@@ -196,6 +197,9 @@ type Localization struct {
 	ToastVersionCheckError     string `json:"toast.version.checkError"`
 	ToastVersionDownloadFailed string `json:"toast.version.downloadFailed"`
 	ToastVersionInstallFailed  string `json:"toast.version.installFailed"`
+
+	// toast.clipboard
+	ToastClipboardCopyFailed string `json:"toast.clipboard.copyFailed"`
 
 	// toast.missingPath
 	ToastMissingPathMessage string `json:"toast.missingPath.message"`

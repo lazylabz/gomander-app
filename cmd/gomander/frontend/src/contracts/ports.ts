@@ -71,6 +71,10 @@ export type ExternalBrowserService = {
 	browserOpenURL: (url: string) => void;
 };
 
+export type ClipboardService = {
+	setText: (text: string) => Promise<boolean>;
+};
+
 export type TranslationsService = {
 	getTranslation: (language: string) => Promise<Localization>;
 	getSupportedLanguages: () => Promise<string[]>;
@@ -81,5 +85,6 @@ export type BackendServices = {
 	helpers: HelpersService;
 	event: EventService;
 	externalBrowser: ExternalBrowserService;
+	clipboard: ClipboardService;
 	translations: TranslationsService;
 };
