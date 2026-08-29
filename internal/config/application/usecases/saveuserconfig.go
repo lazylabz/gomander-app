@@ -4,18 +4,14 @@ import (
 	"gomander/internal/config/domain"
 )
 
-type SaveUserConfig interface {
-	Execute(config domain.Config) error
-}
-
-type DefaultSaveUserConfig struct {
+type SaveUserConfig struct {
 	repository domain.Repository
 }
 
-func NewSaveUserConfig(repository domain.Repository) *DefaultSaveUserConfig {
-	return &DefaultSaveUserConfig{repository: repository}
+func NewSaveUserConfig(repository domain.Repository) *SaveUserConfig {
+	return &SaveUserConfig{repository: repository}
 }
 
-func (uc *DefaultSaveUserConfig) Execute(newUserConfig domain.Config) error {
+func (uc *SaveUserConfig) Execute(newUserConfig domain.Config) error {
 	return uc.repository.Update(&newUserConfig)
 }

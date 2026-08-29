@@ -1,14 +1,9 @@
 package usecases
 
 import (
-	"context"
-	"encoding/json"
-	"path"
+	"fmt"
 
-	"github.com/google/uuid"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
-
-	"gomander/internal/facade"
+	"gomander/internal/dialog"
 	projectdomain "gomander/internal/project/domain"
 )
 
@@ -19,34 +14,35 @@ const (
 	FileTypePackageJSON FileType = "package_json"
 )
 
-type GetProjectToImport interface {
-	Execute(fileType FileType) (*projectdomain.ProjectExportJSONv1, error)
+// BlueprintReader turns a file the user picked into the Project it describes.
+// Every format the app can import is one implementation and nothing else.
+type BlueprintReader interface {
+	Read(filePath string) (*projectdomain.Blueprint, error)
 }
 
-type DefaultGetProjectToImport struct {
-	ctx           context.Context
-	runtimeFacade facade.RuntimeFacade
-	fsFacade      facade.FsFacade
+type GetProjectToImport struct {
+	dialogs dialog.Dialogs
+	readers map[FileType]BlueprintReader
 }
 
 func NewGetProjectToImport(
-	ctx context.Context,
-	runtimeFacade facade.RuntimeFacade,
-	fsFacade facade.FsFacade,
-) *DefaultGetProjectToImport {
-	return &DefaultGetProjectToImport{
-		ctx:           ctx,
-		runtimeFacade: runtimeFacade,
-		fsFacade:      fsFacade,
+	dialogs dialog.Dialogs,
+	readers map[FileType]BlueprintReader,
+) *GetProjectToImport {
+	return &GetProjectToImport{
+		dialogs: dialogs,
+		readers: readers,
 	}
 }
 
-func (uc *DefaultGetProjectToImport) Execute(fileType FileType) (*projectdomain.ProjectExportJSONv1, error) {
-	var projectJSON *projectdomain.ProjectExportJSONv1
+func (uc *GetProjectToImport) Execute(fileType FileType) (*projectdomain.Blueprint, error) {
+	reader, canBeRead := uc.readers[fileType]
+	request, canBeAskedFor := openFileRequestByFileType[fileType]
+	if !canBeRead || !canBeAskedFor {
+		return nil, fmt.Errorf("no importable file of type %q", fileType)
+	}
 
-	options := OpenDialogOptionsByFileType[fileType]
-
-	filePath, err := uc.runtimeFacade.OpenFileDialog(uc.ctx, options)
+	filePath, err := uc.dialogs.AskForFileToOpen(request)
 	if err != nil {
 		return nil, err
 	}
@@ -55,76 +51,16 @@ func (uc *DefaultGetProjectToImport) Execute(fileType FileType) (*projectdomain.
 		return nil, nil // User canceled
 	}
 
-	// Read entire file into memory
-	fileData, err := uc.fsFacade.ReadFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	processor := ProcessorsByFileType[fileType]
-
-	projectJSON, err = processor(fileData, filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	return projectJSON, nil
+	return reader.Read(filePath)
 }
 
-var OpenDialogOptionsByFileType = map[FileType]runtime.OpenDialogOptions{
+var openFileRequestByFileType = map[FileType]dialog.OpenFileRequest{
 	FileTypeGomander: {
 		Title:   "Select an exported Gomander project file",
-		Filters: []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}},
+		Filters: []dialog.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}},
 	},
 	FileTypePackageJSON: {
 		Title:   "Select a package.json file",
-		Filters: []runtime.FileFilter{{DisplayName: "package.json", Pattern: "*.json"}},
+		Filters: []dialog.FileFilter{{DisplayName: "package.json", Pattern: "*.json"}},
 	},
-}
-
-var ProcessorsByFileType = map[FileType]func([]byte, string) (*projectdomain.ProjectExportJSONv1, error){
-	FileTypeGomander:    parseGomanderExportedProject,
-	FileTypePackageJSON: parsePackageJSON,
-}
-
-func parseGomanderExportedProject(data []byte, _ string) (*projectdomain.ProjectExportJSONv1, error) {
-	var projectJSON *projectdomain.ProjectExportJSONv1
-	err := json.Unmarshal(data, &projectJSON)
-	if err != nil {
-		return nil, err
-	}
-	return projectJSON, nil
-}
-
-func parsePackageJSON(data []byte, filePath string) (*projectdomain.ProjectExportJSONv1, error) {
-	var packageJSON struct {
-		Name    string            `json:"name"`
-		Scripts map[string]string `json:"scripts"`
-	}
-	err := json.Unmarshal(data, &packageJSON)
-	if err != nil {
-		return nil, err
-	}
-
-	folderPath := path.Dir(filePath)
-
-	var projectExport = &projectdomain.ProjectExportJSONv1{
-		Version:          1,
-		Name:             packageJSON.Name,
-		Commands:         make([]projectdomain.CommandJSONv1, 0),
-		CommandGroups:    make([]projectdomain.CommandGroupJSONv1, 0),
-		WorkingDirectory: folderPath,
-	}
-
-	for scriptName, scriptCmd := range packageJSON.Scripts {
-		command := projectdomain.CommandJSONv1{
-			Id:               uuid.NewString(),
-			Name:             scriptName,
-			Command:          scriptCmd,
-			WorkingDirectory: "",
-		}
-		projectExport.Commands = append(projectExport.Commands, command)
-	}
-
-	return projectExport, nil
 }

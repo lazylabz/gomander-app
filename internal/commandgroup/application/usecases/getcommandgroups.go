@@ -2,29 +2,29 @@ package usecases
 
 import (
 	"gomander/internal/commandgroup/domain"
-	configdomain "gomander/internal/config/domain"
+	"gomander/internal/openedproject"
 )
 
-type GetCommandGroups interface {
-	Execute() ([]domain.CommandGroup, error)
-}
-
-type DefaultGetCommandGroups struct {
-	configRepository       configdomain.Repository
+type GetCommandGroups struct {
+	openedProject          openedproject.OpenedProject
 	commandGroupRepository domain.Repository
 }
 
-func NewGetCommandGroups(configRepo configdomain.Repository, commandGroupRepo domain.Repository) *DefaultGetCommandGroups {
-	return &DefaultGetCommandGroups{
-		configRepository:       configRepo,
+func NewGetCommandGroups(openedProject openedproject.OpenedProject, commandGroupRepo domain.Repository) *GetCommandGroups {
+	return &GetCommandGroups{
+		openedProject:          openedProject,
 		commandGroupRepository: commandGroupRepo,
 	}
 }
 
-func (uc *DefaultGetCommandGroups) Execute() ([]domain.CommandGroup, error) {
-	userConfig, err := uc.configRepository.GetOrCreate()
+func (uc *GetCommandGroups) Execute() ([]domain.CommandGroup, error) {
+	project, open, err := uc.openedProject.Find()
 	if err != nil {
 		return make([]domain.CommandGroup, 0), err
 	}
-	return uc.commandGroupRepository.GetAll(userConfig.LastOpenedProjectId)
+	if !open {
+		return make([]domain.CommandGroup, 0), nil
+	}
+
+	return uc.commandGroupRepository.GetAll(project.Id)
 }

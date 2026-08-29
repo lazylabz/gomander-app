@@ -6,19 +6,19 @@ import (
 	"net/http"
 	"sync"
 
-	"gomander/internal/app"
+	"gomander/internal/usecases"
 )
 
 var StartPort = 9002
 var EndPort = 9100
 
 type ThirdPartyIntegrationsServer struct {
-	useCases app.UseCases
+	useCases usecases.Registry
 	mu       sync.RWMutex
 	Server   *http.Server
 }
 
-func NewThirdPartyIntegrationsServer(useCases app.UseCases) *ThirdPartyIntegrationsServer {
+func NewThirdPartyIntegrationsServer(useCases usecases.Registry) *ThirdPartyIntegrationsServer {
 	return &ThirdPartyIntegrationsServer{
 		useCases: useCases,
 	}

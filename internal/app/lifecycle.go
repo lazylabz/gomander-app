@@ -4,19 +4,16 @@ import (
 	"context"
 )
 
-// Startup is called when the app starts. The context is saved
-// so we can call the runtime methods
-func (a *App) Startup(ctx context.Context) {
-	a.ctx = ctx
-
+func (a *App) Startup(_ context.Context) error {
 	a.logger.Info("Loading configuration...")
 
-	_, err := a.userConfigRepository.GetOrCreate()
-	if err != nil {
-		panic(err)
+	if _, err := a.userConfigRepository.GetOrCreate(); err != nil {
+		return err
 	}
 
 	a.logger.Info("Configuration loaded successfully")
+
+	return nil
 }
 
 func (a *App) OnBeforeClose(_ context.Context) (prevent bool) {

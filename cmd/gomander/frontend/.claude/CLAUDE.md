@@ -1,183 +1,123 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+The Gomander frontend: React 19, TypeScript, Vite, Zustand, TailwindCSS v4,
+shadcn/ui, react-hook-form + Zod, Biome, pnpm. It talks to the Go backend through
+Wails bindings. See [the root CLAUDE.md](../../../../.claude/CLAUDE.md) for the backend.
 
-## Project Overview
+## Where the reasoning lives
 
-This is the frontend for Gomander, a Wails-based GUI application. The frontend is built with React 19, TypeScript, and
-communicates with the Go backend through Wails-generated bindings.
+- **[CONTEXT.md](../../../../CONTEXT.md)** — the glossary, shared with the backend.
+- **[docs/adr/](../../../../docs/adr/)** — decisions and the alternatives they rejected.
+  ADR-0001 (ports at the third-party edges), 0002 (autosave), 0003 (browser storage)
+  and 0005 (coverage) all bind code in this directory.
 
-## Technology Stack
+`pnpm run` lists the scripts. The dev server runs from the repo root (`make dev`).
 
-- **React 19** with TypeScript
-- **Vite** as build tool with SWC for fast compilation
-- **React Router 7** for routing (using HashRouter for Wails compatibility)
-- **Zustand** for state management (vanilla stores + React hooks)
-- **TailwindCSS v4** for styling
-- **shadcn/ui** components (Radix UI primitives)
-- **react-hook-form** + **Zod** for forms and validation
-- **Biome** for linting and formatting
-- **pnpm** as package manager
-
-## Common Commands
-
-### Development
-
-```bash
-# Type checking (most commonly used during development)
-pnpm run typecheck
-
-# Linting
-pnpm run lint
-
-# Auto-fix lint issues
-pnpm run lint:fix
-```
-
-Note: Development server is run from the root via `make dev` or `wails dev` - not from this directory.
-
-## Architecture
-
-The frontend follows a **layered architecture** with clear separation of concerns:
-
-### Directory Structure
+## Layout
 
 ```
 src/
-├── contracts/         # Wails backend interface layer (ONLY place wailsjs imports allowed)
-│   ├── service.ts     # Exported service wrappers for backend calls
-│   └── types.ts       # Type definitions from backend
-├── useCases/          # Business logic organized by domain
-│   ├── command/       # Command-specific operations (start, stop, create, etc.)
-│   ├── commandGroup/  # Command group operations
-│   ├── project/       # Project operations
-│   ├── userConfig/    # User configuration
-│   └── logging/       # Logging operations
-├── queries/           # Data fetching operations (read-only)
-├── store/             # Zustand state stores (one per domain)
-│   ├── commandStore.ts
-│   ├── commandGroupStore.ts
-│   ├── projectStore.ts
-│   └── userConfigurationStore.ts
-├── screens/           # Top-level screen components
-│   ├── ProjectSelectionScreen/
-│   ├── SettingsScreen/
-│   └── LogsScreen/
-├── components/
-│   ├── layout/        # Layout components
-│   ├── modals/        # Modal dialogs
-│   ├── inputs/        # Form inputs
-│   └── utility/       # Utility components (EventListenersContainer, etc.)
-├── design-system/     # Design system (shadcn/ui components and utilities)
-│   ├── components/
-│   │   └── ui/        # shadcn/ui components (Button, Dialog, etc.)
-│   ├── hooks/         # shadcn/ui hooks (use-mobile, etc.)
-│   └── lib/           # shadcn/ui utilities (cn, utils, etc.)
-├── hooks/             # Custom React hooks (application-specific)
-├── contexts/          # React contexts (theme, version, etc.)
-├── helpers/           # Pure utility functions
-├── types/             # TypeScript type definitions
-└── constants/         # Application constants
+├── contracts/         # the backend seam - the ONLY place wailsjs is imported
+│   ├── ports.ts       # the contract, hand-declared
+│   ├── service.ts     # the services the app calls, plus the test-only swap
+│   └── adapters/      # wails.ts (production), inMemory.ts (tests)
+├── commandOutput/     # a command's output, from Wails event to pixels
+│   ├── commandOutput.ts
+│   ├── ports.ts       # the terminal emulator contract
+│   └── adapters/      # xterm.ts (production), recording.ts (tests)
+├── useCases/          # write operations, by domain
+├── queries/           # read-only fetches
+├── store/             # one Zustand store per domain
+├── screens/ components/ design-system/
+├── hooks/ contexts/ helpers/ types/ constants/
+└── testing/           # fake backend and terminal installers, builders
 ```
 
-### Key Architectural Patterns
+`@/` maps to `src/`. Routing is `HashRouter`, not `BrowserRouter` — a Wails requirement.
 
-#### 1. Contracts Layer (Wails Abstraction)
+## Rules
 
-- **CRITICAL**: Direct `wailsjs` imports are ONLY allowed in `src/contracts/`
-- Biome enforces this rule - imports from `wailsjs` anywhere else will fail linting
-- All backend communication must go through `contracts/service.ts`
-- This provides a clean abstraction layer between frontend and Wails-generated code
+### Backend calls
 
-#### 2. State Management (Zustand)
+Adding one is four steps: declare it on the right type in `contracts/ports.ts`, map it
+in `adapters/wails.ts`, implement it in `adapters/inMemory.ts`, then call it from a use
+case. Biome fails any `wailsjs` import outside `contracts/`, and any `@xterm/*` import
+outside `commandOutput/`.
 
-- **Vanilla stores** created with `createStore` for use in non-React code (use cases)
-- **React hooks** created with `useStore` for use in components
-- Each domain has its own store (command, commandGroup, project, userConfig)
-- Stores are kept minimal - just state and setters
+### Mutations own their outcome
 
-Example pattern:
+A mutation in `useCases/` owns the whole thing: the backend call, the stores it has to
+refresh, its own `i18n.t` toast on success and on failure, and any state the change
+forces (disposing a terminal, clearing the active command). It never throws — it returns
+`false`, so a caller with UI to run on success can branch on it.
 
-```typescript
-// In store file
-export const commandStore = createStore<CommandStore>()(...)  // For use cases
-export const useCommandStore = <T>(selector) => useStore(commandStore, selector)  // For components
-```
+The call site keeps only what is local to the UI: closing a modal, resetting a form,
+`stopPropagation`, selecting the clicked command. A `try`/`catch`, a `fetchX()` or a
+`parseError` around a mutation means that mutation has not absorbed its outcome yet.
 
-#### 3. Use Cases Pattern
+Refresh through `refreshAfterMutation(...queries)` — the outcome is already reported by
+then, so a failing refresh must not reject. Equivalent mutations refresh the same set: a
+command's create/edit/delete refresh the commands and the groups that carry a copy; a
+group's own mutations refresh the groups alone; a project mutation that changes which
+projects exist refreshes the available ones, and an edit refreshes the opened project
+too. `closeProject` and `exportProject` refresh nothing.
 
-- Business logic lives in `useCases/` directory, organized by domain
-- Each use case is a single exported async function
-- Use cases interact with backend via `contracts/service.ts`
-- Use cases update state via vanilla Zustand stores (not React hooks)
+`createProject` is the one exception left — still a `dataService` call from
+`CreateProjectModal` with an `onSuccess` prop.
 
-Example: `useCases/command/startCommand.ts` calls backend and updates state
+### Modals
 
-#### 4. Queries vs Use Cases
+`components/modals/Command/common/formMapping.ts` maps between a form and a `Command`,
+including the one-error-pattern-per-line encoding. A modal that splits or joins that
+string itself should be calling this instead.
 
-- **Queries** (`queries/`): Read-only data fetching operations
-- **Use Cases** (`useCases/`): Write operations or complex business logic
-- Queries typically load data into stores on app initialization
+Every create/edit modal reads the same way: the mutation reports its own outcome and
+returns a boolean, the modal returns early on `false`, and on success closes and resets
+in that order — `setOpen(false)`, then `form.reset()`. A rejected save leaves the modal
+open with what the user typed still in it.
 
-#### 5. Event System
+### Modules that own their sequencing
 
-- Backend pushes real-time updates via Wails events
-- `EventListenersContainer` component (rendered in App.tsx) listens to all events
-- Events defined in `contracts/types.ts` (Event enum)
-- Event handlers call use cases to update state (e.g., PROCESS_STARTED → updateCommandStatus)
-- Log buffering: Logs are buffered for 30ms before being flushed to state for performance
+Call these; do not rebuild what they do.
 
-### Path Aliases
+- `commandOutput/commandOutput.ts` — buffering, the 30 ms flush, timestamping, the
+  backfill for terminals not yet on screen, the bounded tail and the reset ordering.
+- `hooks/useAutosavedForm.ts` — the dirty check, the debounce, the submit, the pending
+  flag. A call site running its own `setTimeout` or diffing against a `useRef` should be
+  using this. The rules live in `createAutosaver`, a plain factory unit-tested with no
+  renderer.
+- `store/sidebarSections.ts` — `useSidebarSection(id)` hands back a `useState`-shaped
+  pair; storage keys and encoding stay inside.
 
-- `@/` maps to `src/` directory
-- Configured in both `vite.config.ts` and `tsconfig.json`
+### State and events
 
-### Routing
+Components read state with `useCommandStore(state => state.field)`; use cases reach it
+with `commandStore.getState()` / `.setState()`. Keep selectors narrow.
 
-- Uses React Router 7 with `HashRouter` (required for Wails)
-- Routes defined in `src/routes.ts`
-- Main routes: ProjectSelection, Logs, Settings
+Every backend event listener is registered in `EventListenersContainer`, which is wiring
+only: one event, one call, no pipeline of its own. New events are declared in
+`contracts/types.ts`.
 
-### Styling
+## Testing
 
-- TailwindCSS v4 configured via `@tailwindcss/vite` plugin
-- Use `cn()` utility from `design-system/lib/utils.ts` to merge Tailwind classes
-- shadcn components in `design-system/components/ui/` provide consistent design system
+Vitest, jsdom, tests next to the code as `*.test.ts(x)`. Node ≥22.10 — jsdom 30 pulls an
+undici that calls `worker_threads.markAsUncloneable`, and on older Node every test file
+fails to start.
 
-### Forms
-
-- `react-hook-form` for form state management
-- `zod` for schema validation
-- `@hookform/resolvers` for integration
-
-## Development Guidelines
-
-### Import Organization
-
-- Biome enforces import sorting via its `organizeImports` assist action
-- Imports are automatically sorted: external packages → internal imports (via @/)
-
-### Adding New Backend Calls
-
-1. Wails generates bindings in `wailsjs/` (DO NOT edit manually)
-2. Add wrapper to `contracts/service.ts` (exported from `dataService`, `helpersService`, etc.)
-3. Create use case in `useCases/` that calls the service
-4. Never import from `wailsjs/` outside of `contracts/` directory
-
-### Working with State
-
-- In **components**: use `useCommandStore(state => state.field)` hooks
-- In **use cases**: use `commandStore.getState()` or `commandStore.setState()`
-- Keep selectors focused - only select what you need
-
-### Adding Event Listeners
-
-- All event listeners registered in `EventListenersContainer.tsx`
-- Define event type in `contracts/types.ts` if new
-- Call use case to handle state updates
-
-## Known Constraints
-
-- Must use `HashRouter` instead of `BrowserRouter` (Wails requirement)
-- Cannot use interactive terminal commands in the app (no PTY support)
-- Auto-generated `wailsjs/` code should never be manually edited
+- `installInMemoryBackend()` (from `@/testing/backend.ts`) swaps every service;
+  `resetBackendServices()` puts Wails back. Never `vi.mock` the `wailsjs/` modules — the
+  contracts seam exists to avoid exactly that.
+- The fake holds state rather than recording calls: drive it through the seam, then query
+  `backend.state`. Emit events with `backend.emit(Event.NEW_LOG_ENTRY, {...})`. Drive a
+  failure by replacing one method: `backend.data.removeCommand = async () => { throw ... }`.
+- `installRecordingTerminals()` (from `@/testing/terminals.ts`) does the same for the
+  emulator; use fake timers to drive the flush loop.
+- Build objects with the builders in `@/testing/builders/`. They mutate and return `this`,
+  so reuse one only when the earlier `with` calls should carry over.
+- `installTranslations()` makes every key echo itself, so assertions name the key rather
+  than the English copy. Assert toasts with `vi.spyOn(toast, "success" | "error")`.
+- Mirror the Go conventions: Arrange / Act / Assert comments, and `sut` for the single
+  unit under test.
+- A hook owning an effect is driven through a probe component with `createRoot` and `act`
+  (see `hooks/useAutosavedForm.test.tsx`). Anything a hook can hand to a plain function
+  belongs in that function, tested without a renderer.

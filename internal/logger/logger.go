@@ -2,36 +2,35 @@ package logger
 
 import (
 	"context"
-
-	"gomander/internal/facade"
 )
 
-type Logger interface {
-	Info(message string)
-	Debug(message string)
-	Error(message string)
+// LogSink is where the desktop shell's log lines end up.
+type LogSink interface {
+	LogInfo(ctx context.Context, message string)
+	LogDebug(ctx context.Context, message string)
+	LogError(ctx context.Context, message string)
 }
 
 type DefaultLogger struct {
-	ctx     context.Context
-	runtime facade.RuntimeFacade
+	ctx  context.Context
+	sink LogSink
 }
 
-func NewDefaultLogger(ctx context.Context, runtime facade.RuntimeFacade) *DefaultLogger {
+func NewDefaultLogger(ctx context.Context, sink LogSink) *DefaultLogger {
 	return &DefaultLogger{
-		ctx:     ctx,
-		runtime: runtime,
+		ctx:  ctx,
+		sink: sink,
 	}
 }
 
 func (l *DefaultLogger) Info(message string) {
-	l.runtime.LogInfo(l.ctx, message)
+	l.sink.LogInfo(l.ctx, message)
 }
 
 func (l *DefaultLogger) Debug(message string) {
-	l.runtime.LogDebug(l.ctx, message)
+	l.sink.LogDebug(l.ctx, message)
 }
 
 func (l *DefaultLogger) Error(message string) {
-	l.runtime.LogError(l.ctx, message)
+	l.sink.LogError(l.ctx, message)
 }

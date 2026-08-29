@@ -2,26 +2,26 @@ package event
 
 import (
 	"context"
-
-	"gomander/internal/facade"
 )
 
-type EventEmitter interface {
-	EmitEvent(event Event, payload interface{})
+// EventSink is what carries an Event to whoever is listening on the other side
+// of the desktop shell.
+type EventSink interface {
+	EventsEmit(ctx context.Context, eventName string, payload interface{})
 }
 
 type DefaultEventEmitter struct {
-	ctx     context.Context
-	runtime facade.RuntimeFacade
+	ctx  context.Context
+	sink EventSink
 }
 
-func NewDefaultEventEmitter(ctx context.Context, runtime facade.RuntimeFacade) *DefaultEventEmitter {
+func NewDefaultEventEmitter(ctx context.Context, sink EventSink) *DefaultEventEmitter {
 	return &DefaultEventEmitter{
-		ctx:     ctx,
-		runtime: runtime,
+		ctx:  ctx,
+		sink: sink,
 	}
 }
 
 func (e *DefaultEventEmitter) EmitEvent(event Event, payload interface{}) {
-	e.runtime.EventsEmit(e.ctx, string(event), payload)
+	e.sink.EventsEmit(e.ctx, string(event), payload)
 }

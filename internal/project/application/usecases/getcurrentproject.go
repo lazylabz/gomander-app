@@ -1,31 +1,28 @@
 package usecases
 
 import (
-	configdomain "gomander/internal/config/domain"
+	"gomander/internal/openedproject"
 	"gomander/internal/project/domain"
 )
 
-type GetCurrentProject interface {
-	Execute() (*domain.Project, error)
+type GetCurrentProject struct {
+	openedProject openedproject.OpenedProject
 }
 
-type DefaultGetCurrentProject struct {
-	configRepository  configdomain.Repository
-	projectRepository domain.Repository
-}
-
-func NewGetCurrentProject(configRepo configdomain.Repository, projectRepo domain.Repository) *DefaultGetCurrentProject {
-	return &DefaultGetCurrentProject{
-		configRepository:  configRepo,
-		projectRepository: projectRepo,
+func NewGetCurrentProject(openedProject openedproject.OpenedProject) *GetCurrentProject {
+	return &GetCurrentProject{
+		openedProject: openedProject,
 	}
 }
 
-func (uc *DefaultGetCurrentProject) Execute() (*domain.Project, error) {
-	userConfig, err := uc.configRepository.GetOrCreate()
+func (uc *GetCurrentProject) Execute() (*domain.Project, error) {
+	project, open, err := uc.openedProject.Find()
 	if err != nil {
 		return nil, err
 	}
+	if !open {
+		return nil, nil
+	}
 
-	return uc.projectRepository.Get(userConfig.LastOpenedProjectId)
+	return &project, nil
 }

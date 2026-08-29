@@ -19,11 +19,7 @@ func TestExecProcessOutputRemainsReadableAfterWait(t *testing.T) {
 	readers, err := process.Start()
 	require.NoError(t, err)
 	require.Len(t, readers, 2)
-	t.Cleanup(func() {
-		for _, reader := range readers {
-			_ = reader.Close()
-		}
-	})
+	t.Cleanup(func() { closeReaders(readers[0], readers[1]) })
 
 	require.NoError(t, process.Wait())
 	stdout, err := io.ReadAll(readers[0])

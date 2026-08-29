@@ -4,20 +4,16 @@ import (
 	"gomander/internal/project/domain"
 )
 
-type GetAvailableProjects interface {
-	Execute() ([]domain.Project, error)
-}
-
-type DefaultGetAvailableProjects struct {
+type GetAvailableProjects struct {
 	projectRepository domain.Repository
 }
 
-func NewGetAvailableProjects(projectRepo domain.Repository) *DefaultGetAvailableProjects {
-	return &DefaultGetAvailableProjects{
+func NewGetAvailableProjects(projectRepo domain.Repository) *GetAvailableProjects {
+	return &GetAvailableProjects{
 		projectRepository: projectRepo,
 	}
 }
 
-func (uc *DefaultGetAvailableProjects) Execute() ([]domain.Project, error) {
+func (uc *GetAvailableProjects) Execute() ([]domain.Project, error) {
 	return uc.projectRepository.GetAll()
 }

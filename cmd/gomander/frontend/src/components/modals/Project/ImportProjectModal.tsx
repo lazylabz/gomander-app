@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { BaseWorkingDirectoryField } from "@/components/modals/Project/common/BaseWorkingDirectoryField.tsx";
 import {
@@ -27,17 +26,14 @@ import {
 	DialogTitle,
 } from "@/design-system/components/ui/dialog.tsx";
 import { Form } from "@/design-system/components/ui/form.tsx";
-import { parseError } from "@/helpers/errorHelpers.ts";
 import { importProject } from "@/useCases/project/importProject.ts";
 
 export const ImportProjectModal = ({
 	open,
-	onSuccess,
 	onClose,
 	project,
 }: {
 	open: boolean;
-	onSuccess: () => Promise<void>;
 	onClose: () => void;
 	project: ProjectExport | null;
 }) => {
@@ -72,19 +68,16 @@ export const ImportProjectModal = ({
 			),
 		};
 
-		try {
-			await importProject(
-				projectWithSelectedCommandsAndCommandGroups,
-				values.name,
-				values.baseWorkingDirectory,
-			);
-
-			await onSuccess();
-			handleOpenChange(false);
-			toast.success(t("toast.project.importSuccess"));
-		} catch (e) {
-			toast.error(parseError(e, t("toast.project.importFailed")));
+		const imported = await importProject(
+			projectWithSelectedCommandsAndCommandGroups,
+			values.name,
+			values.baseWorkingDirectory,
+		);
+		if (!imported) {
+			return;
 		}
+
+		handleOpenChange(false);
 	};
 
 	const commandIdsWatcher = form.watch("commands");

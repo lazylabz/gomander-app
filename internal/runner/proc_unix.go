@@ -10,52 +10,38 @@ import (
 	"time"
 )
 
-func newCommandProcess(command, workingDirectory string, environment []string) commandProcess {
-	cmd := exec.Command(shellExecutable(), "-c", command)
+func newCommandProcess(command, workingDirectory string, environment []string, _ Config) commandProcess {
+	cmd := exec.Command(os.Getenv("SHELL"), "-c", command)
 	cmd.Dir = workingDirectory
 	cmd.Env = environment
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	return &execProcess{cmd: cmd}
 }
 
-func shellExecutable() string {
-	shell := os.Getenv("SHELL")
-	if shell == "" {
-		return "/bin/sh"
-	}
-	return shell
-}
-
-func shouldSkipProcessOutputLine(string) bool {
-	return false
-}
-
-func stopProcessGracefully(process commandProcess, done <-chan struct{}) error {
-	select {
-	case <-done:
+// stopProcessGracefully signals the process group and waits on exited, which
+// the goroutine owning process.Wait closes.
+func stopProcessGracefully(process commandProcess, exited <-chan struct{}) error {
+	if alreadyExited(exited) {
 		return nil
-	default:
 	}
 
 	if err := syscall.Kill(-process.PID(), syscall.SIGTERM); err != nil {
 		if errors.Is(err, syscall.ESRCH) {
 			return nil
 		}
-		return ignoreNoSuchProcess(syscall.Kill(-process.PID(), syscall.SIGKILL))
+		return forceKill(process)
 	}
 
-	timer := time.NewTimer(5 * time.Second)
-	defer timer.Stop()
-
 	select {
-	case <-timer.C:
-		return ignoreNoSuchProcess(syscall.Kill(-process.PID(), syscall.SIGKILL))
-	case <-done:
+	case <-time.After(5 * time.Second):
+		return forceKill(process)
+	case <-exited:
 		return nil
 	}
 }
 
-func ignoreNoSuchProcess(err error) error {
+func forceKill(process commandProcess) error {
+	err := syscall.Kill(-process.PID(), syscall.SIGKILL)
 	if errors.Is(err, syscall.ESRCH) {
 		return nil
 	}

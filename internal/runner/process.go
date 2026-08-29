@@ -10,6 +10,13 @@ type commandProcess interface {
 	Start() ([]io.ReadCloser, error)
 	Wait() error
 	PID() int
+	shouldSkipOutputLine(line string) bool
+}
+
+func closeProcessReaders(readers []io.ReadCloser) {
+	for _, reader := range readers {
+		_ = reader.Close()
+	}
 }
 
 func commandEnvironment(environmentPaths []string) []string {

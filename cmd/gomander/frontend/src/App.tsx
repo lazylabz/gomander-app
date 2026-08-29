@@ -11,12 +11,10 @@ import { initI18n } from "@/design-system/lib/i18n.ts";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
 import { ScreenRoutes } from "@/routes.ts";
-import { LegacyLogsScreen } from "@/screens/LegacyLogsScreen/LegacyLogsScreen.tsx";
 import { LogsScreen } from "@/screens/LogsScreen/LogsScreen.tsx";
 import { ProjectSelectionScreen } from "@/screens/ProjectSelectionScreen/ProjectSelectionScreen.tsx";
 import { SettingsContextProvider } from "@/screens/SettingsScreen/context/settingsContext.tsx";
 import { SettingsScreen } from "@/screens/SettingsScreen/SettingsScreen.tsx";
-import { useExperimentalFeatsStore } from "@/store/experimentalFeatsStore.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 
@@ -27,10 +25,6 @@ function App() {
 	);
 
 	const [i18nReady, setI18nReady] = useState(false);
-
-	const xtermjs = useExperimentalFeatsStore(
-		(state) => state.experimentalFeats.xtermjs,
-	);
 
 	const initialFetchesAreDone = projectIsLoaded && userConfigIsLoaded;
 
@@ -64,7 +58,7 @@ function App() {
 						path={ScreenRoutes.Logs}
 						element={
 							<AppSidebarLayout>
-								{xtermjs ? <LogsScreen /> : <LegacyLogsScreen />}
+								<LogsScreen />
 							</AppSidebarLayout>
 						}
 					/>

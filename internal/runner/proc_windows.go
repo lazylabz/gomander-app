@@ -20,8 +20,11 @@ import (
 )
 
 const (
-	conPTYWidth  = 32766
-	conPTYHeight = 1000
+	conPTYWidth               = 32766
+	conPTYHeight              = 1000
+	windows10MinBuild         = 17763
+	windows11MinBuild         = 22000
+	windowsProductWorkstation = 1
 )
 
 var (
@@ -41,9 +44,8 @@ func (o *conPTYOutput) Read(buffer []byte) (int, error) {
 	if !o.initialized {
 		o.initialized = true
 		firstLine, err := o.reader.ReadBytes('\n')
-		// ConPTY clears and homes its screen before the first command output.
-		// Gomander already rendered the command header, so keep that host-only
-		// initialization from erasing it while preserving application ANSI data.
+		// ConPTY initializes its screen before command output. Gomander has
+		// already rendered the command header, so preserve that existing UI.
 		if bytes.Contains(firstLine, conPTYClearScreen) && bytes.Contains(firstLine, conPTYCursorHome) {
 			firstLine = bytes.Replace(firstLine, conPTYClearScreen, nil, 1)
 			firstLine = bytes.Replace(firstLine, conPTYCursorHome, nil, 1)
@@ -60,7 +62,6 @@ func (o *conPTYOutput) Read(buffer []byte) (int, error) {
 		o.pendingErr = nil
 		return 0, err
 	}
-
 	return o.reader.Read(buffer)
 }
 
@@ -68,75 +69,114 @@ func (o *conPTYOutput) Close() error {
 	return o.pipe.Close()
 }
 
-type windowsProcess struct {
+type windowsConPTYProcess struct {
 	command          string
 	workingDirectory string
 	environment      []string
 	conPTY           pty.ConPty
 	conPTYCommand    *pty.Cmd
-	fallback         *execProcess
 }
 
-func newCommandProcess(command, workingDirectory string, environment []string) commandProcess {
-	return &windowsProcess{
-		command:          command,
-		workingDirectory: workingDirectory,
-		environment:      environment,
-	}
-}
-
-func shouldSkipProcessOutputLine(line string) bool {
-	if !strings.HasPrefix(line, "\x1b]0;") {
-		return false
+func newCommandProcess(command, workingDirectory string, environment []string, config Config) commandProcess {
+	hostEnvironment := currentWindowsHostEnvironment()
+	if shouldUseConPTY(config, hostEnvironment, isConPTYAvailable()) {
+		return &windowsConPTYProcess{
+			command:          command,
+			workingDirectory: workingDirectory,
+			environment:      environment,
+		}
 	}
 
-	titleEnd := strings.IndexByte(line, '\a')
-	return titleEnd >= 0 && line[titleEnd+1:] == "\x1b[?25h"
-}
-
-func (p *windowsProcess) Start() ([]io.ReadCloser, error) {
-	if isConPTYAvailable() {
-		terminal, err := pty.New()
-		if err != nil {
-			return nil, err
-		}
-		pseudoConsole, ok := terminal.(pty.ConPty)
-		if !ok {
-			_ = terminal.Close()
-			return nil, errors.New("Windows PTY does not expose ConPTY pipes")
-		}
-		if err := pseudoConsole.Resize(conPTYWidth, conPTYHeight); err != nil {
-			_ = pseudoConsole.Close()
-			return nil, err
-		}
-
-		command := pseudoConsole.Command(commandInterpreter(), "/D", "/S", "/C", p.command)
-		command.Dir = p.workingDirectory
-		command.Env = p.environment
-		if err := command.Start(); err != nil {
-			_ = pseudoConsole.Close()
-			return nil, err
-		}
-
-		p.conPTY = pseudoConsole
-		p.conPTYCommand = command
-		outputPipe := pseudoConsole.OutputPipe()
-		output := &conPTYOutput{
-			reader: bufio.NewReader(outputPipe),
-			pipe:   outputPipe,
-		}
-		return []io.ReadCloser{output}, nil
-	}
-
-	cmd := exec.Command(commandInterpreter(), "/D", "/S", "/C", p.command)
-	cmd.Dir = p.workingDirectory
-	cmd.Env = p.environment
+	// Keep the established non-ConPTY execution path unchanged.
+	cmd := exec.Command("cmd", "/C", command)
+	cmd.Dir = workingDirectory
+	cmd.Env = environment
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		HideWindow:    true,
 		CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP,
 	}
-	p.fallback = &execProcess{cmd: cmd}
-	return p.fallback.Start()
+	return &execProcess{cmd: cmd}
+}
+
+func (p *windowsConPTYProcess) Start() ([]io.ReadCloser, error) {
+	terminal, err := pty.New()
+	if err != nil {
+		return nil, err
+	}
+	pseudoConsole, ok := terminal.(pty.ConPty)
+	if !ok {
+		_ = terminal.Close()
+		return nil, errors.New("Windows PTY does not expose ConPTY pipes")
+	}
+	if err := pseudoConsole.Resize(conPTYWidth, conPTYHeight); err != nil {
+		_ = pseudoConsole.Close()
+		return nil, err
+	}
+
+	command := pseudoConsole.Command(commandInterpreter(), "/D", "/S", "/C", p.command)
+	command.Dir = p.workingDirectory
+	command.Env = p.environment
+	if err := command.Start(); err != nil {
+		_ = pseudoConsole.Close()
+		return nil, err
+	}
+
+	p.conPTY = pseudoConsole
+	p.conPTYCommand = command
+	outputPipe := pseudoConsole.OutputPipe()
+	return []io.ReadCloser{&conPTYOutput{
+		reader: bufio.NewReader(outputPipe),
+		pipe:   outputPipe,
+	}}, nil
+}
+
+func (p *windowsConPTYProcess) Wait() error {
+	waitErr := p.conPTYCommand.Wait()
+	// Close the pseudo-console writer first while the runner drains its output.
+	windows.ClosePseudoConsole(windows.Handle(p.conPTY.Fd()))
+	_ = p.conPTY.InputPipe().Close()
+	// go-pty exposes the exit code but does not convert it to exec.ExitError.
+	if waitErr == nil && p.conPTYCommand.ProcessState != nil && !p.conPTYCommand.ProcessState.Success() {
+		return fmt.Errorf("exit status %d", p.conPTYCommand.ProcessState.ExitCode())
+	}
+	return waitErr
+}
+
+func (p *windowsConPTYProcess) PID() int {
+	return p.conPTYCommand.Process.Pid
+}
+
+func (p *windowsConPTYProcess) shouldSkipOutputLine(line string) bool {
+	if !strings.HasPrefix(line, "\x1b]0;") {
+		return false
+	}
+	titleEnd := strings.IndexByte(line, '\a')
+	return titleEnd >= 0 && line[titleEnd+1:] == "\x1b[?25h"
+}
+
+func currentWindowsHostEnvironment() HostEnvironment {
+	version := windows.RtlGetVersion()
+	return classifyWindowsVersion(version.MajorVersion, version.BuildNumber, version.ProductType)
+}
+
+func classifyWindowsVersion(majorVersion, buildNumber uint32, productType byte) HostEnvironment {
+	// Product type 1 is VER_NT_WORKSTATION. Server releases can share Windows
+	// 10's major version and build range but are outside the validated scope.
+	if majorVersion == 10 &&
+		buildNumber >= windows10MinBuild &&
+		buildNumber < windows11MinBuild &&
+		productType == windowsProductWorkstation {
+		return HostEnvironmentWindows10
+	}
+	return ""
+}
+
+func shouldUseConPTY(config Config, environment HostEnvironment, available bool) bool {
+	return available && environment != "" && config.enablesConPTY(environment)
+}
+
+func isConPTYAvailable() bool {
+	return windows.NewLazySystemDLL("kernel32.dll").NewProc("CreatePseudoConsole").Find() == nil
 }
 
 func commandInterpreter() string {
@@ -147,61 +187,30 @@ func commandInterpreter() string {
 	return interpreter
 }
 
-func (p *windowsProcess) Wait() error {
-	if p.conPTY == nil {
-		return p.fallback.Wait()
-	}
-
-	waitErr := p.conPTYCommand.Wait()
-	// Close the pseudo-console writer first. The runner keeps draining the
-	// output pipe to EOF, so buffered tail output is not discarded.
-	windows.ClosePseudoConsole(windows.Handle(p.conPTY.Fd()))
-	_ = p.conPTY.InputPipe().Close()
-	// go-pty v0.2.2 exposes the exit code in ProcessState but does not turn a
-	// non-zero Windows exit into an error as exec.Cmd does.
-	if waitErr == nil && p.conPTYCommand.ProcessState != nil && !p.conPTYCommand.ProcessState.Success() {
-		return fmt.Errorf("exit status %d", p.conPTYCommand.ProcessState.ExitCode())
-	}
-	return waitErr
-}
-
-func (p *windowsProcess) PID() int {
-	if p.conPTY != nil {
-		return p.conPTYCommand.Process.Pid
-	}
-	return p.fallback.PID()
-}
-
-func isConPTYAvailable() bool {
-	return windows.NewLazySystemDLL("kernel32.dll").NewProc("CreatePseudoConsole").Find() == nil
-}
-
-func stopProcessGracefully(process commandProcess, done <-chan struct{}) error {
-	select {
-	case <-done:
+func stopProcessGracefully(process commandProcess, exited <-chan struct{}) error {
+	if alreadyExited(exited) {
 		return nil
-	default:
 	}
 
 	pid := strconv.Itoa(process.PID())
 	if err := runTaskkill("/PID", pid); err != nil {
-		select {
-		case <-done:
-			return nil
-		default:
-			return runTaskkill("/F", "/T", "/PID", pid)
-		}
+		return forceKill(pid, exited)
 	}
-
-	timer := time.NewTimer(5 * time.Second)
-	defer timer.Stop()
 
 	select {
-	case <-timer.C:
-		return runTaskkill("/F", "/T", "/PID", pid)
-	case <-done:
+	case <-time.After(5 * time.Second):
+		return forceKill(pid, exited)
+	case <-exited:
 		return nil
 	}
+}
+
+func forceKill(pid string, exited <-chan struct{}) error {
+	err := runTaskkill("/F", "/T", "/PID", pid)
+	if err != nil && alreadyExited(exited) {
+		return nil
+	}
+	return err
 }
 
 func runTaskkill(arguments ...string) error {

@@ -7,6 +7,31 @@ on:
     branches: [main]
 
 jobs:
+  frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - uses: actions/setup-node@v5
+      with:
+        node-version: '24'
+
+    - uses: pnpm/action-setup@v5
+      with:
+        version: 10
+
+    - name: Install frontend dependencies
+      run: pnpm install --frozen-lockfile
+      working-directory: ./cmd/gomander/frontend
+
+    # Coverage is measured but not uploaded yet: the suite covers a single module,
+    # and mixing it into the Codecov project report would fail the 80% target on
+    # every PR.
+    - name: Run tests
+      run: pnpm run test:cov
+      working-directory: ./cmd/gomander/frontend
+
   test:
     strategy:
       matrix:
@@ -34,7 +59,7 @@ jobs:
         echo "dummy" > cmd/gomander/frontend/dist/.dummy
 
     - name: Run tests
-      run: go test -v -coverpkg ./... -coverprofile coverage.txt ./...
+      run: go test -v -race -coverpkg ./... -coverprofile coverage.txt ./...
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v6

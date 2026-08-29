@@ -10,24 +10,19 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 
 	"gomander/cmd/gomander/thirdpartyserver"
-	"gomander/internal/app"
-	commandusecasestest "gomander/internal/command/application/usecases/test"
-	commanddomain "gomander/internal/command/domain"
-	commandgroupusecasestest "gomander/internal/commandgroup/application/usecases/test"
-	commandgroupdomain "gomander/internal/commandgroup/domain"
+	"gomander/internal/apptest"
+	commandtest "gomander/internal/command/domain/test"
+	commandgrouptest "gomander/internal/commandgroup/domain/test"
+	projecttest "gomander/internal/project/domain/test"
+	"gomander/internal/usecases"
 )
 
 func TestNewThirdPartyIntegrationsServer_DiscoveryHandler(t *testing.T) {
 	t.Run("GET /discovery should return discovery info", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, usecases.Registry{})
 		defer testServer.Close()
 
 		// Act
@@ -42,13 +37,10 @@ func TestNewThirdPartyIntegrationsServer_DiscoveryHandler(t *testing.T) {
 		assert.NoError(t, err)
 		assert.JSONEq(t, `{"app": "Gomander"}`, string(body))
 	})
+
 	t.Run("POST /discovery should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, usecases.Registry{})
 		defer testServer.Close()
 
 		// Act
@@ -64,35 +56,29 @@ func TestNewThirdPartyIntegrationsServer_DiscoveryHandler(t *testing.T) {
 func TestNewThirdPartyIntegrationsServer_GetCommandsHandler(t *testing.T) {
 	t.Run("GET /commands should return commands list with status", func(t *testing.T) {
 		// Arrange
-		mockGetCommands := new(commandusecasestest.MockGetCommands)
-		mockGetRunningCommandIds := new(commandusecasestest.MockGetRunningCommandIds)
+		h := apptest.New(t)
 
-		commands := []commanddomain.Command{
-			{
-				Id:   "cmd-1",
-				Name: "Command 1",
-			},
-			{
-				Id:   "cmd-2",
-				Name: "Command 2",
-			},
-		}
+		project := projecttest.NewProjectBuilder().Build()
+		h.GivenProjects(project)
+		h.GivenOpenedProject(project.Id)
 
-		runningCommandIds := []string{"cmd-1"}
+		running := commandtest.NewCommandBuilder().
+			WithId("cmd-1").
+			WithProjectId(project.Id).
+			WithName("Command 1").
+			WithPosition(0).
+			Build()
+		stopped := commandtest.NewCommandBuilder().
+			WithId("cmd-2").
+			WithProjectId(project.Id).
+			WithName("Command 2").
+			WithPosition(1).
+			Build()
+		h.GivenCommands(running, stopped)
 
-		mockGetCommands.On("Execute").Return(commands, nil)
-		mockGetRunningCommandIds.On("Execute").Return(runningCommandIds)
+		assert.NoError(t, h.UseCases.RunCommand.Execute(running.Id))
 
-		useCases := app.UseCases{
-			GetCommands:          mockGetCommands,
-			GetRunningCommandIds: mockGetRunningCommandIds,
-		}
-
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, h.UseCases)
 		defer testServer.Close()
 
 		// Act
@@ -102,14 +88,7 @@ func TestNewThirdPartyIntegrationsServer_GetCommandsHandler(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-
-		var result []map[string]interface{}
-		body, err := io.ReadAll(resp.Body)
-		assert.NoError(t, err)
-		err = json.Unmarshal(body, &result)
-		assert.NoError(t, err)
-
-		assert.Equal(t, result, []map[string]interface{}{
+		assert.Equal(t, []map[string]interface{}{
 			{
 				"id":     "cmd-1",
 				"name":   "Command 1",
@@ -120,18 +99,12 @@ func TestNewThirdPartyIntegrationsServer_GetCommandsHandler(t *testing.T) {
 				"name":   "Command 2",
 				"status": "stopped",
 			},
-		})
-
-		mock.AssertExpectationsForObjects(t, mockGetRunningCommandIds, mockGetCommands)
+		}, decoded(t, resp))
 	})
 
 	t.Run("POST /commands should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, usecases.Registry{})
 		defer testServer.Close()
 
 		// Act
@@ -142,73 +115,36 @@ func TestNewThirdPartyIntegrationsServer_GetCommandsHandler(t *testing.T) {
 		// Assert
 		assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
 	})
-
-	t.Run("Should return 500 when GetCommands returns error", func(t *testing.T) {
-		// Arrange
-		mockGetCommands := new(commandusecasestest.MockGetCommands)
-		expectedError := fmt.Errorf("database error")
-
-		mockGetCommands.On("Execute").Return([]commanddomain.Command{}, expectedError)
-
-		useCases := app.UseCases{
-			GetCommands: mockGetCommands,
-		}
-
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
-		defer testServer.Close()
-
-		// Act
-		resp, err := http.Get(testServer.URL + "/commands")
-		assert.NoError(t, err)
-		defer resp.Body.Close()
-
-		// Assert
-		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
-		mockGetCommands.AssertExpectations(t)
-	})
 }
 
-// Test Run Command Handler
 func TestNewThirdPartyIntegrationsServer_RunCommandHandler(t *testing.T) {
 	t.Run("POST /commands/{id}/run should run the command", func(t *testing.T) {
 		// Arrange
-		mockRunCommand := new(commandusecasestest.MockRunCommands)
-		commandId := "cmd-1"
+		h := apptest.New(t)
 
-		mockRunCommand.On("Execute", commandId).Return(nil)
+		project := projecttest.NewProjectBuilder().Build()
+		h.GivenProjects(project)
+		h.GivenOpenedProject(project.Id)
 
-		useCases := app.UseCases{
-			RunCommand: mockRunCommand,
-		}
+		command := commandtest.NewCommandBuilder().WithProjectId(project.Id).Build()
+		h.GivenCommands(command)
 
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, h.UseCases)
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/commands/"+commandId+"/run", "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/commands/"+command.Id+"/run", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
 		// Assert
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		mock.AssertExpectationsForObjects(t, mockRunCommand)
+		assert.Equal(t, []string{command.Id}, h.UseCases.GetRunningCommandIds.Execute())
 	})
 
 	t.Run("GET /commands/{id}/run should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, usecases.Registry{})
 		defer testServer.Close()
 
 		// Act
@@ -220,73 +156,57 @@ func TestNewThirdPartyIntegrationsServer_RunCommandHandler(t *testing.T) {
 		assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
 	})
 
-	t.Run("Should return 500 when RunCommand returns error", func(t *testing.T) {
+	t.Run("POST /commands/{id}/run should report a missing project", func(t *testing.T) {
 		// Arrange
-		mockRunCommand := new(commandusecasestest.MockRunCommands)
-		commandId := "cmd-1"
-		expectedError := fmt.Errorf("failed to run command")
+		h := apptest.New(t)
 
-		mockRunCommand.On("Execute", commandId).Return(expectedError)
+		command := commandtest.NewCommandBuilder().WithProjectId("deleted-project").Build()
+		h.GivenCommands(command)
 
-		useCases := app.UseCases{
-			RunCommand: mockRunCommand,
-		}
-
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, h.UseCases)
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/commands/"+commandId+"/run", "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/commands/"+command.Id+"/run", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
 		// Assert
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
-		mockRunCommand.AssertExpectations(t)
+		assert.Empty(t, h.StartedProcesses())
 	})
 }
 
-// Test Stop Command Handler
 func TestNewThirdPartyIntegrationsServer_StopCommandHandler(t *testing.T) {
 	t.Run("POST /commands/{id}/stop should stop the command", func(t *testing.T) {
 		// Arrange
-		mockStopCommand := new(commandusecasestest.MockStopCommand)
-		commandId := "cmd-1"
+		h := apptest.New(t)
 
-		mockStopCommand.On("Execute", commandId).Return(nil)
+		project := projecttest.NewProjectBuilder().Build()
+		h.GivenProjects(project)
+		h.GivenOpenedProject(project.Id)
 
-		useCases := app.UseCases{
-			StopCommand: mockStopCommand,
-		}
+		command := commandtest.NewCommandBuilder().WithProjectId(project.Id).Build()
+		h.GivenCommands(command)
 
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
+		assert.NoError(t, h.UseCases.RunCommand.Execute(command.Id))
 
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, h.UseCases)
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/commands/"+commandId+"/stop", "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/commands/"+command.Id+"/stop", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
 		// Assert
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		mock.AssertExpectationsForObjects(t, mockStopCommand)
+		assert.Equal(t, []string{command.Id}, h.StoppedProcessIds())
 	})
 
 	t.Run("GET /commands/{id}/stop should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, usecases.Registry{})
 		defer testServer.Close()
 
 		// Act
@@ -298,73 +218,59 @@ func TestNewThirdPartyIntegrationsServer_StopCommandHandler(t *testing.T) {
 		assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
 	})
 
-	t.Run("Should return 500 when StopCommand returns error", func(t *testing.T) {
+	t.Run("POST /commands/{id}/stop should report a command that is not there", func(t *testing.T) {
 		// Arrange
-		mockStopCommand := new(commandusecasestest.MockStopCommand)
-		commandId := "cmd-1"
-		expectedError := fmt.Errorf("failed to stop command")
+		h := apptest.New(t)
 
-		mockStopCommand.On("Execute", commandId).Return(expectedError)
-
-		useCases := app.UseCases{
-			StopCommand: mockStopCommand,
-		}
-
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, h.UseCases)
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/commands/"+commandId+"/stop", "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/commands/deleted-command/stop", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
 		// Assert
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
-		mockStopCommand.AssertExpectations(t)
+		assert.Empty(t, h.StoppedProcessIds())
 	})
 }
 
-// Test Run Command Group Handler
 func TestNewThirdPartyIntegrationsServer_RunCommandGroupHandler(t *testing.T) {
 	t.Run("POST /command-groups/{id}/run should run the command group", func(t *testing.T) {
 		// Arrange
-		mockRunCommandGroup := new(commandgroupusecasestest.MockRunCommandGroup)
-		groupId := "group-1"
+		h := apptest.New(t)
 
-		mockRunCommandGroup.On("Execute", groupId).Return(nil)
+		project := projecttest.NewProjectBuilder().Build()
+		h.GivenProjects(project)
+		h.GivenOpenedProject(project.Id)
 
-		useCases := app.UseCases{
-			RunCommandGroup: mockRunCommandGroup,
-		}
+		first := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(0).Build()
+		second := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(1).Build()
+		h.GivenCommands(first, second)
 
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
+		group := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId(project.Id).
+			WithCommands(first, second).
+			Build()
+		h.GivenCommandGroups(group)
 
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, h.UseCases)
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/command-groups/"+groupId+"/run", "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/command-groups/"+group.Id+"/run", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
 		// Assert
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		mock.AssertExpectationsForObjects(t, mockRunCommandGroup)
+		assert.Equal(t, []string{first.Id, second.Id}, h.UseCases.GetRunningCommandIds.Execute())
 	})
 
 	t.Run("GET /command-groups/{id}/run should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, usecases.Registry{})
 		defer testServer.Close()
 
 		// Act
@@ -376,73 +282,87 @@ func TestNewThirdPartyIntegrationsServer_RunCommandGroupHandler(t *testing.T) {
 		assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
 	})
 
-	t.Run("Should return 500 when RunCommandGroup returns error", func(t *testing.T) {
+	t.Run("POST /command-groups/{id}/run should report a missing project", func(t *testing.T) {
 		// Arrange
-		mockRunCommandGroup := new(commandgroupusecasestest.MockRunCommandGroup)
-		groupId := "group-1"
-		expectedError := fmt.Errorf("failed to run command group")
+		h := apptest.New(t)
 
-		mockRunCommandGroup.On("Execute", groupId).Return(expectedError)
+		command := commandtest.NewCommandBuilder().WithProjectId("deleted-project").Build()
+		h.GivenCommands(command)
 
-		useCases := app.UseCases{
-			RunCommandGroup: mockRunCommandGroup,
-		}
+		group := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId("deleted-project").
+			WithCommands(command).
+			Build()
+		h.GivenCommandGroups(group)
 
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, h.UseCases)
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/command-groups/"+groupId+"/run", "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/command-groups/"+group.Id+"/run", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
 		// Assert
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
-		mockRunCommandGroup.AssertExpectations(t)
+		assert.Empty(t, h.StartedProcesses())
 	})
-}
 
-// Test Stop Command Group Handler
-func TestNewThirdPartyIntegrationsServer_StopCommandGroupHandler(t *testing.T) {
-	t.Run("POST /command-groups/{id}/stop should stop the command group", func(t *testing.T) {
+	t.Run("POST /command-groups/{id}/run should report a command group that is not there", func(t *testing.T) {
 		// Arrange
-		mockStopCommandGroup := new(commandgroupusecasestest.MockStopCommandGroup)
-		groupId := "group-1"
+		h := apptest.New(t)
 
-		mockStopCommandGroup.On("Execute", groupId).Return(nil)
-
-		useCases := app.UseCases{
-			StopCommandGroup: mockStopCommandGroup,
-		}
-
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, h.UseCases)
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/command-groups/"+groupId+"/stop", "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/command-groups/deleted-command-group/run", "application/json", nil)
+		assert.NoError(t, err)
+		defer resp.Body.Close()
+
+		// Assert
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		assert.Empty(t, h.StartedProcesses())
+	})
+}
+
+func TestNewThirdPartyIntegrationsServer_StopCommandGroupHandler(t *testing.T) {
+	t.Run("POST /command-groups/{id}/stop should stop the command group", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		project := projecttest.NewProjectBuilder().Build()
+		h.GivenProjects(project)
+		h.GivenOpenedProject(project.Id)
+
+		first := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(0).Build()
+		second := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(1).Build()
+		h.GivenCommands(first, second)
+
+		group := commandgrouptest.NewCommandGroupBuilder().
+			WithProjectId(project.Id).
+			WithCommands(first, second).
+			Build()
+		h.GivenCommandGroups(group)
+
+		assert.NoError(t, h.UseCases.RunCommandGroup.Execute(group.Id))
+
+		testServer := serving(t, h.UseCases)
+		defer testServer.Close()
+
+		// Act
+		resp, err := http.Post(testServer.URL+"/command-groups/"+group.Id+"/stop", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
 		// Assert
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		mock.AssertExpectationsForObjects(t, mockStopCommandGroup)
+		assert.Equal(t, []string{first.Id, second.Id}, h.StoppedProcessIds())
 	})
 
 	t.Run("GET /command-groups/{id}/stop should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, usecases.Registry{})
 		defer testServer.Close()
 
 		// Act
@@ -454,75 +374,58 @@ func TestNewThirdPartyIntegrationsServer_StopCommandGroupHandler(t *testing.T) {
 		assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
 	})
 
-	t.Run("Should return 500 when StopCommandGroup returns error", func(t *testing.T) {
+	t.Run("POST /command-groups/{id}/stop should report a command group that is not there", func(t *testing.T) {
 		// Arrange
-		mockStopCommandGroup := new(commandgroupusecasestest.MockStopCommandGroup)
-		groupId := "group-1"
-		expectedError := fmt.Errorf("failed to stop command group")
+		h := apptest.New(t)
 
-		mockStopCommandGroup.On("Execute", groupId).Return(expectedError)
-
-		useCases := app.UseCases{
-			StopCommandGroup: mockStopCommandGroup,
-		}
-
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, h.UseCases)
 		defer testServer.Close()
 
 		// Act
-		resp, err := http.Post(testServer.URL+"/command-groups/"+groupId+"/stop", "application/json", nil)
+		resp, err := http.Post(testServer.URL+"/command-groups/deleted-command-group/stop", "application/json", nil)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
 
 		// Assert
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
-		mockStopCommandGroup.AssertExpectations(t)
+		assert.Empty(t, h.StoppedProcessIds())
 	})
 }
 
-// Test Get Command Groups Handler
 func TestNewThirdPartyIntegrationsServer_GetCommandGroupsHandler(t *testing.T) {
 	t.Run("GET /command-groups should return command groups list with running commands info", func(t *testing.T) {
 		// Arrange
-		mockGetCommandGroups := new(commandgroupusecasestest.MockGetCommandGroups)
-		mockGetRunningCommandIds := new(commandusecasestest.MockGetRunningCommandIds)
+		h := apptest.New(t)
 
-		cmd1 := commanddomain.Command{Id: "cmd-1", Name: "Command 1", Command: "echo 1"}
-		cmd2 := commanddomain.Command{Id: "cmd-2", Name: "Command 2", Command: "echo 2"}
-		cmd3 := commanddomain.Command{Id: "cmd-3", Name: "Command 3", Command: "echo 3"}
+		project := projecttest.NewProjectBuilder().Build()
+		h.GivenProjects(project)
+		h.GivenOpenedProject(project.Id)
 
-		groups := []commandgroupdomain.CommandGroup{
-			{
-				Id:       "group-1",
-				Name:     "Group 1",
-				Commands: []commanddomain.Command{cmd1, cmd2},
-			},
-			{
-				Id:       "group-2",
-				Name:     "Group 2",
-				Commands: []commanddomain.Command{cmd2, cmd3},
-			},
-		}
+		first := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(0).Build()
+		second := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(1).Build()
+		third := commandtest.NewCommandBuilder().WithProjectId(project.Id).WithPosition(2).Build()
+		h.GivenCommands(first, second, third)
 
-		runningCommandIds := []string{"cmd-1", "cmd-3"}
+		firstGroup := commandgrouptest.NewCommandGroupBuilder().
+			WithId("group-1").
+			WithProjectId(project.Id).
+			WithName("Group 1").
+			WithPosition(0).
+			WithCommands(first, second).
+			Build()
+		secondGroup := commandgrouptest.NewCommandGroupBuilder().
+			WithId("group-2").
+			WithProjectId(project.Id).
+			WithName("Group 2").
+			WithPosition(1).
+			WithCommands(second, third).
+			Build()
+		h.GivenCommandGroups(firstGroup, secondGroup)
 
-		mockGetCommandGroups.On("Execute").Return(groups, nil)
-		mockGetRunningCommandIds.On("Execute").Return(runningCommandIds)
+		assert.NoError(t, h.UseCases.RunCommand.Execute(first.Id))
+		assert.NoError(t, h.UseCases.RunCommand.Execute(third.Id))
 
-		useCases := app.UseCases{
-			GetCommandGroups:     mockGetCommandGroups,
-			GetRunningCommandIds: mockGetRunningCommandIds,
-		}
-
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, h.UseCases)
 		defer testServer.Close()
 
 		// Act
@@ -532,15 +435,7 @@ func TestNewThirdPartyIntegrationsServer_GetCommandGroupsHandler(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-
-		var result []map[string]interface{}
-		body, err := io.ReadAll(resp.Body)
-		assert.NoError(t, err)
-		err = json.Unmarshal(body, &result)
-		assert.NoError(t, err)
-
-		// First group should have 2 commands with 1 running
-		assert.Equal(t, result, []map[string]interface{}{
+		assert.Equal(t, []map[string]interface{}{
 			{
 				"id":              "group-1",
 				"name":            "Group 1",
@@ -553,18 +448,12 @@ func TestNewThirdPartyIntegrationsServer_GetCommandGroupsHandler(t *testing.T) {
 				"commands":        float64(2),
 				"runningCommands": float64(1),
 			},
-		})
-
-		mock.AssertExpectationsForObjects(t, mockGetCommandGroups, mockGetRunningCommandIds)
+		}, decoded(t, resp))
 	})
 
 	t.Run("POST /command-groups should return 405 Method Not Allowed", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
+		testServer := serving(t, usecases.Registry{})
 		defer testServer.Close()
 
 		// Act
@@ -575,40 +464,12 @@ func TestNewThirdPartyIntegrationsServer_GetCommandGroupsHandler(t *testing.T) {
 		// Assert
 		assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
 	})
-
-	t.Run("Should return 500 when GetCommandGroups returns error", func(t *testing.T) {
-		// Arrange
-		mockGetCommandGroups := new(commandgroupusecasestest.MockGetCommandGroups)
-		expectedError := fmt.Errorf("failed to get command groups")
-
-		mockGetCommandGroups.On("Execute").Return([]commandgroupdomain.CommandGroup{}, expectedError)
-
-		useCases := app.UseCases{
-			GetCommandGroups: mockGetCommandGroups,
-		}
-
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
-		err := server.RegisterHandlers()
-		assert.NoError(t, err)
-
-		testServer := httptest.NewServer(server.Server.Handler)
-		defer testServer.Close()
-
-		// Act
-		resp, err := http.Get(testServer.URL + "/command-groups")
-		assert.NoError(t, err)
-		defer resp.Body.Close()
-
-		// Assert
-		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
-		mockGetCommandGroups.AssertExpectations(t)
-	})
 }
 
 func TestThirdPartyIntegrationsServer_StartAndStop(t *testing.T) {
 	t.Run("Should start and stop server without errors", func(t *testing.T) {
 		// Arrange
-		server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases{})
+		server := thirdpartyserver.NewThirdPartyIntegrationsServer(usecases.Registry{})
 		err := server.RegisterHandlers()
 		assert.NoError(t, err)
 
@@ -638,4 +499,26 @@ func TestThirdPartyIntegrationsServer_StartAndStop(t *testing.T) {
 		// Assert - Server stopped without error
 		assert.NoError(t, err)
 	})
+}
+
+func serving(t *testing.T, registry usecases.Registry) *httptest.Server {
+	t.Helper()
+
+	server := thirdpartyserver.NewThirdPartyIntegrationsServer(registry)
+	if err := server.RegisterHandlers(); err != nil {
+		t.Fatalf("failed to register the handlers: %v", err)
+	}
+
+	return httptest.NewServer(server.Server.Handler)
+}
+
+func decoded(t *testing.T, resp *http.Response) []map[string]interface{} {
+	t.Helper()
+
+	var decoded []map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&decoded); err != nil {
+		t.Fatalf("failed to decode the response body: %v", err)
+	}
+
+	return decoded
 }

@@ -10,7 +10,6 @@ func ToDomainConfig(model *ConfigModel, paths []EnvironmentPathModel) *domain.Co
 	config := &domain.Config{
 		LastOpenedProjectId: model.LastOpenedProjectId,
 		EnvironmentPaths:    make([]domain.EnvironmentPath, 0),
-		LogLineLimit:        model.LogLineLimit,
 		Locale:              model.Locale,
 	}
 
@@ -32,7 +31,6 @@ func ToModelConfig(config *domain.Config) (*ConfigModel, []EnvironmentPathModel)
 	model := &ConfigModel{
 		Id:                  1,
 		LastOpenedProjectId: config.LastOpenedProjectId,
-		LogLineLimit:        config.LogLineLimit,
 		Locale:              config.Locale,
 	}
 

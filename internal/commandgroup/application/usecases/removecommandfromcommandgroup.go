@@ -8,21 +8,17 @@ import (
 	"gomander/internal/helpers/array"
 )
 
-type RemoveCommandFromCommandGroup interface {
-	Execute(commandId, commandGroupId string) error
-}
-
-type DefaultRemoveCommandFromCommandGroup struct {
+type RemoveCommandFromCommandGroup struct {
 	commandGroupRepository domain.Repository
 }
 
-func NewRemoveCommandFromCommandGroup(commandGroupRepo domain.Repository) *DefaultRemoveCommandFromCommandGroup {
-	return &DefaultRemoveCommandFromCommandGroup{
+func NewRemoveCommandFromCommandGroup(commandGroupRepo domain.Repository) *RemoveCommandFromCommandGroup {
+	return &RemoveCommandFromCommandGroup{
 		commandGroupRepository: commandGroupRepo,
 	}
 }
 
-func (uc *DefaultRemoveCommandFromCommandGroup) Execute(commandId, commandGroupId string) error {
+func (uc *RemoveCommandFromCommandGroup) Execute(commandId, commandGroupId string) error {
 	commandGroup, err := uc.commandGroupRepository.Get(commandGroupId)
 	if err != nil {
 		return err
@@ -35,5 +31,5 @@ func (uc *DefaultRemoveCommandFromCommandGroup) Execute(commandId, commandGroupI
 		return cmd.Id != commandId
 	})
 
-	return uc.commandGroupRepository.Update(commandGroup)
+	return uc.commandGroupRepository.Update(&commandGroup)
 }

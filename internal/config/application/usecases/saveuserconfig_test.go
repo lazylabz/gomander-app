@@ -12,7 +12,7 @@ import (
 	"gomander/internal/config/domain/test"
 )
 
-func TestDefaultSaveUserConfig_Execute(t *testing.T) {
+func TestSaveUserConfig_Execute(t *testing.T) {
 	t.Parallel()
 	t.Run("Should save user configuration successfully", func(t *testing.T) {
 		// Arrange

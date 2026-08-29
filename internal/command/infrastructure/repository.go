@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"gomander/internal/command/domain"
+	"gomander/internal/domainerrors"
 	"gomander/internal/helpers/array"
 )
 
@@ -22,18 +23,16 @@ func NewGormCommandRepository(db *gorm.DB, ctx context.Context) *GormCommandRepo
 	}
 }
 
-func (r GormCommandRepository) Get(commandId string) (*domain.Command, error) {
+func (r GormCommandRepository) Get(commandId string) (domain.Command, error) {
 	cmd, err := gorm.G[CommandModel](r.db).Where("id = ?", commandId).First(r.ctx)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
+			return domain.Command{}, domainerrors.NotFound("command", commandId)
 		}
-		return nil, err
+		return domain.Command{}, err
 	}
 
-	command := ToDomainCommand(cmd)
-
-	return &command, nil
+	return ToDomainCommand(cmd), nil
 }
 
 func (r GormCommandRepository) GetAll(projectId string) ([]domain.Command, error) {
@@ -68,31 +67,7 @@ func (r GormCommandRepository) Update(command *domain.Command) error {
 }
 
 func (r GormCommandRepository) Delete(commandId string) error {
-	originalCommand, err := r.Get(commandId)
-	if err != nil {
-		return err
-	}
-
-	err = r.db.Transaction(func(tx *gorm.DB) error {
-		_, err := gorm.G[CommandModel](tx).Where("id = ?", commandId).Delete(r.ctx)
-		if err != nil {
-			return err
-		}
-
-		// Decrease position of all commands with position greater than the deleted command's position
-		if originalCommand != nil {
-			_, err = gorm.G[CommandModel](tx).
-				Where("project_id = ? AND position > ?", originalCommand.ProjectId, originalCommand.Position).
-				Update(r.ctx, "position", gorm.Expr("position - 1"))
-
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-
+	_, err := gorm.G[CommandModel](r.db).Where("id = ?", commandId).Delete(r.ctx)
 	if err != nil {
 		return err
 	}

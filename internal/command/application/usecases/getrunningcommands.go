@@ -1,21 +1,17 @@
 package usecases
 
-import "gomander/internal/runner"
+import "gomander/internal/execution"
 
-type GetRunningCommandIds interface {
-	Execute() []string
+type GetRunningCommandIds struct {
+	runner execution.Runner
 }
 
-type DefaultGetRunningCommandIds struct {
-	runner runner.Runner
-}
-
-func NewGetRunningCommandIds(runner runner.Runner) *DefaultGetRunningCommandIds {
-	return &DefaultGetRunningCommandIds{
+func NewGetRunningCommandIds(runner execution.Runner) *GetRunningCommandIds {
+	return &GetRunningCommandIds{
 		runner: runner,
 	}
 }
 
-func (uc *DefaultGetRunningCommandIds) Execute() []string {
+func (uc *GetRunningCommandIds) Execute() []string {
 	return uc.runner.GetRunningCommandIds()
 }

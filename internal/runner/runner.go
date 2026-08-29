@@ -3,14 +3,17 @@ package runner
 import (
 	"bufio"
 	"io"
-	"strings"
 	"sync"
+	"time"
 
 	"gomander/internal/command/domain"
 	"gomander/internal/event"
-	"gomander/internal/helpers/path"
-	"gomander/internal/logger"
+	"gomander/internal/execution"
 )
+
+// pipeDrainGrace is how long the scanners get to drain what the process left
+// buffered before the runner stops reading.
+const pipeDrainGrace = 2 * time.Second
 
 var ExpectedTerminationLogs = []string{
 	"signal: terminated",
@@ -22,58 +25,45 @@ var ExpectedTerminationLogs = []string{
 	"wait: no child processes",
 }
 
-type RunningCommand struct {
+type runningCommand struct {
 	process commandProcess
-	done    chan struct{}
+	wg      *sync.WaitGroup
+	// exited is closed by the goroutine that owns process.Wait, so stopping a
+	// Command can await the exit without calling Wait a second time.
+	exited chan struct{}
+}
+
+// Logger is where the runner reports what a Command's process is doing.
+type Logger interface {
+	Info(message string)
+	Debug(message string)
+	Error(message string)
+}
+
+// EventEmitter carries a Process's life and output to whoever is watching it.
+type EventEmitter interface {
+	EmitEvent(event event.Event, payload interface{})
 }
 
 type DefaultRunner struct {
-	runningCommands map[string]RunningCommand
-	eventEmitter    event.EventEmitter
-	logger          logger.Logger
+	runningCommands map[string]runningCommand
+	eventEmitter    EventEmitter
+	logger          Logger
+	config          Config
 	mutex           sync.Mutex
 }
 
-type Runner interface {
-	RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string) error
-	RunCommands(commands []domain.Command, environmentPaths []string, baseWorkingDirectory string) error
-	StopRunningCommand(id string) error
-	StopAllRunningCommands() []error
-	StopRunningCommands(commands []domain.Command) error
-	GetRunningCommandIds() []string
-}
-
-func NewDefaultRunner(logger logger.Logger, emitter event.EventEmitter) *DefaultRunner {
+func NewDefaultRunner(logger Logger, emitter EventEmitter, config Config) *DefaultRunner {
 	return &DefaultRunner{
-		runningCommands: make(map[string]RunningCommand),
+		runningCommands: make(map[string]runningCommand),
 		eventEmitter:    emitter,
 		logger:          logger,
+		config:          config,
 	}
-}
-
-func (c *DefaultRunner) RunCommands(commands []domain.Command, environmentPaths []string, baseWorkingDirectory string) error {
-	for _, command := range commands {
-		err := c.RunCommand(&command, environmentPaths, baseWorkingDirectory)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (c *DefaultRunner) StopRunningCommands(commands []domain.Command) error {
-	for _, command := range commands {
-		err := c.StopRunningCommand(command.Id)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // RunCommand executes a command and streams its output.
-func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []string, baseWorkingDirectory string) error {
+func (c *DefaultRunner) RunCommand(command *domain.Command, environment execution.Environment) error {
 	c.mutex.Lock()
 
 	if _, exists := c.runningCommands[command.Id]; exists {
@@ -82,15 +72,19 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 		return nil
 	}
 
-	done := make(chan struct{})
 	process := newCommandProcess(
 		command.Command,
-		path.GetComputedPath(baseWorkingDirectory, command.WorkingDirectory),
-		commandEnvironment(environmentPaths),
+		command.ResolveWorkingDirectory(environment.BaseWorkingDirectory),
+		commandEnvironment(environment.Paths),
+		c.config,
 	)
-	runningCommand := RunningCommand{
+
+	var wg sync.WaitGroup
+	exited := make(chan struct{})
+	running := runningCommand{
 		process: process,
-		done:    done,
+		wg:      &wg,
+		exited:  exited,
 	}
 
 	c.sendStartingLine(command)
@@ -104,23 +98,27 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 	c.eventEmitter.EmitEvent(event.ProcessStarted, command.Id)
 
 	// Save the command in the runningCommands map
-	c.runningCommands[command.Id] = runningCommand
+	c.runningCommands[command.Id] = running
 	c.mutex.Unlock()
 
-	var scanWg sync.WaitGroup
-	scanWg.Add(len(readers))
+	// Add to WaitGroup before starting goroutines to avoid race conditions
+	wg.Add(len(readers) + 1)
 
+	var scanWg sync.WaitGroup
+
+	scanWg.Add(len(readers))
 	for _, reader := range readers {
-		go func(pipe io.ReadCloser) {
+		go func(reader io.ReadCloser) {
+			defer reader.Close()
 			defer scanWg.Done()
-			defer pipe.Close()
-			c.streamOutput(command, pipe)
+			defer wg.Done()
+			c.streamOutput(command, process, reader)
 		}(reader)
 	}
 
 	// Wait in background until the command finishes, because it ends naturally or because it is stopped.
 	go func() {
-		defer close(done)
+		defer wg.Done()
 
 		// Notify the event emitter that the command has finished and remove it from the runningCommands map
 		defer func() {
@@ -132,14 +130,20 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 		}()
 
 		err := process.Wait()
-		scanWg.Wait()
+		close(exited)
 
-		if err != nil {
+		// A descendant that escaped the kill can hold the write ends open, so the
+		// scanners get a grace period to drain what is buffered and are then cut off.
+		if !waitFor(&scanWg, pipeDrainGrace) {
+			closeProcessReaders(readers)
+			scanWg.Wait()
+		}
+
+		// An expected termination is what stopping a Command looks like, not
+		// something to report on its terminal.
+		if err != nil && !isExpectedError(err) {
 			c.sendStreamLine(command, err.Error())
-
-			if !isExpectedError(err) {
-				c.logger.Error("[ERROR - Waiting for project]: " + err.Error())
-			}
+			c.logger.Error("[ERROR - Waiting for project]: " + err.Error())
 		}
 	}()
 
@@ -147,39 +151,35 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environmentPaths []s
 }
 
 func (c *DefaultRunner) sendStartingLine(command *domain.Command) {
-	c.eventEmitter.EmitEvent(event.NewLogEntry, map[string]string{
-		"id":   command.Id,
-		"line": "\033[1;36m" + command.Command + "\033[0m",
-	})
+	c.emitLogEntry(command, command.Command, event.CommandLogEntry)
 }
 
 func (c *DefaultRunner) StopRunningCommand(id string) error {
 	c.mutex.Lock()
-	runningCommand, exists := c.runningCommands[id]
+	running, exists := c.runningCommands[id]
 	c.mutex.Unlock()
 
 	if !exists {
 		return nil
 	}
 
-	return stopProcessGracefully(runningCommand.process, runningCommand.done)
+	return stopProcessGracefully(running.process, running.exited)
 }
 
 func (c *DefaultRunner) StopAllRunningCommands() []error {
-	errs := make([]error, 0)
-
-	// Create a slice to hold commands to stop
-	// this is necessary because we should not modify the map while iterating over it
+	// Copy under the lock: stopping is slow and the wait goroutines delete from
+	// the map as their Commands end.
 	c.mutex.Lock()
-	commandsToStop := make([]RunningCommand, 0, len(c.runningCommands))
-
-	for _, command := range c.runningCommands {
-		commandsToStop = append(commandsToStop, command)
+	commandsToStop := make([]runningCommand, 0, len(c.runningCommands))
+	for _, running := range c.runningCommands {
+		commandsToStop = append(commandsToStop, running)
 	}
 	c.mutex.Unlock()
 
-	for _, command := range commandsToStop {
-		err := stopProcessGracefully(command.process, command.done)
+	errs := make([]error, 0)
+
+	for _, running := range commandsToStop {
+		err := stopProcessGracefully(running.process, running.exited)
 
 		if err != nil {
 			errs = append(errs, err)
@@ -187,6 +187,32 @@ func (c *DefaultRunner) StopAllRunningCommands() []error {
 	}
 
 	return errs
+}
+
+// alreadyExited reports whether the goroutine owning cmd.Wait has seen the
+// process end.
+func alreadyExited(exited <-chan struct{}) bool {
+	select {
+	case <-exited:
+		return true
+	default:
+		return false
+	}
+}
+
+func waitFor(wg *sync.WaitGroup, timeout time.Duration) bool {
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		return true
+	case <-time.After(timeout):
+		return false
+	}
 }
 
 // isExpectedError checks if the error is one of the expected termination logs.
@@ -199,13 +225,13 @@ func isExpectedError(err error) bool {
 	return false
 }
 
-func (c *DefaultRunner) streamOutput(command *domain.Command, pipeReader io.ReadCloser) {
+func (c *DefaultRunner) streamOutput(command *domain.Command, process commandProcess, pipeReader io.ReadCloser) {
 	scanner := bufio.NewScanner(pipeReader)
 	scanner.Buffer(make([]byte, 1024), 1024*1024) // Set buffer size to 1MB
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		if shouldSkipProcessOutputLine(line) {
+		if process.shouldSkipOutputLine(line) {
 			continue
 		}
 		c.logger.Debug(line)
@@ -214,52 +240,19 @@ func (c *DefaultRunner) streamOutput(command *domain.Command, pipeReader io.Read
 }
 
 func (c *DefaultRunner) sendStreamLine(command *domain.Command, line string) {
-	c.processStreamLine(command, line)
+	if command.MatchesErrorPattern(line) {
+		c.eventEmitter.EmitEvent(event.CommandErrorDetected, command.Id)
+	}
 
+	c.emitLogEntry(command, line, event.OutputLogEntry)
+}
+
+func (c *DefaultRunner) emitLogEntry(command *domain.Command, line string, kind event.LogEntryKind) {
 	c.eventEmitter.EmitEvent(event.NewLogEntry, map[string]string{
 		"id":   command.Id,
 		"line": line,
+		"kind": string(kind),
 	})
-}
-
-func (c *DefaultRunner) processStreamLine(command *domain.Command, line string) {
-	c.checkLineForErrors(command, line)
-}
-
-func (c *DefaultRunner) checkLineForErrors(command *domain.Command, line string) {
-	errorPatterns := command.ErrorPatterns
-
-	for _, pattern := range errorPatterns {
-		matchString := strings.Contains(line, pattern)
-
-		if matchString {
-			c.eventEmitter.EmitEvent(event.CommandErrorDetected, command.Id)
-			break
-		}
-	}
-}
-
-func (c *DefaultRunner) GetRunningCommands() map[string]RunningCommand {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	runningCommands := make(map[string]RunningCommand, len(c.runningCommands))
-	for id, command := range c.runningCommands {
-		runningCommands[id] = command
-	}
-	return runningCommands
-}
-
-func (c *DefaultRunner) WaitForCommand(commandId string) {
-	c.mutex.Lock()
-	runningCommand, exists := c.runningCommands[commandId]
-	c.mutex.Unlock()
-
-	if exists {
-		<-runningCommand.done
-	} else {
-		return
-	}
 }
 
 func (c *DefaultRunner) GetRunningCommandIds() []string {

@@ -12,7 +12,7 @@ import (
 	"gomander/internal/project/domain/test"
 )
 
-func TestDefaultEditProject_Execute(t *testing.T) {
+func TestEditProject_Execute(t *testing.T) {
 	t.Run("Should edit a project successfully", func(t *testing.T) {
 		// Arrange
 		mockProjectRepository := new(test.MockProjectRepository)

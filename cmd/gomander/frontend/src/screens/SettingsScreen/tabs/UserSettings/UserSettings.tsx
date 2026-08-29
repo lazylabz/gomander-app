@@ -18,7 +18,6 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/design-system/components/ui/form.tsx";
-import { Input } from "@/design-system/components/ui/input.tsx";
 import {
 	Select,
 	SelectContent,
@@ -132,28 +131,6 @@ export const UserSettings = () => {
 									{t("userSettingsForm.themeDescription")}
 								</FormDescription>
 							</FormItem>
-							<FormField
-								control={userSettingsForm.control}
-								name="logLineLimit"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>{t("userSettingsForm.logLimitLabel")}</FormLabel>
-										<FormControl>
-											<Input
-												type="number"
-												min={1}
-												max={5000}
-												{...field}
-												onChange={(e) => field.onChange(Number(e.target.value))}
-											/>
-										</FormControl>
-										<FormDescription className="text-xs">
-											{t("userSettingsForm.logLimitDescription")}
-										</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
 						</CardContent>
 					</Card>
 				</div>

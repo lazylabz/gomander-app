@@ -2,18 +2,14 @@ package usecases
 
 import "gomander/internal/config/domain"
 
-type GetUserConfig interface {
-	Execute() (*domain.Config, error)
-}
-
-type DefaultGetUserConfig struct {
+type GetUserConfig struct {
 	repository domain.Repository
 }
 
-func NewGetUserConfig(repository domain.Repository) *DefaultGetUserConfig {
-	return &DefaultGetUserConfig{repository: repository}
+func NewGetUserConfig(repository domain.Repository) *GetUserConfig {
+	return &GetUserConfig{repository: repository}
 }
 
-func (uc *DefaultGetUserConfig) Execute() (*domain.Config, error) {
+func (uc *GetUserConfig) Execute() (*domain.Config, error) {
 	return uc.repository.GetOrCreate()
 }

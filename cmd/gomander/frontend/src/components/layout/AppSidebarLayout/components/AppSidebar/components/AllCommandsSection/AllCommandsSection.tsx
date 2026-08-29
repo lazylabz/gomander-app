@@ -11,8 +11,6 @@ import { toast } from "sonner";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
 import { CreateCommandModal } from "@/components/modals/Command/CreateCommandModal.tsx";
-import { ALL_COMMANDS_SECTION_OPEN } from "@/constants/localStorage.ts";
-import type { Command } from "@/contracts/types.ts";
 import {
 	Collapsible,
 	CollapsibleContent,
@@ -31,38 +29,25 @@ import {
 	SidebarMenu,
 	SidebarMenuItem,
 } from "@/design-system/components/ui/sidebar.tsx";
-import { parseError } from "@/helpers/errorHelpers.ts";
-import { useLocalStorageState } from "@/hooks/useLocalStorageState.ts";
-import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
+import {
+	ALL_COMMANDS_SECTION_ID,
+	useSidebarSection,
+} from "@/store/sidebarSections.ts";
 import { reorderCommands } from "@/useCases/command/reorderCommands.ts";
 
 export const AllCommandsSection = () => {
 	const { t } = useTranslation();
 	const commands = useCommandStore((state) => state.commands);
-	const setCommands = useCommandStore((state) => state.setCommands);
 
 	const [modalOpen, setModalOpen] = useState(false);
 
-	const [sectionOpen, setSectionOpen] = useLocalStorageState(
-		ALL_COMMANDS_SECTION_OPEN,
-		false,
+	const [sectionOpen, setSectionOpen] = useSidebarSection(
+		ALL_COMMANDS_SECTION_ID,
 	);
 
 	const openCreateCommandModal = () => {
 		setModalOpen(true);
-	};
-
-	const handleSaveReorderedCommands = async (reorderedCommands: Command[]) => {
-		const newOrder = reorderedCommands.map((command) => command.id);
-		setCommands(reorderedCommands);
-		try {
-			await reorderCommands(newOrder);
-		} catch (e) {
-			toast.error(parseError(e, t("toast.command.reorderFailed")));
-		} finally {
-			fetchCommands();
-		}
 	};
 
 	const handleDragEnd = async (event: DragEndEvent) => {
@@ -89,7 +74,7 @@ export const AllCommandsSection = () => {
 		const reorderedCommands = arrayMove(commands, oldIndex, newIndex);
 
 		// 3. Persist the new order
-		await handleSaveReorderedCommands(reorderedCommands);
+		await reorderCommands(reorderedCommands.map((command) => command.id));
 	};
 
 	return (

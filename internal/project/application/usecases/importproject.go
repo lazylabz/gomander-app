@@ -6,94 +6,81 @@ import (
 	"gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	projectdomain "gomander/internal/project/domain"
+	"gomander/internal/unitofwork"
 )
 
-type ImportProject interface {
-	Execute(projectJSON projectdomain.ProjectExportJSONv1, name, workingDirectory string) error
+type ImportProject struct {
+	unitOfWork unitofwork.UnitOfWork
 }
 
-type DefaultImportProject struct {
-	projectRepository      projectdomain.Repository
-	commandRepository      domain.Repository
-	commandGroupRepository commandgroupdomain.Repository
-}
-
-func NewImportProject(
-	projectRepo projectdomain.Repository,
-	commandRepo domain.Repository,
-	commandGroupRepo commandgroupdomain.Repository,
-) *DefaultImportProject {
-	return &DefaultImportProject{
-		projectRepository:      projectRepo,
-		commandRepository:      commandRepo,
-		commandGroupRepository: commandGroupRepo,
+func NewImportProject(unitOfWork unitofwork.UnitOfWork) *ImportProject {
+	return &ImportProject{
+		unitOfWork: unitOfWork,
 	}
 }
 
-func (uc *DefaultImportProject) Execute(projectJSON projectdomain.ProjectExportJSONv1, name, workingDirectory string) error {
+func (uc *ImportProject) Execute(blueprint projectdomain.Blueprint, name, workingDirectory string) error {
 	project := projectdomain.Project{
 		Id:               uuid.New().String(),
 		Name:             name,
 		WorkingDirectory: workingDirectory,
 	}
 
-	commands := make([]domain.Command, 0, len(projectJSON.Commands))
-	commandGroups := make([]commandgroupdomain.CommandGroup, 0, len(projectJSON.CommandGroups))
+	commands := make([]domain.Command, 0, len(blueprint.Commands))
+	commandGroups := make([]commandgroupdomain.CommandGroup, 0, len(blueprint.CommandGroups))
 
-	commandIdsToNewRandomIds := make(map[string]string)
-	newIdsToCommand := make(map[string]domain.Command)
+	// The Ids a Blueprint carries only name its own Commands; the ones stored
+	// are new, so a Group has to be told which is which.
+	commandsByBlueprintId := make(map[string]domain.Command, len(blueprint.Commands))
 
-	for i, cmd := range projectJSON.Commands {
+	for _, cmd := range blueprint.Commands {
 		newCommand := domain.Command{
 			Id:               uuid.New().String(),
 			Name:             cmd.Name,
 			Command:          cmd.Command,
 			WorkingDirectory: cmd.WorkingDirectory,
 			ProjectId:        project.Id,
-			Position:         i,
+			Position:         domain.Order.End(commands),
 		}
 
 		commands = append(commands, newCommand)
-		commandIdsToNewRandomIds[cmd.Id] = newCommand.Id
-		newIdsToCommand[newCommand.Id] = newCommand
+		commandsByBlueprintId[cmd.Id] = newCommand
 	}
 
-	for i, group := range projectJSON.CommandGroups {
+	for _, group := range blueprint.CommandGroups {
 		newGroup := commandgroupdomain.CommandGroup{
 			Id:        uuid.New().String(),
 			Name:      group.Name,
 			ProjectId: project.Id,
-			Position:  i,
+			Position:  commandgroupdomain.Order.End(commandGroups),
 		}
 
 		for _, cmdId := range group.CommandIds {
-			if newCmdId, exists := commandIdsToNewRandomIds[cmdId]; exists {
-				newGroup.Commands = append(newGroup.Commands, newIdsToCommand[newCmdId])
+			if command, exists := commandsByBlueprintId[cmdId]; exists {
+				newGroup.Commands = append(newGroup.Commands, command)
 			}
 		}
 
 		commandGroups = append(commandGroups, newGroup)
 	}
 
-	// Persist everything
-	err := uc.projectRepository.Create(project)
-	if err != nil {
-		return err
-	}
-
-	for _, command := range commands {
-		err = uc.commandRepository.Create(&command)
-		if err != nil {
+	return uc.unitOfWork.Do(func(repositories unitofwork.Repositories) error {
+		if err := repositories.Projects.Create(project); err != nil {
 			return err
 		}
-	}
 
-	for _, group := range commandGroups {
-		err = uc.commandGroupRepository.Create(&group)
-		if err != nil {
-			return err
+		for _, command := range commands {
+			if err := repositories.Commands.Create(&command); err != nil {
+				return err
+			}
 		}
-	}
 
-	return nil
+		for _, group := range commandGroups {
+			if err := repositories.CommandGroups.Create(&group); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }

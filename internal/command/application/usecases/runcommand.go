@@ -2,61 +2,38 @@ package usecases
 
 import (
 	"gomander/internal/command/domain"
-	configdomain "gomander/internal/config/domain"
-	"gomander/internal/helpers/array"
-	projectdomain "gomander/internal/project/domain"
-	"gomander/internal/runner"
+	"gomander/internal/execution"
+	"gomander/internal/openedproject"
 )
 
-type RunCommand interface {
-	Execute(commandId string) error
-}
-
-type DefaultRunCommand struct {
-	configRepository  configdomain.Repository
+type RunCommand struct {
+	openedProject     openedproject.OpenedProject
 	commandRepository domain.Repository
-	projectRepository projectdomain.Repository
-	commandRunner     runner.Runner
+	commandRunner     execution.Runner
 }
 
 func NewRunCommand(
-	configRepo configdomain.Repository,
+	openedProject openedproject.OpenedProject,
 	commandRepo domain.Repository,
-	projectRepo projectdomain.Repository,
-	runner runner.Runner,
-) *DefaultRunCommand {
-	return &DefaultRunCommand{
-		configRepository:  configRepo,
+	runner execution.Runner,
+) *RunCommand {
+	return &RunCommand{
+		openedProject:     openedProject,
 		commandRepository: commandRepo,
-		projectRepository: projectRepo,
 		commandRunner:     runner,
 	}
 }
 
-func (uc *DefaultRunCommand) Execute(commandId string) error {
+func (uc *RunCommand) Execute(commandId string) error {
 	cmd, err := uc.commandRepository.Get(commandId)
 	if err != nil {
 		return err
 	}
 
-	userConfig, err := uc.configRepository.GetOrCreate()
+	environment, err := uc.openedProject.ExecutionEnvironment()
 	if err != nil {
 		return err
 	}
 
-	currentProject, err := uc.projectRepository.Get(cmd.ProjectId)
-	if err != nil {
-		return err
-	}
-
-	environmentPathsStrings := array.Map(userConfig.EnvironmentPaths, func(ep configdomain.EnvironmentPath) string {
-		return ep.Path
-	})
-
-	err = uc.commandRunner.RunCommand(cmd, environmentPathsStrings, currentProject.WorkingDirectory)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return uc.commandRunner.RunCommand(&cmd, environment)
 }

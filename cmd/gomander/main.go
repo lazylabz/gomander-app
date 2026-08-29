@@ -21,17 +21,22 @@ import (
 	commandgroupinfrastructure "gomander/internal/commandgroup/infrastructure"
 	configusecases "gomander/internal/config/application/usecases"
 	configinfrastructure "gomander/internal/config/infrastructure"
+	"gomander/internal/dialog"
 	"gomander/internal/eventbus"
 	"gomander/internal/facade"
 	localizationusecases "gomander/internal/localization/application/usecases"
 	"gomander/internal/logger"
+	"gomander/internal/openedproject"
 	projectusecases "gomander/internal/project/application/usecases"
 	projectinfrastructure "gomander/internal/project/infrastructure"
-	"gomander/internal/releases"
+	releaseusecases "gomander/internal/releases/application/usecases"
+	releaseinfrastructure "gomander/internal/releases/infrastructure"
 	"gomander/internal/runner"
 	"gomander/internal/uihelpers/fs"
 	"gomander/internal/uihelpers/os_internal"
 	"gomander/internal/uihelpers/path"
+	unitofworkinfrastructure "gomander/internal/unitofwork/infrastructure"
+	"gomander/internal/usecases"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -48,24 +53,15 @@ var assets embed.FS
 //go:embed locales
 var localeFs embed.FS
 
-const ConfigFolderPathName = "gomander"
-
 func main() {
-	// Create an instance of the app structure
-	app := internalapp.NewApp()
+	// The app can only be built once Wails hands us its context, so OnStartup fills this in
+	var app *internalapp.App
 
 	// Create instance of helpers
 	uiPathHelper := path.NewUiPathHelper()
-	uiFsHelper := fs.NewUIFsHelper(facade.DefaultRuntimeFacade{})
+	dialogs := dialog.NewWailsDialogs()
+	uiFsHelper := fs.NewUIFsHelper(dialogs, facade.DefaultRuntimeFacade{})
 	uiOsHelper := os_internal.NewUIOsHelper()
-	releaseHelper := releases.NewReleaseHelper(
-		facade.DefaultRuntimeFacade{},
-		facade.DefaultOpenFacade{},
-		facade.DefaultOSFacade{},
-		facade.DefaultIOFacade{},
-		releases.DefaultLatestReleaseUrl,
-		releases.DefaultBinaryDownloadBaseUrl,
-	)
 
 	// Create instance of controllers
 	controllers := NewWailsControllers()
@@ -83,24 +79,26 @@ func main() {
 			// Initialize the database
 			gormDb := configDB(ctx)
 
-			// Register deps
-			registerDeps(gormDb, ctx, app)
+			// Load context into the desktop adapters
+			dialog.SetWailsDialogsContext(dialogs, ctx)
+
+			// Build deps
+			var useCases usecases.Registry
+			app, useCases = buildDeps(gormDb, ctx, dialogs)
 
 			// Register event handlers
 			app.RegisterHandlers()
 
 			// Start app
-			app.Startup(ctx)
+			if err := app.Startup(ctx); err != nil {
+				panic(err)
+			}
 
 			// Initialize controllers
-			controllers.loadUseCases(app.UseCases)
-
-			// Load context into helpers
-			fs.SetUIFsHelperContext(uiFsHelper, ctx)
-			releases.SetReleaseHelperContext(releaseHelper, ctx)
+			controllers.loadUseCases(useCases)
 
 			// Start http server for 3rd party integrations
-			server := thirdpartyserver.NewThirdPartyIntegrationsServer(app.UseCases)
+			server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
 
 			go func() {
 				err := server.RegisterHandlers()
@@ -111,14 +109,14 @@ func main() {
 			}()
 		},
 		Bind: []interface{}{
-			app,
 			uiPathHelper,
 			controllers,
-			releaseHelper,
 			uiFsHelper,
 			uiOsHelper,
 		},
-		OnBeforeClose: app.OnBeforeClose,
+		OnBeforeClose: func(ctx context.Context) (prevent bool) {
+			return app.OnBeforeClose(ctx)
+		},
 		EnumBind: []interface{}{
 			event.Events,
 		},
@@ -173,7 +171,7 @@ func getDbFile() string {
 		panic(err)
 	}
 
-	configFolderPath := filepath.Join(userConfig, ConfigFolderPathName)
+	configFolderPath := filepath.Join(userConfig, appConfig.configFolderName)
 	err = os.MkdirAll(configFolderPath, os.ModePerm)
 	if err != nil {
 		panic(err)
@@ -184,17 +182,24 @@ func getDbFile() string {
 	return dbLocation
 }
 
-func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
+func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*internalapp.App, usecases.Registry) {
 	// Initialize deps
 	l := logger.NewDefaultLogger(ctx, facade.DefaultRuntimeFacade{})
 	ee := event.NewDefaultEventEmitter(ctx, facade.DefaultRuntimeFacade{})
-	r := runner.NewDefaultRunner(l, ee)
+	r := runner.NewDefaultRunner(l, ee, appConfig.runner)
+	releaseFeed := releaseinfrastructure.NewGithubReleaseFeed(ctx, facade.DefaultIOFacade{}, releaseinfrastructure.DefaultLatestReleaseUrl)
+	releaseDownloader := releaseinfrastructure.NewGithubReleaseDownloader(ctx, facade.DefaultOSFacade{}, facade.DefaultIOFacade{}, releaseinfrastructure.DefaultBinaryDownloadBaseUrl)
+	releaseInstaller := releaseinfrastructure.NewOSReleaseInstaller(facade.DefaultOSFacade{}, facade.DefaultOpenFacade{})
+	appControl := releaseinfrastructure.NewShellAppControl(ctx, facade.DefaultRuntimeFacade{})
 
 	// Initialize repos
 	commandRepo := commmandinfrastructure.NewGormCommandRepository(gormDb, ctx)
 	commandGroupRepo := commandgroupinfrastructure.NewGormCommandGroupRepository(gormDb, ctx)
 	projectRepo := projectinfrastructure.NewGormProjectRepository(gormDb, ctx)
 	configRepo := configinfrastructure.NewGormConfigRepository(gormDb, ctx)
+
+	// Initialize the unit of work
+	unitOfWork := unitofworkinfrastructure.NewGormUnitOfWork(gormDb, ctx)
 
 	// Initialize event handlers
 	cleanCommandGroupsOnCommandDeleted := commandgrouphandlers.NewCleanCommandGroupsOnCommandDeleted(commandGroupRepo, ee)
@@ -205,6 +210,9 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	// Initialize event bus
 	eventBus := eventbus.NewInMemoryEventBus()
 
+	// Initialize the opened project
+	openedProject := openedproject.NewOpenedProject(configRepo, projectRepo)
+
 	// Initialize use cases
 
 	// Configuration
@@ -214,94 +222,93 @@ func registerDeps(gormDb *gorm.DB, ctx context.Context, app *internalapp.App) {
 	getTranslation := localizationusecases.NewGetTranslation(localeFs)
 	getSupportedLanguages := localizationusecases.NewGetSupportedLanguages(localeFs)
 	// Projects
-	getCurrentProject := projectusecases.NewGetCurrentProject(configRepo, projectRepo)
+	getCurrentProject := projectusecases.NewGetCurrentProject(openedProject)
 	getAvailableProjects := projectusecases.NewGetAvailableProjects(projectRepo)
-	openProject := projectusecases.NewOpenProject(configRepo, projectRepo)
+	openProject := projectusecases.NewOpenProject(openedProject)
 	createProject := projectusecases.NewCreateProject(projectRepo)
 	editProject := projectusecases.NewEditProject(projectRepo)
-	closeProject := projectusecases.NewCloseProject(configRepo)
-	deleteProject := projectusecases.NewDeleteProject(projectRepo, eventBus, l)
-	exportProject := projectusecases.NewExportProject(ctx, projectRepo, commandRepo, commandGroupRepo, facade.DefaultRuntimeFacade{}, facade.DefaultFsFacade{})
-	importProject := projectusecases.NewImportProject(projectRepo, commandRepo, commandGroupRepo)
-	getProjectToImport := projectusecases.NewGetProjectToImport(ctx, facade.DefaultRuntimeFacade{}, facade.DefaultFsFacade{})
+	closeProject := projectusecases.NewCloseProject(openedProject)
+	deleteProject := projectusecases.NewDeleteProject(projectRepo, eventBus)
+	projectFileV1 := projectinfrastructure.NewProjectFileV1(facade.DefaultFsFacade{})
+	exportProject := projectusecases.NewExportProject(projectRepo, commandRepo, commandGroupRepo, dialogs, projectFileV1)
+	importProject := projectusecases.NewImportProject(unitOfWork)
+	getProjectToImport := projectusecases.NewGetProjectToImport(dialogs, map[projectusecases.FileType]projectusecases.BlueprintReader{
+		projectusecases.FileTypeGomander:    projectFileV1,
+		projectusecases.FileTypePackageJSON: projectinfrastructure.NewPackageJSONFile(facade.DefaultFsFacade{}),
+	})
 	// Command Groups
-	getCommandGroups := commandgroupusecases.NewGetCommandGroups(configRepo, commandGroupRepo)
-	createCommandGroup := commandgroupusecases.NewCreateCommandGroup(configRepo, commandGroupRepo)
+	getCommandGroups := commandgroupusecases.NewGetCommandGroups(openedProject, commandGroupRepo)
+	createCommandGroup := commandgroupusecases.NewCreateCommandGroup(openedProject, commandGroupRepo)
 	updateCommandGroup := commandgroupusecases.NewUpdateCommandGroup(commandGroupRepo)
 	deleteCommandGroup := commandgroupusecases.NewDeleteCommandGroup(commandGroupRepo, ee)
 	removeCommandFromCommandGroup := commandgroupusecases.NewRemoveCommandFromCommandGroup(commandGroupRepo)
-	reorderCommandGroups := commandgroupusecases.NewReorderCommandGroups(configRepo, commandGroupRepo)
-	runCommandGroup := commandgroupusecases.NewRunCommandGroup(configRepo, commandRepo, commandGroupRepo, projectRepo, r)
+	reorderCommandGroups := commandgroupusecases.NewReorderCommandGroups(openedProject, commandGroupRepo)
+	runCommandGroup := commandgroupusecases.NewRunCommandGroup(openedProject, commandGroupRepo, r)
 	stopCommandGroup := commandgroupusecases.NewStopCommandGroup(commandGroupRepo, r)
 	// Commands
-	getCommands := commandusecases.NewGetCommands(configRepo, commandRepo)
-	addCommand := commandusecases.NewAddCommand(configRepo, commandRepo)
-	duplicateCommand := commandusecases.NewDuplicateCommand(configRepo, commandRepo, eventBus)
+	getCommands := commandusecases.NewGetCommands(openedProject, commandRepo)
+	addCommand := commandusecases.NewAddCommand(openedProject, commandRepo)
+	duplicateCommand := commandusecases.NewDuplicateCommand(openedProject, commandRepo, eventBus)
 	removeCommand := commandusecases.NewRemoveCommand(commandRepo, eventBus)
 	editCommand := commandusecases.NewEditCommand(commandRepo)
-	reorderCommands := commandusecases.NewReorderCommands(configRepo, commandRepo)
-	runCommand := commandusecases.NewRunCommand(configRepo, commandRepo, projectRepo, r)
+	reorderCommands := commandusecases.NewReorderCommands(openedProject, commandRepo)
+	runCommand := commandusecases.NewRunCommand(openedProject, commandRepo, r)
 	stopCommand := commandusecases.NewStopCommand(commandRepo, r)
 	getRunningCommandIds := commandusecases.NewGetRunningCommandIds(r)
+	// Releases
+	getCurrentRelease := releaseusecases.NewGetCurrentRelease()
+	checkForNewRelease := releaseusecases.NewCheckForNewRelease(releaseFeed)
+	downloadRelease := releaseusecases.NewDownloadRelease(releaseDownloader)
+	installReleaseAndQuit := releaseusecases.NewInstallReleaseAndQuit(releaseInstaller, appControl)
 
-	app.LoadDependencies(internalapp.Dependencies{
-		Logger:       l,
-		EventEmitter: ee,
-		Runner:       r,
-
-		CommandRepository:      commandRepo,
-		CommandGroupRepository: commandGroupRepo,
-		ProjectRepository:      projectRepo,
-		ConfigRepository:       configRepo,
-
-		FsFacade:      facade.DefaultFsFacade{},
-		RuntimeFacade: facade.DefaultRuntimeFacade{},
-
-		EventBus: eventBus,
-		EventHandlers: internalapp.EventHandlers{
-			CleanCommandGroupsOnCommandDeleted:   cleanCommandGroupsOnCommandDeleted,
-			CleanCommandGroupsOnProjectDeleted:   cleanCommandGroupsOnProjectDeleted,
-			CleanCommandsOnProjectDeleted:        cleanCommandsOnProjectDeleted,
-			AddCommandToGroupOnCommandDuplicated: addCommandToGroupOnCommandDuplicated,
-		},
-
-		UseCases: internalapp.UseCases{
-			// Configuration
-			GetUserConfig:  getUserConfig,
-			SaveUserConfig: saveUserConfig,
-			// Localization
-			GetTranslation:        getTranslation,
-			GetSupportedLanguages: getSupportedLanguages,
-			// Projects
-			GetCurrentProject:    getCurrentProject,
-			GetAvailableProjects: getAvailableProjects,
-			OpenProject:          openProject,
-			CreateProject:        createProject,
-			EditProject:          editProject,
-			CloseProject:         closeProject,
-			DeleteProject:        deleteProject,
-			ExportProject:        exportProject,
-			ImportProject:        importProject,
-			GetProjectToImport:   getProjectToImport,
-			// Command Groups
-			GetCommandGroups:              getCommandGroups,
-			CreateCommandGroup:            createCommandGroup,
-			UpdateCommandGroup:            updateCommandGroup,
-			DeleteCommandGroup:            deleteCommandGroup,
-			RemoveCommandFromCommandGroup: removeCommandFromCommandGroup,
-			ReorderCommandGroups:          reorderCommandGroups,
-			RunCommandGroup:               runCommandGroup,
-			StopCommandGroup:              stopCommandGroup,
-			// Commands
-			GetCommands:          getCommands,
-			AddCommand:           addCommand,
-			DuplicateCommand:     duplicateCommand,
-			RemoveCommand:        removeCommand,
-			EditCommand:          editCommand,
-			ReorderCommands:      reorderCommands,
-			RunCommand:           runCommand,
-			StopCommand:          stopCommand,
-			GetRunningCommandIds: getRunningCommandIds,
-		},
+	app := internalapp.NewApp(l, r, configRepo, eventBus, internalapp.EventHandlers{
+		CleanCommandGroupsOnCommandDeleted:   cleanCommandGroupsOnCommandDeleted,
+		CleanCommandGroupsOnProjectDeleted:   cleanCommandGroupsOnProjectDeleted,
+		CleanCommandsOnProjectDeleted:        cleanCommandsOnProjectDeleted,
+		AddCommandToGroupOnCommandDuplicated: addCommandToGroupOnCommandDuplicated,
 	})
+
+	return app, usecases.Registry{
+		// Configuration
+		GetUserConfig:  getUserConfig,
+		SaveUserConfig: saveUserConfig,
+		// Localization
+		GetTranslation:        getTranslation,
+		GetSupportedLanguages: getSupportedLanguages,
+		// Projects
+		GetCurrentProject:    getCurrentProject,
+		GetAvailableProjects: getAvailableProjects,
+		OpenProject:          openProject,
+		CreateProject:        createProject,
+		EditProject:          editProject,
+		CloseProject:         closeProject,
+		DeleteProject:        deleteProject,
+		ExportProject:        exportProject,
+		ImportProject:        importProject,
+		GetProjectToImport:   getProjectToImport,
+		// Command Groups
+		GetCommandGroups:              getCommandGroups,
+		CreateCommandGroup:            createCommandGroup,
+		UpdateCommandGroup:            updateCommandGroup,
+		DeleteCommandGroup:            deleteCommandGroup,
+		RemoveCommandFromCommandGroup: removeCommandFromCommandGroup,
+		ReorderCommandGroups:          reorderCommandGroups,
+		RunCommandGroup:               runCommandGroup,
+		StopCommandGroup:              stopCommandGroup,
+		// Commands
+		GetCommands:          getCommands,
+		AddCommand:           addCommand,
+		DuplicateCommand:     duplicateCommand,
+		RemoveCommand:        removeCommand,
+		EditCommand:          editCommand,
+		ReorderCommands:      reorderCommands,
+		RunCommand:           runCommand,
+		StopCommand:          stopCommand,
+		GetRunningCommandIds: getRunningCommandIds,
+		// Releases
+		GetCurrentRelease:     getCurrentRelease,
+		CheckForNewRelease:    checkForNewRelease,
+		DownloadRelease:       downloadRelease,
+		InstallReleaseAndQuit: installReleaseAndQuit,
+	}
 }

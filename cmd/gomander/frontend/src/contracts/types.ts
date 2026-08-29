@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/style/useLiteralEnumMembers: proxy to wails types */
-import type { domain } from "../../wailsjs/go/models.ts";
+import type { domain, main } from "../../wailsjs/go/models.ts";
 import { event } from "../../wailsjs/go/models.ts";
 
 // Types
@@ -7,7 +7,10 @@ export type Command = domain.Command;
 export type UserConfig = domain.Config;
 export type CommandGroup = domain.CommandGroup;
 export type Project = domain.Project;
-export type ProjectExport = domain.ProjectExportJSONv1;
+export type EnvironmentPath = domain.EnvironmentPath;
+export type ProjectExport = main.ProjectBlueprint;
+export type CommandExport = main.CommandBlueprint;
+export type CommandGroupExport = main.CommandGroupBlueprint;
 export type Localization = domain.Localization;
 
 // Enums
@@ -19,10 +22,19 @@ export enum Event {
 	COMMAND_ERROR_DETECTED = event.Event.COMMAND_ERROR_DETECTED,
 }
 
+// Which of a command's two kinds of line arrived: the command's own text, sent
+// once as it starts, or a line the process printed. How each one looks is
+// decided in commandOutput, not by the backend that sends it.
+export enum LogEntryKind {
+	COMMAND = "command",
+	OUTPUT = "output",
+}
+
 export type EventData = {
 	[Event.NEW_LOG_ENTRY]: {
 		id: string;
 		line: string;
+		kind: LogEntryKind;
 	};
 	[Event.PROCESS_FINISHED]: string;
 	[Event.PROCESS_STARTED]: string;

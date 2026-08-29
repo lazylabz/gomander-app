@@ -11,7 +11,7 @@ import (
 	"gomander/internal/commandgroup/domain/test"
 )
 
-func TestDefaultUpdateCommandGroup_Execute(t *testing.T) {
+func TestUpdateCommandGroup_Execute(t *testing.T) {
 	t.Run("Should update a command group", func(t *testing.T) {
 		// Arrange
 		mockCommandGroupRepository := new(test.MockCommandGroupRepository)

@@ -13,7 +13,7 @@ import (
 //go:embed testdata
 var fullTestFsTranslation embed.FS
 
-func TestDefaultGetTranslation_Execute(t *testing.T) {
+func TestGetTranslation_Execute(t *testing.T) {
 	t.Run("Should return translation for valid locale", func(t *testing.T) {
 		// Arrange
 		testFs, _ := fs.Sub(fullTestFsTranslation, "testdata")

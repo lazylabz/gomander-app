@@ -1,36 +1,30 @@
 package usecases
 
 import (
-	"errors"
-
 	"github.com/google/uuid"
 
 	"gomander/internal/command/domain"
 	domainevent "gomander/internal/command/domain/event"
-	configdomain "gomander/internal/config/domain"
 	"gomander/internal/eventbus"
+	"gomander/internal/openedproject"
 )
 
-type DuplicateCommand interface {
-	Execute(commandId, targetGroupId string) error
-}
-
-type DefaultDuplicateCommand struct {
-	configRepository  configdomain.Repository
+type DuplicateCommand struct {
+	openedProject     openedproject.OpenedProject
 	commandRepository domain.Repository
 	eventBus          eventbus.EventBus
 }
 
-func NewDuplicateCommand(configRepo configdomain.Repository, commandRepo domain.Repository, eventBus eventbus.EventBus) *DefaultDuplicateCommand {
-	return &DefaultDuplicateCommand{
-		configRepository:  configRepo,
+func NewDuplicateCommand(openedProject openedproject.OpenedProject, commandRepo domain.Repository, eventBus eventbus.EventBus) *DuplicateCommand {
+	return &DuplicateCommand{
+		openedProject:     openedProject,
 		commandRepository: commandRepo,
 		eventBus:          eventBus,
 	}
 }
 
-func (uc *DefaultDuplicateCommand) Execute(commandId, targetGroupId string) error {
-	userConfig, err := uc.configRepository.GetOrCreate()
+func (uc *DuplicateCommand) Execute(commandId, targetGroupId string) error {
+	project, err := uc.openedProject.Get()
 	if err != nil {
 		return err
 	}
@@ -40,17 +34,15 @@ func (uc *DefaultDuplicateCommand) Execute(commandId, targetGroupId string) erro
 		return err
 	}
 
-	allCommands, err := uc.commandRepository.GetAll(userConfig.LastOpenedProjectId)
+	allCommands, err := uc.commandRepository.GetAll(project.Id)
 	if err != nil {
 		return err
 	}
 
-	duplicatedCommand := *originalCommand
-
-	// Override specific fields
+	duplicatedCommand := originalCommand
 	duplicatedCommand.Id = uuid.New().String()
 	duplicatedCommand.Name = originalCommand.Name + " (copy)"
-	duplicatedCommand.Position = len(allCommands)
+	duplicatedCommand.Position = domain.Order.End(allCommands)
 
 	err = uc.commandRepository.Create(&duplicatedCommand)
 	if err != nil {
@@ -59,19 +51,8 @@ func (uc *DefaultDuplicateCommand) Execute(commandId, targetGroupId string) erro
 
 	domainEvent := domainevent.NewCommandDuplicatedEvent(duplicatedCommand.Id, targetGroupId)
 
-	errs := uc.eventBus.PublishSync(domainEvent)
-
-	if len(errs) > 0 {
-		combinedErrMsg := "Errors occurred while duplicating command:"
-
-		for _, pubErr := range errs {
-			combinedErrMsg += "\n- " + pubErr.Error()
-		}
-
-		err = errors.New(combinedErrMsg)
-
-		return err
-	}
-
-	return nil
+	return eventbus.Combined(
+		"Errors occurred while duplicating command:",
+		uc.eventBus.PublishSync(domainEvent),
+	)
 }

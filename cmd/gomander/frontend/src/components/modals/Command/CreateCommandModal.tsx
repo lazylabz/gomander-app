@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Terminal } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { CommandCommandField } from "@/components/modals/Command/common/CommandCommandField.tsx";
 import { CommandComputedPath } from "@/components/modals/Command/common/CommandComputedPath.tsx";
@@ -10,6 +9,10 @@ import { CommandErrorPatternsField } from "@/components/modals/Command/common/Co
 import { CommandLinkField } from "@/components/modals/Command/common/CommandLinkField.tsx";
 import { CommandNameField } from "@/components/modals/Command/common/CommandNameField.tsx";
 import { CommandWorkingDirectoryField } from "@/components/modals/Command/common/CommandWorkingDirectoryField.tsx";
+import {
+	emptyFormValues,
+	toCommand,
+} from "@/components/modals/Command/common/formMapping.ts";
 import {
 	type FormSchemaType,
 	formSchema,
@@ -30,8 +33,6 @@ import {
 	DialogTitle,
 } from "@/design-system/components/ui/dialog.tsx";
 import { Form } from "@/design-system/components/ui/form.tsx";
-import { parseError } from "@/helpers/errorHelpers.ts";
-import { fetchCommands } from "@/queries/fetchCommands.ts";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { createCommand } from "@/useCases/command/createCommand.ts";
 
@@ -47,13 +48,7 @@ export const CreateCommandModal = ({
 
 	const form = useForm<FormSchemaType>({
 		resolver: zodResolver(formSchema),
-		defaultValues: {
-			name: "",
-			command: "",
-			workingDirectory: "",
-			link: "",
-			errorPatterns: "",
-		},
+		defaultValues: emptyFormValues(),
 	});
 
 	const onSubmit = async (values: FormSchemaType) => {
@@ -61,28 +56,19 @@ export const CreateCommandModal = ({
 			return;
 		}
 
-		try {
-			await createCommand({
+		const created = await createCommand(
+			toCommand(values, {
 				id: crypto.randomUUID(),
 				projectId: projectId,
-				name: values.name,
-				command: values.command,
-				workingDirectory: values.workingDirectory,
 				position: 0, // Will be set by the backend
-				link: values.link,
-				errorPatterns: values.errorPatterns
-					.split("\n")
-					.filter((pattern) => pattern.trim() !== ""),
-			});
-			toast.success(t("toast.command.createSuccess"));
-
-			setOpen(false);
-			form.reset();
-		} catch (e) {
-			toast.error(parseError(e, t("toast.command.createFailed")));
-		} finally {
-			fetchCommands();
+			}),
+		);
+		if (!created) {
+			return;
 		}
+
+		setOpen(false);
+		form.reset();
 	};
 
 	const onOpenChange = (open: boolean) => {

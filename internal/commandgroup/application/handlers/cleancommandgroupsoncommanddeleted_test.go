@@ -1,100 +1,42 @@
 package handlers_test
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 
 	commanddomainevent "gomander/internal/command/domain/event"
 	"gomander/internal/commandgroup/application/handlers"
+	handlerstest "gomander/internal/commandgroup/application/handlers/test"
 	"gomander/internal/commandgroup/domain/test"
-	event2 "gomander/internal/event"
-	test2 "gomander/internal/event/test"
 )
 
-var cmdId = "cmd-123"
-
-func TestDefaultCleanCommandGroupsOnCommandDeleted(t *testing.T) {
-	t.Run("Should remove command from command groups and delete empty groups", func(t *testing.T) {
+// What the handler does to the Command Groups is verified at the application
+// seam, in internal/apptest: it takes several of them to say anything true
+// about a rule that spans several of them.
+func TestCleanCommandGroupsOnCommandDeleted(t *testing.T) {
+	t.Run("Should do nothing if the event is of another type", func(t *testing.T) {
 		// Arrange
 		mockRepo := new(test.MockCommandGroupRepository)
-		mockEventEmitter := new(test2.MockEventEmitter)
-		handler := handlers.NewCleanCommandGroupsOnCommandDeleted(mockRepo, mockEventEmitter)
-		event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
-
-		mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(nil).Once()
-		deletedCmdGroupId := "cmdGroupId"
-		mockRepo.On("DeleteEmpty").Return([]string{deletedCmdGroupId}, nil).Once()
-		mockEventEmitter.On("EmitEvent", event2.CommandGroupDeleted, deletedCmdGroupId).Return()
+		mockEventEmitter := new(handlerstest.MockEventEmitter)
+		sut := handlers.NewCleanCommandGroupsOnCommandDeleted(mockRepo, mockEventEmitter)
 
 		// Act
-		err := handler.Execute(event)
+		err := sut.Execute(FakeEvent{})
 
 		// Assert
 		assert.NoError(t, err)
-		mock.AssertExpectationsForObjects(t, mockRepo, mockEventEmitter)
-	})
-
-	t.Run("Should return error if failing to remove command from command groups", func(t *testing.T) {
-		// Arrange
-		mockRepo := new(test.MockCommandGroupRepository)
-		mockEventEmitter := new(test2.MockEventEmitter)
-		handler := handlers.NewCleanCommandGroupsOnCommandDeleted(mockRepo, mockEventEmitter)
-		event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
-
-		expectedErr := errors.New("remove error")
-		mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(expectedErr).Once()
-
-		// Act
-		err := handler.Execute(event)
-
-		// Assert
-		assert.ErrorIs(t, err, expectedErr)
-		mock.AssertExpectationsForObjects(t, mockRepo, mockEventEmitter)
-	})
-
-	t.Run("Should return error if failing to remove empty groups", func(t *testing.T) {
-		// Arrange
-		mockRepo := new(test.MockCommandGroupRepository)
-		mockEventEmitter := new(test2.MockEventEmitter)
-		handler := handlers.NewCleanCommandGroupsOnCommandDeleted(mockRepo, mockEventEmitter)
-		event := commanddomainevent.CommandDeletedEvent{CommandId: cmdId}
-
-		mockRepo.On("RemoveCommandFromCommandGroups", cmdId).Return(nil).Once()
-		expectedErr := errors.New("delete empty error")
-		mockRepo.On("DeleteEmpty").Return(make([]string, 0), expectedErr).Once()
-
-		// Act
-		err := handler.Execute(event)
-
-		// Assert
-		assert.ErrorIs(t, err, expectedErr)
-		mock.AssertExpectationsForObjects(t, mockRepo, mockEventEmitter)
-	})
-
-	t.Run("Should do nothing if command is the wrong type", func(t *testing.T) {
-		// Arrange
-		mockRepo := new(test.MockCommandGroupRepository)
-		mockEventEmitter := new(test2.MockEventEmitter)
-		handler := handlers.NewCleanCommandGroupsOnCommandDeleted(mockRepo, mockEventEmitter)
-
-		// Act
-		err := handler.Execute(FakeEvent{})
-
-		// Assert
-		assert.NoError(t, err)
-		mock.AssertExpectationsForObjects(t, mockRepo, mockEventEmitter)
+		mockRepo.AssertExpectations(t)
+		mockEventEmitter.AssertExpectations(t)
 	})
 }
 
-func TestDefaultCleanCommandGroupsOnCommandDeleted_GetEvent(t *testing.T) {
+func TestCleanCommandGroupsOnCommandDeleted_GetEvent(t *testing.T) {
 	// Arrange
-	handler := handlers.NewCleanCommandGroupsOnCommandDeleted(nil, nil)
+	sut := handlers.NewCleanCommandGroupsOnCommandDeleted(nil, nil)
 
 	// Act
-	event := handler.GetEvent()
+	event := sut.GetEvent()
 
 	// Assert
 	_, ok := event.(commanddomainevent.CommandDeletedEvent)

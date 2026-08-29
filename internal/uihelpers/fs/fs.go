@@ -1,36 +1,36 @@
 package fs
 
 import (
-	"context"
 	"path/filepath"
 
-	"github.com/wailsapp/wails/v2/pkg/runtime"
-
-	"gomander/internal/facade"
+	"gomander/internal/dialog"
 )
 
-type UIFsHelper struct {
-	runtime facade.RuntimeFacade
-	ctx     context.Context
+// FileManager reveals a path in whatever the operating system uses to browse
+// files.
+type FileManager interface {
+	OpenFolder(path string) error
 }
 
-func NewUIFsHelper(runtime facade.RuntimeFacade) *UIFsHelper {
+type UIFsHelper struct {
+	dialogs     dialog.Dialogs
+	fileManager FileManager
+}
+
+func NewUIFsHelper(dialogs dialog.Dialogs, fileManager FileManager) *UIFsHelper {
 	return &UIFsHelper{
-		runtime: runtime,
+		dialogs:     dialogs,
+		fileManager: fileManager,
 	}
 }
 
-func SetUIFsHelperContext(h *UIFsHelper, ctx context.Context) {
-	h.ctx = ctx
-}
-
 func (h *UIFsHelper) AskForDirPath() (string, error) {
-	return h.runtime.OpenDirectoryDialog(h.ctx, runtime.OpenDialogOptions{})
+	return h.dialogs.AskForDirectory(dialog.PickDirectoryRequest{})
 }
 
 func (h *UIFsHelper) OpenFileFolder(filePath string) error {
 	cleanPath := filepath.Clean(filePath)
 	folderPath := filepath.Dir(cleanPath)
 
-	return h.runtime.OpenFolderInFileManager(folderPath)
+	return h.fileManager.OpenFolder(folderPath)
 }

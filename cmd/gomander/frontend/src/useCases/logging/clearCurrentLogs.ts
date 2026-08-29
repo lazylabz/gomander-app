@@ -1,6 +1,5 @@
+import { resetCommandOutput } from "@/commandOutput/commandOutput.ts";
 import { commandStore } from "@/store/commandStore.ts";
-import { terminalStore } from "@/store/terminalStore.ts";
-import { cleanCommandLogs } from "@/useCases/command/cleanCommandLogs.ts";
 
 export const clearCurrentLogs = () => {
 	const { activeCommandId } = commandStore.getState();
@@ -9,8 +8,5 @@ export const clearCurrentLogs = () => {
 		return;
 	}
 
-	cleanCommandLogs(activeCommandId);
-
-	const { resetTerminal } = terminalStore.getState();
-	resetTerminal(activeCommandId);
+	resetCommandOutput(activeCommandId);
 };

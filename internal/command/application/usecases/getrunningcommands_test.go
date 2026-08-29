@@ -6,10 +6,10 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"gomander/internal/command/application/usecases"
-	"gomander/internal/runner/test"
+	"gomander/internal/execution/test"
 )
 
-func TestDefaultGetRunningCommandIds_Execute(t *testing.T) {
+func TestGetRunningCommandIds_Execute(t *testing.T) {
 	t.Run("Should return empty list when there are no running commands", func(t *testing.T) {
 		// Arrange
 		mockRunner := new(test.MockRunner)

@@ -2,38 +2,33 @@ package usecases
 
 import (
 	"gomander/internal/commandgroup/domain"
-	configdomain "gomander/internal/config/domain"
+	"gomander/internal/openedproject"
 )
 
-type CreateCommandGroup interface {
-	Execute(commandGroup *domain.CommandGroup) error
-}
-
-type DefaultCreateCommandGroup struct {
-	configRepository       configdomain.Repository
+type CreateCommandGroup struct {
+	openedProject          openedproject.OpenedProject
 	commandGroupRepository domain.Repository
 }
 
-func NewCreateCommandGroup(configRepo configdomain.Repository, commandGroupRepo domain.Repository) *DefaultCreateCommandGroup {
-	return &DefaultCreateCommandGroup{
-		configRepository:       configRepo,
+func NewCreateCommandGroup(openedProject openedproject.OpenedProject, commandGroupRepo domain.Repository) *CreateCommandGroup {
+	return &CreateCommandGroup{
+		openedProject:          openedProject,
 		commandGroupRepository: commandGroupRepo,
 	}
 }
 
-func (uc *DefaultCreateCommandGroup) Execute(commandGroup *domain.CommandGroup) error {
-	userConfig, err := uc.configRepository.GetOrCreate()
+func (uc *CreateCommandGroup) Execute(commandGroup *domain.CommandGroup) error {
+	project, err := uc.openedProject.Get()
 	if err != nil {
 		return err
 	}
 
-	existingCommandGroups, err := uc.commandGroupRepository.GetAll(userConfig.LastOpenedProjectId)
+	existingCommandGroups, err := uc.commandGroupRepository.GetAll(project.Id)
 	if err != nil {
 		return err
 	}
 
-	newPosition := len(existingCommandGroups)
-	commandGroup.Position = newPosition
+	commandGroup.Position = domain.Order.End(existingCommandGroups)
 
 	return uc.commandGroupRepository.Create(commandGroup)
 }

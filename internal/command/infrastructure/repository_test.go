@@ -4,16 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/glebarez/sqlite"
-
-	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 
 	"gomander/internal/command/domain/test"
 
 	"gomander/internal/command/domain"
-	_ "gomander/migrations"
+	"gomander/internal/domainerrors"
+	"gomander/internal/testdb"
 )
 
 type testHelper struct {
@@ -24,7 +22,7 @@ type testHelper struct {
 func newTestHelper(t *testing.T, preloaded []*CommandModel) *testHelper {
 	t.Helper() // IMPORTANT: This marks the function as a helper, so error traces will point to the test instead of here
 
-	repo := arrange(preloaded)
+	repo := arrange(t, preloaded)
 
 	helper := &testHelper{
 		t:    t,
@@ -52,19 +50,18 @@ func TestGormCommandRepository_Get(t *testing.T) {
 
 		// Assert
 		assert.NoError(t, err)
-		assert.Equal(t, &expectedCommand, got)
+		assert.Equal(t, expectedCommand, got)
 	})
-	t.Run("Should return nil when it doesn't exists", func(t *testing.T) {
+	t.Run("Should report a command that does not exist as not found", func(t *testing.T) {
 		// Arrange
 		var preloadedCommandModels []*CommandModel
 		h := newTestHelper(t, preloadedCommandModels)
 
 		// Act
-		cmd, err := h.repo.Get("nonexistent")
+		_, err := h.repo.Get("nonexistent")
 
 		// Assert
-		assert.NoError(t, err)
-		assert.Nil(t, cmd)
+		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
 	})
 }
 
@@ -131,7 +128,7 @@ func TestGormCommandRepository_Save(t *testing.T) {
 		// Verify the command was saved
 		actual, err := h.repo.Get("cmd3")
 		assert.NoError(t, err)
-		assert.Equal(t, &cmd, actual)
+		assert.Equal(t, cmd, actual)
 	})
 }
 
@@ -168,7 +165,7 @@ func TestGormCommandRepository_Edit(t *testing.T) {
 		// Verify the command was updated
 		actual, err := h.repo.Get(existingCommandBuilder.Build().Id)
 		assert.NoError(t, err)
-		assert.Equal(t, &editedCommand, actual)
+		assert.Equal(t, editedCommand, actual)
 	})
 }
 
@@ -192,11 +189,10 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Verify the command was deleted
-		deletedCommand, err := h.repo.Get(cmd.Id)
-		assert.NoError(t, err)
-		assert.Nil(t, deletedCommand)
+		_, err = h.repo.Get(cmd.Id)
+		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
 	})
-	t.Run("Should delete an existing command and adjust other commands positions", func(t *testing.T) {
+	t.Run("Should leave the positions of the remaining commands untouched", func(t *testing.T) {
 		// Arrange
 		projectId := "proj1"
 		cmd1 := test.NewCommandBuilder().
@@ -230,15 +226,15 @@ func TestGormCommandRepository_Delete(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 
-		// Verify positions were adjusted correctly
+		// Closing the gap is the ordering module's job, not the repository's
 		cmd1AfterDelete, err := h.repo.Get(cmd1.Id)
 		assert.NoError(t, err)
 
 		cmd3AfterDelete, err := h.repo.Get(cmd3.Id)
 		assert.NoError(t, err)
 
-		assert.Equal(t, cmd1.Position, cmd1AfterDelete.Position, "Expected cmd1 position to remain unchanged")
-		assert.Equal(t, cmd3.Position-1, cmd3AfterDelete.Position, "Expected cmd3 position to be adjusted after deletion of cmd2")
+		assert.Equal(t, cmd1.Position, cmd1AfterDelete.Position)
+		assert.Equal(t, cmd3.Position, cmd3AfterDelete.Position)
 	})
 }
 
@@ -271,45 +267,28 @@ func TestGormCommandRepository_DeleteAll(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Verify project commands were deleted
-		cmd1After, _ := h.repo.Get(cmd1.Id)
-		cmd2After, _ := h.repo.Get(cmd2.Id)
-		assert.Nil(t, cmd1After)
-		assert.Nil(t, cmd2After)
+		_, cmd1Err := h.repo.Get(cmd1.Id)
+		_, cmd2Err := h.repo.Get(cmd2.Id)
+		assert.ErrorIs(t, cmd1Err, domainerrors.ErrNotFound)
+		assert.ErrorIs(t, cmd2Err, domainerrors.ErrNotFound)
 
 		// Verify other project command remains
-		cmdOtherAfter, _ := h.repo.Get(cmdOther.Id)
-		assert.NotNil(t, cmdOtherAfter)
+		cmdOtherAfter, err := h.repo.Get(cmdOther.Id)
+		assert.NoError(t, err)
+		assert.Equal(t, cmdOther, cmdOtherAfter)
 	})
 }
 
-func arrange(preloadedCommandModels []*CommandModel) (repo *GormCommandRepository) {
-	// Initialize the database
+func arrange(t *testing.T, preloadedCommandModels []*CommandModel) (repo *GormCommandRepository) {
+	t.Helper()
+
 	ctx := context.Background()
-	gormDb, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-
-	db, err := gormDb.DB()
-	if err != nil {
-		panic(err)
-	}
-
-	// Execute migrations
-	err = goose.SetDialect("sqlite3")
-	if err != nil {
-		panic(err)
-	}
-
-	err = goose.UpContext(ctx, db, ".")
-	if err != nil {
-		panic(err)
-	}
+	gormDb := testdb.New(t)
 
 	for _, m := range preloadedCommandModels {
-		err = gorm.G[CommandModel](gormDb).Create(ctx, m)
+		err := gorm.G[CommandModel](gormDb).Create(ctx, m)
 		if err != nil {
-			panic(err)
+			t.Fatalf("failed to preload command: %v", err)
 		}
 	}
 

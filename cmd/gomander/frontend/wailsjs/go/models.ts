@@ -1,62 +1,3 @@
-export namespace app {
-	
-	export interface UseCases {
-	    GetUserConfig: any;
-	    SaveUserConfig: any;
-	    GetTranslation: any;
-	    GetSupportedLanguages: any;
-	    GetCurrentProject: any;
-	    GetAvailableProjects: any;
-	    OpenProject: any;
-	    CreateProject: any;
-	    EditProject: any;
-	    CloseProject: any;
-	    DeleteProject: any;
-	    ExportProject: any;
-	    ImportProject: any;
-	    GetProjectToImport: any;
-	    GetCommandGroups: any;
-	    CreateCommandGroup: any;
-	    UpdateCommandGroup: any;
-	    DeleteCommandGroup: any;
-	    RemoveCommandFromCommandGroup: any;
-	    ReorderCommandGroups: any;
-	    RunCommandGroup: any;
-	    StopCommandGroup: any;
-	    GetCommands: any;
-	    AddCommand: any;
-	    DuplicateCommand: any;
-	    RemoveCommand: any;
-	    EditCommand: any;
-	    ReorderCommands: any;
-	    RunCommand: any;
-	    StopCommand: any;
-	    GetRunningCommandIds: any;
-	}
-	export interface EventHandlers {
-	    CleanCommandGroupsOnCommandDeleted: any;
-	    CleanCommandGroupsOnProjectDeleted: any;
-	    CleanCommandsOnProjectDeleted: any;
-	    AddCommandToGroupOnCommandDuplicated: any;
-	}
-	export interface Dependencies {
-	    Logger: any;
-	    EventEmitter: any;
-	    Runner: any;
-	    CommandRepository: any;
-	    CommandGroupRepository: any;
-	    ProjectRepository: any;
-	    ConfigRepository: any;
-	    FsFacade: any;
-	    RuntimeFacade: any;
-	    EventBus: any;
-	    EventHandlers: EventHandlers;
-	    UseCases: UseCases;
-	}
-	
-
-}
-
 export namespace domain {
 	
 	export interface Command {
@@ -76,17 +17,6 @@ export namespace domain {
 	    commands: Command[];
 	    position: number;
 	}
-	export interface CommandGroupJSONv1 {
-	    id: string;
-	    name: string;
-	    commandIds: string[];
-	}
-	export interface CommandJSONv1 {
-	    id: string;
-	    name: string;
-	    command: string;
-	    workingDirectory: string;
-	}
 	export interface EnvironmentPath {
 	    id: string;
 	    path: string;
@@ -94,7 +24,6 @@ export namespace domain {
 	export interface Config {
 	    lastOpenedProjectId: string;
 	    environmentPaths: EnvironmentPath[];
-	    logLineLimit: number;
 	    locale: string;
 	}
 	
@@ -143,11 +72,6 @@ export namespace domain {
 	    "settings.title": string;
 	    "settings.tabs.user": string;
 	    "settings.tabs.project": string;
-	    "settings.tabs.experimental": string;
-	    "settings.experimental.title": string;
-	    "settings.experimental.description": string;
-	    "settings.experimental.xtermjs.label": string;
-	    "settings.experimental.xtermjs.description": string;
 	    "settings.saving.inProgress": string;
 	    "settings.saving.done": string;
 	    "aboutModal.version": string;
@@ -219,11 +143,7 @@ export namespace domain {
 	    "userSettingsForm.themeLight": string;
 	    "userSettingsForm.themeDark": string;
 	    "userSettingsForm.themeDescription": string;
-	    "userSettingsForm.logLimitLabel": string;
-	    "userSettingsForm.logLimitDescription": string;
 	    "userSettingsForm.validation.pathEmpty": string;
-	    "userSettingsForm.validation.logLimitMin": string;
-	    "userSettingsForm.validation.logLimitMax": string;
 	    "projectSettingsForm.sectionTitle": string;
 	    "projectSettingsForm.sectionDescription": string;
 	    "toast.command.runFailed": string;
@@ -258,6 +178,9 @@ export namespace domain {
 	    "toast.project.exportSuccess": string;
 	    "toast.project.exportFailed": string;
 	    "toast.project.openFolderAction": string;
+	    "toast.project.deleteSuccess": string;
+	    "toast.project.deleteFailed": string;
+	    "toast.project.closeFailed": string;
 	    "toast.settings.userSaveSuccess": string;
 	    "toast.settings.userSaveFailed": string;
 	    "toast.settings.projectSaveSuccess": string;
@@ -280,13 +203,6 @@ export namespace domain {
 	    name: string;
 	    workingDirectory: string;
 	}
-	export interface ProjectExportJSONv1 {
-	    version: number;
-	    name: string;
-	    workingDirectory: string;
-	    commands: CommandJSONv1[];
-	    commandGroups: CommandGroupJSONv1[];
-	}
 
 }
 
@@ -298,6 +214,28 @@ export namespace event {
 	    NEW_LOG_ENTRY = "new_log_entry",
 	    COMMAND_GROUP_DELETED = "command_group_deleted",
 	    COMMAND_ERROR_DETECTED = "command_error_detected",
+	}
+
+}
+
+export namespace main {
+	
+	export interface CommandBlueprint {
+	    id: string;
+	    name: string;
+	    command: string;
+	    workingDirectory: string;
+	}
+	export interface CommandGroupBlueprint {
+	    id: string;
+	    name: string;
+	    commandIds: string[];
+	}
+	export interface ProjectBlueprint {
+	    name: string;
+	    workingDirectory: string;
+	    commands: CommandBlueprint[];
+	    commandGroups: CommandGroupBlueprint[];
 	}
 
 }

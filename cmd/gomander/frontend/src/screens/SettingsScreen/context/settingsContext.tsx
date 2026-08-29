@@ -1,11 +1,11 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { type UseFormReturn, useForm } from "react-hook-form";
+import { createContext, useContext, useEffect, useState } from "react";
+import type { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
 
 import { LANGUAGE_LABELS } from "@/constants/languages.ts";
 import { translationsService } from "@/contracts/service.ts";
+import { useAutosavedForm } from "@/hooks/useAutosavedForm.ts";
 import {
 	type ProjectSettingsSchemaType,
 	projectSettingsSchema,
@@ -22,7 +22,6 @@ import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 export enum SettingsTab {
 	User = "user",
 	Project = "project",
-	Experimental = "experimental",
 }
 
 type SupportedLanguage = {
@@ -57,101 +56,28 @@ export const SettingsContextProvider = ({
 
 	const initialTab = state?.tab || SettingsTab.User;
 
-	//region Project settings
-
 	const projectInfo = useProjectStore((state) => state.projectInfo);
-
-	const [hasProjectPendingChanges, setHasProjectPendingChanges] =
-		useState(false);
-	const lastProjectSavedValues = useRef<ProjectSettingsSchemaType | null>(null);
-
-	const projectForm = useForm<ProjectSettingsSchemaType>({
-		resolver: zodResolver(projectSettingsSchema),
-		defaultValues: {
-			name: projectInfo?.name || "",
-			baseWorkingDirectory: projectInfo?.workingDirectory || "",
-		},
-	});
-
-	const projectFormWatcher = projectForm.watch();
-
-	// Autosave project settings
-	// biome-ignore lint/correctness/useExhaustiveDependencies: @noel-lopez
-	useEffect(() => {
-		const currentValues = projectForm.getValues();
-
-		if (lastProjectSavedValues.current === null) {
-			lastProjectSavedValues.current = JSON.parse(
-				JSON.stringify(currentValues),
-			);
-			return;
-		}
-
-		if (
-			JSON.stringify(currentValues) ===
-			JSON.stringify(lastProjectSavedValues.current)
-		) {
-			return;
-		}
-
-		setHasProjectPendingChanges(true);
-		const timeout = setTimeout(async () => {
-			lastProjectSavedValues.current = JSON.parse(
-				JSON.stringify(currentValues),
-			);
-			await projectForm.handleSubmit(saveProjectSettingsForm)();
-			setHasProjectPendingChanges(false);
-		}, 300);
-
-		return () => clearTimeout(timeout);
-	}, [projectForm, projectFormWatcher]);
-
-	//endregion
-
-	//region User settings
-
 	const userConfig = useUserConfigurationStore((state) => state.userConfig);
 	const { i18n } = useTranslation();
 
-	const [hasUserPendingChanges, setHasUserPendingChanges] = useState(false);
-	const lastUserSavedValues = useRef<UserSettingsSchemaType | null>(null);
+	const { form: projectForm, isPending: isProjectSavePending } =
+		useAutosavedForm({
+			schema: projectSettingsSchema,
+			defaultValues: {
+				name: projectInfo?.name || "",
+				baseWorkingDirectory: projectInfo?.workingDirectory || "",
+			},
+			save: saveProjectSettingsForm,
+		});
 
-	const userForm = useForm<UserSettingsSchemaType>({
-		resolver: zodResolver(userSettingsSchema),
+	const { form: userForm, isPending: isUserSavePending } = useAutosavedForm({
+		schema: userSettingsSchema,
 		defaultValues: {
 			environmentPaths: userConfig.environmentPaths,
-			logLineLimit: userConfig.logLineLimit,
 			locale: i18n.language,
 		},
+		save: saveUserSettingsForm,
 	});
-
-	const userFormWatcher = userForm.watch();
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: @noel-lopez
-	useEffect(() => {
-		const currentValues = userForm.getValues();
-
-		if (lastUserSavedValues.current === null) {
-			lastUserSavedValues.current = JSON.parse(JSON.stringify(currentValues));
-			return;
-		}
-
-		if (
-			JSON.stringify(currentValues) ===
-			JSON.stringify(lastUserSavedValues.current)
-		) {
-			return;
-		}
-
-		setHasUserPendingChanges(true);
-		const timeout = setTimeout(async () => {
-			lastUserSavedValues.current = JSON.parse(JSON.stringify(currentValues));
-			await userForm.handleSubmit(saveUserSettingsForm)();
-			setHasUserPendingChanges(false);
-		}, 300);
-
-		return () => clearTimeout(timeout);
-	}, [userForm, userFormWatcher]);
 
 	const [supportedLanguages, setSupportedLanguages] = useState<
 		SupportedLanguage[]
@@ -176,8 +102,6 @@ export const SettingsContextProvider = ({
 		loadSupportedLanguages();
 	}, []);
 
-	//endregion
-
 	const hasFormErrors =
 		Object.keys(projectForm.formState.errors).length > 0 ||
 		Object.keys(userForm.formState.errors).length > 0;
@@ -185,7 +109,7 @@ export const SettingsContextProvider = ({
 	const value: SettingsContextData = {
 		initialTab,
 		hasPendingChanges:
-			hasProjectPendingChanges || hasUserPendingChanges || hasFormErrors,
+			isProjectSavePending || isUserSavePending || hasFormErrors,
 		projectSettingsForm: projectForm,
 		userSettingsForm: userForm,
 		supportedLanguages,

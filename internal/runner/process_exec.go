@@ -18,27 +18,20 @@ func (p *execProcess) Start() ([]io.ReadCloser, error) {
 
 	stderrReader, stderrWriter, err := os.Pipe()
 	if err != nil {
-		_ = stdoutReader.Close()
-		_ = stdoutWriter.Close()
+		closeReaders(stdoutReader, stdoutWriter)
 		return nil, err
 	}
 
 	p.cmd.Stdout = stdoutWriter
 	p.cmd.Stderr = stderrWriter
 	if err := p.cmd.Start(); err != nil {
-		_ = stdoutReader.Close()
-		_ = stdoutWriter.Close()
-		_ = stderrReader.Close()
-		_ = stderrWriter.Close()
+		closeReaders(stdoutReader, stdoutWriter, stderrReader, stderrWriter)
 		return nil, err
 	}
 
 	// The child inherited its own write handles. Closing the parent's copies
-	// lets readers reach EOF after the child exits without letting Cmd.Wait
-	// close the reader sides before trailing output is drained.
-	_ = stdoutWriter.Close()
-	_ = stderrWriter.Close()
-
+	// lets readers reach EOF without allowing Cmd.Wait to close them early.
+	closeReaders(stdoutWriter, stderrWriter)
 	return []io.ReadCloser{stdoutReader, stderrReader}, nil
 }
 
@@ -48,4 +41,14 @@ func (p *execProcess) Wait() error {
 
 func (p *execProcess) PID() int {
 	return p.cmd.Process.Pid
+}
+
+func (p *execProcess) shouldSkipOutputLine(string) bool {
+	return false
+}
+
+func closeReaders(readers ...io.Closer) {
+	for _, reader := range readers {
+		_ = reader.Close()
+	}
 }

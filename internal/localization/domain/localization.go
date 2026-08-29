@@ -52,16 +52,11 @@ type Localization struct {
 	LogsSearchNext   string `json:"logs.searchNext"`
 
 	// settings screen
-	SettingsTitle                    string `json:"settings.title"`
-	SettingsTabsUser                 string `json:"settings.tabs.user"`
-	SettingsTabsProject              string `json:"settings.tabs.project"`
-	SettingsTabsExperimental         string `json:"settings.tabs.experimental"`
-	SettingsExperimentalTitle        string `json:"settings.experimental.title"`
-	SettingsExperimentalDescription  string `json:"settings.experimental.description"`
-	SettingsExperimentalXtermjsLabel string `json:"settings.experimental.xtermjs.label"`
-	SettingsExperimentalXtermjsDesc  string `json:"settings.experimental.xtermjs.description"`
-	SettingsSavingInProgress         string `json:"settings.saving.inProgress"`
-	SettingsSavingDone               string `json:"settings.saving.done"`
+	SettingsTitle            string `json:"settings.title"`
+	SettingsTabsUser         string `json:"settings.tabs.user"`
+	SettingsTabsProject      string `json:"settings.tabs.project"`
+	SettingsSavingInProgress string `json:"settings.saving.inProgress"`
+	SettingsSavingDone       string `json:"settings.saving.done"`
 
 	// aboutModal
 	AboutModalVersion            string `json:"aboutModal.version"`
@@ -144,11 +139,7 @@ type Localization struct {
 	UserSettingsFormThemeLight             string `json:"userSettingsForm.themeLight"`
 	UserSettingsFormThemeDark              string `json:"userSettingsForm.themeDark"`
 	UserSettingsFormThemeDescription       string `json:"userSettingsForm.themeDescription"`
-	UserSettingsFormLogLimitLabel          string `json:"userSettingsForm.logLimitLabel"`
-	UserSettingsFormLogLimitDescription    string `json:"userSettingsForm.logLimitDescription"`
 	UserSettingsFormValidationPathEmpty    string `json:"userSettingsForm.validation.pathEmpty"`
-	UserSettingsFormValidationLogLimitMin  string `json:"userSettingsForm.validation.logLimitMin"`
-	UserSettingsFormValidationLogLimitMax  string `json:"userSettingsForm.validation.logLimitMax"`
 
 	// projectSettingsForm
 	ProjectSettingsFormSectionTitle       string `json:"projectSettingsForm.sectionTitle"`
@@ -191,6 +182,9 @@ type Localization struct {
 	ToastProjectExportSuccess    string `json:"toast.project.exportSuccess"`
 	ToastProjectExportFailed     string `json:"toast.project.exportFailed"`
 	ToastProjectOpenFolderAction string `json:"toast.project.openFolderAction"`
+	ToastProjectDeleteSuccess    string `json:"toast.project.deleteSuccess"`
+	ToastProjectDeleteFailed     string `json:"toast.project.deleteFailed"`
+	ToastProjectCloseFailed      string `json:"toast.project.closeFailed"`
 
 	// toast.settings
 	ToastSettingsUserSaveSuccess    string `json:"toast.settings.userSaveSuccess"`

@@ -47,11 +47,6 @@
   "settings.title": "Settings",
   "settings.tabs.user": "User Settings",
   "settings.tabs.project": "Project Settings",
-  "settings.tabs.experimental": "Experimental",
-  "settings.experimental.title": "Experimental Features",
-  "settings.experimental.description": "Enable experimental features that are not yet stable.",
-  "settings.experimental.xtermjs.label": "Use xterm.js renderer",
-  "settings.experimental.xtermjs.description": "Enabled by default. Turn it off to go back to the classic log renderer.",
   "settings.saving.inProgress": "Saving...",
   "settings.saving.done": "All changes saved",
 
@@ -129,11 +124,7 @@
   "userSettingsForm.themeLight": "Light theme",
   "userSettingsForm.themeDark": "Dark theme",
   "userSettingsForm.themeDescription": "(The system theme will adapt to your operating system's theme settings)",
-  "userSettingsForm.logLimitLabel": "Log line limit",
-  "userSettingsForm.logLimitDescription": "Maximum number of log lines to keep per command (1-5000). The recommended value is 100. Bigger values may impact performance.",
   "userSettingsForm.validation.pathEmpty": "Path cannot be empty",
-  "userSettingsForm.validation.logLimitMin": "Must be at least 1",
-  "userSettingsForm.validation.logLimitMax": "Must be at most 5000",
 
   "projectSettingsForm.sectionTitle": "Project information",
   "projectSettingsForm.sectionDescription": "Configure your project details and basic settings.",
@@ -172,6 +163,9 @@
   "toast.project.exportSuccess": "Project exported successfully",
   "toast.project.exportFailed": "Failed to export the project",
   "toast.project.openFolderAction": "Open containing folder",
+  "toast.project.deleteSuccess": "Project deleted successfully",
+  "toast.project.deleteFailed": "Failed to delete the project",
+  "toast.project.closeFailed": "Failed to close the project",
 
   "toast.settings.userSaveSuccess": "User settings saved successfully",
   "toast.settings.userSaveFailed": "Failed to save user settings",
