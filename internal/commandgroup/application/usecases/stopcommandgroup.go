@@ -21,13 +21,13 @@ func NewStopCommandGroup(
 }
 
 func (uc *StopCommandGroup) Execute(commandGroupId string) error {
-	cmdGroup, err := uc.commandGroupRepository.Get(commandGroupId)
+	cmdGroup, err := uc.commandGroupRepository.GetWithCommandIds(commandGroupId)
 	if err != nil {
 		return err
 	}
 
-	for _, command := range cmdGroup.Commands {
-		if err := uc.commandRunner.StopRunningCommand(command.Id); err != nil {
+	for _, commandId := range cmdGroup.CommandIds {
+		if err := uc.commandRunner.StopRunningCommand(commandId); err != nil {
 			return err
 		}
 	}

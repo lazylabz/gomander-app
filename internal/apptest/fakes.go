@@ -345,6 +345,22 @@ func (r commandGroupRepositoryThatCanFail) Create(commandGroup *commandgroupdoma
 	return r.Repository.Create(commandGroup)
 }
 
+func (r commandGroupRepositoryThatCanFail) CreateWithCommandIds(commandGroup *commandgroupdomain.CommandGroupWithCommandIds) error {
+	if r.failures.commandGroupWrite != nil {
+		return r.failures.commandGroupWrite
+	}
+
+	return r.Repository.CreateWithCommandIds(commandGroup)
+}
+
+func (r commandGroupRepositoryThatCanFail) UpdateWithCommandIds(commandGroup *commandgroupdomain.CommandGroupWithCommandIds) error {
+	if r.failures.commandGroupWrite != nil {
+		return r.failures.commandGroupWrite
+	}
+
+	return r.Repository.UpdateWithCommandIds(commandGroup)
+}
+
 func (r commandGroupRepositoryThatCanFail) Update(commandGroup *commandgroupdomain.CommandGroup) error {
 	if r.failures.commandGroupWrite != nil {
 		return r.failures.commandGroupWrite

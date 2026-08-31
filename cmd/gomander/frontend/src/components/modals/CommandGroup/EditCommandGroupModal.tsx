@@ -36,7 +36,7 @@ export const EditCommandGroupModal = ({
 		resolver: zodResolver(formSchema),
 		values: {
 			name: commandGroup?.name || "",
-			commands: commandGroup?.commands.map((c) => c.id) || [],
+			commands: commandGroup?.commandIds || [],
 		},
 	});
 
@@ -48,7 +48,7 @@ export const EditCommandGroupModal = ({
 		const edited = await editCommandGroup({
 			...commandGroup,
 			name: values.name,
-			commands: values.commands,
+			commandIds: values.commands,
 		});
 		if (!edited) {
 			return;

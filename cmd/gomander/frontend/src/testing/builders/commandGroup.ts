@@ -6,7 +6,7 @@ export class CommandGroupBuilder {
 		projectId: crypto.randomUUID(),
 		name: "Test Command Group",
 		position: 0,
-		commands: [],
+		commandIds: [],
 	};
 
 	withId(id: string): this {
@@ -30,11 +30,11 @@ export class CommandGroupBuilder {
 	}
 
 	withCommands(...commands: Command[]): this {
-		this.data.commands = commands;
+		this.data.commandIds = commands.map((command) => command.id);
 		return this;
 	}
 
 	build(): CommandGroup {
-		return { ...this.data, commands: [...this.data.commands] };
+		return { ...this.data, commandIds: [...this.data.commandIds] };
 	}
 }

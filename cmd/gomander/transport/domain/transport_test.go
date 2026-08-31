@@ -69,7 +69,17 @@ func TestCommandGroup(t *testing.T) {
 		Position:  2,
 	}
 
-	t.Run("Should reach the frontend under the field names it already receives", func(t *testing.T) {
+	// The entity the DTO stands for: what the read path still carries, once
+	// narrowed to the Commands it names.
+	named := commandgroupdomain.CommandGroupWithCommandIds{
+		Id:         "group-id",
+		ProjectId:  "project-id",
+		Name:       "group-name",
+		CommandIds: []string{command.Id},
+		Position:   2,
+	}
+
+	t.Run("Should reach the frontend naming the commands the group holds", func(t *testing.T) {
 		// Act
 		encoded, err := json.Marshal(transport.FromCommandGroup(commandGroup))
 
@@ -79,7 +89,7 @@ func TestCommandGroup(t *testing.T) {
 			"id": "group-id",
 			"projectId": "project-id",
 			"name": "group-name",
-			"commands": [`+commandJSON+`],
+			"commandIds": ["command-id"],
 			"position": 2
 		}`, string(encoded))
 	})
@@ -89,11 +99,11 @@ func TestCommandGroup(t *testing.T) {
 		roundTripped := transport.FromCommandGroup(commandGroup).ToDomain()
 
 		// Assert
-		assert.Equal(t, commandGroup, roundTripped)
+		assert.Equal(t, named, roundTripped)
 	})
 
 	t.Run("Should say everything the entity says", func(t *testing.T) {
-		assertMirrors(t, commandGroup, transport.FromCommandGroup(commandGroup))
+		assertMirrors(t, named, transport.FromCommandGroup(commandGroup))
 	})
 }
 

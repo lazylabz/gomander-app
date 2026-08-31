@@ -16,8 +16,6 @@ export const cleanCommandGroupFromErrors = (commandGroupId: string) => {
 	}
 
 	setCommandIdsWithErrors(
-		commandIdsWithErrors.filter(
-			(id) => !commandGroup.commands.some((command) => command.id === id),
-		),
+		commandIdsWithErrors.filter((id) => !commandGroup.commandIds.includes(id)),
 	);
 };

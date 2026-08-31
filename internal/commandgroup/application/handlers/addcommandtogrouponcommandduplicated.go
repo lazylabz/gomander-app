@@ -5,6 +5,7 @@ import (
 	commanddomainevent "gomander/internal/command/domain/event"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	"gomander/internal/eventbus"
+	"gomander/internal/helpers/array"
 )
 
 type AddCommandToGroupOnCommandDuplicated struct {
@@ -35,28 +36,22 @@ func (h *AddCommandToGroupOnCommandDuplicated) Execute(e eventbus.Event) error {
 		return nil
 	}
 
-	commandGroup, err := h.commandGroupRepository.Get(event.InsideGroupId)
+	commandGroup, err := h.commandGroupRepository.GetWithCommandIds(event.InsideGroupId)
 	if err != nil {
 		return err
 	}
 
-	// Check if the command is already in the group
-	for _, cmd := range commandGroup.Commands {
-		if cmd.Id == event.CommandId {
-			return nil
-		}
+	if array.Contains(commandGroup.CommandIds, event.CommandId) {
+		return nil
 	}
 
-	command, err := h.commandRepository.Get(event.CommandId)
-	if err != nil {
+	// The Group names the Command rather than carrying it, but a Command that
+	// is not there must not gain a membership row.
+	if _, err := h.commandRepository.Get(event.CommandId); err != nil {
 		return err
 	}
 
-	commandGroup.Commands = append(commandGroup.Commands, command)
+	commandGroup.CommandIds = append(commandGroup.CommandIds, event.CommandId)
 
-	if err := h.commandGroupRepository.Update(&commandGroup); err != nil {
-		return err
-	}
-
-	return nil
+	return h.commandGroupRepository.UpdateWithCommandIds(&commandGroup)
 }

@@ -132,20 +132,12 @@ export const createInMemoryBackend = (
 				state.commands.push(duplicate);
 
 				const group = state.commandGroups.find((g) => g.id === groupId);
-				group?.commands.push(duplicate);
+				group?.commandIds.push(duplicate.id);
 			},
 			editCommand: async (command) => {
 				state.commands = state.commands.map((c) =>
 					c.id === command.id ? snapshot(command) : c,
 				);
-				// A group carries a copy of every command it holds, so an edit shows
-				// up there too.
-				state.commandGroups = state.commandGroups.map((g) => ({
-					...g,
-					commands: g.commands.map((c) =>
-						c.id === command.id ? snapshot(command) : c,
-					),
-				}));
 			},
 			reorderCommands: async (orderedCommandIds) => {
 				state.commands = reorderBy(state.commands, orderedCommandIds);
@@ -170,7 +162,10 @@ export const createInMemoryBackend = (
 			removeCommandFromGroup: async (commandId, groupId) => {
 				state.commandGroups = state.commandGroups.map((g) =>
 					g.id === groupId
-						? { ...g, commands: g.commands.filter((c) => c.id !== commandId) }
+						? {
+								...g,
+								commandIds: g.commandIds.filter((id) => id !== commandId),
+							}
 						: g,
 				);
 			},
@@ -189,10 +184,10 @@ export const createInMemoryBackend = (
 			removeCommand: async (commandId) => {
 				state.commands = state.commands.filter((c) => c.id !== commandId);
 				// Mirrors the backend event handler that prunes deleted commands from
-				// every group they belonged to.
+				// every group that named them.
 				state.commandGroups = state.commandGroups.map((g) => ({
 					...g,
-					commands: g.commands.filter((c) => c.id !== commandId),
+					commandIds: g.commandIds.filter((id) => id !== commandId),
 				}));
 			},
 			runCommand: async (commandId) => {

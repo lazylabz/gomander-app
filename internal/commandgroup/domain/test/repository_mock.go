@@ -46,6 +46,11 @@ func (m *MockCommandGroupRepository) Create(commandGroup *commandgroupdomain.Com
 	return args.Error(0)
 }
 
+func (m *MockCommandGroupRepository) CreateWithCommandIds(commandGroup *commandgroupdomain.CommandGroupWithCommandIds) error {
+	args := m.Called(commandGroup)
+	return args.Error(0)
+}
+
 func (m *MockCommandGroupRepository) Update(commandGroup *commandgroupdomain.CommandGroup) error {
 	args := m.Called(commandGroup)
 	return args.Error(0)

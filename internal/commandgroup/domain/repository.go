@@ -1,6 +1,10 @@
 package domain
 
 type Repository interface {
+	// Get, GetAll, GetAllContaining, Create and Update carry whole Commands.
+	// Only GetAll still has a caller - the read path - and all five go once it
+	// names the Commands it answers instead of carrying them.
+	//
 	// Get reports a missing Command Group as domainerrors.ErrNotFound, so a nil
 	// error guarantees a usable Command Group.
 	Get(id string) (CommandGroup, error)
@@ -19,8 +23,9 @@ type Repository interface {
 	GetAllContainingWithCommandIds(commandId string) ([]CommandGroupWithCommandIds, error)
 	Create(commandGroup *CommandGroup) error
 	Update(commandGroup *CommandGroup) error
-	// UpdateWithCommandIds writes what Update writes, from the form that names
-	// the Commands the Command Group holds instead of carrying them.
+	// The two writes below write what Create and Update write, from the form
+	// that names the Commands the Command Group holds instead of carrying them.
+	CreateWithCommandIds(commandGroup *CommandGroupWithCommandIds) error
 	UpdateWithCommandIds(commandGroup *CommandGroupWithCommandIds) error
 	Delete(commandGroupId string) error
 }

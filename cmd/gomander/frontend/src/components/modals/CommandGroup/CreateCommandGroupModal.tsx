@@ -49,7 +49,7 @@ export const CreateCommandGroupModal = ({
 			id: crypto.randomUUID(),
 			projectId: projectId,
 			name: values.name,
-			commands: values.commands,
+			commandIds: values.commands,
 		});
 		if (!created) {
 			return;
