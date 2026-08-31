@@ -360,9 +360,3 @@ func (r commandGroupRepositoryThatCanFail) Delete(commandGroupId string) error {
 
 	return r.Repository.Delete(commandGroupId)
 }
-
-func (r commandGroupRepositoryThatCanFail) Atomically(change func(commandgroupdomain.Repository) error) error {
-	return r.Repository.Atomically(func(repository commandgroupdomain.Repository) error {
-		return change(commandGroupRepositoryThatCanFail{Repository: repository, failures: r.failures})
-	})
-}

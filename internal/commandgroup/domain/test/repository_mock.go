@@ -63,9 +63,3 @@ func (m *MockCommandGroupRepository) GetAllContaining(commandId string) ([]comma
 	}
 	return args.Get(0).([]commandgroupdomain.CommandGroup), args.Error(1)
 }
-
-// Atomically runs change against this same mock: the transaction is the real
-// repository's business, and a test that stubs one is testing GORM.
-func (m *MockCommandGroupRepository) Atomically(change func(commandgroupdomain.Repository) error) error {
-	return change(m)
-}

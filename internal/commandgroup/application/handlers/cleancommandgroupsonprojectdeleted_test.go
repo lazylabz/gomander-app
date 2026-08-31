@@ -9,6 +9,7 @@ import (
 	handlerstest "gomander/internal/commandgroup/application/handlers/test"
 	"gomander/internal/commandgroup/domain/test"
 	projectdomainevent "gomander/internal/project/domain/event"
+	unitofworktest "gomander/internal/unitofwork/test"
 )
 
 // What the handler does to the Project's Command Groups is verified at the
@@ -18,7 +19,7 @@ func TestCleanCommandGroupsOnProjectDeleted(t *testing.T) {
 		// Arrange
 		mockRepo := new(test.MockCommandGroupRepository)
 		mockEventEmitter := new(handlerstest.MockEventEmitter)
-		sut := handlers.NewCleanCommandGroupsOnProjectDeleted(mockRepo, mockEventEmitter)
+		sut := handlers.NewCleanCommandGroupsOnProjectDeleted(unitofworktest.NewMockUnitOfWork(nil, nil, mockRepo), mockEventEmitter)
 
 		// Act
 		err := sut.Execute(FakeEvent{})

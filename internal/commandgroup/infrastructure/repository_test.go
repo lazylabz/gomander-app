@@ -2,7 +2,6 @@ package infrastructure_test
 
 import (
 	"context"
-	"errors"
 	"testing"
 	"time"
 
@@ -735,84 +734,6 @@ func TestGormCommandGroupRepository_GetAllContaining(t *testing.T) {
 		// Assert
 		assert.Nil(t, err)
 		assert.Empty(t, result)
-	})
-}
-
-func TestGormCommandGroupRepository_Atomically(t *testing.T) {
-	t.Run("Should keep the writes made inside it", func(t *testing.T) {
-		// Arrange
-		projectId := "project1"
-		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
-
-		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1).Build()
-		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd1).Build()
-
-		helper := newTestHelper(
-			t,
-			[]commandinfrastructure.CommandModel{commandinfrastructure.ToCommandModel(&cmd1)},
-			[]infrastructure.CommandGroupModel{
-				infrastructure.ToCommandGroupModel(&cmdGroup1),
-				infrastructure.ToCommandGroupModel(&cmdGroup2),
-			},
-			[]infrastructure.CommandToCommandGroupModel{
-				{CommandGroupId: cmdGroup1.Id, CommandId: cmd1.Id, Position: 0},
-				{CommandGroupId: cmdGroup2.Id, CommandId: cmd1.Id, Position: 0},
-			},
-		)
-
-		// Act
-		err := helper.repo.Atomically(func(repo domain.Repository) error {
-			if err := repo.Delete(cmdGroup1.Id); err != nil {
-				return err
-			}
-			return repo.Delete(cmdGroup2.Id)
-		})
-
-		// Assert
-		assert.Nil(t, err)
-
-		remaining, err := helper.repo.GetAll(projectId)
-		assert.Nil(t, err)
-		assert.Empty(t, remaining)
-	})
-
-	t.Run("Should undo every write it made when one of them fails", func(t *testing.T) {
-		// Arrange
-		projectId := "project1"
-		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
-
-		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1).Build()
-		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd1).Build()
-
-		helper := newTestHelper(
-			t,
-			[]commandinfrastructure.CommandModel{commandinfrastructure.ToCommandModel(&cmd1)},
-			[]infrastructure.CommandGroupModel{
-				infrastructure.ToCommandGroupModel(&cmdGroup1),
-				infrastructure.ToCommandGroupModel(&cmdGroup2),
-			},
-			[]infrastructure.CommandToCommandGroupModel{
-				{CommandGroupId: cmdGroup1.Id, CommandId: cmd1.Id, Position: 0},
-				{CommandGroupId: cmdGroup2.Id, CommandId: cmd1.Id, Position: 0},
-			},
-		)
-
-		expectedErr := errors.New("the second write failed")
-
-		// Act
-		err := helper.repo.Atomically(func(repo domain.Repository) error {
-			if err := repo.Delete(cmdGroup1.Id); err != nil {
-				return err
-			}
-			return expectedErr
-		})
-
-		// Assert
-		assert.ErrorIs(t, err, expectedErr)
-
-		remaining, err := helper.repo.GetAll(projectId)
-		assert.Nil(t, err)
-		assert.Equal(t, []domain.CommandGroup{cmdGroup1, cmdGroup2}, remaining)
 	})
 }
 
