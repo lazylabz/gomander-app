@@ -76,9 +76,6 @@ make dev
 make all
 ```
 
-> [!NOTE]
-> At the time this document was written, we currently don't have frontend tests.
-
 ## Commit Guidelines
 
 ### Commit Message Format
