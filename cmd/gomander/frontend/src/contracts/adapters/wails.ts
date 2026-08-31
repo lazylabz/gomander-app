@@ -42,7 +42,12 @@ import {
 } from "../../../wailsjs/go/main/WailsControllers";
 import { GetOs } from "../../../wailsjs/go/os_internal/UIOsHelper";
 import { GetComputedPath } from "../../../wailsjs/go/path/UiPathHelper";
-import { BrowserOpenURL, EventsOff, EventsOn } from "../../../wailsjs/runtime";
+import {
+	BrowserOpenURL,
+	ClipboardSetText,
+	EventsOff,
+	EventsOn,
+} from "../../../wailsjs/runtime";
 
 export const wailsBackend = {
 	data: {
@@ -93,6 +98,9 @@ export const wailsBackend = {
 	},
 	externalBrowser: {
 		browserOpenURL: BrowserOpenURL,
+	},
+	clipboard: {
+		setText: ClipboardSetText,
 	},
 	translations: {
 		getTranslation: GetTranslationController,

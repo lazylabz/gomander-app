@@ -32,6 +32,8 @@ export type InMemoryBackendState = {
 	downloadedReleases: string[];
 	installedBinaryPath: string | null;
 	openedUrls: string[];
+	clipboardText: string;
+	clipboardWriteResult: boolean;
 	openedFolders: string[];
 	exportedProjectIds: string[];
 };
@@ -71,6 +73,8 @@ const createState = (): InMemoryBackendState => ({
 	downloadedReleases: [],
 	installedBinaryPath: null,
 	openedUrls: [],
+	clipboardText: "",
+	clipboardWriteResult: true,
 	openedFolders: [],
 	exportedProjectIds: [],
 });
@@ -291,6 +295,15 @@ export const createInMemoryBackend = (
 		externalBrowser: {
 			browserOpenURL: (url) => {
 				state.openedUrls.push(url);
+			},
+		},
+
+		clipboard: {
+			setText: async (text) => {
+				if (state.clipboardWriteResult) {
+					state.clipboardText = text;
+				}
+				return state.clipboardWriteResult;
 			},
 		},
 

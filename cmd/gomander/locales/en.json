@@ -9,6 +9,7 @@
   "common.add": "Add",
   "common.advanced": "Advanced",
   "common.close": "Close",
+  "common.copy": "Copy",
 
   "sidebar.project.close": "Close",
   "sidebar.commands.title": "Commands",
@@ -175,6 +176,8 @@
   "toast.version.checkError": "Error checking for new releases",
   "toast.version.downloadFailed": "Failed to download the update",
   "toast.version.installFailed": "Failed to install the update",
+
+  "toast.clipboard.copyFailed": "Failed to copy to the clipboard",
 
   "toast.missingPath.message": "A command may have failed because its executable wasn't found in your environment paths.",
   "toast.missingPath.action": "Learn more",

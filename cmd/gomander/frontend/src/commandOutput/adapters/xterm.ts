@@ -69,7 +69,7 @@ export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
 		},
 		dispose: () => terminal.dispose(),
 
-		attach: (element) => {
+		attach: (element, copyText) => {
 			if (terminal.element) {
 				// Opened before — re-attaching the existing node keeps the scrollback
 				element.appendChild(terminal.element);
@@ -86,6 +86,23 @@ export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
 			terminal.loadAddon(search);
 
 			fit.fit();
+
+			terminal.attachCustomKeyEventHandler((event) => {
+				const isCopyShortcut =
+					event.ctrlKey && !event.altKey && event.key.toLowerCase() === "c";
+				if (!isCopyShortcut) {
+					return true;
+				}
+
+				event.preventDefault();
+				if (event.type === "keydown" && !event.repeat) {
+					const selection = terminal.getSelection();
+					if (selection) {
+						copyText(selection);
+					}
+				}
+				return false;
+			});
 
 			let lastQuery = "";
 			repaintSearch = () => {
@@ -126,9 +143,17 @@ export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
 						return () => handle.dispose();
 					},
 				},
+				hasSelection: () => terminal.hasSelection(),
+				copySelection: () => {
+					const selection = terminal.getSelection();
+					if (selection) {
+						copyText(selection);
+					}
+				},
 
 				detach: () => {
 					repaintSearch = null;
+					terminal.attachCustomKeyEventHandler(() => true);
 					search.dispose();
 					// Detach the DOM only — the emulator outlives the view
 					if (terminal.element && element.contains(terminal.element)) {
