@@ -1,34 +1,19 @@
 package usecases
 
 import (
-	"fmt"
-	"io/fs"
-	"strings"
+	"gomander/internal/localization"
 )
 
 type GetSupportedLanguages struct {
-	localeFs fs.FS
+	catalogue localization.Catalogue
 }
 
-func NewGetSupportedLanguages(localeFs fs.FS) *GetSupportedLanguages {
+func NewGetSupportedLanguages(catalogue localization.Catalogue) *GetSupportedLanguages {
 	return &GetSupportedLanguages{
-		localeFs: localeFs,
+		catalogue: catalogue,
 	}
 }
 
 func (uc *GetSupportedLanguages) Execute() ([]string, error) {
-	dirEntries, err := fs.ReadDir(uc.localeFs, "locales")
-	if err != nil {
-		return nil, fmt.Errorf("read locales directory: %w", err)
-	}
-
-	languages := make([]string, 0, len(dirEntries))
-	for _, d := range dirEntries {
-		if !d.IsDir() && strings.HasSuffix(d.Name(), ".json") {
-			languageCode := strings.TrimSuffix(d.Name(), ".json")
-			languages = append(languages, languageCode)
-		}
-	}
-
-	return languages, nil
+	return uc.catalogue.Locales()
 }

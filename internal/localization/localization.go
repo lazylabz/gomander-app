@@ -1,4 +1,4 @@
-package domain
+package localization
 
 type Localization struct {
 	// common

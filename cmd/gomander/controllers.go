@@ -2,7 +2,7 @@ package main
 
 import (
 	transport "gomander/cmd/gomander/transport/domain"
-	localizationdomain "gomander/internal/localization/domain"
+	"gomander/internal/localization"
 	projectusecases "gomander/internal/project/application/usecases"
 	"gomander/internal/usecases"
 )
@@ -181,7 +181,7 @@ func (wc *WailsControllers) InstallReleaseAndQuitController(binaryPath string) e
 
 // Localization controllers
 
-func (wc *WailsControllers) GetTranslationController(locale string) (*localizationdomain.Localization, error) {
+func (wc *WailsControllers) GetTranslationController(locale string) (*localization.Localization, error) {
 	return wc.useCases.GetTranslation.Execute(locale)
 }
 

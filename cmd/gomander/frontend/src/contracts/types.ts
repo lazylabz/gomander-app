@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/style/useLiteralEnumMembers: proxy to wails types */
-import type { domain } from "../../wailsjs/go/models.ts";
+import type { domain, localization } from "../../wailsjs/go/models.ts";
 import { event } from "../../wailsjs/go/models.ts";
 
 // Types
@@ -11,7 +11,7 @@ export type EnvironmentPath = domain.EnvironmentPath;
 export type ProjectExport = domain.ProjectBlueprint;
 export type CommandExport = domain.CommandBlueprint;
 export type CommandGroupExport = domain.CommandGroupBlueprint;
-export type Localization = domain.Localization;
+export type Localization = localization.Localization;
 
 // Enums
 export enum Event {
