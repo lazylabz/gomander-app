@@ -14,6 +14,6 @@ func NewUpdateCommandGroup(commandGroupRepo domain.Repository) *UpdateCommandGro
 	}
 }
 
-func (uc *UpdateCommandGroup) Execute(commandGroup *domain.CommandGroupWithCommandIds) error {
-	return uc.commandGroupRepository.UpdateWithCommandIds(commandGroup)
+func (uc *UpdateCommandGroup) Execute(commandGroup *domain.CommandGroup) error {
+	return uc.commandGroupRepository.Update(commandGroup)
 }

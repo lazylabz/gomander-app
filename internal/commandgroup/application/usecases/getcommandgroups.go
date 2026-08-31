@@ -17,9 +17,6 @@ func NewGetCommandGroups(openedProject openedproject.OpenedProject, commandGroup
 	}
 }
 
-// Execute is the last caller of the form that carries whole Commands. The
-// controller narrows them to the ids the frontend receives, so what the wire
-// speaks does not depend on it; the form goes when the embedded one does.
 func (uc *GetCommandGroups) Execute() ([]domain.CommandGroup, error) {
 	project, open, err := uc.openedProject.Find()
 	if err != nil {

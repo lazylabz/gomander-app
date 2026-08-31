@@ -63,7 +63,7 @@ func TestACommandGroupLosingItsLastCommand(t *testing.T) {
 		assert.NoError(t, err)
 		groups := commandGroupsOf(t, h)
 		assert.Len(t, groups, 1)
-		assert.Equal(t, []string{first.Id, third.Id}, array.Map(groups[0].Commands, commandId))
+		assert.Equal(t, []string{first.Id, third.Id}, groups[0].CommandIds)
 		assert.Empty(t, h.EmittedEvents())
 	})
 
@@ -88,7 +88,7 @@ func TestACommandGroupLosingItsLastCommand(t *testing.T) {
 		assert.Error(t, err)
 		groups := commandGroupsOf(t, h)
 		assert.Len(t, groups, 1)
-		assert.Equal(t, []string{onlyCommand.Id}, array.Map(groups[0].Commands, commandId))
+		assert.Equal(t, []string{onlyCommand.Id}, groups[0].CommandIds)
 	})
 }
 
@@ -118,7 +118,7 @@ func TestRemovingACommandFromACommandGroup(t *testing.T) {
 
 		groups := commandGroupsOf(t, h)
 		assert.Len(t, groups, 1)
-		assert.Equal(t, []string{kept.Id}, array.Map(groups[0].Commands, commandId))
+		assert.Equal(t, []string{kept.Id}, groups[0].CommandIds)
 
 		// Leaving a group is not leaving the project.
 		assert.Equal(t, []string{removed.Id, kept.Id}, array.Map(commandsOf(t, h), commandId))

@@ -79,7 +79,7 @@ func TestOrderingCommands(t *testing.T) {
 		commands := commandsOf(t, h)
 		groups := commandGroupsOf(t, h)
 		assert.Len(t, groups, 1)
-		assert.Equal(t, []string{original.Id, commands[1].Id}, array.Map(groups[0].Commands, commandId))
+		assert.Equal(t, []string{original.Id, commands[1].Id}, groups[0].CommandIds)
 	})
 
 	t.Run("Should renumber the list when commands are reordered", func(t *testing.T) {

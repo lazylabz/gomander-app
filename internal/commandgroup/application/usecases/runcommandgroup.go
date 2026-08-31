@@ -29,7 +29,7 @@ func NewRunCommandGroup(
 }
 
 func (uc *RunCommandGroup) Execute(commandGroupId string) error {
-	cmdGroup, err := uc.commandGroupRepository.GetWithCommandIds(commandGroupId)
+	cmdGroup, err := uc.commandGroupRepository.Get(commandGroupId)
 	if err != nil {
 		return err
 	}

@@ -8,8 +8,8 @@ import (
 // gone: the ones still standing, and the ones that ceased to exist because that
 // Command was their last.
 type Cascade struct {
-	Survived []CommandGroupWithCommandIds
-	Deleted  []CommandGroupWithCommandIds
+	Survived []CommandGroup
+	Deleted  []CommandGroup
 }
 
 // RemoveCommandFrom drops the Command from every Command Group given and
@@ -17,13 +17,13 @@ type Cascade struct {
 // answers only what is left; persisting that answer atomically is the caller's.
 //
 // Give it the Command Groups that held the Command, which
-// Repository.GetAllContainingWithCommandIds answers from the membership table.
+// Repository.GetAllContaining answers from the membership table.
 // The rule is decided on membership alone, so it answers the same whether or
 // not the Command's own record has already been deleted.
-func RemoveCommandFrom(commandGroups []CommandGroupWithCommandIds, commandId string) Cascade {
+func RemoveCommandFrom(commandGroups []CommandGroup, commandId string) Cascade {
 	cascade := Cascade{
-		Survived: make([]CommandGroupWithCommandIds, 0, len(commandGroups)),
-		Deleted:  make([]CommandGroupWithCommandIds, 0),
+		Survived: make([]CommandGroup, 0, len(commandGroups)),
+		Deleted:  make([]CommandGroup, 0),
 	}
 
 	for _, commandGroup := range commandGroups {

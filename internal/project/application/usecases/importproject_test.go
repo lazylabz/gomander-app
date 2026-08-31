@@ -52,7 +52,7 @@ func TestImportProject_Execute(t *testing.T) {
 		newWorkingDirectory := "/imported/project/dir"
 
 		commands := []domain.Command{cmd1, cmd2, cmd3}
-		commandGroups := []commandgroupdomain.CommandGroupWithCommandIds{cmdGroup1, cmdGroup2}
+		commandGroups := []commandgroupdomain.CommandGroup{cmdGroup1, cmdGroup2}
 
 		blueprint := projectdomain.Blueprint{
 			Name: "test",
@@ -64,7 +64,7 @@ func TestImportProject_Execute(t *testing.T) {
 					WorkingDirectory: cmd.WorkingDirectory,
 				}
 			}),
-			CommandGroups: array.Map(commandGroups, func(group commandgroupdomain.CommandGroupWithCommandIds) projectdomain.BlueprintCommandGroup {
+			CommandGroups: array.Map(commandGroups, func(group commandgroupdomain.CommandGroup) projectdomain.BlueprintCommandGroup {
 				return projectdomain.BlueprintCommandGroup{
 					Name:       group.Name,
 					CommandIds: group.CommandIds,
@@ -87,9 +87,9 @@ func TestImportProject_Execute(t *testing.T) {
 			capturedCommands = append(capturedCommands, args.Get(0).(*domain.Command))
 		}).Return(nil)
 
-		var capturedCommandGroups []*commandgroupdomain.CommandGroupWithCommandIds
-		mockCommandGroupRepository.On("CreateWithCommandIds", mock.Anything).Run(func(args mock.Arguments) {
-			capturedCommandGroups = append(capturedCommandGroups, args.Get(0).(*commandgroupdomain.CommandGroupWithCommandIds))
+		var capturedCommandGroups []*commandgroupdomain.CommandGroup
+		mockCommandGroupRepository.On("Create", mock.Anything).Run(func(args mock.Arguments) {
+			capturedCommandGroups = append(capturedCommandGroups, args.Get(0).(*commandgroupdomain.CommandGroup))
 		}).Return(nil)
 
 		// Act
@@ -222,7 +222,7 @@ func TestImportProject_Execute(t *testing.T) {
 
 		mockProjectRepository.On("Create", mock.Anything).Return(nil)
 		mockCommandRepository.On("Create", mock.Anything).Return(nil)
-		mockCommandGroupRepository.On("CreateWithCommandIds", mock.Anything).Return(assert.AnError)
+		mockCommandGroupRepository.On("Create", mock.Anything).Return(assert.AnError)
 
 		// Act
 		err := sut.Execute(blueprint, "Imported Project", "/imported/project/dir")

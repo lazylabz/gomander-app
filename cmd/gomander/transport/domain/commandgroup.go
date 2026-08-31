@@ -1,7 +1,6 @@
 package domain
 
 import (
-	commanddomain "gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 )
 
@@ -17,14 +16,12 @@ type CommandGroup struct {
 	Position   int      `json:"position"`
 }
 
-// FromCommandGroup narrows the Commands the read path still carries to the ids
-// the wire speaks in. It becomes a copy once that read path names them too.
 func FromCommandGroup(commandGroup commandgroupdomain.CommandGroup) CommandGroup {
 	return CommandGroup{
 		Id:         commandGroup.Id,
 		ProjectId:  commandGroup.ProjectId,
 		Name:       commandGroup.Name,
-		CommandIds: mapSlice(commandGroup.Commands, func(command commanddomain.Command) string { return command.Id }),
+		CommandIds: commandGroup.CommandIds,
 		Position:   commandGroup.Position,
 	}
 }
@@ -33,8 +30,8 @@ func FromCommandGroups(commandGroups []commandgroupdomain.CommandGroup) []Comman
 	return mapSlice(commandGroups, FromCommandGroup)
 }
 
-func (g CommandGroup) ToDomain() commandgroupdomain.CommandGroupWithCommandIds {
-	return commandgroupdomain.CommandGroupWithCommandIds{
+func (g CommandGroup) ToDomain() commandgroupdomain.CommandGroup {
+	return commandgroupdomain.CommandGroup{
 		Id:         g.Id,
 		ProjectId:  g.ProjectId,
 		Name:       g.Name,

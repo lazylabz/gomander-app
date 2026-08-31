@@ -39,7 +39,7 @@ func TestGormUnitOfWork_Do(t *testing.T) {
 			if err := repositories.Commands.Create(&command); err != nil {
 				return err
 			}
-			return repositories.CommandGroups.CreateWithCommandIds(&commandGroup)
+			return repositories.CommandGroups.Create(&commandGroup)
 		})
 
 		// Assert
@@ -53,9 +53,9 @@ func TestGormUnitOfWork_Do(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, []commanddomain.Command{command}, storedCommands)
 
-		storedCommandGroups, err := commandgroupinfrastructure.NewGormCommandGroupRepository(db, ctx).GetAllWithCommandIds(project.Id)
+		storedCommandGroups, err := commandgroupinfrastructure.NewGormCommandGroupRepository(db, ctx).GetAll(project.Id)
 		assert.NoError(t, err)
-		assert.Equal(t, []commandgroupdomain.CommandGroupWithCommandIds{commandGroup}, storedCommandGroups)
+		assert.Equal(t, []commandgroupdomain.CommandGroup{commandGroup}, storedCommandGroups)
 	})
 
 	t.Run("Should undo every write it made when one of them fails", func(t *testing.T) {
@@ -76,7 +76,7 @@ func TestGormUnitOfWork_Do(t *testing.T) {
 			if err := repositories.Commands.Create(&command); err != nil {
 				return err
 			}
-			if err := repositories.CommandGroups.CreateWithCommandIds(&commandGroup); err != nil {
+			if err := repositories.CommandGroups.Create(&commandGroup); err != nil {
 				return err
 			}
 			return assert.AnError
@@ -93,7 +93,7 @@ func TestGormUnitOfWork_Do(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Empty(t, storedCommands)
 
-		storedCommandGroups, err := commandgroupinfrastructure.NewGormCommandGroupRepository(db, ctx).GetAllWithCommandIds(project.Id)
+		storedCommandGroups, err := commandgroupinfrastructure.NewGormCommandGroupRepository(db, ctx).GetAll(project.Id)
 		assert.NoError(t, err)
 		assert.Empty(t, storedCommandGroups)
 	})

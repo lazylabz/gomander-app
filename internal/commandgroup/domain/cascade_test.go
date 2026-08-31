@@ -19,7 +19,7 @@ func TestRemoveCommandFrom(t *testing.T) {
 		commandGroup := commandgrouptest.NewCommandGroupBuilder().WithCommands(removed, kept).Build()
 
 		// Act
-		cascade := domain.RemoveCommandFrom([]domain.CommandGroupWithCommandIds{commandGroup}, removed.Id)
+		cascade := domain.RemoveCommandFrom([]domain.CommandGroup{commandGroup}, removed.Id)
 
 		// Assert
 		assert.Empty(t, cascade.Deleted)
@@ -33,7 +33,7 @@ func TestRemoveCommandFrom(t *testing.T) {
 		commandGroup := commandgrouptest.NewCommandGroupBuilder().WithCommands(onlyCommand).Build()
 
 		// Act
-		cascade := domain.RemoveCommandFrom([]domain.CommandGroupWithCommandIds{commandGroup}, onlyCommand.Id)
+		cascade := domain.RemoveCommandFrom([]domain.CommandGroup{commandGroup}, onlyCommand.Id)
 
 		// Assert
 		assert.Empty(t, cascade.Survived)
@@ -49,7 +49,7 @@ func TestRemoveCommandFrom(t *testing.T) {
 		surviving := commandgrouptest.NewCommandGroupBuilder().WithCommands(kept, removed).Build()
 
 		// Act
-		cascade := domain.RemoveCommandFrom([]domain.CommandGroupWithCommandIds{emptied, surviving}, removed.Id)
+		cascade := domain.RemoveCommandFrom([]domain.CommandGroup{emptied, surviving}, removed.Id)
 
 		// Assert
 		assert.Equal(t, []string{surviving.Id}, idsOf(cascade.Survived))
@@ -63,7 +63,7 @@ func TestRemoveCommandFrom(t *testing.T) {
 		commandGroup := commandgrouptest.NewCommandGroupBuilder().WithCommands(removed, kept).Build()
 
 		// Act
-		domain.RemoveCommandFrom([]domain.CommandGroupWithCommandIds{commandGroup}, removed.Id)
+		domain.RemoveCommandFrom([]domain.CommandGroup{commandGroup}, removed.Id)
 
 		// Assert
 		assert.Equal(t, []string{removed.Id, kept.Id}, commandGroup.CommandIds)
@@ -79,8 +79,8 @@ func TestRemoveCommandFrom(t *testing.T) {
 	})
 }
 
-func idsOf(commandGroups []domain.CommandGroupWithCommandIds) []string {
-	return array.Map(commandGroups, func(commandGroup domain.CommandGroupWithCommandIds) string {
+func idsOf(commandGroups []domain.CommandGroup) []string {
+	return array.Map(commandGroups, func(commandGroup domain.CommandGroup) string {
 		return commandGroup.Id
 	})
 }

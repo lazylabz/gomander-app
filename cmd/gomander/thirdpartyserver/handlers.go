@@ -108,8 +108,8 @@ func (s *ThirdPartyIntegrationsServer) handleGetCommandGroups(w http.ResponseWri
 		return map[string]interface{}{
 			"id":              group.Id,
 			"name":            group.Name,
-			"commands":        len(group.Commands),
-			"runningCommands": runningCommands.CountIn(group.Commands),
+			"commands":        len(group.CommandIds),
+			"runningCommands": runningCommands.CountIn(group.CommandIds),
 		}
 	})
 
