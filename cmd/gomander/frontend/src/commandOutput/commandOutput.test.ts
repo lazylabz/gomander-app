@@ -10,6 +10,7 @@ import {
 	FLUSH_INTERVAL_MS,
 	LOG_TAIL_SIZE,
 	resetCommandOutput,
+	resetCommandOutputForNewRun,
 	setCommandOutputTheme,
 } from "@/commandOutput/commandOutput.ts";
 import { TERMINAL_SCROLLBACK } from "@/commandOutput/ports.ts";
@@ -336,6 +337,19 @@ describe("the command output pipeline", () => {
 			expect(commandOutputTail("cmd-1")).toEqual([]);
 		});
 
+		it("Should drop an unflushed opening line too, since the screen was asked to be empty", () => {
+			// Arrange
+			attachCommandOutput("cmd-1", document.createElement("div"));
+			appendCommandLogEntry("cmd-1", "pnpm dev", LogEntryKind.COMMAND);
+
+			// Act
+			resetCommandOutput("cmd-1");
+			flush();
+
+			// Assert
+			expect(terminalOf("cmd-1").written).toEqual([]);
+		});
+
 		it("Should leave the output of the other commands alone", () => {
 			// Arrange
 			attachCommandOutput("cmd-2", document.createElement("div"));
@@ -350,6 +364,65 @@ describe("the command output pipeline", () => {
 			expect(terminalOf("cmd-2").written).toEqual([
 				"\x1b[90m[09:07:02]\x1b[0m untouched",
 			]);
+		});
+	});
+
+	describe("resetting for a new run", () => {
+		const openingLine = "\x1b[90m[09:07:02]\x1b[0m \x1b[1;36mpnpm dev\x1b[0m";
+
+		it("Should keep the line naming the command that is starting", () => {
+			// Arrange: the runner sends the opening line before it announces the
+			// process started, so it is buffered when the reset arrives.
+			attachCommandOutput("cmd-1", document.createElement("div"));
+			appendCommandLogEntry("cmd-1", "pnpm dev", LogEntryKind.COMMAND);
+
+			// Act
+			resetCommandOutputForNewRun("cmd-1");
+			flush();
+
+			// Assert
+			expect(terminalOf("cmd-1").written).toEqual([openingLine]);
+		});
+
+		it("Should drop the unflushed output of the run that just ended", () => {
+			// Arrange
+			attachCommandOutput("cmd-1", document.createElement("div"));
+			appendCommandOutput("cmd-1", ["from the previous run"]);
+			appendCommandLogEntry("cmd-1", "pnpm dev", LogEntryKind.COMMAND);
+
+			// Act
+			resetCommandOutputForNewRun("cmd-1");
+			flush();
+
+			// Assert
+			expect(terminalOf("cmd-1").written).toEqual([openingLine]);
+		});
+
+		it("Should keep it for a terminal that is not on screen yet", () => {
+			// Arrange
+			appendCommandLogEntry("cmd-1", "pnpm dev", LogEntryKind.COMMAND);
+
+			// Act
+			resetCommandOutputForNewRun("cmd-1");
+			flush();
+			attachCommandOutput("cmd-1", document.createElement("div"));
+
+			// Assert
+			expect(terminalOf("cmd-1").written).toEqual([openingLine]);
+		});
+
+		it("Should reset the terminal of the run that just ended", () => {
+			// Arrange
+			attachCommandOutput("cmd-1", document.createElement("div"));
+			appendCommandOutput("cmd-1", ["from the previous run"]);
+			flush();
+
+			// Act
+			resetCommandOutputForNewRun("cmd-1");
+
+			// Assert
+			expect(terminalOf("cmd-1").resets).toBe(1);
+			expect(terminalOf("cmd-1").written).toEqual([]);
 		});
 	});
 
