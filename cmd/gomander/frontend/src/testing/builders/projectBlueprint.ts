@@ -1,11 +1,11 @@
 import type {
-	CommandExport,
-	CommandGroupExport,
-	ProjectExport,
+	CommandBlueprint,
+	CommandGroupBlueprint,
+	ProjectBlueprint,
 } from "@/contracts/types.ts";
 
-export class ProjectExportBuilder {
-	private data: ProjectExport = {
+export class ProjectBlueprintBuilder {
+	private data: ProjectBlueprint = {
 		name: "Test Project",
 		workingDirectory: "/app",
 		commands: [],
@@ -22,17 +22,17 @@ export class ProjectExportBuilder {
 		return this;
 	}
 
-	withCommands(...commands: CommandExport[]): this {
+	withCommands(...commands: CommandBlueprint[]): this {
 		this.data.commands = commands;
 		return this;
 	}
 
-	withCommandGroups(...commandGroups: CommandGroupExport[]): this {
+	withCommandGroups(...commandGroups: CommandGroupBlueprint[]): this {
 		this.data.commandGroups = commandGroups;
 		return this;
 	}
 
-	build(): ProjectExport {
+	build(): ProjectBlueprint {
 		return {
 			...this.data,
 			commands: [...this.data.commands],

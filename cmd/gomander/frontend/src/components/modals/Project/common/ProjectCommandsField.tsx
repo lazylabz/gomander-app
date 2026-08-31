@@ -2,7 +2,7 @@ import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import type { FormSchemaType } from "@/components/modals/Project/common/importAndExportSchema.ts";
-import type { ProjectExport } from "@/contracts/types.ts";
+import type { ProjectBlueprint } from "@/contracts/types.ts";
 import { Checkbox } from "@/design-system/components/ui/checkbox.tsx";
 import {
 	FormControl,
@@ -15,7 +15,7 @@ export const ProjectCommandsField = ({
 	commands,
 	onChange,
 }: {
-	commands: ProjectExport["commands"];
+	commands: ProjectBlueprint["commands"];
 	onChange?: (selectedCommandIds: string[]) => void;
 }) => {
 	const { t } = useTranslation();

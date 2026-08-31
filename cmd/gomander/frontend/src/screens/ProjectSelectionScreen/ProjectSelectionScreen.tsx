@@ -8,7 +8,7 @@ import { CreateProjectModal } from "@/components/modals/Project/CreateProjectMod
 import { DeleteProjectModal } from "@/components/modals/Project/DeleteProjectModal.tsx";
 import { ImportProjectModal } from "@/components/modals/Project/ImportProjectModal.tsx";
 import { dataService } from "@/contracts/service.ts";
-import type { ProjectExport } from "@/contracts/types.ts";
+import type { ProjectBlueprint } from "@/contracts/types.ts";
 import { Button } from "@/design-system/components/ui/button.tsx";
 import { ButtonGroup } from "@/design-system/components/ui/button-group.tsx";
 import {
@@ -34,7 +34,7 @@ export const ProjectSelectionScreen = () => {
 	const navigate = useNavigate();
 
 	const [projectBeingImported, setProjectBeingImported] =
-		useState<ProjectExport | null>(null);
+		useState<ProjectBlueprint | null>(null);
 
 	const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false);
 

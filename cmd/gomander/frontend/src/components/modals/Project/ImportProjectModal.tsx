@@ -10,7 +10,7 @@ import {
 import { ProjectCommandGroupsField } from "@/components/modals/Project/common/ProjectCommandGroupsField.tsx";
 import { ProjectCommandsField } from "@/components/modals/Project/common/ProjectCommandsField.tsx";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
-import type { ProjectExport } from "@/contracts/types.ts";
+import type { ProjectBlueprint } from "@/contracts/types.ts";
 import {
 	Accordion,
 	AccordionContent,
@@ -35,7 +35,7 @@ export const ImportProjectModal = ({
 }: {
 	open: boolean;
 	onClose: () => void;
-	project: ProjectExport | null;
+	project: ProjectBlueprint | null;
 }) => {
 	const { t } = useTranslation();
 	const form = useForm<FormSchemaType>({
@@ -60,7 +60,7 @@ export const ImportProjectModal = ({
 			return;
 		}
 
-		const projectWithSelectedCommandsAndCommandGroups: ProjectExport = {
+		const projectWithSelectedCommandsAndCommandGroups: ProjectBlueprint = {
 			...project,
 			commands: project.commands.filter((c) => values.commands.includes(c.id)),
 			commandGroups: project.commandGroups.filter((cg) =>

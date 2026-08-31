@@ -9,7 +9,7 @@ import type {
 	EventData,
 	Localization,
 	Project,
-	ProjectExport,
+	ProjectBlueprint,
 	UserConfig,
 } from "@/contracts/types.ts";
 
@@ -21,8 +21,8 @@ export type InMemoryBackendState = {
 	userConfig: UserConfig;
 	runningCommandIds: string[];
 	runningGroupIds: string[];
-	projectToImport: ProjectExport;
-	importedProjects: ProjectExport[];
+	projectToImport: ProjectBlueprint;
+	importedProjects: ProjectBlueprint[];
 	translations: Record<string, Localization>;
 	supportedLanguages: string[];
 	os: string;
@@ -41,7 +41,7 @@ export type InMemoryBackend = BackendServices & {
 	emit: <E extends Event>(event: E, data: EventData[E]) => void;
 };
 
-const emptyProjectExport: ProjectExport = {
+const emptyProjectBlueprint: ProjectBlueprint = {
 	name: "",
 	workingDirectory: "",
 	commands: [],
@@ -60,7 +60,7 @@ const createState = (): InMemoryBackendState => ({
 	},
 	runningCommandIds: [],
 	runningGroupIds: [],
-	projectToImport: emptyProjectExport,
+	projectToImport: emptyProjectBlueprint,
 	importedProjects: [],
 	translations: {},
 	supportedLanguages: ["en"],
