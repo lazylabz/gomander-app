@@ -2,7 +2,7 @@ import { Fragment, useEffect, useRef } from "react";
 
 import {
 	appendCommandLogEntry,
-	resetCommandOutput,
+	resetCommandOutputForNewRun,
 	setCommandOutputTheme,
 } from "@/commandOutput/commandOutput.ts";
 import { useTheme } from "@/contexts/theme.tsx";
@@ -60,7 +60,7 @@ export const EventListenersContainer = () => {
 			Event.PROCESS_STARTED,
 			(data: EventData[Event.PROCESS_STARTED]) => {
 				updateCommandStatus(data, CommandStatus.RUNNING);
-				resetCommandOutput(data);
+				resetCommandOutputForNewRun(data);
 			},
 		);
 
