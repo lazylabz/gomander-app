@@ -38,6 +38,34 @@ export namespace domain {
 	    locale: string;
 	}
 	
+	export interface Project {
+	    id: string;
+	    name: string;
+	    workingDirectory: string;
+	}
+	export interface ProjectBlueprint {
+	    name: string;
+	    workingDirectory: string;
+	    commands: CommandBlueprint[];
+	    commandGroups: CommandGroupBlueprint[];
+	}
+
+}
+
+export namespace event {
+	
+	export enum Event {
+	    PROCESS_FINISHED = "process_finished",
+	    PROCESS_STARTED = "process_started",
+	    NEW_LOG_ENTRY = "new_log_entry",
+	    COMMAND_GROUP_DELETED = "command_group_deleted",
+	    COMMAND_ERROR_DETECTED = "command_error_detected",
+	}
+
+}
+
+export namespace localization {
+	
 	export interface Localization {
 	    "common.cancel": string;
 	    "common.save": string;
@@ -208,29 +236,6 @@ export namespace domain {
 	    "modal.missingPath.howToStep2": string;
 	    "modal.missingPath.commandPlaceholder": string;
 	    "modal.missingPath.goToSettings": string;
-	}
-	export interface Project {
-	    id: string;
-	    name: string;
-	    workingDirectory: string;
-	}
-	export interface ProjectBlueprint {
-	    name: string;
-	    workingDirectory: string;
-	    commands: CommandBlueprint[];
-	    commandGroups: CommandGroupBlueprint[];
-	}
-
-}
-
-export namespace event {
-	
-	export enum Event {
-	    PROCESS_FINISHED = "process_finished",
-	    PROCESS_STARTED = "process_started",
-	    NEW_LOG_ENTRY = "new_log_entry",
-	    COMMAND_GROUP_DELETED = "command_group_deleted",
-	    COMMAND_ERROR_DETECTED = "command_error_detected",
 	}
 
 }

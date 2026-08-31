@@ -72,8 +72,8 @@ type Harness struct {
 //
 // The graph below mirrors buildDeps in cmd/gomander/main.go, which is where the
 // app wires the same pieces together. The localization use cases are the one
-// omission: they read the locale files embedded in the desktop binary, and no
-// backend behaviour depends on them.
+// omission: they answer from the locale files embedded in the desktop binary,
+// and no backend behaviour depends on them.
 func New(t *testing.T) *Harness {
 	t.Helper()
 

@@ -25,6 +25,7 @@ import (
 	"gomander/internal/eventbus"
 	"gomander/internal/facade"
 	localizationusecases "gomander/internal/localization/application/usecases"
+	localizationinfrastructure "gomander/internal/localization/infrastructure"
 	"gomander/internal/logger"
 	"gomander/internal/openedproject"
 	projectusecases "gomander/internal/project/application/usecases"
@@ -221,8 +222,9 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*i
 	getUserConfig := configusecases.NewGetUserConfig(configRepo)
 	saveUserConfig := configusecases.NewSaveUserConfig(configRepo)
 	// Localization
-	getTranslation := localizationusecases.NewGetTranslation(localeFs)
-	getSupportedLanguages := localizationusecases.NewGetSupportedLanguages(localeFs)
+	localeFiles := localizationinfrastructure.NewLocaleFiles(localeFs)
+	getTranslation := localizationusecases.NewGetTranslation(localeFiles)
+	getSupportedLanguages := localizationusecases.NewGetSupportedLanguages(localeFiles)
 	// Projects
 	getCurrentProject := projectusecases.NewGetCurrentProject(openedProject)
 	getAvailableProjects := projectusecases.NewGetAvailableProjects(projectRepo)

@@ -76,6 +76,12 @@ release feed for the latest published one, and updates by downloading that one's
 binary and handing it to the operating system.
 _Avoid_: version (that is the number a Release is named by), update, build
 
+**Translation Catalogue**:
+The UI copy Gomander ships, one Localization per locale. A locale is supported
+because the Catalogue holds it; what the copy is stored as, and how the files
+that carry it are named, is the adapter's business and nobody else's.
+_Avoid_: i18n bundle, locale files (that is one adapter's storage), strings
+
 **Transport DTO**:
 The shape a controller hands to the frontend, or takes from it, together with
 the mapping to and from the entity behind it. It is what the wire is allowed to
