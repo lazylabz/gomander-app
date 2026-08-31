@@ -63,7 +63,7 @@ func (h *CleanCommandGroupsOnCommandDeleted) applyTheCascadeFor(commandId string
 	var cascade commandgroupdomain.Cascade
 
 	err := h.unitOfWork.Do(func(repositories unitofwork.Repositories) error {
-		commandGroups, err := repositories.CommandGroups.GetAllContaining(commandId)
+		commandGroups, err := repositories.CommandGroups.GetAllContainingWithCommandIds(commandId)
 		if err != nil {
 			return err
 		}
@@ -71,7 +71,7 @@ func (h *CleanCommandGroupsOnCommandDeleted) applyTheCascadeFor(commandId string
 		cascade = commandgroupdomain.RemoveCommandFrom(commandGroups, commandId)
 
 		for i := range cascade.Survived {
-			if err := repositories.CommandGroups.Update(&cascade.Survived[i]); err != nil {
+			if err := repositories.CommandGroups.UpdateWithCommandIds(&cascade.Survived[i]); err != nil {
 				return err
 			}
 		}
@@ -108,7 +108,7 @@ func (h *CleanCommandGroupsOnCommandDeleted) closeTheGapsLeftIn(projectIds []str
 	return nil
 }
 
-func projectIdsOf(commandGroups []commandgroupdomain.CommandGroup) []string {
+func projectIdsOf(commandGroups []commandgroupdomain.CommandGroupWithCommandIds) []string {
 	projectIds := make([]string, 0, len(commandGroups))
 
 	for _, commandGroup := range commandGroups {

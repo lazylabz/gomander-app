@@ -19,5 +19,8 @@ type Repository interface {
 	GetAllContainingWithCommandIds(commandId string) ([]CommandGroupWithCommandIds, error)
 	Create(commandGroup *CommandGroup) error
 	Update(commandGroup *CommandGroup) error
+	// UpdateWithCommandIds writes what Update writes, from the form that names
+	// the Commands the Command Group holds instead of carrying them.
+	UpdateWithCommandIds(commandGroup *CommandGroupWithCommandIds) error
 	Delete(commandGroupId string) error
 }

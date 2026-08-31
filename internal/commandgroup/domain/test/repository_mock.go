@@ -51,6 +51,11 @@ func (m *MockCommandGroupRepository) Update(commandGroup *commandgroupdomain.Com
 	return args.Error(0)
 }
 
+func (m *MockCommandGroupRepository) UpdateWithCommandIds(commandGroup *commandgroupdomain.CommandGroupWithCommandIds) error {
+	args := m.Called(commandGroup)
+	return args.Error(0)
+}
+
 func (m *MockCommandGroupRepository) Delete(commandGroupId string) error {
 	args := m.Called(commandGroupId)
 	return args.Error(0)
