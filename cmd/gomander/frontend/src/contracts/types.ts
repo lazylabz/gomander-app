@@ -8,9 +8,9 @@ export type UserConfig = domain.Config;
 export type CommandGroup = domain.CommandGroup;
 export type Project = domain.Project;
 export type EnvironmentPath = domain.EnvironmentPath;
-export type ProjectExport = domain.ProjectBlueprint;
-export type CommandExport = domain.CommandBlueprint;
-export type CommandGroupExport = domain.CommandGroupBlueprint;
+export type ProjectBlueprint = domain.ProjectBlueprint;
+export type CommandBlueprint = domain.CommandBlueprint;
+export type CommandGroupBlueprint = domain.CommandGroupBlueprint;
 export type Localization = localization.Localization;
 
 // Enums

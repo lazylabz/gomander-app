@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetBackendServices } from "@/contracts/service.ts";
 import { projectStore } from "@/store/projectStore.ts";
 import { installInMemoryBackend } from "@/testing/backend.ts";
-import { ProjectExportBuilder } from "@/testing/builders/projectExport.ts";
+import { ProjectBlueprintBuilder } from "@/testing/builders/projectBlueprint.ts";
 import { installTranslations } from "@/testing/i18n.ts";
 import { importProject } from "@/useCases/project/importProject.ts";
 
@@ -14,7 +14,7 @@ describe("importProject", () => {
 	const toastSuccess = vi.spyOn(toast, "success");
 	const toastError = vi.spyOn(toast, "error");
 
-	const projectToImport = new ProjectExportBuilder()
+	const projectToImport = new ProjectBlueprintBuilder()
 		.withName("Exported project")
 		.build();
 

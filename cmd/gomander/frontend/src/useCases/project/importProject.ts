@@ -1,14 +1,14 @@
 import { toast } from "sonner";
 
 import { dataService } from "@/contracts/service.ts";
-import type { ProjectExport } from "@/contracts/types.ts";
+import type { ProjectBlueprint } from "@/contracts/types.ts";
 import i18n from "@/design-system/lib/i18n.ts";
 import { parseError } from "@/helpers/errorHelpers.ts";
 import { fetchAvailableProjects } from "@/queries/fetchAvailableProjects.ts";
 import { refreshAfterMutation } from "@/queries/refreshAfterMutation.ts";
 
 export const importProject = async (
-	project: ProjectExport,
+	project: ProjectBlueprint,
 	name: string,
 	workingDirectory: string,
 ): Promise<boolean> => {

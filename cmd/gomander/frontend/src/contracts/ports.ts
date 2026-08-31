@@ -5,7 +5,7 @@ import type {
 	EventData,
 	Localization,
 	Project,
-	ProjectExport,
+	ProjectBlueprint,
 	UserConfig,
 } from "@/contracts/types.ts";
 
@@ -36,12 +36,12 @@ export type DataService = {
 	deleteProject: (projectId: string) => Promise<void>;
 	exportProject: (projectId: string) => Promise<string>;
 	importProject: (
-		project: ProjectExport,
+		project: ProjectBlueprint,
 		name: string,
 		workingDirectory: string,
 	) => Promise<void>;
-	getProjectToImport: () => Promise<ProjectExport>;
-	getProjectToImportFromPackageJson: () => Promise<ProjectExport>;
+	getProjectToImport: () => Promise<ProjectBlueprint>;
+	getProjectToImportFromPackageJson: () => Promise<ProjectBlueprint>;
 	editProject: (project: Project) => Promise<void>;
 	getCurrentRelease: () => Promise<string>;
 	checkForNewRelease: () => Promise<string>;
