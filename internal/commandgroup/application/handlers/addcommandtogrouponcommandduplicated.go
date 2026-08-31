@@ -36,7 +36,7 @@ func (h *AddCommandToGroupOnCommandDuplicated) Execute(e eventbus.Event) error {
 		return nil
 	}
 
-	commandGroup, err := h.commandGroupRepository.GetWithCommandIds(event.InsideGroupId)
+	commandGroup, err := h.commandGroupRepository.Get(event.InsideGroupId)
 	if err != nil {
 		return err
 	}
@@ -53,5 +53,5 @@ func (h *AddCommandToGroupOnCommandDuplicated) Execute(e eventbus.Event) error {
 
 	commandGroup.CommandIds = append(commandGroup.CommandIds, event.CommandId)
 
-	return h.commandGroupRepository.UpdateWithCommandIds(&commandGroup)
+	return h.commandGroupRepository.Update(&commandGroup)
 }

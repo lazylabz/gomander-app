@@ -17,18 +17,18 @@ func NewCreateCommandGroup(openedProject openedproject.OpenedProject, commandGro
 	}
 }
 
-func (uc *CreateCommandGroup) Execute(commandGroup *domain.CommandGroupWithCommandIds) error {
+func (uc *CreateCommandGroup) Execute(commandGroup *domain.CommandGroup) error {
 	project, err := uc.openedProject.Get()
 	if err != nil {
 		return err
 	}
 
-	existingCommandGroups, err := uc.commandGroupRepository.GetAllWithCommandIds(project.Id)
+	existingCommandGroups, err := uc.commandGroupRepository.GetAll(project.Id)
 	if err != nil {
 		return err
 	}
 
 	commandGroup.Position = domain.Order.End(existingCommandGroups)
 
-	return uc.commandGroupRepository.CreateWithCommandIds(commandGroup)
+	return uc.commandGroupRepository.Create(commandGroup)
 }

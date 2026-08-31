@@ -23,10 +23,10 @@ func (uc *ReorderCommandGroups) Execute(newOrderedIds []string) error {
 		return err
 	}
 
-	existingCommandGroups, err := uc.commandGroupRepository.GetAllWithCommandIds(project.Id)
+	existingCommandGroups, err := uc.commandGroupRepository.GetAll(project.Id)
 	if err != nil {
 		return err
 	}
 
-	return domain.Order.Rearrange(existingCommandGroups, newOrderedIds, uc.commandGroupRepository.UpdateWithCommandIds)
+	return domain.Order.Rearrange(existingCommandGroups, newOrderedIds, uc.commandGroupRepository.Update)
 }

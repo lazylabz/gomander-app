@@ -26,7 +26,7 @@ func NewDeleteCommandGroup(
 }
 
 func (uc *DeleteCommandGroup) Execute(commandGroupId string) error {
-	deletedCommandGroup, err := uc.commandGroupRepository.GetWithCommandIds(commandGroupId)
+	deletedCommandGroup, err := uc.commandGroupRepository.Get(commandGroupId)
 	if err != nil {
 		return err
 	}
@@ -45,10 +45,10 @@ func (uc *DeleteCommandGroup) Execute(commandGroupId string) error {
 }
 
 func (uc *DeleteCommandGroup) closeTheGapLeftIn(projectId string) error {
-	remainingCommandGroups, err := uc.commandGroupRepository.GetAllWithCommandIds(projectId)
+	remainingCommandGroups, err := uc.commandGroupRepository.GetAll(projectId)
 	if err != nil {
 		return err
 	}
 
-	return domain.Order.CloseGaps(remainingCommandGroups, uc.commandGroupRepository.UpdateWithCommandIds)
+	return domain.Order.CloseGaps(remainingCommandGroups, uc.commandGroupRepository.Update)
 }

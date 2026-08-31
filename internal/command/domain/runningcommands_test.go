@@ -48,7 +48,7 @@ func TestRunningCommands(t *testing.T) {
 		running := domain.NewRunningCommands([]string{first.Id, third.Id})
 
 		// Act & Assert
-		assert.Equal(t, 2, running.CountIn([]domain.Command{first, second, third}))
+		assert.Equal(t, 2, running.CountIn([]string{first.Id, second.Id, third.Id}))
 	})
 
 	t.Run("Should not count a running command that is not one of the ones given", func(t *testing.T) {
@@ -58,7 +58,7 @@ func TestRunningCommands(t *testing.T) {
 		running := domain.NewRunningCommands([]string{outsider.Id})
 
 		// Act & Assert
-		assert.Equal(t, 0, running.CountIn([]domain.Command{command}))
+		assert.Equal(t, 0, running.CountIn([]string{command.Id}))
 	})
 
 	t.Run("Should count nothing in a command group with no commands", func(t *testing.T) {

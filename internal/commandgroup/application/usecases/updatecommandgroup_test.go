@@ -24,7 +24,7 @@ func TestUpdateCommandGroup_Execute(t *testing.T) {
 			WithProjectId(projectId).
 			Build()
 
-		mockCommandGroupRepository.On("UpdateWithCommandIds", &paramCommandGroup).Return(nil)
+		mockCommandGroupRepository.On("Update", &paramCommandGroup).Return(nil)
 
 		// Act
 		err := sut.Execute(&paramCommandGroup)
@@ -49,7 +49,7 @@ func TestUpdateCommandGroup_Execute(t *testing.T) {
 			WithProjectId(projectId).
 			Build()
 
-		mockCommandGroupRepository.On("UpdateWithCommandIds", &paramCommandGroup).Return(errors.New("failed to update command group"))
+		mockCommandGroupRepository.On("Update", &paramCommandGroup).Return(errors.New("failed to update command group"))
 
 		// Act
 		err := sut.Execute(&paramCommandGroup)

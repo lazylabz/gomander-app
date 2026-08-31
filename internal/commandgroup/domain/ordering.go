@@ -5,9 +5,9 @@ import "gomander/internal/ordering"
 // Order is where a Command Group sits among its Project's Command Groups;
 // nothing else assigns a Position.
 var Order = ordering.NewList(
-	func(commandGroup CommandGroupWithCommandIds) string { return commandGroup.Id },
-	func(commandGroup CommandGroupWithCommandIds) int { return commandGroup.Position },
-	func(commandGroup *CommandGroupWithCommandIds, position int) { commandGroup.Position = position },
+	func(commandGroup CommandGroup) string { return commandGroup.Id },
+	func(commandGroup CommandGroup) int { return commandGroup.Position },
+	func(commandGroup *CommandGroup, position int) { commandGroup.Position = position },
 )
 
 // CommandPlacement is where one of the Commands a Command Group holds sits
@@ -29,21 +29,6 @@ var CommandOrder = ordering.NewList(
 // the order the Group holds them, each one placed behind the last. Storage
 // writes these Positions rather than deciding any of its own.
 func (commandGroup CommandGroup) CommandPlacements() []CommandPlacement {
-	placements := make([]CommandPlacement, 0, len(commandGroup.Commands))
-
-	for _, command := range commandGroup.Commands {
-		placements = append(placements, CommandPlacement{
-			CommandId: command.Id,
-			Position:  CommandOrder.End(placements),
-		})
-	}
-
-	return placements
-}
-
-// CommandPlacements answers the same for a Command Group that names the
-// Commands it holds instead of carrying them.
-func (commandGroup CommandGroupWithCommandIds) CommandPlacements() []CommandPlacement {
 	placements := make([]CommandPlacement, 0, len(commandGroup.CommandIds))
 
 	for _, commandId := range commandGroup.CommandIds {

@@ -17,36 +17,21 @@ func (m *MockCommandGroupRepository) Get(id string) (commandgroupdomain.CommandG
 
 func (m *MockCommandGroupRepository) GetAll(projectId string) ([]commandgroupdomain.CommandGroup, error) {
 	args := m.Called(projectId)
-	return args.Get(0).([]commandgroupdomain.CommandGroup), args.Error(1)
-}
-
-func (m *MockCommandGroupRepository) GetWithCommandIds(id string) (commandgroupdomain.CommandGroupWithCommandIds, error) {
-	args := m.Called(id)
-	return args.Get(0).(commandgroupdomain.CommandGroupWithCommandIds), args.Error(1)
-}
-
-func (m *MockCommandGroupRepository) GetAllWithCommandIds(projectId string) ([]commandgroupdomain.CommandGroupWithCommandIds, error) {
-	args := m.Called(projectId)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]commandgroupdomain.CommandGroupWithCommandIds), args.Error(1)
+	return args.Get(0).([]commandgroupdomain.CommandGroup), args.Error(1)
 }
 
-func (m *MockCommandGroupRepository) GetAllContainingWithCommandIds(commandId string) ([]commandgroupdomain.CommandGroupWithCommandIds, error) {
+func (m *MockCommandGroupRepository) GetAllContaining(commandId string) ([]commandgroupdomain.CommandGroup, error) {
 	args := m.Called(commandId)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]commandgroupdomain.CommandGroupWithCommandIds), args.Error(1)
+	return args.Get(0).([]commandgroupdomain.CommandGroup), args.Error(1)
 }
 
 func (m *MockCommandGroupRepository) Create(commandGroup *commandgroupdomain.CommandGroup) error {
-	args := m.Called(commandGroup)
-	return args.Error(0)
-}
-
-func (m *MockCommandGroupRepository) CreateWithCommandIds(commandGroup *commandgroupdomain.CommandGroupWithCommandIds) error {
 	args := m.Called(commandGroup)
 	return args.Error(0)
 }
@@ -56,20 +41,7 @@ func (m *MockCommandGroupRepository) Update(commandGroup *commandgroupdomain.Com
 	return args.Error(0)
 }
 
-func (m *MockCommandGroupRepository) UpdateWithCommandIds(commandGroup *commandgroupdomain.CommandGroupWithCommandIds) error {
-	args := m.Called(commandGroup)
-	return args.Error(0)
-}
-
 func (m *MockCommandGroupRepository) Delete(commandGroupId string) error {
 	args := m.Called(commandGroupId)
 	return args.Error(0)
-}
-
-func (m *MockCommandGroupRepository) GetAllContaining(commandId string) ([]commandgroupdomain.CommandGroup, error) {
-	args := m.Called(commandId)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).([]commandgroupdomain.CommandGroup), args.Error(1)
 }

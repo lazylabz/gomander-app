@@ -40,14 +40,14 @@ func (r RunningCommands) StatusOf(commandId string) Status {
 	return Stopped
 }
 
-// CountIn answers how many of the given Commands are running - the Commands of
-// a Command Group, so its count and each Command's Status come from the same
-// place.
-func (r RunningCommands) CountIn(commands []Command) int {
+// CountIn answers how many of the named Commands are running - the Commands a
+// Command Group names, so its count and each Command's Status come from the
+// same place.
+func (r RunningCommands) CountIn(commandIds []string) int {
 	count := 0
 
-	for _, command := range commands {
-		if r.IsRunning(command.Id) {
+	for _, commandId := range commandIds {
+		if r.IsRunning(commandId) {
 			count++
 		}
 	}

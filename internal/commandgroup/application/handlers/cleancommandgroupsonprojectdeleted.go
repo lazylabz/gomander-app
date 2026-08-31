@@ -47,11 +47,11 @@ func (h *CleanCommandGroupsOnProjectDeleted) Execute(e eventbus.Event) error {
 
 // deleteTheCommandGroupsOf works in one Unit of Work, so a Project never
 // outlives only some of its Command Groups.
-func (h *CleanCommandGroupsOnProjectDeleted) deleteTheCommandGroupsOf(projectId string) ([]commandgroupdomain.CommandGroupWithCommandIds, error) {
-	var deleted []commandgroupdomain.CommandGroupWithCommandIds
+func (h *CleanCommandGroupsOnProjectDeleted) deleteTheCommandGroupsOf(projectId string) ([]commandgroupdomain.CommandGroup, error) {
+	var deleted []commandgroupdomain.CommandGroup
 
 	err := h.unitOfWork.Do(func(repositories unitofwork.Repositories) error {
-		commandGroups, err := repositories.CommandGroups.GetAllWithCommandIds(projectId)
+		commandGroups, err := repositories.CommandGroups.GetAll(projectId)
 		if err != nil {
 			return err
 		}

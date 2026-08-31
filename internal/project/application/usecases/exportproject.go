@@ -56,7 +56,7 @@ func (uc *ExportProject) Execute(projectId string) (string, error) {
 		return "", err
 	}
 
-	commandGroups, err := uc.commandGroupRepository.GetAllWithCommandIds(projectId)
+	commandGroups, err := uc.commandGroupRepository.GetAll(projectId)
 	if err != nil {
 		return "", err
 	}

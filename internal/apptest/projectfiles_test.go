@@ -143,6 +143,6 @@ func TestImportingAProject(t *testing.T) {
 		groups := commandGroupsOf(t, h)
 		assert.Len(t, groups, 1)
 		assert.Equal(t, "Everything", groups[0].Name)
-		assert.Equal(t, []string{"Dev server", "Tests"}, array.Map(groups[0].Commands, commandName))
+		assert.Equal(t, []string{"Dev server", "Tests"}, commandNamesOf(commands, groups[0].CommandIds))
 	})
 }

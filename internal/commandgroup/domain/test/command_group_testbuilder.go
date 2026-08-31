@@ -57,26 +57,13 @@ func (b *CommandGroupBuilder) WithCommands(commands ...domain.Command) *CommandG
 	return b
 }
 
-func (b *CommandGroupBuilder) Build() commandgroupdomain.CommandGroupWithCommandIds {
-	return commandgroupdomain.CommandGroupWithCommandIds{
+func (b *CommandGroupBuilder) Build() commandgroupdomain.CommandGroup {
+	return commandgroupdomain.CommandGroup{
 		Id:         b.data.Id,
 		ProjectId:  b.data.ProjectId,
 		Name:       b.data.Name,
 		CommandIds: array.Map(b.data.Commands, func(command domain.Command) string { return command.Id }),
 		Position:   b.data.Position,
-	}
-}
-
-// BuildWithCommands is the same Command Group in the form that carries the
-// Commands it holds instead of naming them, which only the read path still
-// answers in.
-func (b *CommandGroupBuilder) BuildWithCommands() commandgroupdomain.CommandGroup {
-	return commandgroupdomain.CommandGroup{
-		Id:        b.data.Id,
-		ProjectId: b.data.ProjectId,
-		Name:      b.data.Name,
-		Commands:  b.data.Commands,
-		Position:  b.data.Position,
 	}
 }
 

@@ -62,16 +62,6 @@ func TestCommand(t *testing.T) {
 
 func TestCommandGroup(t *testing.T) {
 	commandGroup := commandgroupdomain.CommandGroup{
-		Id:        "group-id",
-		ProjectId: "project-id",
-		Name:      "group-name",
-		Commands:  []commanddomain.Command{command},
-		Position:  2,
-	}
-
-	// The entity the DTO stands for: what the read path still carries, once
-	// narrowed to the Commands it names.
-	named := commandgroupdomain.CommandGroupWithCommandIds{
 		Id:         "group-id",
 		ProjectId:  "project-id",
 		Name:       "group-name",
@@ -99,11 +89,11 @@ func TestCommandGroup(t *testing.T) {
 		roundTripped := transport.FromCommandGroup(commandGroup).ToDomain()
 
 		// Assert
-		assert.Equal(t, named, roundTripped)
+		assert.Equal(t, commandGroup, roundTripped)
 	})
 
 	t.Run("Should say everything the entity says", func(t *testing.T) {
-		assertMirrors(t, named, transport.FromCommandGroup(commandGroup))
+		assertMirrors(t, commandGroup, transport.FromCommandGroup(commandGroup))
 	})
 }
 

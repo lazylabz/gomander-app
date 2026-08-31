@@ -46,138 +46,6 @@ func newTestHelper(t *testing.T,
 	return helper
 }
 
-func TestGormCommandGroupRepository_GetAll(t *testing.T) {
-	t.Run("Should return all command groups sorted by position with their commands sorted by position", func(t *testing.T) {
-		// Arrange
-		projectId := "project1"
-
-		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
-		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
-		cmd3 := test.NewCommandBuilder().WithName("Command 3").WithProjectId(projectId).Build()
-
-		cmd1Model := commandinfrastructure.ToCommandModel(&cmd1)
-		cmd2Model := commandinfrastructure.ToCommandModel(&cmd2)
-		cmd3Model := commandinfrastructure.ToCommandModel(&cmd3)
-
-		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3).BuildWithCommands()
-		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd1, cmd3, cmd2).BuildWithCommands()
-
-		cmdGroup1Model := infrastructure.ToCommandGroupModel(&cmdGroup1)
-		cmdGroup2Model := infrastructure.ToCommandGroupModel(&cmdGroup2)
-
-		cmdToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{
-			// CommandGroup 1 associations
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd2.Id,
-				Position:       0,
-			},
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd1.Id,
-				Position:       1,
-			},
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd3.Id,
-				Position:       2,
-			},
-			// CommandGroup 2 associations
-			{
-				CommandGroupId: cmdGroup2.Id,
-				CommandId:      cmd1.Id,
-				Position:       0,
-			},
-			{
-				CommandGroupId: cmdGroup2.Id,
-				CommandId:      cmd3.Id,
-				Position:       1,
-			},
-			{
-				CommandGroupId: cmdGroup2.Id,
-				CommandId:      cmd2.Id,
-				Position:       2,
-			},
-		}
-
-		helper := newTestHelper(
-			t,
-			[]commandinfrastructure.CommandModel{cmd1Model, cmd2Model, cmd3Model},
-			[]infrastructure.CommandGroupModel{cmdGroup1Model, cmdGroup2Model},
-			cmdToCommandGroupModels,
-		)
-
-		// Act
-		result, err := helper.repo.GetAll(projectId)
-
-		// Assert
-		expectedCommandGroups := []domain.CommandGroup{
-			cmdGroup1,
-			cmdGroup2,
-		}
-
-		assert.Nil(t, err)
-		assert.Equal(t, expectedCommandGroups, result)
-	})
-
-	t.Run("Should return a command group that has no commands", func(t *testing.T) {
-		// Arrange
-		projectId := "project1"
-
-		empty := test2.NewCommandGroupBuilder().WithName("Empty").WithProjectId(projectId).WithPosition(0).BuildWithCommands()
-
-		helper := newTestHelper(t, nil, []infrastructure.CommandGroupModel{infrastructure.ToCommandGroupModel(&empty)}, nil)
-
-		// Act
-		result, err := helper.repo.GetAll(projectId)
-
-		// Assert
-		assert.Nil(t, err)
-		assert.Equal(t, []domain.CommandGroup{empty}, result)
-	})
-
-	t.Run("Should read the command groups and their commands in a single query", func(t *testing.T) {
-		// Arrange
-		projectId := "project1"
-
-		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
-		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
-
-		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1).BuildWithCommands()
-		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd2).BuildWithCommands()
-
-		helper := newTestHelper(
-			t,
-			[]commandinfrastructure.CommandModel{
-				commandinfrastructure.ToCommandModel(&cmd1),
-				commandinfrastructure.ToCommandModel(&cmd2),
-			},
-			[]infrastructure.CommandGroupModel{
-				infrastructure.ToCommandGroupModel(&cmdGroup1),
-				infrastructure.ToCommandGroupModel(&cmdGroup2),
-			},
-			[]infrastructure.CommandToCommandGroupModel{
-				{CommandGroupId: cmdGroup1.Id, CommandId: cmd1.Id, Position: 0},
-				{CommandGroupId: cmdGroup2.Id, CommandId: cmd2.Id, Position: 0},
-			},
-		)
-
-		recorder := &sqlRecorder{Interface: gormlogger.Discard}
-		repo := infrastructure.NewGormCommandGroupRepository(
-			helper.gormDb.Session(&gorm.Session{Logger: recorder}),
-			context.Background(),
-		)
-
-		// Act
-		result, err := repo.GetAll(projectId)
-
-		// Assert
-		assert.Nil(t, err)
-		assert.Equal(t, []domain.CommandGroup{cmdGroup1, cmdGroup2}, result)
-		assert.Len(t, recorder.statements, 1)
-	})
-}
-
 // sqlRecorder keeps every statement GORM executes, so a test can say how many a
 // read costs.
 type sqlRecorder struct {
@@ -190,88 +58,7 @@ func (r *sqlRecorder) Trace(_ context.Context, _ time.Time, statement func() (st
 	r.statements = append(r.statements, sql)
 }
 
-func TestGormCommandGroupRepository_Get(t *testing.T) {
-	t.Run("Should return a command group by id with sorted commands", func(t *testing.T) {
-		// Arrange
-		projectId := "project1"
-
-		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
-		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
-		cmd3 := test.NewCommandBuilder().WithName("Command 3").WithProjectId(projectId).Build()
-
-		cmd1Model := commandinfrastructure.ToCommandModel(&cmd1)
-		cmd2Model := commandinfrastructure.ToCommandModel(&cmd2)
-		cmd3Model := commandinfrastructure.ToCommandModel(&cmd3)
-
-		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3).BuildWithCommands()
-		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd1, cmd3, cmd2).BuildWithCommands()
-
-		cmdGroup1Model := infrastructure.ToCommandGroupModel(&cmdGroup1)
-		cmdGroup2Model := infrastructure.ToCommandGroupModel(&cmdGroup2)
-
-		commandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{
-			// CommandGroup 1 associations
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd2.Id,
-				Position:       0,
-			},
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd1.Id,
-				Position:       1,
-			},
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd3.Id,
-				Position:       2,
-			},
-			// CommandGroup 2 associations
-			{
-				CommandGroupId: cmdGroup2.Id,
-				CommandId:      cmd1.Id,
-				Position:       0,
-			},
-			{
-				CommandGroupId: cmdGroup2.Id,
-				CommandId:      cmd3.Id,
-				Position:       1,
-			},
-			{
-				CommandGroupId: cmdGroup2.Id,
-				CommandId:      cmd2.Id,
-				Position:       2,
-			},
-		}
-
-		helper := newTestHelper(
-			t,
-			[]commandinfrastructure.CommandModel{cmd1Model, cmd2Model, cmd3Model},
-			[]infrastructure.CommandGroupModel{cmdGroup1Model, cmdGroup2Model},
-			commandToCommandGroupModels,
-		)
-
-		// Act
-		result, err := helper.repo.Get(cmdGroup1.Id)
-
-		// Assert
-		assert.Nil(t, err)
-
-		assert.Equal(t, cmdGroup1, result)
-	})
-	t.Run("Should report a command group that does not exist as not found", func(t *testing.T) {
-		// Arrange
-		helper := newTestHelper(t, nil, nil, nil)
-
-		// Act
-		_, err := helper.repo.Get("non-existent-id")
-
-		// Assert
-		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
-	})
-}
-
-func TestGormCommandGroupRepository_GetAllWithCommandIds(t *testing.T) {
+func TestGormCommandGroupRepository_GetAll(t *testing.T) {
 	t.Run("Should return all command groups sorted by position, each naming its commands in position order", func(t *testing.T) {
 		// Arrange
 		projectId := "project1"
@@ -283,8 +70,8 @@ func TestGormCommandGroupRepository_GetAllWithCommandIds(t *testing.T) {
 		cmdGroup1Builder := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3)
 		cmdGroup2Builder := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd1, cmd3, cmd2)
 
-		cmdGroup1 := cmdGroup1Builder.BuildWithCommands()
-		cmdGroup2 := cmdGroup2Builder.BuildWithCommands()
+		cmdGroup1 := cmdGroup1Builder.Build()
+		cmdGroup2 := cmdGroup2Builder.Build()
 
 		helper := newTestHelper(
 			t,
@@ -308,10 +95,10 @@ func TestGormCommandGroupRepository_GetAllWithCommandIds(t *testing.T) {
 		)
 
 		// Act
-		result, err := helper.repo.GetAllWithCommandIds(projectId)
+		result, err := helper.repo.GetAll(projectId)
 
 		// Assert
-		expected := []domain.CommandGroupWithCommandIds{
+		expected := []domain.CommandGroup{
 			cmdGroup1Builder.Build(),
 			cmdGroup2Builder.Build(),
 		}
@@ -325,16 +112,16 @@ func TestGormCommandGroupRepository_GetAllWithCommandIds(t *testing.T) {
 		projectId := "project1"
 
 		emptyBuilder := test2.NewCommandGroupBuilder().WithName("Empty").WithProjectId(projectId).WithPosition(0)
-		empty := emptyBuilder.BuildWithCommands()
+		empty := emptyBuilder.Build()
 
 		helper := newTestHelper(t, nil, []infrastructure.CommandGroupModel{infrastructure.ToCommandGroupModel(&empty)}, nil)
 
 		// Act
-		result, err := helper.repo.GetAllWithCommandIds(projectId)
+		result, err := helper.repo.GetAll(projectId)
 
 		// Assert
 		assert.Nil(t, err)
-		assert.Equal(t, []domain.CommandGroupWithCommandIds{emptyBuilder.Build()}, result)
+		assert.Equal(t, []domain.CommandGroup{emptyBuilder.Build()}, result)
 	})
 
 	t.Run("Should read the command groups and the commands they name in a single query", func(t *testing.T) {
@@ -344,7 +131,7 @@ func TestGormCommandGroupRepository_GetAllWithCommandIds(t *testing.T) {
 		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
 
 		cmdGroup1Builder := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1)
-		cmdGroup1 := cmdGroup1Builder.BuildWithCommands()
+		cmdGroup1 := cmdGroup1Builder.Build()
 
 		helper := newTestHelper(
 			t,
@@ -360,16 +147,16 @@ func TestGormCommandGroupRepository_GetAllWithCommandIds(t *testing.T) {
 		)
 
 		// Act
-		result, err := repo.GetAllWithCommandIds(projectId)
+		result, err := repo.GetAll(projectId)
 
 		// Assert
 		assert.Nil(t, err)
-		assert.Equal(t, []domain.CommandGroupWithCommandIds{cmdGroup1Builder.Build()}, result)
+		assert.Equal(t, []domain.CommandGroup{cmdGroup1Builder.Build()}, result)
 		assert.Len(t, recorder.statements, 1)
 	})
 }
 
-func TestGormCommandGroupRepository_GetWithCommandIds(t *testing.T) {
+func TestGormCommandGroupRepository_Get(t *testing.T) {
 	t.Run("Should return a command group by id naming its commands in position order", func(t *testing.T) {
 		// Arrange
 		projectId := "project1"
@@ -380,8 +167,8 @@ func TestGormCommandGroupRepository_GetWithCommandIds(t *testing.T) {
 		cmdGroup1Builder := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1)
 		cmdGroup2Builder := test2.NewCommandGroupBuilder().WithName("Group 2").WithProjectId(projectId).WithPosition(1).WithCommands(cmd1)
 
-		cmdGroup1 := cmdGroup1Builder.BuildWithCommands()
-		cmdGroup2 := cmdGroup2Builder.BuildWithCommands()
+		cmdGroup1 := cmdGroup1Builder.Build()
+		cmdGroup2 := cmdGroup2Builder.Build()
 
 		helper := newTestHelper(
 			t,
@@ -401,7 +188,7 @@ func TestGormCommandGroupRepository_GetWithCommandIds(t *testing.T) {
 		)
 
 		// Act
-		result, err := helper.repo.GetWithCommandIds(cmdGroup1.Id)
+		result, err := helper.repo.Get(cmdGroup1.Id)
 
 		// Assert
 		assert.Nil(t, err)
@@ -413,14 +200,14 @@ func TestGormCommandGroupRepository_GetWithCommandIds(t *testing.T) {
 		helper := newTestHelper(t, nil, nil, nil)
 
 		// Act
-		_, err := helper.repo.GetWithCommandIds("non-existent-id")
+		_, err := helper.repo.Get("non-existent-id")
 
 		// Assert
 		assert.ErrorIs(t, err, domainerrors.ErrNotFound)
 	})
 }
 
-func TestGormCommandGroupRepository_GetAllContainingWithCommandIds(t *testing.T) {
+func TestGormCommandGroupRepository_GetAllContaining(t *testing.T) {
 	t.Run("Should return every command group holding the command, naming all of the commands they hold", func(t *testing.T) {
 		// Arrange
 		projectId := "project1"
@@ -434,9 +221,9 @@ func TestGormCommandGroupRepository_GetAllContainingWithCommandIds(t *testing.T)
 		notHoldingBuilder := test2.NewCommandGroupBuilder().WithName("Not holding").WithProjectId(projectId).WithPosition(1).WithCommands(cmd2)
 		holdingElsewhereBuilder := test2.NewCommandGroupBuilder().WithName("Holding elsewhere").WithProjectId(otherProjectId).WithPosition(0).WithCommands(cmd1, cmd3)
 
-		holding := holdingBuilder.BuildWithCommands()
-		notHolding := notHoldingBuilder.BuildWithCommands()
-		holdingElsewhere := holdingElsewhereBuilder.BuildWithCommands()
+		holding := holdingBuilder.Build()
+		notHolding := notHoldingBuilder.Build()
+		holdingElsewhere := holdingElsewhereBuilder.Build()
 
 		helper := newTestHelper(
 			t,
@@ -460,11 +247,11 @@ func TestGormCommandGroupRepository_GetAllContainingWithCommandIds(t *testing.T)
 		)
 
 		// Act
-		result, err := helper.repo.GetAllContainingWithCommandIds(cmd1.Id)
+		result, err := helper.repo.GetAllContaining(cmd1.Id)
 
 		// Assert
 		assert.Nil(t, err)
-		assert.ElementsMatch(t, []domain.CommandGroupWithCommandIds{
+		assert.ElementsMatch(t, []domain.CommandGroup{
 			holdingBuilder.Build(),
 			holdingElsewhereBuilder.Build(),
 		}, result)
@@ -478,7 +265,7 @@ func TestGormCommandGroupRepository_GetAllContainingWithCommandIds(t *testing.T)
 		survivor := test.NewCommandBuilder().WithName("Survivor").WithProjectId(projectId).Build()
 
 		holdingBuilder := test2.NewCommandGroupBuilder().WithName("Holding").WithProjectId(projectId).WithPosition(0).WithCommands(deleted, survivor)
-		holding := holdingBuilder.BuildWithCommands()
+		holding := holdingBuilder.Build()
 
 		helper := newTestHelper(
 			t,
@@ -491,11 +278,11 @@ func TestGormCommandGroupRepository_GetAllContainingWithCommandIds(t *testing.T)
 		)
 
 		// Act
-		result, err := helper.repo.GetAllContainingWithCommandIds(deleted.Id)
+		result, err := helper.repo.GetAllContaining(deleted.Id)
 
 		// Assert
 		assert.Nil(t, err)
-		assert.Equal(t, []domain.CommandGroupWithCommandIds{holdingBuilder.Build()}, result)
+		assert.Equal(t, []domain.CommandGroup{holdingBuilder.Build()}, result)
 	})
 
 	t.Run("Should return nothing when no command group holds the command", func(t *testing.T) {
@@ -503,7 +290,7 @@ func TestGormCommandGroupRepository_GetAllContainingWithCommandIds(t *testing.T)
 		helper := newTestHelper(t, nil, nil, nil)
 
 		// Act
-		result, err := helper.repo.GetAllContainingWithCommandIds("unheld-command")
+		result, err := helper.repo.GetAllContaining("unheld-command")
 
 		// Assert
 		assert.Nil(t, err)
@@ -512,41 +299,6 @@ func TestGormCommandGroupRepository_GetAllContainingWithCommandIds(t *testing.T)
 }
 
 func TestGormCommandGroupRepository_Create(t *testing.T) {
-	t.Run("Should create a new command group and its associations", func(t *testing.T) {
-		// Arrange
-		projectId := "project1"
-
-		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
-		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
-		cmd3 := test.NewCommandBuilder().WithName("Command 3").WithProjectId(projectId).Build()
-
-		cmd1Model := commandinfrastructure.ToCommandModel(&cmd1)
-		cmd2Model := commandinfrastructure.ToCommandModel(&cmd2)
-		cmd3Model := commandinfrastructure.ToCommandModel(&cmd3)
-
-		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3).BuildWithCommands()
-
-		helper := newTestHelper(
-			t,
-			[]commandinfrastructure.CommandModel{cmd1Model, cmd2Model, cmd3Model},
-			nil,
-			nil,
-		)
-
-		// Act
-		err := helper.repo.Create(&cmdGroup1)
-
-		// Assert
-		assert.Nil(t, err)
-
-		// Verify the group was created correctly
-		result, err := helper.repo.Get(cmdGroup1.Id)
-		assert.Nil(t, err)
-		assert.Equal(t, cmdGroup1, result)
-	})
-}
-
-func TestGormCommandGroupRepository_CreateWithCommandIds(t *testing.T) {
 	t.Run("Should create a new command group naming its commands, in the order it names them", func(t *testing.T) {
 		// Arrange
 		projectId := "project1"
@@ -567,73 +319,18 @@ func TestGormCommandGroupRepository_CreateWithCommandIds(t *testing.T) {
 		)
 
 		// Act
-		err := helper.repo.CreateWithCommandIds(&cmdGroup1)
+		err := helper.repo.Create(&cmdGroup1)
 
 		// Assert
 		assert.Nil(t, err)
 
-		result, err := helper.repo.GetWithCommandIds(cmdGroup1.Id)
+		result, err := helper.repo.Get(cmdGroup1.Id)
 		assert.Nil(t, err)
 		assert.Equal(t, cmdGroup1, result)
 	})
 }
 
 func TestGormCommandGroupRepository_Update(t *testing.T) {
-	t.Run("Should update an existing command group and its associations", func(t *testing.T) {
-		projectId := "project1"
-
-		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
-		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
-		cmd3 := test.NewCommandBuilder().WithName("Command 3").WithProjectId(projectId).Build()
-
-		commandModels := []commandinfrastructure.CommandModel{
-			commandinfrastructure.ToCommandModel(&cmd1),
-			commandinfrastructure.ToCommandModel(&cmd2),
-			commandinfrastructure.ToCommandModel(&cmd3),
-		}
-
-		cmdGroup1Builder := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1, cmd3)
-		cmdGroup1 := cmdGroup1Builder.BuildWithCommands()
-
-		groupModel := infrastructure.ToCommandGroupModel(&cmdGroup1)
-
-		commandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd2.Id,
-				Position:       0,
-			},
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd1.Id,
-				Position:       1,
-			},
-			{
-				CommandGroupId: cmdGroup1.Id,
-				CommandId:      cmd3.Id,
-				Position:       2,
-			},
-		}
-
-		helper := newTestHelper(
-			t,
-			commandModels,
-			[]infrastructure.CommandGroupModel{groupModel},
-			commandToCommandGroupModels,
-		)
-
-		updatedGroup := cmdGroup1Builder.WithName("Updated Group 1").WithCommands(cmd1, cmd2, cmd3).BuildWithCommands()
-
-		err := helper.repo.Update(&updatedGroup)
-		assert.Nil(t, err)
-
-		result, err := helper.repo.Get(updatedGroup.Id)
-		assert.Nil(t, err)
-		assert.Equal(t, updatedGroup, result)
-	})
-}
-
-func TestGormCommandGroupRepository_UpdateWithCommandIds(t *testing.T) {
 	t.Run("Should update an existing command group and the commands it names", func(t *testing.T) {
 		projectId := "project1"
 
@@ -646,7 +343,7 @@ func TestGormCommandGroupRepository_UpdateWithCommandIds(t *testing.T) {
 		}
 
 		cmdGroup1Builder := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1, cmd2)
-		cmdGroup1 := cmdGroup1Builder.BuildWithCommands()
+		cmdGroup1 := cmdGroup1Builder.Build()
 
 		commandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{
 			{
@@ -670,10 +367,10 @@ func TestGormCommandGroupRepository_UpdateWithCommandIds(t *testing.T) {
 
 		updatedGroup := cmdGroup1Builder.WithName("Updated Group 1").WithCommands(cmd2).Build()
 
-		err := helper.repo.UpdateWithCommandIds(&updatedGroup)
+		err := helper.repo.Update(&updatedGroup)
 		assert.Nil(t, err)
 
-		result, err := helper.repo.GetWithCommandIds(updatedGroup.Id)
+		result, err := helper.repo.Get(updatedGroup.Id)
 		assert.Nil(t, err)
 		assert.Equal(t, updatedGroup, result)
 	})
@@ -684,7 +381,7 @@ func TestGormCommandGroupRepository_UpdateWithCommandIds(t *testing.T) {
 		kept := test.NewCommandBuilder().WithName("Kept").WithProjectId(projectId).Build()
 
 		cmdGroup1Builder := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(kept)
-		cmdGroup1 := cmdGroup1Builder.BuildWithCommands()
+		cmdGroup1 := cmdGroup1Builder.Build()
 
 		helper := newTestHelper(
 			t,
@@ -699,7 +396,7 @@ func TestGormCommandGroupRepository_UpdateWithCommandIds(t *testing.T) {
 			},
 		)
 
-		namingAGoneCommand := domain.CommandGroupWithCommandIds{
+		namingAGoneCommand := domain.CommandGroup{
 			Id:         cmdGroup1.Id,
 			ProjectId:  projectId,
 			Name:       "Group 1",
@@ -707,10 +404,10 @@ func TestGormCommandGroupRepository_UpdateWithCommandIds(t *testing.T) {
 			Position:   0,
 		}
 
-		err := helper.repo.UpdateWithCommandIds(&namingAGoneCommand)
+		err := helper.repo.Update(&namingAGoneCommand)
 		assert.Nil(t, err)
 
-		result, err := helper.repo.GetWithCommandIds(cmdGroup1.Id)
+		result, err := helper.repo.Get(cmdGroup1.Id)
 		assert.Nil(t, err)
 		assert.Equal(t, namingAGoneCommand, result)
 	})
@@ -726,7 +423,7 @@ func TestGormCommandGroupRepository_Delete(t *testing.T) {
 			commandinfrastructure.ToCommandModel(&cmd1),
 		}
 
-		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1).BuildWithCommands()
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1).Build()
 
 		groupModel := infrastructure.ToCommandGroupModel(&cmdGroup1)
 
@@ -762,9 +459,9 @@ func TestGormCommandGroupRepository_Delete(t *testing.T) {
 	t.Run("Should leave the positions of the remaining command groups untouched", func(t *testing.T) {
 		projectId := "project1"
 
-		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).BuildWithCommands()
-		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(1).BuildWithCommands()
-		cmdGroup3 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(2).BuildWithCommands()
+		cmdGroup1 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).Build()
+		cmdGroup2 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(1).Build()
+		cmdGroup3 := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(2).Build()
 
 		group1Model := infrastructure.ToCommandGroupModel(&cmdGroup1)
 		group2Model := infrastructure.ToCommandGroupModel(&cmdGroup2)
@@ -789,66 +486,6 @@ func TestGormCommandGroupRepository_Delete(t *testing.T) {
 		// Closing the gap is the ordering module's job, not the repository's
 		assert.Equal(t, group1Model.Position, resultGroup1.Position)
 		assert.Equal(t, group3Model.Position, resultGroup3.Position)
-	})
-}
-
-func TestGormCommandGroupRepository_GetAllContaining(t *testing.T) {
-	t.Run("Should return every command group holding the command, with all of their commands", func(t *testing.T) {
-		// Arrange
-		projectId := "project1"
-		otherProjectId := "project2"
-
-		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
-		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
-		cmd3 := test.NewCommandBuilder().WithName("Command 3").WithProjectId(otherProjectId).Build()
-
-		commandModels := []commandinfrastructure.CommandModel{
-			commandinfrastructure.ToCommandModel(&cmd1),
-			commandinfrastructure.ToCommandModel(&cmd2),
-			commandinfrastructure.ToCommandModel(&cmd3),
-		}
-
-		holding := test2.NewCommandGroupBuilder().WithName("Holding").WithProjectId(projectId).WithPosition(0).WithCommands(cmd2, cmd1).BuildWithCommands()
-		notHolding := test2.NewCommandGroupBuilder().WithName("Not holding").WithProjectId(projectId).WithPosition(1).WithCommands(cmd2).BuildWithCommands()
-		holdingElsewhere := test2.NewCommandGroupBuilder().WithName("Holding elsewhere").WithProjectId(otherProjectId).WithPosition(0).WithCommands(cmd1, cmd3).BuildWithCommands()
-
-		commandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{
-			{CommandGroupId: holding.Id, CommandId: cmd2.Id, Position: 0},
-			{CommandGroupId: holding.Id, CommandId: cmd1.Id, Position: 1},
-			{CommandGroupId: notHolding.Id, CommandId: cmd2.Id, Position: 0},
-			{CommandGroupId: holdingElsewhere.Id, CommandId: cmd1.Id, Position: 0},
-			{CommandGroupId: holdingElsewhere.Id, CommandId: cmd3.Id, Position: 1},
-		}
-
-		helper := newTestHelper(
-			t,
-			commandModels,
-			[]infrastructure.CommandGroupModel{
-				infrastructure.ToCommandGroupModel(&holding),
-				infrastructure.ToCommandGroupModel(&notHolding),
-				infrastructure.ToCommandGroupModel(&holdingElsewhere),
-			},
-			commandToCommandGroupModels,
-		)
-
-		// Act
-		result, err := helper.repo.GetAllContaining(cmd1.Id)
-
-		// Assert
-		assert.Nil(t, err)
-		assert.ElementsMatch(t, []domain.CommandGroup{holding, holdingElsewhere}, result)
-	})
-
-	t.Run("Should return nothing when no command group holds the command", func(t *testing.T) {
-		// Arrange
-		helper := newTestHelper(t, nil, nil, nil)
-
-		// Act
-		result, err := helper.repo.GetAllContaining("unheld-command")
-
-		// Assert
-		assert.Nil(t, err)
-		assert.Empty(t, result)
 	})
 }
 

@@ -18,7 +18,7 @@ func NewRemoveCommandFromCommandGroup(commandGroupRepo domain.Repository) *Remov
 }
 
 func (uc *RemoveCommandFromCommandGroup) Execute(commandId, commandGroupId string) error {
-	commandGroup, err := uc.commandGroupRepository.GetWithCommandIds(commandGroupId)
+	commandGroup, err := uc.commandGroupRepository.Get(commandGroupId)
 	if err != nil {
 		return err
 	}
@@ -30,5 +30,5 @@ func (uc *RemoveCommandFromCommandGroup) Execute(commandId, commandGroupId strin
 		return heldCommandId != commandId
 	})
 
-	return uc.commandGroupRepository.UpdateWithCommandIds(&commandGroup)
+	return uc.commandGroupRepository.Update(&commandGroup)
 }

@@ -218,11 +218,11 @@ func (h *Harness) GivenCommands(commands ...commanddomain.Command) {
 	}
 }
 
-func (h *Harness) GivenCommandGroups(commandGroups ...commandgroupdomain.CommandGroupWithCommandIds) {
+func (h *Harness) GivenCommandGroups(commandGroups ...commandgroupdomain.CommandGroup) {
 	h.t.Helper()
 
 	for i := range commandGroups {
-		if err := h.commandGroupRepository.CreateWithCommandIds(&commandGroups[i]); err != nil {
+		if err := h.commandGroupRepository.Create(&commandGroups[i]); err != nil {
 			h.t.Fatalf("failed to arrange command group %s: %v", commandGroups[i].Id, err)
 		}
 	}
