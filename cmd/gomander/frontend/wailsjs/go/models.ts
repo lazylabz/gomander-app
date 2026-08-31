@@ -10,12 +10,23 @@ export namespace domain {
 	    link: string;
 	    errorPatterns: string[];
 	}
+	export interface CommandBlueprint {
+	    id: string;
+	    name: string;
+	    command: string;
+	    workingDirectory: string;
+	}
 	export interface CommandGroup {
 	    id: string;
 	    projectId: string;
 	    name: string;
 	    commands: Command[];
 	    position: number;
+	}
+	export interface CommandGroupBlueprint {
+	    id: string;
+	    name: string;
+	    commandIds: string[];
 	}
 	export interface EnvironmentPath {
 	    id: string;
@@ -203,6 +214,12 @@ export namespace domain {
 	    name: string;
 	    workingDirectory: string;
 	}
+	export interface ProjectBlueprint {
+	    name: string;
+	    workingDirectory: string;
+	    commands: CommandBlueprint[];
+	    commandGroups: CommandGroupBlueprint[];
+	}
 
 }
 
@@ -214,28 +231,6 @@ export namespace event {
 	    NEW_LOG_ENTRY = "new_log_entry",
 	    COMMAND_GROUP_DELETED = "command_group_deleted",
 	    COMMAND_ERROR_DETECTED = "command_error_detected",
-	}
-
-}
-
-export namespace main {
-	
-	export interface CommandBlueprint {
-	    id: string;
-	    name: string;
-	    command: string;
-	    workingDirectory: string;
-	}
-	export interface CommandGroupBlueprint {
-	    id: string;
-	    name: string;
-	    commandIds: string[];
-	}
-	export interface ProjectBlueprint {
-	    name: string;
-	    workingDirectory: string;
-	    commands: CommandBlueprint[];
-	    commandGroups: CommandGroupBlueprint[];
 	}
 
 }

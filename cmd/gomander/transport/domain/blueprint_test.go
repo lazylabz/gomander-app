@@ -1,11 +1,13 @@
-package main
+package domain_test
 
 import (
 	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
+	transport "gomander/cmd/gomander/transport/domain"
 	projectdomain "gomander/internal/project/domain"
 )
 
@@ -23,10 +25,10 @@ var blueprint = projectdomain.Blueprint{
 func TestProjectBlueprint(t *testing.T) {
 	t.Run("Should reach the frontend under the names it reads", func(t *testing.T) {
 		// Act
-		sent, err := json.Marshal(newProjectBlueprint(blueprint))
+		sent, err := json.Marshal(transport.FromBlueprint(blueprint))
 
 		// Assert
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.JSONEq(t, `{
 			"name": "Gomander",
 			"workingDirectory": "/home/user/app",
@@ -50,9 +52,23 @@ func TestProjectBlueprint(t *testing.T) {
 
 	t.Run("Should come back from the frontend as the Blueprint it left as", func(t *testing.T) {
 		// Act
-		returned := newProjectBlueprint(blueprint).toDomain()
+		returned := transport.FromBlueprint(blueprint).ToDomain()
 
 		// Assert
 		assert.Equal(t, blueprint, returned)
+	})
+
+	t.Run("Should give the frontend empty lists for a Blueprint that carries none", func(t *testing.T) {
+		// Act
+		sent, err := json.Marshal(transport.FromBlueprint(projectdomain.Blueprint{}))
+
+		// Assert
+		require.NoError(t, err)
+		assert.JSONEq(t, `{
+			"name": "",
+			"workingDirectory": "",
+			"commands": [],
+			"commandGroups": []
+		}`, string(sent))
 	})
 }

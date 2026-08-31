@@ -1,12 +1,12 @@
 package domain
 
 type EnvironmentPath struct {
-	Id   string `json:"id"`
-	Path string `json:"path"`
+	Id   string
+	Path string
 }
 
 type Config struct {
-	LastOpenedProjectId string            `json:"lastOpenedProjectId"`
-	EnvironmentPaths    []EnvironmentPath `json:"environmentPaths"`
-	Locale              string            `json:"locale"`
+	LastOpenedProjectId string
+	EnvironmentPaths    []EnvironmentPath
+	Locale              string
 }
