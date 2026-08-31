@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { resetBackendServices } from "@/contracts/service.ts";
 import { commandGroupStore } from "@/store/commandGroupStore.ts";
-import { commandStore } from "@/store/commandStore.ts";
 import { installInMemoryBackend } from "@/testing/backend.ts";
 import { CommandBuilder } from "@/testing/builders/command.ts";
 import { CommandGroupBuilder } from "@/testing/builders/commandGroup.ts";
@@ -26,17 +25,14 @@ describe("editCommandGroup", () => {
 		.build();
 
 	const edit = {
-		id: "group-1",
-		projectId: existingGroup.projectId,
+		...existingGroup,
 		name: "New name",
-		position: existingGroup.position,
-		commands: ["cmd-1", "cmd-2"],
+		commandIds: [secondCommand.id, firstCommand.id],
 	};
 
 	beforeEach(async () => {
 		vi.clearAllMocks();
 		await installTranslations();
-		commandStore.setState({ commands: [firstCommand, secondCommand] });
 		commandGroupStore.setState({ commandGroups: [existingGroup] });
 	});
 
@@ -44,7 +40,7 @@ describe("editCommandGroup", () => {
 		resetBackendServices();
 	});
 
-	it("Should save the edited group and refresh the groups", async () => {
+	it("Should save the edited group, naming the commands in the order it was given, and refresh the groups", async () => {
 		// Arrange
 		installInMemoryBackend({ commandGroups: [existingGroup] });
 
@@ -55,23 +51,10 @@ describe("editCommandGroup", () => {
 		expect(succeeded).toBe(true);
 		const [group] = commandGroupStore.getState().commandGroups;
 		expect(group.name).toBe("New name");
-		expect(group.commands).toEqual([firstCommand, secondCommand]);
+		expect(group.commandIds).toEqual(["cmd-2", "cmd-1"]);
 		expect(toastSuccess).toHaveBeenCalledWith(
 			"toast.commandGroup.updateSuccess",
 		);
-	});
-
-	it("Should leave out a command it does not know about", async () => {
-		// Arrange
-		const backend = installInMemoryBackend({ commandGroups: [existingGroup] });
-
-		// Act
-		await sut({ ...edit, commands: ["unknown", "cmd-2"] });
-
-		// Assert
-		expect(backend.state.commandGroups[0].commands.map((c) => c.id)).toEqual([
-			"cmd-2",
-		]);
 	});
 
 	it("Should notify the user when the backend rejects the edit", async () => {

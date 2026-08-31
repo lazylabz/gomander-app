@@ -46,9 +46,9 @@ describe("removeCommandFromGroup", () => {
 
 		// Assert
 		expect(succeeded).toBe(true);
-		expect(
-			commandGroupStore.getState().commandGroups[0].commands.map((c) => c.id),
-		).toEqual(["cmd-2"]);
+		expect(commandGroupStore.getState().commandGroups[0].commandIds).toEqual([
+			"cmd-2",
+		]);
 		expect(toastSuccess).toHaveBeenCalledWith(
 			"toast.command.removeFromGroupSuccess",
 		);
@@ -68,7 +68,7 @@ describe("removeCommandFromGroup", () => {
 		expect(toastError).toHaveBeenCalledWith(
 			"toast.commandGroup.cannotRemoveLast",
 		);
-		expect(backend.state.commandGroups[0].commands).toHaveLength(1);
+		expect(backend.state.commandGroups[0].commandIds).toHaveLength(1);
 	});
 
 	it("Should report an unknown group", async () => {
@@ -100,8 +100,9 @@ describe("removeCommandFromGroup", () => {
 		expect(toastError).toHaveBeenCalledWith(
 			"toast.command.removeFromGroupFailed: boom",
 		);
-		expect(
-			commandGroupStore.getState().commandGroups[0].commands.map((c) => c.id),
-		).toEqual(["cmd-1", "cmd-2"]);
+		expect(commandGroupStore.getState().commandGroups[0].commandIds).toEqual([
+			"cmd-1",
+			"cmd-2",
+		]);
 	});
 });

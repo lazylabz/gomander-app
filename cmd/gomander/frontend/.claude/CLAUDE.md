@@ -57,10 +57,11 @@ The call site keeps only what is local to the UI: closing a modal, resetting a f
 
 Refresh through `refreshAfterMutation(...queries)` — the outcome is already reported by
 then, so a failing refresh must not reject. Equivalent mutations refresh the same set: a
-command's create/edit/delete refresh the commands and the groups that carry a copy; a
-group's own mutations refresh the groups alone; a project mutation that changes which
-projects exist refreshes the available ones, and an edit refreshes the opened project
-too. `closeProject` and `exportProject` refresh nothing.
+command's create and delete refresh the commands and the groups that name it, while an
+edit refreshes the commands alone because a group holds no copy to update; a group's own
+mutations refresh the groups alone; a project mutation that changes which projects exist
+refreshes the available ones, and an edit refreshes the opened project too.
+`closeProject` and `exportProject` refresh nothing.
 
 `createProject` is the one exception left — still a `dataService` call from
 `CreateProjectModal` with an `onSuccess` prop.

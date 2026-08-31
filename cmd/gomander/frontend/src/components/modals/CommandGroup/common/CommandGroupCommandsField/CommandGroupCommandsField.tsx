@@ -30,7 +30,7 @@ import {
 	FormItem,
 	FormMessage,
 } from "@/design-system/components/ui/form.tsx";
-import { isDefined } from "@/helpers/mapHelpers.ts";
+import { resolveCommands } from "@/helpers/commandHelpers.ts";
 import { useCommandStore } from "@/store/commandStore.ts";
 
 export const CommandGroupCommandsField = () => {
@@ -48,9 +48,7 @@ export const CommandGroupCommandsField = () => {
 
 		return {
 			availableCommands: allCommands.filter((cmd) => !selectedSet.has(cmd.id)),
-			addedCommands: selectedCommandIds
-				.map((id) => allCommands.find((cmd) => cmd.id === id))
-				.filter(isDefined),
+			addedCommands: resolveCommands(selectedCommandIds, allCommands),
 		};
 	}, [allCommands, selectedCommandIds]);
 

@@ -18,7 +18,7 @@ export const removeCommandFromGroup = async (
 		toast.error(i18n.t("toast.commandGroup.notFound"));
 		return false;
 	}
-	if (group.commands.length === 1) {
+	if (group.commandIds.length === 1) {
 		toast.error(i18n.t("toast.commandGroup.cannotRemoveLast"));
 		return false;
 	}

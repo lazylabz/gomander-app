@@ -5,9 +5,9 @@ import "gomander/internal/ordering"
 // Order is where a Command Group sits among its Project's Command Groups;
 // nothing else assigns a Position.
 var Order = ordering.NewList(
-	func(commandGroup CommandGroup) string { return commandGroup.Id },
-	func(commandGroup CommandGroup) int { return commandGroup.Position },
-	func(commandGroup *CommandGroup, position int) { commandGroup.Position = position },
+	func(commandGroup CommandGroupWithCommandIds) string { return commandGroup.Id },
+	func(commandGroup CommandGroupWithCommandIds) int { return commandGroup.Position },
+	func(commandGroup *CommandGroupWithCommandIds, position int) { commandGroup.Position = position },
 )
 
 // CommandPlacement is where one of the Commands a Command Group holds sits

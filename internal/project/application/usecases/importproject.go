@@ -27,7 +27,7 @@ func (uc *ImportProject) Execute(blueprint projectdomain.Blueprint, name, workin
 	}
 
 	commands := make([]domain.Command, 0, len(blueprint.Commands))
-	commandGroups := make([]commandgroupdomain.CommandGroup, 0, len(blueprint.CommandGroups))
+	commandGroups := make([]commandgroupdomain.CommandGroupWithCommandIds, 0, len(blueprint.CommandGroups))
 
 	// The Ids a Blueprint carries only name its own Commands; the ones stored
 	// are new, so a Group has to be told which is which.
@@ -48,7 +48,7 @@ func (uc *ImportProject) Execute(blueprint projectdomain.Blueprint, name, workin
 	}
 
 	for _, group := range blueprint.CommandGroups {
-		newGroup := commandgroupdomain.CommandGroup{
+		newGroup := commandgroupdomain.CommandGroupWithCommandIds{
 			Id:        uuid.New().String(),
 			Name:      group.Name,
 			ProjectId: project.Id,
@@ -57,7 +57,7 @@ func (uc *ImportProject) Execute(blueprint projectdomain.Blueprint, name, workin
 
 		for _, cmdId := range group.CommandIds {
 			if command, exists := commandsByBlueprintId[cmdId]; exists {
-				newGroup.Commands = append(newGroup.Commands, command)
+				newGroup.CommandIds = append(newGroup.CommandIds, command.Id)
 			}
 		}
 
@@ -76,7 +76,7 @@ func (uc *ImportProject) Execute(blueprint projectdomain.Blueprint, name, workin
 		}
 
 		for _, group := range commandGroups {
-			if err := repositories.CommandGroups.Create(&group); err != nil {
+			if err := repositories.CommandGroups.CreateWithCommandIds(&group); err != nil {
 				return err
 			}
 		}

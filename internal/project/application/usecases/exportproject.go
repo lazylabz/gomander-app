@@ -4,7 +4,6 @@ import (
 	"gomander/internal/command/domain"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	"gomander/internal/dialog"
-	"gomander/internal/helpers/array"
 	projectdomain "gomander/internal/project/domain"
 )
 
@@ -57,7 +56,7 @@ func (uc *ExportProject) Execute(projectId string) (string, error) {
 		return "", err
 	}
 
-	commandGroups, err := uc.commandGroupRepository.GetAll(projectId)
+	commandGroups, err := uc.commandGroupRepository.GetAllWithCommandIds(projectId)
 	if err != nil {
 		return "", err
 	}
@@ -81,7 +80,7 @@ func (uc *ExportProject) Execute(projectId string) (string, error) {
 		blueprint.CommandGroups = append(blueprint.CommandGroups, projectdomain.BlueprintCommandGroup{
 			Id:         group.Id,
 			Name:       group.Name,
-			CommandIds: array.Map(group.Commands, func(cmd domain.Command) string { return cmd.Id }),
+			CommandIds: group.CommandIds,
 		})
 	}
 

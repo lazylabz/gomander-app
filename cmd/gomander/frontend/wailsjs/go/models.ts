@@ -20,7 +20,7 @@ export namespace domain {
 	    id: string;
 	    projectId: string;
 	    name: string;
-	    commands: Command[];
+	    commandIds: string[];
 	    position: number;
 	}
 	export interface CommandGroupBlueprint {

@@ -16,7 +16,7 @@ func TestRemoveCommandFrom(t *testing.T) {
 		// Arrange
 		removed := commandtest.NewCommandBuilder().Build()
 		kept := commandtest.NewCommandBuilder().Build()
-		commandGroup := commandgrouptest.NewCommandGroupBuilder().WithCommands(removed, kept).BuildWithCommandIds()
+		commandGroup := commandgrouptest.NewCommandGroupBuilder().WithCommands(removed, kept).Build()
 
 		// Act
 		cascade := domain.RemoveCommandFrom([]domain.CommandGroupWithCommandIds{commandGroup}, removed.Id)
@@ -30,7 +30,7 @@ func TestRemoveCommandFrom(t *testing.T) {
 	t.Run("Should make a command group that has lost its last command cease to exist", func(t *testing.T) {
 		// Arrange
 		onlyCommand := commandtest.NewCommandBuilder().Build()
-		commandGroup := commandgrouptest.NewCommandGroupBuilder().WithCommands(onlyCommand).BuildWithCommandIds()
+		commandGroup := commandgrouptest.NewCommandGroupBuilder().WithCommands(onlyCommand).Build()
 
 		// Act
 		cascade := domain.RemoveCommandFrom([]domain.CommandGroupWithCommandIds{commandGroup}, onlyCommand.Id)
@@ -45,8 +45,8 @@ func TestRemoveCommandFrom(t *testing.T) {
 		removed := commandtest.NewCommandBuilder().Build()
 		kept := commandtest.NewCommandBuilder().Build()
 
-		emptied := commandgrouptest.NewCommandGroupBuilder().WithCommands(removed).BuildWithCommandIds()
-		surviving := commandgrouptest.NewCommandGroupBuilder().WithCommands(kept, removed).BuildWithCommandIds()
+		emptied := commandgrouptest.NewCommandGroupBuilder().WithCommands(removed).Build()
+		surviving := commandgrouptest.NewCommandGroupBuilder().WithCommands(kept, removed).Build()
 
 		// Act
 		cascade := domain.RemoveCommandFrom([]domain.CommandGroupWithCommandIds{emptied, surviving}, removed.Id)
@@ -60,7 +60,7 @@ func TestRemoveCommandFrom(t *testing.T) {
 		// Arrange
 		removed := commandtest.NewCommandBuilder().Build()
 		kept := commandtest.NewCommandBuilder().Build()
-		commandGroup := commandgrouptest.NewCommandGroupBuilder().WithCommands(removed, kept).BuildWithCommandIds()
+		commandGroup := commandgrouptest.NewCommandGroupBuilder().WithCommands(removed, kept).Build()
 
 		// Act
 		domain.RemoveCommandFrom([]domain.CommandGroupWithCommandIds{commandGroup}, removed.Id)

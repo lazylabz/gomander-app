@@ -94,12 +94,12 @@ func (h *CleanCommandGroupsOnCommandDeleted) applyTheCascadeFor(commandId string
 
 func (h *CleanCommandGroupsOnCommandDeleted) closeTheGapsLeftIn(projectIds []string) error {
 	for _, projectId := range projectIds {
-		remainingCommandGroups, err := h.commandGroupRepository.GetAll(projectId)
+		remainingCommandGroups, err := h.commandGroupRepository.GetAllWithCommandIds(projectId)
 		if err != nil {
 			return err
 		}
 
-		err = commandgroupdomain.Order.CloseGaps(remainingCommandGroups, h.commandGroupRepository.Update)
+		err = commandgroupdomain.Order.CloseGaps(remainingCommandGroups, h.commandGroupRepository.UpdateWithCommandIds)
 		if err != nil {
 			return err
 		}

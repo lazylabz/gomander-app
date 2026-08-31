@@ -153,7 +153,7 @@ func New(t *testing.T) *Harness {
 			DeleteCommandGroup:            commandgroupusecases.NewDeleteCommandGroup(commandGroupRepo, ee),
 			RemoveCommandFromCommandGroup: commandgroupusecases.NewRemoveCommandFromCommandGroup(commandGroupRepo),
 			ReorderCommandGroups:          commandgroupusecases.NewReorderCommandGroups(openedProject, commandGroupRepo),
-			RunCommandGroup:               commandgroupusecases.NewRunCommandGroup(openedProject, commandGroupRepo, processRunner),
+			RunCommandGroup:               commandgroupusecases.NewRunCommandGroup(openedProject, commandGroupRepo, commandRepo, processRunner),
 			StopCommandGroup:              commandgroupusecases.NewStopCommandGroup(commandGroupRepo, processRunner),
 
 			GetCommands:          commandusecases.NewGetCommands(openedProject, commandRepo),
@@ -218,11 +218,11 @@ func (h *Harness) GivenCommands(commands ...commanddomain.Command) {
 	}
 }
 
-func (h *Harness) GivenCommandGroups(commandGroups ...commandgroupdomain.CommandGroup) {
+func (h *Harness) GivenCommandGroups(commandGroups ...commandgroupdomain.CommandGroupWithCommandIds) {
 	h.t.Helper()
 
 	for i := range commandGroups {
-		if err := h.commandGroupRepository.Create(&commandGroups[i]); err != nil {
+		if err := h.commandGroupRepository.CreateWithCommandIds(&commandGroups[i]); err != nil {
 			h.t.Fatalf("failed to arrange command group %s: %v", commandGroups[i].Id, err)
 		}
 	}

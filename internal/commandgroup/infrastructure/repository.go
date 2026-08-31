@@ -135,22 +135,28 @@ func (r GormCommandGroupRepository) findWithCommandIds(condition string, args ..
 }
 
 func (r GormCommandGroupRepository) Create(commandGroup *domain.CommandGroup) error {
-	commandGroupModel := ToCommandGroupModel(commandGroup)
+	return r.write(ToCommandGroupModel(commandGroup), ToCommandToCommandGroupModels(commandGroup))
+}
 
-	err := r.db.Transaction(func(tx *gorm.DB) error {
+func (r GormCommandGroupRepository) CreateWithCommandIds(commandGroup *domain.CommandGroupWithCommandIds) error {
+	return r.write(
+		ToCommandGroupModelWithCommandIds(commandGroup),
+		ToCommandToCommandGroupModelsWithCommandIds(commandGroup),
+	)
+}
+
+func (r GormCommandGroupRepository) write(
+	commandGroupModel CommandGroupModel,
+	placements []CommandToCommandGroupModel,
+) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
 		err := gorm.G[CommandGroupModel](tx).Create(r.ctx, &commandGroupModel)
 		if err != nil {
 			return err
 		}
 
-		return r.writeCommandPlacements(tx, ToCommandToCommandGroupModels(commandGroup))
+		return r.writeCommandPlacements(tx, placements)
 	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (r GormCommandGroupRepository) Update(commandGroup *domain.CommandGroup) error {

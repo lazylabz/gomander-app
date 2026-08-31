@@ -61,9 +61,9 @@ describe("deleteCommand", () => {
 		// Assert
 		expect(succeeded).toBe(true);
 		expect(commandStore.getState().commands).toEqual([]);
-		expect(
-			commandGroupStore.getState().commandGroups[0].commands.map((c) => c.id),
-		).toEqual(["cmd-2"]);
+		expect(commandGroupStore.getState().commandGroups[0].commandIds).toEqual([
+			"cmd-2",
+		]);
 	});
 
 	it("Should clear the active command", async () => {

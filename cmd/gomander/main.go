@@ -247,7 +247,7 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*i
 	deleteCommandGroup := commandgroupusecases.NewDeleteCommandGroup(commandGroupRepo, ee)
 	removeCommandFromCommandGroup := commandgroupusecases.NewRemoveCommandFromCommandGroup(commandGroupRepo)
 	reorderCommandGroups := commandgroupusecases.NewReorderCommandGroups(openedProject, commandGroupRepo)
-	runCommandGroup := commandgroupusecases.NewRunCommandGroup(openedProject, commandGroupRepo, r)
+	runCommandGroup := commandgroupusecases.NewRunCommandGroup(openedProject, commandGroupRepo, commandRepo, r)
 	stopCommandGroup := commandgroupusecases.NewStopCommandGroup(commandGroupRepo, r)
 	// Commands
 	getCommands := commandusecases.NewGetCommands(openedProject, commandRepo)

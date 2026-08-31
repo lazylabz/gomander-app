@@ -62,9 +62,9 @@ describe("duplicateCommand", () => {
 		await sut("cmd-1", "group-1");
 
 		// Assert
-		expect(commandGroupStore.getState().commandGroups[0].commands).toHaveLength(
-			2,
-		);
+		expect(
+			commandGroupStore.getState().commandGroups[0].commandIds,
+		).toHaveLength(2);
 	});
 
 	it("Should clear the active command and notify the user", async () => {
