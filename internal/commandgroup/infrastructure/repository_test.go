@@ -601,6 +601,89 @@ func TestGormCommandGroupRepository_Update(t *testing.T) {
 	})
 }
 
+func TestGormCommandGroupRepository_UpdateWithCommandIds(t *testing.T) {
+	t.Run("Should update an existing command group and the commands it names", func(t *testing.T) {
+		projectId := "project1"
+
+		cmd1 := test.NewCommandBuilder().WithName("Command 1").WithProjectId(projectId).Build()
+		cmd2 := test.NewCommandBuilder().WithName("Command 2").WithProjectId(projectId).Build()
+
+		commandModels := []commandinfrastructure.CommandModel{
+			commandinfrastructure.ToCommandModel(&cmd1),
+			commandinfrastructure.ToCommandModel(&cmd2),
+		}
+
+		cmdGroup1Builder := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(cmd1, cmd2)
+		cmdGroup1 := cmdGroup1Builder.Build()
+
+		commandToCommandGroupModels := []infrastructure.CommandToCommandGroupModel{
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd1.Id,
+				Position:       0,
+			},
+			{
+				CommandGroupId: cmdGroup1.Id,
+				CommandId:      cmd2.Id,
+				Position:       1,
+			},
+		}
+
+		helper := newTestHelper(
+			t,
+			commandModels,
+			[]infrastructure.CommandGroupModel{infrastructure.ToCommandGroupModel(&cmdGroup1)},
+			commandToCommandGroupModels,
+		)
+
+		updatedGroup := cmdGroup1Builder.WithName("Updated Group 1").WithCommands(cmd2).BuildWithCommandIds()
+
+		err := helper.repo.UpdateWithCommandIds(&updatedGroup)
+		assert.Nil(t, err)
+
+		result, err := helper.repo.GetWithCommandIds(updatedGroup.Id)
+		assert.Nil(t, err)
+		assert.Equal(t, updatedGroup, result)
+	})
+
+	t.Run("Should write a command group that names a command whose own record is gone", func(t *testing.T) {
+		projectId := "project1"
+
+		kept := test.NewCommandBuilder().WithName("Kept").WithProjectId(projectId).Build()
+
+		cmdGroup1Builder := test2.NewCommandGroupBuilder().WithName("Group 1").WithProjectId(projectId).WithPosition(0).WithCommands(kept)
+		cmdGroup1 := cmdGroup1Builder.Build()
+
+		helper := newTestHelper(
+			t,
+			[]commandinfrastructure.CommandModel{commandinfrastructure.ToCommandModel(&kept)},
+			[]infrastructure.CommandGroupModel{infrastructure.ToCommandGroupModel(&cmdGroup1)},
+			[]infrastructure.CommandToCommandGroupModel{
+				{
+					CommandGroupId: cmdGroup1.Id,
+					CommandId:      kept.Id,
+					Position:       0,
+				},
+			},
+		)
+
+		namingAGoneCommand := domain.CommandGroupWithCommandIds{
+			Id:         cmdGroup1.Id,
+			ProjectId:  projectId,
+			Name:       "Group 1",
+			CommandIds: []string{kept.Id, "deleted-command"},
+			Position:   0,
+		}
+
+		err := helper.repo.UpdateWithCommandIds(&namingAGoneCommand)
+		assert.Nil(t, err)
+
+		result, err := helper.repo.GetWithCommandIds(cmdGroup1.Id)
+		assert.Nil(t, err)
+		assert.Equal(t, namingAGoneCommand, result)
+	})
+}
+
 func TestGormCommandGroupRepository_Delete(t *testing.T) {
 	t.Run("Should delete an existing command group and its associations", func(t *testing.T) {
 		projectId := "project1"

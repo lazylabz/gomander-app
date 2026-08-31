@@ -143,7 +143,7 @@ func (r GormCommandGroupRepository) Create(commandGroup *domain.CommandGroup) er
 			return err
 		}
 
-		return r.writeCommandPlacements(tx, commandGroup)
+		return r.writeCommandPlacements(tx, ToCommandToCommandGroupModels(commandGroup))
 	})
 
 	if err != nil {
@@ -154,16 +154,28 @@ func (r GormCommandGroupRepository) Create(commandGroup *domain.CommandGroup) er
 }
 
 func (r GormCommandGroupRepository) Update(commandGroup *domain.CommandGroup) error {
-	commandGroupModel := ToCommandGroupModel(commandGroup)
+	return r.rewrite(ToCommandGroupModel(commandGroup), ToCommandToCommandGroupModels(commandGroup))
+}
 
-	err := r.db.Transaction(func(tx *gorm.DB) error {
-		// Update the command group data
+func (r GormCommandGroupRepository) UpdateWithCommandIds(commandGroup *domain.CommandGroupWithCommandIds) error {
+	return r.rewrite(
+		ToCommandGroupModelWithCommandIds(commandGroup),
+		ToCommandToCommandGroupModelsWithCommandIds(commandGroup),
+	)
+}
+
+// rewrite replaces the Command Group and the membership rows it owns, so a
+// Command the Group no longer holds leaves no row behind.
+func (r GormCommandGroupRepository) rewrite(
+	commandGroupModel CommandGroupModel,
+	placements []CommandToCommandGroupModel,
+) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
 		_, err := gorm.G[CommandGroupModel](tx).Where("id = ?", commandGroupModel.Id).Select("*").Updates(r.ctx, commandGroupModel)
 		if err != nil {
 			return err
 		}
 
-		// Delete existing command associations
 		_, err = gorm.G[CommandToCommandGroupModel](tx).
 			Where("command_group_id = ?", commandGroupModel.Id).
 			Delete(r.ctx)
@@ -171,18 +183,12 @@ func (r GormCommandGroupRepository) Update(commandGroup *domain.CommandGroup) er
 			return err
 		}
 
-		return r.writeCommandPlacements(tx, commandGroup)
+		return r.writeCommandPlacements(tx, placements)
 	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
-func (r GormCommandGroupRepository) writeCommandPlacements(tx *gorm.DB, commandGroup *domain.CommandGroup) error {
-	for _, model := range ToCommandToCommandGroupModels(commandGroup) {
+func (r GormCommandGroupRepository) writeCommandPlacements(tx *gorm.DB, placements []CommandToCommandGroupModel) error {
+	for _, model := range placements {
 		if err := gorm.G[CommandToCommandGroupModel](tx).Create(r.ctx, &model); err != nil {
 			return err
 		}

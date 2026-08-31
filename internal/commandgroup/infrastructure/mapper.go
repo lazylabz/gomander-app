@@ -16,19 +16,33 @@ func ToCommandGroupModel(domainCommandGroup *domain.CommandGroup) CommandGroupMo
 	}
 }
 
+func ToCommandGroupModelWithCommandIds(domainCommandGroup *domain.CommandGroupWithCommandIds) CommandGroupModel {
+	return CommandGroupModel{
+		Id:        domainCommandGroup.Id,
+		Name:      domainCommandGroup.Name,
+		ProjectId: domainCommandGroup.ProjectId,
+		Position:  domainCommandGroup.Position,
+	}
+}
+
 // ToCommandToCommandGroupModels turns the Command Group's own answer about
 // where its Commands sit into the rows that hold it.
 func ToCommandToCommandGroupModels(domainCommandGroup *domain.CommandGroup) []CommandToCommandGroupModel {
-	return array.Map(
-		domainCommandGroup.CommandPlacements(),
-		func(placement domain.CommandPlacement) CommandToCommandGroupModel {
-			return CommandToCommandGroupModel{
-				CommandGroupId: domainCommandGroup.Id,
-				CommandId:      placement.CommandId,
-				Position:       placement.Position,
-			}
-		},
-	)
+	return toCommandToCommandGroupModels(domainCommandGroup.Id, domainCommandGroup.CommandPlacements())
+}
+
+func ToCommandToCommandGroupModelsWithCommandIds(domainCommandGroup *domain.CommandGroupWithCommandIds) []CommandToCommandGroupModel {
+	return toCommandToCommandGroupModels(domainCommandGroup.Id, domainCommandGroup.CommandPlacements())
+}
+
+func toCommandToCommandGroupModels(commandGroupId string, placements []domain.CommandPlacement) []CommandToCommandGroupModel {
+	return array.Map(placements, func(placement domain.CommandPlacement) CommandToCommandGroupModel {
+		return CommandToCommandGroupModel{
+			CommandGroupId: commandGroupId,
+			CommandId:      placement.CommandId,
+			Position:       placement.Position,
+		}
+	})
 }
 
 // ToDomainCommandGroups folds the rows of commandGroupQuery back into Command

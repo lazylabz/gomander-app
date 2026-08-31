@@ -40,3 +40,18 @@ func (commandGroup CommandGroup) CommandPlacements() []CommandPlacement {
 
 	return placements
 }
+
+// CommandPlacements answers the same for a Command Group that names the
+// Commands it holds instead of carrying them.
+func (commandGroup CommandGroupWithCommandIds) CommandPlacements() []CommandPlacement {
+	placements := make([]CommandPlacement, 0, len(commandGroup.CommandIds))
+
+	for _, commandId := range commandGroup.CommandIds {
+		placements = append(placements, CommandPlacement{
+			CommandId: commandId,
+			Position:  CommandOrder.End(placements),
+		})
+	}
+
+	return placements
+}
