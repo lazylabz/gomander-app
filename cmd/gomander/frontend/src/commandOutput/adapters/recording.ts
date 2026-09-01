@@ -5,6 +5,7 @@ import type {
 	TerminalFactory,
 	TerminalTheme,
 } from "@/commandOutput/ports.ts";
+import { copyTextToClipboard } from "@/useCases/clipboard/copyTextToClipboard.ts";
 
 export type RecordedSearch = {
 	query: string;
@@ -23,6 +24,7 @@ export type RecordedTerminal = {
 	disposed: boolean;
 	searches: RecordedSearch[];
 	searchesCleared: number;
+	selection: string;
 	reportResults: (resultCount: number) => void;
 };
 
@@ -47,6 +49,7 @@ export const createRecordingTerminals = (): RecordingTerminals => {
 			disposed: false,
 			searches: [],
 			searchesCleared: 0,
+			selection: "",
 			reportResults: (resultCount) => {
 				for (const listener of resultListeners) {
 					listener(resultCount);
@@ -101,8 +104,12 @@ export const createRecordingTerminals = (): RecordingTerminals => {
 							};
 						},
 					},
-					hasSelection: () => false,
-					copySelection: () => {},
+					hasSelection: () => recorded.selection.length > 0,
+					copySelection: () => {
+						if (recorded.selection) {
+							void copyTextToClipboard(recorded.selection);
+						}
+					},
 					detach: () => {
 						recorded.attachedTo = null;
 					},
