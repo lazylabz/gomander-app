@@ -3,6 +3,8 @@
 package runner
 
 import (
+	"bufio"
+	"bytes"
 	"io"
 	"os"
 	"strings"
@@ -42,6 +44,18 @@ func TestShouldUseConPTYRequiresAllowlistAndAPI(t *testing.T) {
 	assert.False(t, shouldUseConPTY(Config{}, HostEnvironmentWindows10, true))
 	assert.False(t, shouldUseConPTY(enabled, "", true))
 	assert.False(t, shouldUseConPTY(enabled, HostEnvironmentWindows10, false))
+}
+
+func TestConPTYOutputFiltersHostInitializationLines(t *testing.T) {
+	input := bytes.NewBufferString(
+		"\x1b[2J\x1b[H\x1b]0;C:\\Windows\\System32\\cmd.exe\a\x1b[?25h\r\ncommand output\r\n",
+	)
+	sut := &conPTYOutput{reader: bufio.NewReader(input)}
+
+	output, err := io.ReadAll(sut)
+
+	require.NoError(t, err)
+	assert.Equal(t, "command output\r\n", string(output))
 }
 
 func TestWindowsProcessUsesTerminalOnlyWhenConfigured(t *testing.T) {

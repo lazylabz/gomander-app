@@ -112,7 +112,7 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 			defer reader.Close()
 			defer scanWg.Done()
 			defer wg.Done()
-			c.streamOutput(command, process, reader)
+			c.streamOutput(command, reader)
 		}(reader)
 	}
 
@@ -135,7 +135,7 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 		// A descendant that escaped the kill can hold the write ends open, so the
 		// scanners get a grace period to drain what is buffered and are then cut off.
 		if !waitFor(&scanWg, pipeDrainGrace) {
-			closeProcessReaders(readers)
+			closeReaders(readers...)
 			scanWg.Wait()
 		}
 
@@ -225,15 +225,12 @@ func isExpectedError(err error) bool {
 	return false
 }
 
-func (c *DefaultRunner) streamOutput(command *domain.Command, process commandProcess, pipeReader io.ReadCloser) {
+func (c *DefaultRunner) streamOutput(command *domain.Command, pipeReader io.ReadCloser) {
 	scanner := bufio.NewScanner(pipeReader)
 	scanner.Buffer(make([]byte, 1024), 1024*1024) // Set buffer size to 1MB
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		if process.shouldSkipOutputLine(line) {
-			continue
-		}
 		c.logger.Debug(line)
 		c.sendStreamLine(command, line)
 	}

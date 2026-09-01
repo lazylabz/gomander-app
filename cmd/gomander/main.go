@@ -54,6 +54,12 @@ var assets embed.FS
 var localeFs embed.FS
 
 func main() {
+	appConfig := applicationConfig{
+		configFolderName: "gomander",
+		// ConPTY remains opt-in until its Windows 10 behavior can run in CI.
+		runner: runner.Config{},
+	}
+
 	// The app can only be built once Wails hands us its context, so OnStartup fills this in
 	var app *internalapp.App
 
@@ -77,14 +83,14 @@ func main() {
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup: func(ctx context.Context) {
 			// Initialize the database
-			gormDb := configDB(ctx)
+			gormDb := configDB(ctx, appConfig.configFolderName)
 
 			// Load context into the desktop adapters
 			dialog.SetWailsDialogsContext(dialogs, ctx)
 
 			// Build deps
 			var useCases usecases.Registry
-			app, useCases = buildDeps(gormDb, ctx, dialogs)
+			app, useCases = buildDeps(gormDb, ctx, dialogs, appConfig.runner)
 
 			// Register event handlers
 			app.RegisterHandlers()
@@ -127,8 +133,8 @@ func main() {
 	}
 }
 
-func configDB(ctx context.Context) *gorm.DB {
-	gormDb, err := gorm.Open(sqlite.Open(getDbFile()+"?cache=shared"), &gorm.Config{
+func configDB(ctx context.Context, configFolderName string) *gorm.DB {
+	gormDb, err := gorm.Open(sqlite.Open(getDbFile(configFolderName)+"?cache=shared"), &gorm.Config{
 		// Uncomment when debugging
 		// Logger: gormlogger.Default.LogMode(gormlogger.Info),
 		Logger: gormlogger.Default.LogMode(gormlogger.Error),
@@ -164,14 +170,14 @@ func configDB(ctx context.Context) *gorm.DB {
 	return gormDb
 }
 
-func getDbFile() string {
+func getDbFile(configFolderName string) string {
 	userConfig, err := os.UserConfigDir()
 
 	if err != nil {
 		panic(err)
 	}
 
-	configFolderPath := filepath.Join(userConfig, appConfig.configFolderName)
+	configFolderPath := filepath.Join(userConfig, configFolderName)
 	err = os.MkdirAll(configFolderPath, os.ModePerm)
 	if err != nil {
 		panic(err)
@@ -182,11 +188,11 @@ func getDbFile() string {
 	return dbLocation
 }
 
-func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*internalapp.App, usecases.Registry) {
+func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs, runnerConfig runner.Config) (*internalapp.App, usecases.Registry) {
 	// Initialize deps
 	l := logger.NewDefaultLogger(ctx, facade.DefaultRuntimeFacade{})
 	ee := event.NewDefaultEventEmitter(ctx, facade.DefaultRuntimeFacade{})
-	r := runner.NewDefaultRunner(l, ee, appConfig.runner)
+	r := runner.NewDefaultRunner(l, ee, runnerConfig)
 	releaseFeed := releaseinfrastructure.NewGithubReleaseFeed(ctx, facade.DefaultIOFacade{}, releaseinfrastructure.DefaultLatestReleaseUrl)
 	releaseDownloader := releaseinfrastructure.NewGithubReleaseDownloader(ctx, facade.DefaultOSFacade{}, facade.DefaultIOFacade{}, releaseinfrastructure.DefaultBinaryDownloadBaseUrl)
 	releaseInstaller := releaseinfrastructure.NewOSReleaseInstaller(facade.DefaultOSFacade{}, facade.DefaultOpenFacade{})

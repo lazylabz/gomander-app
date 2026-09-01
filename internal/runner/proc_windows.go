@@ -11,7 +11,6 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
@@ -30,6 +29,7 @@ const (
 var (
 	conPTYClearScreen = []byte("\x1b[2J")
 	conPTYCursorHome  = []byte("\x1b[H")
+	conPTYCursorShown = []byte("\x1b[?25h")
 )
 
 type conPTYOutput struct {
@@ -41,28 +41,47 @@ type conPTYOutput struct {
 }
 
 func (o *conPTYOutput) Read(buffer []byte) (int, error) {
-	if !o.initialized {
-		o.initialized = true
-		firstLine, err := o.reader.ReadBytes('\n')
-		// ConPTY initializes its screen before command output. Gomander has
-		// already rendered the command header, so preserve that existing UI.
-		if bytes.Contains(firstLine, conPTYClearScreen) && bytes.Contains(firstLine, conPTYCursorHome) {
-			firstLine = bytes.Replace(firstLine, conPTYClearScreen, nil, 1)
-			firstLine = bytes.Replace(firstLine, conPTYCursorHome, nil, 1)
+	for {
+		if o.pending != nil && o.pending.Len() > 0 {
+			return o.pending.Read(buffer)
 		}
-		o.pending = bytes.NewReader(firstLine)
+		if o.pendingErr != nil {
+			err := o.pendingErr
+			o.pendingErr = nil
+			return 0, err
+		}
+
+		line, err := o.reader.ReadBytes('\n')
+		if !o.initialized {
+			// ConPTY initializes its screen before command output. Gomander has
+			// already rendered the command header, so preserve that existing UI.
+			if bytes.Contains(line, conPTYClearScreen) && bytes.Contains(line, conPTYCursorHome) {
+				line = bytes.Replace(line, conPTYClearScreen, nil, 1)
+				line = bytes.Replace(line, conPTYCursorHome, nil, 1)
+			}
+			o.initialized = true
+		}
+
+		if isConPTYHostOnlyLine(line) {
+			if err != nil {
+				return 0, err
+			}
+			continue
+		}
+
+		o.pending = bytes.NewReader(line)
 		o.pendingErr = err
 	}
+}
 
-	if o.pending.Len() > 0 {
-		return o.pending.Read(buffer)
+func isConPTYHostOnlyLine(line []byte) bool {
+	line = bytes.TrimSuffix(line, []byte{'\n'})
+	line = bytes.TrimSuffix(line, []byte{'\r'})
+	if !bytes.HasPrefix(line, []byte("\x1b]0;")) {
+		return false
 	}
-	if o.pendingErr != nil {
-		err := o.pendingErr
-		o.pendingErr = nil
-		return 0, err
-	}
-	return o.reader.Read(buffer)
+	titleEnd := bytes.IndexByte(line, '\a')
+	return titleEnd >= 0 && bytes.Equal(line[titleEnd+1:], conPTYCursorShown)
 }
 
 func (o *conPTYOutput) Close() error {
@@ -144,14 +163,6 @@ func (p *windowsConPTYProcess) Wait() error {
 
 func (p *windowsConPTYProcess) PID() int {
 	return p.conPTYCommand.Process.Pid
-}
-
-func (p *windowsConPTYProcess) shouldSkipOutputLine(line string) bool {
-	if !strings.HasPrefix(line, "\x1b]0;") {
-		return false
-	}
-	titleEnd := strings.IndexByte(line, '\a')
-	return titleEnd >= 0 && line[titleEnd+1:] == "\x1b[?25h"
 }
 
 func currentWindowsHostEnvironment() HostEnvironment {

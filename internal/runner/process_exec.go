@@ -43,11 +43,7 @@ func (p *execProcess) PID() int {
 	return p.cmd.Process.Pid
 }
 
-func (p *execProcess) shouldSkipOutputLine(string) bool {
-	return false
-}
-
-func closeReaders(readers ...io.Closer) {
+func closeReaders[T io.Closer](readers ...T) {
 	for _, reader := range readers {
 		_ = reader.Close()
 	}
