@@ -12,6 +12,7 @@ import {
 	type TerminalTheme,
 } from "@/commandOutput/ports.ts";
 import { externalBrowserService } from "@/contracts/service.ts";
+import { copyTextToClipboard } from "@/useCases/clipboard/copyTextToClipboard.ts";
 
 const XTERM_THEMES: Record<TerminalTheme, ITheme> = {
 	light: {
@@ -69,7 +70,7 @@ export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
 		},
 		dispose: () => terminal.dispose(),
 
-		attach: (element, copyText) => {
+		attach: (element) => {
 			if (terminal.element) {
 				// Opened before — re-attaching the existing node keeps the scrollback
 				element.appendChild(terminal.element);
@@ -98,7 +99,7 @@ export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
 				if (event.type === "keydown" && !event.repeat) {
 					const selection = terminal.getSelection();
 					if (selection) {
-						copyText(selection);
+						void copyTextToClipboard(selection);
 					}
 				}
 				return false;
@@ -147,7 +148,7 @@ export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
 				copySelection: () => {
 					const selection = terminal.getSelection();
 					if (selection) {
-						copyText(selection);
+						void copyTextToClipboard(selection);
 					}
 				},
 

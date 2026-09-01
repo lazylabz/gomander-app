@@ -13,7 +13,6 @@ import {
 	ContextMenuTrigger,
 } from "@/design-system/components/ui/context-menu.tsx";
 import { useShortcut } from "@/hooks/useShortcut.ts";
-import { copyTextToClipboard } from "@/useCases/clipboard/copyTextToClipboard.ts";
 import { useTerminalSearch } from "../hooks/useTerminalSearch.ts";
 import { TerminalSearchBar } from "./TerminalSearchBar.tsx";
 
@@ -70,9 +69,7 @@ export const CommandTerminal = ({ commandId }: Props) => {
 		}
 		const container = containerRef.current;
 
-		const terminal = attachCommandOutput(commandId, container, (text) => {
-			void copyTextToClipboard(text);
-		});
+		const terminal = attachCommandOutput(commandId, container);
 		attachedRef.current = terminal;
 		searchRef.current = terminal.search;
 

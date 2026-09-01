@@ -23,7 +23,6 @@ export type RecordedTerminal = {
 	disposed: boolean;
 	searches: RecordedSearch[];
 	searchesCleared: number;
-	selection: string;
 	reportResults: (resultCount: number) => void;
 };
 
@@ -48,7 +47,6 @@ export const createRecordingTerminals = (): RecordingTerminals => {
 			disposed: false,
 			searches: [],
 			searchesCleared: 0,
-			selection: "",
 			reportResults: (resultCount) => {
 				for (const listener of resultListeners) {
 					listener(resultCount);
@@ -71,7 +69,7 @@ export const createRecordingTerminals = (): RecordingTerminals => {
 			dispose: () => {
 				recorded.disposed = true;
 			},
-			attach: (element, copyText) => {
+			attach: (element) => {
 				recorded.attachedTo = element;
 				recorded.writtenWhenAttached ??= recorded.written.length;
 				return {
@@ -103,12 +101,8 @@ export const createRecordingTerminals = (): RecordingTerminals => {
 							};
 						},
 					},
-					hasSelection: () => recorded.selection.length > 0,
-					copySelection: () => {
-						if (recorded.selection) {
-							copyText(recorded.selection);
-						}
-					},
+					hasSelection: () => false,
+					copySelection: () => {},
 					detach: () => {
 						recorded.attachedTo = null;
 					},
