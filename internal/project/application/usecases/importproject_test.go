@@ -32,6 +32,8 @@ func TestImportProject_Execute(t *testing.T) {
 			WithName("Name 1").
 			WithCommand("echo 1").
 			WithWorkingDirectory("/1").
+			WithLink("https://example.com").
+			WithErrorPatterns([]string{"ERR", "FATAL"}).
 			Build()
 		cmd2 := test.NewCommandBuilder().
 			WithProjectId(projectId).
@@ -62,6 +64,8 @@ func TestImportProject_Execute(t *testing.T) {
 					Name:             cmd.Name,
 					Command:          cmd.Command,
 					WorkingDirectory: cmd.WorkingDirectory,
+					Link:             cmd.Link,
+					ErrorPatterns:    cmd.ErrorPatterns,
 				}
 			}),
 			CommandGroups: array.Map(commandGroups, func(group commandgroupdomain.CommandGroup) projectdomain.BlueprintCommandGroup {
@@ -102,6 +106,8 @@ func TestImportProject_Execute(t *testing.T) {
 			assert.Equal(t, expectedCmd.Name, capturedCommands[i].Name)
 			assert.Equal(t, expectedCmd.Command, capturedCommands[i].Command)
 			assert.Equal(t, expectedCmd.WorkingDirectory, capturedCommands[i].WorkingDirectory)
+			assert.Equal(t, expectedCmd.Link, capturedCommands[i].Link)
+			assert.Equal(t, expectedCmd.ErrorPatterns, capturedCommands[i].ErrorPatterns)
 			assert.Equal(t, i, capturedCommands[i].Position)
 			assert.Equal(t, newProjectId, capturedCommands[i].ProjectId) // Ensure the project ID is set correctly
 			assert.NotEmpty(t, capturedCommands[i].Id)                   // Random ID exists

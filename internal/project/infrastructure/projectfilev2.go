@@ -7,46 +7,52 @@ import (
 	"gomander/internal/project/domain"
 )
 
-// ProjectFileV1 reads and writes version 1 of the file Gomander exports a
-// Project to. Keeping this shape byte for byte is what lets a file exported by
-// an older Gomander still be imported. A second version is a second codec, not
-// an edit of this one; version 1 cannot carry a Command's link or error patterns.
-type ProjectFileV1 struct {
+// ProjectFileV2 is version 2 of the file Gomander exports a Project to. It
+// carries each Command's link and error patterns, which version 1 had nowhere
+// to put. It is the version written today; version 1 remains the reader for
+// files an older Gomander already produced.
+type ProjectFileV2 struct {
 	fs facade.FsFacade
 }
 
-func NewProjectFileV1(fs facade.FsFacade) *ProjectFileV1 {
-	return &ProjectFileV1{fs: fs}
+func NewProjectFileV2(fs facade.FsFacade) *ProjectFileV2 {
+	return &ProjectFileV2{fs: fs}
 }
 
-type projectV1 struct {
+type projectV2 struct {
 	Version          int              `json:"version"`
 	Name             string           `json:"name"`
 	WorkingDirectory string           `json:"workingDirectory"`
-	Commands         []commandV1      `json:"commands"`
-	CommandGroups    []commandGroupV1 `json:"commandGroups"`
+	Commands         []commandV2      `json:"commands"`
+	CommandGroups    []commandGroupV2 `json:"commandGroups"`
 }
 
-type commandV1 struct {
-	Id               string `json:"id"`
-	Name             string `json:"name"`
-	Command          string `json:"command"`
-	WorkingDirectory string `json:"workingDirectory"`
+type commandV2 struct {
+	Id               string   `json:"id"`
+	Name             string   `json:"name"`
+	Command          string   `json:"command"`
+	WorkingDirectory string   `json:"workingDirectory"`
+	Link             string   `json:"link"`
+	ErrorPatterns    []string `json:"errorPatterns"`
 }
 
-type commandGroupV1 struct {
+type commandGroupV2 struct {
 	Id         string   `json:"id"`
 	Name       string   `json:"name"`
 	CommandIds []string `json:"commandIds"`
 }
 
-func (f *ProjectFileV1) Read(filePath string) (*domain.Blueprint, error) {
+func (f *ProjectFileV2) Read(filePath string) (*domain.Blueprint, error) {
 	data, err := f.fs.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}
 
-	var file projectV1
+	return decodeProjectV2(data)
+}
+
+func decodeProjectV2(data []byte) (*domain.Blueprint, error) {
+	var file projectV2
 	if err := json.Unmarshal(data, &file); err != nil {
 		return nil, err
 	}
@@ -62,6 +68,8 @@ func (f *ProjectFileV1) Read(filePath string) (*domain.Blueprint, error) {
 			Name:             command.Name,
 			Command:          command.Command,
 			WorkingDirectory: command.WorkingDirectory,
+			Link:             command.Link,
+			ErrorPatterns:    emptyStrings(command.ErrorPatterns),
 		})
 	}
 
@@ -76,24 +84,26 @@ func (f *ProjectFileV1) Read(filePath string) (*domain.Blueprint, error) {
 	return &blueprint, nil
 }
 
-func (f *ProjectFileV1) Write(filePath string, blueprint domain.Blueprint) error {
-	file := projectV1{
-		Version:          1,
+func (f *ProjectFileV2) Write(filePath string, blueprint domain.Blueprint) error {
+	file := projectV2{
+		Version:          2,
 		Name:             blueprint.Name,
 		WorkingDirectory: blueprint.WorkingDirectory,
 	}
 
 	for _, command := range blueprint.Commands {
-		file.Commands = append(file.Commands, commandV1{
+		file.Commands = append(file.Commands, commandV2{
 			Id:               command.Id,
 			Name:             command.Name,
 			Command:          command.Command,
 			WorkingDirectory: command.WorkingDirectory,
+			Link:             command.Link,
+			ErrorPatterns:    emptyStrings(command.ErrorPatterns),
 		})
 	}
 
 	for _, group := range blueprint.CommandGroups {
-		file.CommandGroups = append(file.CommandGroups, commandGroupV1{
+		file.CommandGroups = append(file.CommandGroups, commandGroupV2{
 			Id:         group.Id,
 			Name:       group.Name,
 			CommandIds: group.CommandIds,
@@ -106,4 +116,13 @@ func (f *ProjectFileV1) Write(filePath string, blueprint domain.Blueprint) error
 	}
 
 	return f.fs.WriteFile(filePath, data, 0644)
+}
+
+// emptyStrings turns a missing list into an empty one so a file never carries
+// null for error patterns, and a Blueprint never has to distinguish the two.
+func emptyStrings(values []string) []string {
+	if values == nil {
+		return []string{}
+	}
+	return values
 }

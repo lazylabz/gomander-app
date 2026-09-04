@@ -15,7 +15,14 @@ var blueprint = projectdomain.Blueprint{
 	Name:             "Gomander",
 	WorkingDirectory: "/home/user/app",
 	Commands: []projectdomain.BlueprintCommand{
-		{Id: "cmd-1", Name: "Dev server", Command: "pnpm dev", WorkingDirectory: "web"},
+		{
+			Id:               "cmd-1",
+			Name:             "Dev server",
+			Command:          "pnpm dev",
+			WorkingDirectory: "web",
+			Link:             "http://localhost:3000",
+			ErrorPatterns:    []string{"ERROR", "FATAL"},
+		},
 	},
 	CommandGroups: []projectdomain.BlueprintCommandGroup{
 		{Id: "group-1", Name: "Everything", CommandIds: []string{"cmd-1"}},
@@ -37,7 +44,9 @@ func TestProjectBlueprint(t *testing.T) {
 					"id": "cmd-1",
 					"name": "Dev server",
 					"command": "pnpm dev",
-					"workingDirectory": "web"
+					"workingDirectory": "web",
+					"link": "http://localhost:3000",
+					"errorPatterns": ["ERROR", "FATAL"]
 				}
 			],
 			"commandGroups": [
@@ -70,5 +79,19 @@ func TestProjectBlueprint(t *testing.T) {
 			"commands": [],
 			"commandGroups": []
 		}`, string(sent))
+	})
+
+	t.Run("Should give the frontend an empty error pattern list when a command carries none", func(t *testing.T) {
+		// Act
+		sent := transport.FromBlueprint(projectdomain.Blueprint{
+			Commands: []projectdomain.BlueprintCommand{
+				{Id: "cmd-1", Name: "Tests", Command: "pnpm test"},
+			},
+		})
+
+		// Assert
+		assert.Equal(t, "", sent.Commands[0].Link)
+		assert.Equal(t, []string{}, sent.Commands[0].ErrorPatterns)
+		assert.Equal(t, []string{}, sent.ToDomain().Commands[0].ErrorPatterns)
 	})
 }

@@ -15,6 +15,8 @@ export namespace domain {
 	    name: string;
 	    command: string;
 	    workingDirectory: string;
+	    link: string;
+	    errorPatterns: string[];
 	}
 	export interface CommandGroup {
 	    id: string;
