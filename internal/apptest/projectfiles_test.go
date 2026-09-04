@@ -49,7 +49,7 @@ func TestExportingAProject(t *testing.T) {
 		exported, written := h.ExportedFile("/home/user/gomander.json")
 		assert.True(t, written)
 		assert.JSONEq(t, `{
-			"version": 1,
+			"version": 2,
 			"name": "Gomander",
 			"workingDirectory": "",
 			"commands": [
@@ -57,7 +57,9 @@ func TestExportingAProject(t *testing.T) {
 					"id": "`+command.Id+`",
 					"name": "Dev server",
 					"command": "pnpm dev",
-					"workingDirectory": "`+command.WorkingDirectory+`"
+					"workingDirectory": "`+command.WorkingDirectory+`",
+					"link": "",
+					"errorPatterns": []
 				}
 			],
 			"commandGroups": [
@@ -144,5 +146,103 @@ func TestImportingAProject(t *testing.T) {
 		assert.Len(t, groups, 1)
 		assert.Equal(t, "Everything", groups[0].Name)
 		assert.Equal(t, []string{"Dev server", "Tests"}, commandNamesOf(commands, groups[0].CommandIds))
+		assert.Equal(t, "", commands[0].Link)
+		assert.Empty(t, commands[0].ErrorPatterns)
+		assert.Equal(t, "", commands[1].Link)
+		assert.Empty(t, commands[1].ErrorPatterns)
+	})
+
+	t.Run("Should restore each command's link and error patterns from a version 2 file", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		h.GivenFileToImport("/home/user/gomander.json", []byte(`{
+			"version": 2,
+			"name": "Exported",
+			"commands": [
+				{
+					"id": "cmd-1",
+					"name": "Dev server",
+					"command": "pnpm dev",
+					"workingDirectory": "web",
+					"link": "http://localhost:3000",
+					"errorPatterns": ["ERROR", "FATAL"]
+				}
+			],
+			"commandGroups": []
+		}`))
+
+		toImport, err := h.UseCases.GetProjectToImport.Execute(projectusecases.FileTypeGomander)
+		assert.NoError(t, err)
+		assert.NotNil(t, toImport)
+		assert.Equal(t, "http://localhost:3000", toImport.Commands[0].Link)
+		assert.Equal(t, []string{"ERROR", "FATAL"}, toImport.Commands[0].ErrorPatterns)
+
+		// Act
+		err = h.UseCases.ImportProject.Execute(*toImport, "Imported", "/work")
+
+		// Assert
+		assert.NoError(t, err)
+
+		projects, err := h.UseCases.GetAvailableProjects.Execute()
+		assert.NoError(t, err)
+		h.GivenOpenedProject(projects[0].Id)
+
+		commands := commandsOf(t, h)
+		assert.Equal(t, []string{"Dev server"}, array.Map(commands, commandName))
+		assert.Equal(t, "http://localhost:3000", commands[0].Link)
+		assert.Equal(t, []string{"ERROR", "FATAL"}, commands[0].ErrorPatterns)
+	})
+}
+
+func TestExportingThenImportingAProject(t *testing.T) {
+	t.Run("Should keep each command's link and error patterns", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		project := projecttest.NewProjectBuilder().WithName("Gomander").Build()
+		h.GivenProjects(project)
+
+		command := commandtest.NewCommandBuilder().
+			WithProjectId(project.Id).
+			WithName("Dev server").
+			WithCommand("pnpm dev").
+			WithWorkingDirectory("web").
+			WithLink("http://localhost:3000").
+			WithErrorPatterns([]string{"ERROR", "FATAL"}).
+			Build()
+		h.GivenCommands(command)
+
+		h.GivenExportDestination("/home/user/gomander.json")
+
+		path, err := h.UseCases.ExportProject.Execute(project.Id)
+		assert.NoError(t, err)
+
+		exported, written := h.ExportedFile(path)
+		assert.True(t, written)
+
+		destination := apptest.New(t)
+		destination.GivenFileToImport(path, exported)
+
+		toImport, err := destination.UseCases.GetProjectToImport.Execute(projectusecases.FileTypeGomander)
+		assert.NoError(t, err)
+		assert.NotNil(t, toImport)
+
+		// Act
+		err = destination.UseCases.ImportProject.Execute(*toImport, "Imported", "/work")
+
+		// Assert
+		assert.NoError(t, err)
+
+		projects, err := destination.UseCases.GetAvailableProjects.Execute()
+		assert.NoError(t, err)
+		destination.GivenOpenedProject(projects[0].Id)
+
+		commands := commandsOf(t, destination)
+		assert.Equal(t, []string{"Dev server"}, array.Map(commands, commandName))
+		assert.Equal(t, "http://localhost:3000", commands[0].Link)
+		assert.Equal(t, []string{"ERROR", "FATAL"}, commands[0].ErrorPatterns)
+		assert.Equal(t, "web", commands[0].WorkingDirectory)
+		assert.Equal(t, "pnpm dev", commands[0].Command)
 	})
 }
