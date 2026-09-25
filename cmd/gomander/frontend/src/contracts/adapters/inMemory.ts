@@ -22,12 +22,14 @@ export type InMemoryBackendState = {
 	runningCommandIds: string[];
 	runningGroupIds: string[];
 	projectToImport: ProjectBlueprint;
+	packageJsonProjectToImport: ProjectBlueprint;
 	importedProjects: ProjectBlueprint[];
 	translations: Record<string, Localization>;
 	supportedLanguages: string[];
 	os: string;
 	currentRelease: string;
 	newRelease: string;
+	releaseBinaryPath: string;
 	pickedDirPath: string;
 	downloadedReleases: string[];
 	installedBinaryPath: string | null;
@@ -61,12 +63,14 @@ const createState = (): InMemoryBackendState => ({
 	runningCommandIds: [],
 	runningGroupIds: [],
 	projectToImport: emptyProjectBlueprint,
+	packageJsonProjectToImport: emptyProjectBlueprint,
 	importedProjects: [],
 	translations: {},
 	supportedLanguages: ["en"],
 	os: "darwin",
 	currentRelease: "v1.0.0",
 	newRelease: "",
+	releaseBinaryPath: "/downloads/gomander",
 	pickedDirPath: "/picked/dir",
 	downloadedReleases: [],
 	installedBinaryPath: null,
@@ -234,7 +238,7 @@ export const createInMemoryBackend = (
 			},
 			getProjectToImport: async () => snapshot(state.projectToImport),
 			getProjectToImportFromPackageJson: async () =>
-				snapshot(state.projectToImport),
+				snapshot(state.packageJsonProjectToImport),
 			editProject: async (project) => {
 				state.projects = state.projects.map((p) =>
 					p.id === project.id ? snapshot(project) : p,
@@ -247,7 +251,7 @@ export const createInMemoryBackend = (
 			checkForNewRelease: async () => state.newRelease,
 			downloadRelease: async (release) => {
 				state.downloadedReleases.push(release);
-				return `/downloads/${release}`;
+				return state.releaseBinaryPath;
 			},
 			installReleaseAndQuit: async (binaryPath) => {
 				state.installedBinaryPath = binaryPath;
