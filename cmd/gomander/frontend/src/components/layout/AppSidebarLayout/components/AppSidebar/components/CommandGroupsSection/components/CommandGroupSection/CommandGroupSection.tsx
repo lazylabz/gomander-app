@@ -140,6 +140,8 @@ export const CommandGroupSection = ({
 									)}
 									{someCommandIsIdle && (
 										<Play
+											role="button"
+											aria-label={t("sidebar.commandGroups.run")}
 											size={16}
 											className="text-muted-foreground cursor-pointer hover:text-primary"
 											onClick={run}
@@ -148,6 +150,8 @@ export const CommandGroupSection = ({
 									{someCommandIsRunning && (
 										<div className="group/command p-0 m-0">
 											<Square
+												role="button"
+												aria-label={t("sidebar.commandGroups.stop")}
 												size={16}
 												className="text-muted-foreground cursor-pointer hover:text-primary"
 												onClick={stop}

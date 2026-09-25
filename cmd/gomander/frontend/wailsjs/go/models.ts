@@ -81,8 +81,13 @@ export namespace localization {
 	    "sidebar.commands.title": string;
 	    "sidebar.commands.add": string;
 	    "sidebar.commands.removeFromGroup": string;
+	    "sidebar.commands.run": string;
+	    "sidebar.commands.stop": string;
+	    "sidebar.commands.openLink": string;
 	    "sidebar.commandGroups.title": string;
 	    "sidebar.commandGroups.add": string;
+	    "sidebar.commandGroups.run": string;
+	    "sidebar.commandGroups.stop": string;
 	    "sidebar.commandGroups.applyReorder": string;
 	    "sidebar.commandGroups.startReorder": string;
 	    "sidebar.create.title": string;

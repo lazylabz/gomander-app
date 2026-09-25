@@ -18,8 +18,13 @@ type Localization struct {
 	SidebarCommandsTitle             string `json:"sidebar.commands.title"`
 	SidebarCommandsAdd               string `json:"sidebar.commands.add"`
 	SidebarCommandsRemoveFromGroup   string `json:"sidebar.commands.removeFromGroup"`
+	SidebarCommandsRun               string `json:"sidebar.commands.run"`
+	SidebarCommandsStop              string `json:"sidebar.commands.stop"`
+	SidebarCommandsOpenLink          string `json:"sidebar.commands.openLink"`
 	SidebarCommandGroupsTitle        string `json:"sidebar.commandGroups.title"`
 	SidebarCommandGroupsAdd          string `json:"sidebar.commandGroups.add"`
+	SidebarCommandGroupsRun          string `json:"sidebar.commandGroups.run"`
+	SidebarCommandGroupsStop         string `json:"sidebar.commandGroups.stop"`
 	SidebarCommandGroupsApplyReorder string `json:"sidebar.commandGroups.applyReorder"`
 	SidebarCommandGroupsStartReorder string `json:"sidebar.commandGroups.startReorder"`
 	SidebarCreateTitle               string `json:"sidebar.create.title"`
