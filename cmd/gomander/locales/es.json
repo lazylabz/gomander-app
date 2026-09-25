@@ -158,6 +158,8 @@
   "toast.commandGroup.cannotRemoveLast": "El grupo necesita al menos un comando.",
 
   "toast.project.selectFailed": "Error al seleccionar el proyecto",
+  "toast.project.createSuccess": "Proyecto creado",
+  "toast.project.createFailed": "Error al crear el proyecto",
   "toast.project.importSuccess": "Proyecto importado",
   "toast.project.importFailed": "Error al importar el proyecto",
   "toast.project.exportSuccess": "Proyecto exportado",

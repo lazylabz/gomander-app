@@ -177,6 +177,8 @@ type Localization struct {
 
 	// toast.project
 	ToastProjectSelectFailed     string `json:"toast.project.selectFailed"`
+	ToastProjectCreateSuccess    string `json:"toast.project.createSuccess"`
+	ToastProjectCreateFailed     string `json:"toast.project.createFailed"`
 	ToastProjectImportSuccess    string `json:"toast.project.importSuccess"`
 	ToastProjectImportFailed     string `json:"toast.project.importFailed"`
 	ToastProjectExportSuccess    string `json:"toast.project.exportSuccess"`

@@ -2,12 +2,10 @@ import { ChevronDownIcon, Import, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { toast } from "sonner";
 
 import { CreateProjectModal } from "@/components/modals/Project/CreateProjectModal.tsx";
 import { DeleteProjectModal } from "@/components/modals/Project/DeleteProjectModal.tsx";
 import { ImportProjectModal } from "@/components/modals/Project/ImportProjectModal.tsx";
-import { dataService } from "@/contracts/service.ts";
 import type { ProjectBlueprint } from "@/contracts/types.ts";
 import { Button } from "@/design-system/components/ui/button.tsx";
 import { ButtonGroup } from "@/design-system/components/ui/button-group.tsx";
@@ -17,12 +15,15 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/design-system/components/ui/dropdown-menu.tsx";
-import { parseError } from "@/helpers/errorHelpers.ts";
 import { fetchAvailableProjects } from "@/queries/fetchAvailableProjects.ts";
 import { ScreenRoutes } from "@/routes.ts";
 import { ProjectCard } from "@/screens/ProjectSelectionScreen/components/ProjectCard.tsx";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { deleteProject } from "@/useCases/project/deleteProject.ts";
+import {
+	type ImportSource,
+	pickProjectToImport,
+} from "@/useCases/project/pickProjectToImport.ts";
 
 export const ProjectSelectionScreen = () => {
 	const { t } = useTranslation();
@@ -62,22 +63,10 @@ export const ProjectSelectionScreen = () => {
 		setProjectIdBeingDeleted(null);
 	};
 
-	const handleImportProject = async () => {
-		try {
-			const projectToImport = await dataService.getProjectToImport();
+	const handleImportProject = (source: ImportSource) => async () => {
+		const projectToImport = await pickProjectToImport(source);
+		if (projectToImport) {
 			setProjectBeingImported(projectToImport);
-		} catch (e) {
-			toast.error(parseError(e, t("toast.project.selectFailed")));
-		}
-	};
-
-	const handleImportProjectFromPackageJson = async () => {
-		try {
-			const projectToImport =
-				await dataService.getProjectToImportFromPackageJson();
-			setProjectBeingImported(projectToImport);
-		} catch (e) {
-			toast.error(parseError(e, t("toast.project.selectFailed")));
 		}
 	};
 
@@ -96,7 +85,6 @@ export const ProjectSelectionScreen = () => {
 	return (
 		<>
 			<CreateProjectModal
-				onSuccess={fetchAvailableProjects}
 				open={createProjectModalOpen}
 				setOpen={setCreateProjectModalOpen}
 			/>
@@ -133,7 +121,10 @@ export const ProjectSelectionScreen = () => {
 						<Plus /> {t("projectSelection.createButton")}
 					</Button>
 					<ButtonGroup>
-						<Button variant="ghost" onClick={handleImportProject}>
+						<Button
+							variant="ghost"
+							onClick={handleImportProject("exportedProject")}
+						>
 							<Import />
 							{t("projectSelection.importButton")}
 						</Button>
@@ -148,7 +139,7 @@ export const ProjectSelectionScreen = () => {
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end" className="w-52">
-								<DropdownMenuItem onClick={handleImportProjectFromPackageJson}>
+								<DropdownMenuItem onClick={handleImportProject("packageJson")}>
 									{t("projectSelection.importPackageJson")}
 								</DropdownMenuItem>
 							</DropdownMenuContent>

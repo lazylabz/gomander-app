@@ -212,6 +212,8 @@ export namespace localization {
 	    "toast.commandGroup.notFound": string;
 	    "toast.commandGroup.cannotRemoveLast": string;
 	    "toast.project.selectFailed": string;
+	    "toast.project.createSuccess": string;
+	    "toast.project.createFailed": string;
 	    "toast.project.importSuccess": string;
 	    "toast.project.importFailed": string;
 	    "toast.project.exportSuccess": string;
