@@ -41,6 +41,7 @@
   "projectSelection.createButton": "Create a new project",
   "projectSelection.importButton": "Import an existing project",
   "projectSelection.moreOptions": "More Options",
+  "projectSelection.projectOptions": "Project options",
   "projectSelection.importPackageJson": "From a package.json",
   "projectSelection.exportAction": "Export",
 

@@ -33,7 +33,10 @@ export const ProjectCard = ({
 	return (
 		<div className="relative px-4 py-2 border border-neutral-100 dark:border-neutral-900 rounded-xl shadow-none hover:shadow-md shadow-neutral-100 dark:shadow-neutral-800 transition-all w-80">
 			<DropdownMenu>
-				<DropdownMenuTrigger className="cursor-pointer flex absolute items-center justify-center top-0 right-0 px-2 pb-2 pt-3 text-muted-foreground hover:text-primary">
+				<DropdownMenuTrigger
+					aria-label={t("projectSelection.projectOptions")}
+					className="cursor-pointer flex absolute items-center justify-center top-0 right-0 px-2 pb-2 pt-3 text-muted-foreground hover:text-primary"
+				>
 					<EllipsisVertical size={16} />
 				</DropdownMenuTrigger>
 				<DropdownMenuContent>

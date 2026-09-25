@@ -47,6 +47,7 @@ type Localization struct {
 	ProjectSelectionCreateButton      string `json:"projectSelection.createButton"`
 	ProjectSelectionImportButton      string `json:"projectSelection.importButton"`
 	ProjectSelectionMoreOptions       string `json:"projectSelection.moreOptions"`
+	ProjectSelectionProjectOptions    string `json:"projectSelection.projectOptions"`
 	ProjectSelectionImportPackageJson string `json:"projectSelection.importPackageJson"`
 	ProjectSelectionExportAction      string `json:"projectSelection.exportAction"`
 

@@ -107,6 +107,7 @@ export namespace localization {
 	    "projectSelection.createButton": string;
 	    "projectSelection.importButton": string;
 	    "projectSelection.moreOptions": string;
+	    "projectSelection.projectOptions": string;
 	    "projectSelection.importPackageJson": string;
 	    "projectSelection.exportAction": string;
 	    "logs.matches_one": string;
