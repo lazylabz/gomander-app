@@ -35,14 +35,24 @@ function App() {
 			setI18nReady(true);
 			loadAllProjectData();
 			fetchUserConfig();
-			fetchCurrentRelease();
-			checkForNewRelease();
 		};
 
 		initializeApp();
 	}, []);
 
-	if (!i18nReady || !initialFetchesAreDone) {
+	const appIsReady = i18nReady && initialFetchesAreDone;
+
+	// Waits for the Toaster to be mounted, or a failed check would toast into nothing.
+	useEffect(() => {
+		if (!appIsReady) {
+			return;
+		}
+
+		fetchCurrentRelease();
+		checkForNewRelease();
+	}, [appIsReady]);
+
+	if (!appIsReady) {
 		return null;
 	}
 
