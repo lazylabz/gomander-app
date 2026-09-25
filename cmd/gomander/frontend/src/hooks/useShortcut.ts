@@ -39,25 +39,30 @@ const ModifierMap: Record<Modifier, (keyof KeyboardEvent)[]> = {
 
 type Shortcut = `${Modifier}-${Key}` | Key;
 
-export const useShortcut = (shortCut: Shortcut, callback: () => void) => {
-	const hasModifier = shortCut.includes("-");
+export const matchesShortcut = (
+	shortcut: Shortcut,
+	event: KeyboardEvent,
+): boolean => {
+	const [modifier, key] = shortcut.includes("-")
+		? (shortcut.split("-") as [Modifier, Key])
+		: [null, shortcut as Key];
 
-	const modifier = hasModifier ? (shortCut.split("-")[0] as Modifier) : null;
-	const key = hasModifier ? (shortCut.split("-")[1] as Key) : (shortCut as Key);
+	const keyMatches = event.key.toLowerCase() === key.toLowerCase();
+	const modifierMatches =
+		!modifier || ModifierMap[modifier].some((mod) => event[mod]);
 
+	return keyMatches && modifierMatches;
+};
+
+export const useShortcut = (shortcut: Shortcut, callback: () => void) => {
 	const handleKeyDown = useCallback(
 		(event: KeyboardEvent) => {
-			// Check if the key is a modifier key
-			const keyMatches = event.key.toLowerCase() === key.toLowerCase();
-			const modifierMatches =
-				!modifier || ModifierMap[modifier].some((mod) => event[mod]);
-
-			if (keyMatches && modifierMatches) {
+			if (matchesShortcut(shortcut, event)) {
 				event.preventDefault();
 				callback();
 			}
 		},
-		[key, modifier, callback],
+		[shortcut, callback],
 	);
 
 	useEffect(() => {
