@@ -6,7 +6,7 @@ other external dependency in the frontend sits behind a port with a fake adapter
 
 The inconsistency is deliberate. A port earns its place when it has more than one
 real implementation, or when tests cannot run against the real thing. Neither
-holds: the jsdom test environment provides browser storage, so a port here would
+holds: the DOM test environment provides browser storage, so a port here would
 have exactly one real adapter and one fake that behaves identically. The storage
 key, the JSON encoding and the `try`/`catch` around a rejected read stay
 implementation details of this one module, and callers see only
