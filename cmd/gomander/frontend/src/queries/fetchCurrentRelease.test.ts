@@ -25,6 +25,6 @@ describe("fetchCurrentRelease", () => {
 		await sut();
 
 		// Assert
-		expect(releaseStore.getState().currentVersion).toBe("v1.2.3");
+		expect(releaseStore.getState().currentRelease).toBe("v1.2.3");
 	});
 });

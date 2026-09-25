@@ -1,10 +1,9 @@
 import { screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { VersionSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/VersionSection/VersionSection.tsx";
-import i18n from "@/design-system/lib/i18n.ts";
 import { releaseStore } from "@/store/releaseStore.ts";
-import { installTranslations } from "@/testing/i18n.ts";
+import { installTranslations, withTranslation } from "@/testing/i18n.ts";
 import { renderWithProviders } from "@/testing/render.tsx";
 import { resetStores } from "@/testing/stores.ts";
 
@@ -22,16 +21,8 @@ describe("VersionSection", () => {
 
 	it("Should show the current version", () => {
 		// Arrange
-		i18n.addResource(
-			"en",
-			"translation",
-			"sidebar.version.current",
-			"{{version}}",
-		);
-		onTestFinished(() => {
-			i18n.removeResourceBundle("en", "translation");
-		});
-		releaseStore.setState({ currentVersion: "v1.2.0" });
+		withTranslation("sidebar.version.current", "{{version}}");
+		releaseStore.setState({ currentRelease: "v1.2.0" });
 
 		// Act
 		render();
@@ -51,17 +42,17 @@ describe("VersionSection", () => {
 	it.each([
 		{
 			situation: "a new version is available",
-			release: { currentVersion: "v1.2.0", newVersion: "v1.3.0" },
+			release: { currentRelease: "v1.2.0", newRelease: "v1.3.0" },
 			tooltip: "sidebar.version.newAvailable",
 		},
 		{
 			situation: "the current version is the latest",
-			release: { currentVersion: "v1.2.0" },
+			release: { currentRelease: "v1.2.0" },
 			tooltip: "sidebar.version.latest",
 		},
 		{
 			situation: "the check for a new version failed",
-			release: { currentVersion: "v1.2.0", checkFailed: true },
+			release: { currentRelease: "v1.2.0", checkFailed: true },
 			tooltip: "sidebar.version.checkError",
 		},
 	])("Should tell on hover when $situation", async ({ release, tooltip }) => {
@@ -78,7 +69,7 @@ describe("VersionSection", () => {
 
 	it("Should open the about modal when clicked", async () => {
 		// Arrange
-		releaseStore.setState({ currentVersion: "v1.2.0" });
+		releaseStore.setState({ currentRelease: "v1.2.0" });
 		const { user } = render();
 
 		// Act

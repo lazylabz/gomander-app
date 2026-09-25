@@ -3,6 +3,6 @@ import { releaseStore } from "@/store/releaseStore.ts";
 
 export const fetchCurrentRelease = async (): Promise<void> => {
 	releaseStore.setState({
-		currentVersion: await dataService.getCurrentRelease(),
+		currentRelease: await dataService.getCurrentRelease(),
 	});
 };

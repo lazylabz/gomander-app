@@ -40,7 +40,7 @@ describe("downloadLatestRelease", () => {
 		const backend = installInMemoryBackend({
 			releaseBinaryPath: "/downloads/gomander",
 		});
-		releaseStore.setState({ newVersion: "v2.0.0" });
+		releaseStore.setState({ newRelease: "v2.0.0" });
 
 		// Act
 		await sut();
@@ -61,7 +61,7 @@ describe("downloadLatestRelease", () => {
 			new Promise((resolve) => {
 				finishDownload = resolve;
 			});
-		releaseStore.setState({ newVersion: "v2.0.0" });
+		releaseStore.setState({ newRelease: "v2.0.0" });
 
 		// Act
 		const download = sut();
@@ -78,7 +78,7 @@ describe("downloadLatestRelease", () => {
 		backend.data.downloadRelease = async () => {
 			throw new Error("boom");
 		};
-		releaseStore.setState({ newVersion: "v2.0.0" });
+		releaseStore.setState({ newRelease: "v2.0.0" });
 
 		// Act
 		await sut();

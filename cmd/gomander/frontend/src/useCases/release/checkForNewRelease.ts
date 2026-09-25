@@ -8,7 +8,7 @@ export const checkForNewRelease = async (): Promise<void> => {
 	releaseStore.setState({ checkFailed: false });
 	try {
 		const release = await dataService.checkForNewRelease();
-		releaseStore.setState({ newVersion: release || null });
+		releaseStore.setState({ newRelease: release || null });
 	} catch (e) {
 		console.error("Error checking for new releases:", e);
 		releaseStore.setState({ checkFailed: true });

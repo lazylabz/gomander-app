@@ -4,16 +4,16 @@ import { createStore } from "zustand/vanilla";
 export type UpdateStatus = "idle" | "downloading" | "downloaded" | "installing";
 
 type ReleaseStore = {
-	currentVersion: string;
-	newVersion: string | null;
+	currentRelease: string;
+	newRelease: string | null;
 	checkFailed: boolean;
 	updateStatus: UpdateStatus;
 	downloadedBinaryPath: string | null;
 };
 
 export const releaseStore = createStore<ReleaseStore>()(() => ({
-	currentVersion: "",
-	newVersion: null,
+	currentRelease: "",
+	newRelease: null,
 	checkFailed: false,
 	updateStatus: "idle",
 	downloadedBinaryPath: null,

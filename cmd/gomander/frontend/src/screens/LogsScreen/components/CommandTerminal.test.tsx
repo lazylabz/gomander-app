@@ -1,20 +1,12 @@
 import { act, screen } from "@testing-library/react";
-import {
-	afterEach,
-	beforeEach,
-	describe,
-	expect,
-	it,
-	onTestFinished,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import type {
 	RecordedTerminal,
 	RecordingTerminals,
 } from "@/commandOutput/adapters/recording.ts";
-import i18n from "@/design-system/lib/i18n.ts";
 import { CommandTerminal } from "@/screens/LogsScreen/components/CommandTerminal.tsx";
-import { installTranslations } from "@/testing/i18n.ts";
+import { installTranslations, withTranslation } from "@/testing/i18n.ts";
 import { renderWithProviders } from "@/testing/render.tsx";
 import {
 	installRecordingTerminals,
@@ -125,12 +117,7 @@ describe("CommandTerminal", () => {
 
 	it("Should show how many matches the terminal reports", async () => {
 		// Arrange
-		// The echoed key drops the interpolated count, so this test registers
-		// one resource that renders it.
-		i18n.addResource("en", "translation", "logs.matches", "{{count}} matches");
-		onTestFinished(() => {
-			i18n.removeResourceBundle("en", "translation");
-		});
+		withTranslation("logs.matches", "{{count}} matches");
 		const { user } = renderSut();
 		const input = await openSearch(user);
 		await user.type(input, "ab");

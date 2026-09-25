@@ -6,14 +6,14 @@ import { parseError } from "@/helpers/errorHelpers.ts";
 import { releaseStore } from "@/store/releaseStore.ts";
 
 export const downloadLatestRelease = async (): Promise<void> => {
-	const { newVersion } = releaseStore.getState();
-	if (!newVersion) {
+	const { newRelease } = releaseStore.getState();
+	if (!newRelease) {
 		return;
 	}
 
 	releaseStore.setState({ updateStatus: "downloading" });
 	try {
-		const binaryPath = await dataService.downloadRelease(newVersion);
+		const binaryPath = await dataService.downloadRelease(newRelease);
 		releaseStore.setState({
 			updateStatus: "downloaded",
 			downloadedBinaryPath: binaryPath,

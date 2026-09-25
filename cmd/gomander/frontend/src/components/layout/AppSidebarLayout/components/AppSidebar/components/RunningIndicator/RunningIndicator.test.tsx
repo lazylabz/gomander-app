@@ -1,11 +1,10 @@
 import { screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, onTestFinished } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { RunningIndicator } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/RunningIndicator/RunningIndicator.tsx";
-import i18n from "@/design-system/lib/i18n.ts";
 import { commandStore } from "@/store/commandStore.ts";
 import { CommandBuilder } from "@/testing/builders/command.ts";
-import { installTranslations } from "@/testing/i18n.ts";
+import { installTranslations, withTranslation } from "@/testing/i18n.ts";
 import { renderWithProviders } from "@/testing/render.tsx";
 import { resetStores } from "@/testing/stores.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
@@ -18,15 +17,10 @@ describe("RunningIndicator", () => {
 
 	it("Should tell how many loaded commands run", async () => {
 		// Arrange
-		i18n.addResource(
-			"en",
-			"translation",
+		withTranslation(
 			"sidebar.runningIndicator.running_other",
 			"{{count}} running",
 		);
-		onTestFinished(() => {
-			i18n.removeResourceBundle("en", "translation");
-		});
 		commandStore.setState({
 			commands: [
 				new CommandBuilder().withId("cmd-1").build(),

@@ -14,18 +14,18 @@ export const VersionSection = ({
 	openAboutModal: () => void;
 }) => {
 	const { t } = useTranslation();
-	const currentVersion = useReleaseStore((state) => state.currentVersion);
-	const newVersion = useReleaseStore((state) => state.newVersion);
+	const currentRelease = useReleaseStore((state) => state.currentRelease);
+	const newRelease = useReleaseStore((state) => state.newRelease);
 	const checkFailed = useReleaseStore((state) => state.checkFailed);
 
 	return (
 		<Tooltip>
 			<TooltipTrigger className="cursor-pointer" onClick={openAboutModal}>
 				<p className="text-sm text-muted-foreground flex items-center gap-2">
-					{currentVersion
-						? t("sidebar.version.current", { version: currentVersion })
+					{currentRelease
+						? t("sidebar.version.current", { version: currentRelease })
 						: "..."}
-					{newVersion && (
+					{newRelease && (
 						<>
 							<Info
 								className="text-orange-400 dark:text-yellow-400 cursor-pointer"
@@ -34,12 +34,12 @@ export const VersionSection = ({
 							/>
 							<TooltipContent>
 								<span className="font-semibold">
-									{t("sidebar.version.newAvailable", { version: newVersion })}
+									{t("sidebar.version.newAvailable", { version: newRelease })}
 								</span>
 							</TooltipContent>
 						</>
 					)}
-					{currentVersion && !newVersion && !checkFailed && (
+					{currentRelease && !newRelease && !checkFailed && (
 						<>
 							<Info
 								className="text-green-600 dark:text-green-200 cursor-pointer"

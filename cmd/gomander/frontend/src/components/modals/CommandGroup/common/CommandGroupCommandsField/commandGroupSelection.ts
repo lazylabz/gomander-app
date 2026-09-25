@@ -9,9 +9,6 @@ type Container = typeof AVAILABLE_COMMANDS | typeof ADDED_COMMANDS;
 
 export type Drag = { activeId: string; overId: string };
 
-// Each function hands back the very same array when the drag changes nothing,
-// so the caller can skip touching the form.
-
 const containerOf = (
 	id: string,
 	selectedIds: string[],
@@ -35,6 +32,8 @@ export const addCommand = (selectedIds: string[], commandId: string) => [
 export const removeCommand = (selectedIds: string[], commandId: string) =>
 	selectedIds.filter((id) => id !== commandId);
 
+// A drag that changes nothing hands back the very same array, so the caller can
+// skip touching the form.
 export const moveAcrossContainers = (
 	selectedIds: string[],
 	allCommandIds: string[],
@@ -53,8 +52,8 @@ export const moveAcrossContainers = (
 	return selectedIds;
 };
 
-// Only two added commands are both in the selection, so the index lookup alone
-// rules out a drag that touches a container or an available command.
+// Container ids and available commands are never in the selection, so a failed
+// index lookup already rules out any drag that is not between two added commands.
 export const reorderAdded = (
 	selectedIds: string[],
 	{ activeId, overId }: Drag,

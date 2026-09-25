@@ -31,19 +31,19 @@ describe("checkForNewRelease", () => {
 		await sut();
 
 		// Assert
-		expect(releaseStore.getState().newVersion).toBe("v2.0.0");
+		expect(releaseStore.getState().newRelease).toBe("v2.0.0");
 	});
 
 	it("Should store no new version when the backend reports none", async () => {
 		// Arrange
 		installInMemoryBackend({ newRelease: "" });
-		releaseStore.setState({ newVersion: "v2.0.0" });
+		releaseStore.setState({ newRelease: "v2.0.0" });
 
 		// Act
 		await sut();
 
 		// Assert
-		expect(releaseStore.getState().newVersion).toBeNull();
+		expect(releaseStore.getState().newRelease).toBeNull();
 	});
 
 	it("Should flag the failure and notify the user when the check is rejected", async () => {

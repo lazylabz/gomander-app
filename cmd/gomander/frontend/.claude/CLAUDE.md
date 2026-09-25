@@ -114,7 +114,8 @@ tested.
 - Build objects with the builders in `@/testing/builders/`. They mutate and return `this`,
   so reuse one only when the earlier `with` calls should carry over.
 - `installTranslations()` makes every key echo itself, so assertions name the key rather
-  than the English copy. Assert toasts with `vi.spyOn(toast, "success" | "error")`.
+  than the English copy. A test that must see an interpolated value gives that one key
+  copy with `withTranslation(key, copy)`. Assert toasts with `vi.spyOn(toast, "success" | "error")`.
 - Mirror the Go conventions: Arrange / Act / Assert comments, and `sut` for the single
   unit under test.
 - Render components with `renderWithProviders` (from `@/testing/render.tsx`): it wraps
