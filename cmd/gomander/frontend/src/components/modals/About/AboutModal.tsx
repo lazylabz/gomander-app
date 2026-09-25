@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useVersionContext } from "@/contexts/version.tsx";
 import { externalBrowserService, helpersService } from "@/contracts/service.ts";
 import {
 	Avatar,
@@ -29,6 +28,9 @@ import {
 } from "@/design-system/components/ui/dialog.tsx";
 import { cn } from "@/design-system/lib/utils.ts";
 import { GithubIcon } from "@/icons/GithubIcon.tsx";
+import { useReleaseStore } from "@/store/releaseStore.ts";
+import { downloadLatestRelease } from "@/useCases/release/downloadLatestRelease.ts";
+import { installLatestRelease } from "@/useCases/release/installLatestRelease.ts";
 
 type OS = "darwin" | "linux" | "windows";
 
@@ -44,13 +46,9 @@ export const AboutModal = ({
 }) => {
 	const { t } = useTranslation();
 
-	const {
-		currentVersion,
-		newVersion,
-		updateStatus,
-		downloadLatestRelease,
-		installLatestRelease,
-	} = useVersionContext();
+	const currentVersion = useReleaseStore((state) => state.currentVersion);
+	const newVersion = useReleaseStore((state) => state.newVersion);
+	const updateStatus = useReleaseStore((state) => state.updateStatus);
 
 	const [installDisclaimerModalOpen, setInstallDisclaimersModalOpen] =
 		useState(false);

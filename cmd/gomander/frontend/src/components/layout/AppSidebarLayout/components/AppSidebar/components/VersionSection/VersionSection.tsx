@@ -1,12 +1,12 @@
 import { Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { useVersionContext } from "@/contexts/version.tsx";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
 } from "@/design-system/components/ui/tooltip.tsx";
+import { useReleaseStore } from "@/store/releaseStore.ts";
 
 export const VersionSection = ({
 	openAboutModal,
@@ -14,8 +14,9 @@ export const VersionSection = ({
 	openAboutModal: () => void;
 }) => {
 	const { t } = useTranslation();
-	const { newVersion, currentVersion, errorLoadingNewVersion } =
-		useVersionContext();
+	const currentVersion = useReleaseStore((state) => state.currentVersion);
+	const newVersion = useReleaseStore((state) => state.newVersion);
+	const checkFailed = useReleaseStore((state) => state.checkFailed);
 
 	return (
 		<Tooltip>
@@ -38,7 +39,7 @@ export const VersionSection = ({
 							</TooltipContent>
 						</>
 					)}
-					{currentVersion && !newVersion && !errorLoadingNewVersion && (
+					{currentVersion && !newVersion && !checkFailed && (
 						<>
 							<Info
 								className="text-green-600 dark:text-green-200 cursor-pointer"
@@ -48,7 +49,7 @@ export const VersionSection = ({
 							<TooltipContent>{t("sidebar.version.latest")}</TooltipContent>
 						</>
 					)}
-					{errorLoadingNewVersion && (
+					{checkFailed && (
 						<>
 							<Info
 								className="text-red-600 dark:text-red-400 cursor-pointer"

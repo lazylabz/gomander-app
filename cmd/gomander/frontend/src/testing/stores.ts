@@ -4,6 +4,7 @@ import { commandGroupStore } from "@/store/commandGroupStore.ts";
 import { commandStore } from "@/store/commandStore.ts";
 import { missingEnvironmentPathStore } from "@/store/missingEnvironmentPathStore.ts";
 import { projectStore } from "@/store/projectStore.ts";
+import { releaseStore } from "@/store/releaseStore.ts";
 import { userConfigurationStore } from "@/store/userConfigurationStore.ts";
 
 const reset = <T>(store: StoreApi<T>) =>
@@ -15,4 +16,5 @@ export const resetStores = (): void => {
 	reset(projectStore);
 	reset(userConfigurationStore);
 	reset(missingEnvironmentPathStore);
+	reset(releaseStore);
 };
