@@ -3,9 +3,11 @@ import type { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
 
-import { LANGUAGE_LABELS } from "@/constants/languages.ts";
-import { translationsService } from "@/contracts/service.ts";
 import { useAutosavedForm } from "@/hooks/useAutosavedForm.ts";
+import {
+	fetchSupportedLanguages,
+	type SupportedLanguage,
+} from "@/queries/fetchSupportedLanguages.ts";
 import {
 	type ProjectSettingsSchemaType,
 	projectSettingsSchema,
@@ -23,11 +25,6 @@ export enum SettingsTab {
 	User = "user",
 	Project = "project",
 }
-
-type SupportedLanguage = {
-	value: string;
-	label: string;
-};
 
 // Define context
 export interface SettingsContextData {
@@ -86,14 +83,7 @@ export const SettingsContextProvider = ({
 	useEffect(() => {
 		const loadSupportedLanguages = async () => {
 			try {
-				const languages = await translationsService.getSupportedLanguages();
-				const languageOptions = languages.map(
-					(lang): SupportedLanguage => ({
-						value: lang,
-						label: LANGUAGE_LABELS[lang] || lang,
-					}),
-				);
-				setSupportedLanguages(languageOptions);
+				setSupportedLanguages(await fetchSupportedLanguages());
 			} catch (error) {
 				console.error("Failed to load supported languages:", error);
 			}
