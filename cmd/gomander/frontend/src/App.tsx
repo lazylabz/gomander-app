@@ -5,9 +5,9 @@ import { AppSidebarLayout } from "@/components/layout/AppSidebarLayout/AppSideba
 import { MissingEnvironmentPathDialog } from "@/components/MissingEnvironmentPath/MissingEnvironmentPathDialog.tsx";
 import { EventListenersContainer } from "@/components/utility/EventListenersContainer.tsx";
 import { ThemeProvider } from "@/contexts/theme.tsx";
-import { VersionProvider } from "@/contexts/version.tsx";
 import { Toaster } from "@/design-system/components/ui/sonner.tsx";
 import { initI18n } from "@/design-system/lib/i18n.ts";
+import { fetchCurrentRelease } from "@/queries/fetchCurrentRelease.ts";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
 import { ScreenRoutes } from "@/routes.ts";
@@ -17,6 +17,7 @@ import { SettingsContextProvider } from "@/screens/SettingsScreen/context/settin
 import { SettingsScreen } from "@/screens/SettingsScreen/SettingsScreen.tsx";
 import { useProjectStore } from "@/store/projectStore.ts";
 import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
+import { checkForNewRelease } from "@/useCases/release/checkForNewRelease.ts";
 
 function App() {
 	const projectIsLoaded = useProjectStore((state) => state.isLoaded);
@@ -39,41 +40,51 @@ function App() {
 		initializeApp();
 	}, []);
 
-	if (!i18nReady || !initialFetchesAreDone) {
+	const appIsReady = i18nReady && initialFetchesAreDone;
+
+	// Waits for the Toaster to be mounted, or a failed check would toast into nothing.
+	useEffect(() => {
+		if (!appIsReady) {
+			return;
+		}
+
+		fetchCurrentRelease();
+		checkForNewRelease();
+	}, [appIsReady]);
+
+	if (!appIsReady) {
 		return null;
 	}
 
 	return (
-		<VersionProvider>
-			<ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-				<EventListenersContainer />
-				<MissingEnvironmentPathDialog />
-				<Toaster richColors position="top-right" />
-				<Routes>
-					<Route
-						path={ScreenRoutes.ProjectSelection}
-						element={<ProjectSelectionScreen />}
-					/>
-					<Route
-						path={ScreenRoutes.Logs}
-						element={
-							<AppSidebarLayout>
-								<LogsScreen />
-							</AppSidebarLayout>
-						}
-					/>
+		<ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+			<EventListenersContainer />
+			<MissingEnvironmentPathDialog />
+			<Toaster richColors position="top-right" />
+			<Routes>
+				<Route
+					path={ScreenRoutes.ProjectSelection}
+					element={<ProjectSelectionScreen />}
+				/>
+				<Route
+					path={ScreenRoutes.Logs}
+					element={
+						<AppSidebarLayout>
+							<LogsScreen />
+						</AppSidebarLayout>
+					}
+				/>
 
-					<Route
-						path={ScreenRoutes.Settings}
-						element={
-							<SettingsContextProvider>
-								<SettingsScreen />
-							</SettingsContextProvider>
-						}
-					/>
-				</Routes>
-			</ThemeProvider>
-		</VersionProvider>
+				<Route
+					path={ScreenRoutes.Settings}
+					element={
+						<SettingsContextProvider>
+							<SettingsScreen />
+						</SettingsContextProvider>
+					}
+				/>
+			</Routes>
+		</ThemeProvider>
 	);
 }
 

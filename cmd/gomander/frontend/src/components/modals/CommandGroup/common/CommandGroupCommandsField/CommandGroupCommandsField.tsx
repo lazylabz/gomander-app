@@ -8,7 +8,6 @@ import {
 	useSensors,
 } from "@dnd-kit/core";
 import {
-	arrayMove,
 	SortableContext,
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
@@ -17,6 +16,13 @@ import { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import {
+	addCommand,
+	type Drag,
+	moveAcrossContainers,
+	removeCommand,
+	reorderAdded,
+} from "@/components/modals/CommandGroup/common/CommandGroupCommandsField/commandGroupSelection.ts";
 import {
 	ADDED_COMMANDS,
 	AVAILABLE_COMMANDS,
@@ -60,89 +66,28 @@ export const CommandGroupCommandsField = () => {
 		}),
 	);
 
-	const findContainer = (id: string): string | null => {
-		if (id === AVAILABLE_COMMANDS || id === ADDED_COMMANDS) {
-			return id;
-		}
+	const allCommandIds = allCommands.map((cmd) => cmd.id);
 
-		if (availableCommands.find((cmd) => cmd.id === id)) {
-			return AVAILABLE_COMMANDS;
-		}
-		if (addedCommands.find((cmd) => cmd.id === id)) {
-			return ADDED_COMMANDS;
-		}
-
-		return null;
-	};
-
-	const addCommand = (commandId: string) => {
-		const newSelected = [...selectedCommandIds, commandId];
-		form.setValue("commands", newSelected);
-	};
-
-	const removeCommand = (commandId: string) => {
-		const newSelected = selectedCommandIds.filter((id) => id !== commandId);
-		form.setValue("commands", newSelected);
-	};
-
-	const handleDragOver = (event: DragOverEvent) => {
-		const { active, over } = event;
-
-		if (!over) {
-			return;
-		}
-
-		const activeContainer = findContainer(active.id.toString());
-		const overContainer = findContainer(over.id.toString());
-
-		if (
-			!activeContainer ||
-			!overContainer ||
-			activeContainer === overContainer
-		) {
-			return;
-		}
-
-		const commandId = active.id.toString();
-
-		// Move between containers
-		if (
-			activeContainer === AVAILABLE_COMMANDS &&
-			overContainer === ADDED_COMMANDS
-		) {
-			addCommand(commandId);
-		} else if (
-			activeContainer === ADDED_COMMANDS &&
-			overContainer === AVAILABLE_COMMANDS
-		) {
-			removeCommand(commandId);
+	const setSelected = (next: string[]) => {
+		if (next !== selectedCommandIds) {
+			form.setValue("commands", next);
 		}
 	};
 
-	const handleDragEnd = (event: DragEndEvent) => {
-		const { active, over } = event;
-
-		if (!over) {
-			return;
-		}
-
-		const activeContainer = findContainer(active.id.toString());
-		const overContainer = findContainer(over.id.toString());
-
-		// Reorder within added commands
-		if (
-			activeContainer === ADDED_COMMANDS &&
-			overContainer === ADDED_COMMANDS
-		) {
-			const oldIndex = selectedCommandIds.indexOf(active.id.toString());
-			const newIndex = selectedCommandIds.indexOf(over.id.toString());
-
-			if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
-				const reorderedIds = arrayMove(selectedCommandIds, oldIndex, newIndex);
-				form.setValue("commands", reorderedIds);
+	const applyDrag =
+		(resolve: (selectedIds: string[], drag: Drag) => string[]) =>
+		({ active, over }: DragOverEvent | DragEndEvent) => {
+			if (!over) {
+				return;
 			}
-		}
-	};
+
+			setSelected(
+				resolve(selectedCommandIds, {
+					activeId: active.id.toString(),
+					overId: over.id.toString(),
+				}),
+			);
+		};
 
 	return (
 		<FormField
@@ -153,8 +98,10 @@ export const CommandGroupCommandsField = () => {
 					<DndContext
 						sensors={sensors}
 						collisionDetection={closestCorners}
-						onDragOver={handleDragOver}
-						onDragEnd={handleDragEnd}
+						onDragOver={applyDrag((selectedIds, drag) =>
+							moveAcrossContainers(selectedIds, allCommandIds, drag),
+						)}
+						onDragEnd={applyDrag(reorderAdded)}
 					>
 						<div className="flex gap-6 select-none">
 							<SortableContext
@@ -172,8 +119,15 @@ export const CommandGroupCommandsField = () => {
 											rightComponent={
 												<button
 													type="button"
+													aria-label={t("commandGroupForm.addCommand", {
+														name: command.name,
+													})}
 													className="cursor-pointer flex items-center justify-center p-2 rounded text-neutral-900 shadow-xs dark:text-neutral-50 bg-accent group-hover:bg-neutral-200 hover:bg-neutral-300/80 dark:group-hover:bg-card/60 dark:hover:bg-card"
-													onClick={() => addCommand(command.id)}
+													onClick={() =>
+														setSelected(
+															addCommand(selectedCommandIds, command.id),
+														)
+													}
 												>
 													<ChevronRight className="size-4" />
 												</button>
@@ -195,8 +149,15 @@ export const CommandGroupCommandsField = () => {
 											rightComponent={
 												<button
 													type="button"
+													aria-label={t("commandGroupForm.removeCommand", {
+														name: command.name,
+													})}
 													className="cursor-pointer flex items-center justify-center p-2 rounded text-neutral-900 shadow-xs dark:text-neutral-50 bg-accent group-hover:bg-neutral-200 hover:bg-neutral-300/80 dark:group-hover:bg-card/60 dark:hover:bg-card"
-													onClick={() => removeCommand(command.id)}
+													onClick={() =>
+														setSelected(
+															removeCommand(selectedCommandIds, command.id),
+														)
+													}
 												>
 													<X className="size-4" />
 												</button>

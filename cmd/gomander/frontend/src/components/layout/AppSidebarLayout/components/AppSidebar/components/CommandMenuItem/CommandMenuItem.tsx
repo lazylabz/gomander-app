@@ -159,6 +159,8 @@ export const CommandMenuItem = ({
 							</p>
 							{command.link && (
 								<LinkIcon
+									role="button"
+									aria-label={t("sidebar.commands.openLink")}
 									size={12}
 									onClick={handleOpenLink}
 									className="text-muted-foreground cursor-pointer hover:text-primary min-w-4"
@@ -168,6 +170,8 @@ export const CommandMenuItem = ({
 						<div className="shrink-0">
 							{isIdle && (
 								<Play
+									role="button"
+									aria-label={t("sidebar.commands.run")}
 									size={16}
 									className="text-muted-foreground cursor-pointer hover:text-primary"
 									onClick={handleRunCommand}
@@ -175,6 +179,8 @@ export const CommandMenuItem = ({
 							)}
 							{isRunning && (
 								<Square
+									role="button"
+									aria-label={t("sidebar.commands.stop")}
 									size={16}
 									className="text-muted-foreground dark:text-primary/70 cursor-pointer hover:text-primary dark:hover:text-primary"
 									onClick={handleStopCommand}

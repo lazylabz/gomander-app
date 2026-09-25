@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useVersionContext } from "@/contexts/version.tsx";
 import { externalBrowserService, helpersService } from "@/contracts/service.ts";
 import {
 	Avatar,
@@ -29,6 +28,9 @@ import {
 } from "@/design-system/components/ui/dialog.tsx";
 import { cn } from "@/design-system/lib/utils.ts";
 import { GithubIcon } from "@/icons/GithubIcon.tsx";
+import { useReleaseStore } from "@/store/releaseStore.ts";
+import { downloadLatestRelease } from "@/useCases/release/downloadLatestRelease.ts";
+import { installLatestRelease } from "@/useCases/release/installLatestRelease.ts";
 
 type OS = "darwin" | "linux" | "windows";
 
@@ -44,13 +46,9 @@ export const AboutModal = ({
 }) => {
 	const { t } = useTranslation();
 
-	const {
-		currentVersion,
-		newVersion,
-		updateStatus,
-		downloadLatestRelease,
-		installLatestRelease,
-	} = useVersionContext();
+	const currentRelease = useReleaseStore((state) => state.currentRelease);
+	const newRelease = useReleaseStore((state) => state.newRelease);
+	const updateStatus = useReleaseStore((state) => state.updateStatus);
 
 	const [installDisclaimerModalOpen, setInstallDisclaimersModalOpen] =
 		useState(false);
@@ -107,10 +105,10 @@ export const AboutModal = ({
 	};
 
 	const handleReleaseNotesClick = () => {
-		if (!newVersion) {
+		if (!newRelease) {
 			return;
 		}
-		const url = `https://github.com/lazylabz/gomander-app/releases/tag/v${newVersion}`;
+		const url = `https://github.com/lazylabz/gomander-app/releases/tag/v${newRelease}`;
 		externalBrowserService.browserOpenURL(url);
 	};
 
@@ -153,17 +151,17 @@ export const AboutModal = ({
 						<h3 className="text-xl font-bold text-foreground">
 							Gomander
 							<span className="ml-2 font-normal text-sm text-muted-foreground">
-								{t("aboutModal.version", { version: currentVersion })}
+								{t("aboutModal.version", { version: currentRelease })}
 							</span>
 						</h3>
 					</div>
 					{/* Update Notice */}
-					{newVersion && (
+					{newRelease && (
 						<div className="bg-sky-50 dark:bg-sky-950/40 border border-b-0 border-sky-200 dark:border-sky-950 shadow-sm shadow-sky-200 dark:shadow-sky-950 rounded-lg p-4">
 							<div className="flex items-center">
 								<div className="flex-1">
 									<p className="text-sm font-medium text-foreground mb-1">
-										{t("aboutModal.newVersion", { version: newVersion })}
+										{t("aboutModal.newVersion", { version: newRelease })}
 									</p>
 									<p className="text-xs text-muted-foreground">
 										{t("aboutModal.newVersionSubtitle")}
@@ -189,7 +187,7 @@ export const AboutModal = ({
 					</p>
 					{/* CTAs */}
 					<div
-						className={cn("flex gap-4", newVersion ? "flex-row" : "flex-col")}
+						className={cn("flex gap-4", newRelease ? "flex-row" : "flex-col")}
 					>
 						{/* GitHub CTA */}
 						<button
@@ -254,7 +252,7 @@ export const AboutModal = ({
 							</div>
 							<div className="text-xs text-muted-foreground">
 								{t("aboutModal.installDisclaimer.releaseNotesSubtitle", {
-									version: newVersion ?? "",
+									version: newRelease ?? "",
 								})}
 							</div>
 						</div>

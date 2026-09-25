@@ -1,12 +1,12 @@
 import { Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { useVersionContext } from "@/contexts/version.tsx";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
 } from "@/design-system/components/ui/tooltip.tsx";
+import { useReleaseStore } from "@/store/releaseStore.ts";
 
 export const VersionSection = ({
 	openAboutModal,
@@ -14,17 +14,18 @@ export const VersionSection = ({
 	openAboutModal: () => void;
 }) => {
 	const { t } = useTranslation();
-	const { newVersion, currentVersion, errorLoadingNewVersion } =
-		useVersionContext();
+	const currentRelease = useReleaseStore((state) => state.currentRelease);
+	const newRelease = useReleaseStore((state) => state.newRelease);
+	const checkFailed = useReleaseStore((state) => state.checkFailed);
 
 	return (
 		<Tooltip>
 			<TooltipTrigger className="cursor-pointer" onClick={openAboutModal}>
 				<p className="text-sm text-muted-foreground flex items-center gap-2">
-					{currentVersion
-						? t("sidebar.version.current", { version: currentVersion })
+					{currentRelease
+						? t("sidebar.version.current", { version: currentRelease })
 						: "..."}
-					{newVersion && (
+					{newRelease && (
 						<>
 							<Info
 								className="text-orange-400 dark:text-yellow-400 cursor-pointer"
@@ -33,12 +34,12 @@ export const VersionSection = ({
 							/>
 							<TooltipContent>
 								<span className="font-semibold">
-									{t("sidebar.version.newAvailable", { version: newVersion })}
+									{t("sidebar.version.newAvailable", { version: newRelease })}
 								</span>
 							</TooltipContent>
 						</>
 					)}
-					{currentVersion && !newVersion && !errorLoadingNewVersion && (
+					{currentRelease && !newRelease && !checkFailed && (
 						<>
 							<Info
 								className="text-green-600 dark:text-green-200 cursor-pointer"
@@ -48,7 +49,7 @@ export const VersionSection = ({
 							<TooltipContent>{t("sidebar.version.latest")}</TooltipContent>
 						</>
 					)}
-					{errorLoadingNewVersion && (
+					{checkFailed && (
 						<>
 							<Info
 								className="text-red-600 dark:text-red-400 cursor-pointer"

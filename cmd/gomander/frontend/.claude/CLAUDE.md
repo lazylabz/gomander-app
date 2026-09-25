@@ -8,8 +8,8 @@ Wails bindings. See [the root CLAUDE.md](../../../../.claude/CLAUDE.md) for the 
 
 - **[CONTEXT.md](../../../../CONTEXT.md)** — the glossary, shared with the backend.
 - **[docs/adr/](../../../../docs/adr/)** — decisions and the alternatives they rejected.
-  ADR-0001 (ports at the third-party edges), 0002 (autosave), 0003 (browser storage)
-  and 0005 (coverage) all bind code in this directory.
+  ADR-0001 (ports at the third-party edges), 0002 (autosave), 0003 (browser storage),
+  0005 (coverage) and 0008 (component tests) all bind code in this directory.
 
 `pnpm run` lists the scripts. The dev server runs from the repo root (`make dev`).
 
@@ -63,9 +63,6 @@ mutations refresh the groups alone; a project mutation that changes which projec
 refreshes the available ones, and an edit refreshes the opened project too.
 `closeProject` and `exportProject` refresh nothing.
 
-`createProject` is the one exception left — still a `dataService` call from
-`CreateProjectModal` with an `onSuccess` prop.
-
 ### Modals
 
 `components/modals/Command/common/formMapping.ts` maps between a form and a `Command`,
@@ -101,9 +98,10 @@ only: one event, one call, no pipeline of its own. New events are declared in
 
 ## Testing
 
-Vitest, jsdom, tests next to the code as `*.test.ts(x)`. Node ≥22.10 — jsdom 30 pulls an
-undici that calls `worker_threads.markAsUncloneable`, and on older Node every test file
-fails to start.
+Vitest, happy-dom, Testing Library, tests next to the code as `*.test.ts(x)`. ADR-0008
+sets the strategy: a rule is tested in the deepest module that owns it, and a component
+is rendered only for its wiring. Logic found in a component moves out before it is
+tested.
 
 - `installInMemoryBackend()` (from `@/testing/backend.ts`) swaps every service;
   `resetBackendServices()` puts Wails back. Never `vi.mock` the `wailsjs/` modules — the
@@ -116,9 +114,17 @@ fails to start.
 - Build objects with the builders in `@/testing/builders/`. They mutate and return `this`,
   so reuse one only when the earlier `with` calls should carry over.
 - `installTranslations()` makes every key echo itself, so assertions name the key rather
-  than the English copy. Assert toasts with `vi.spyOn(toast, "success" | "error")`.
+  than the English copy. A test that must see an interpolated value gives that one key
+  copy with `withTranslation(key, copy)`. Assert toasts with `vi.spyOn(toast, "success" | "error")`.
 - Mirror the Go conventions: Arrange / Act / Assert comments, and `sut` for the single
   unit under test.
-- A hook owning an effect is driven through a probe component with `createRoot` and `act`
-  (see `hooks/useAutosavedForm.test.tsx`). Anything a hook can hand to a plain function
+- Render components with `renderWithProviders` (from `@/testing/render.tsx`): it wraps
+  the router and the sidebar provider, returns a user-event `user`, and `location()` for
+  asserting navigation. Query by role and label; assert with the jest-dom matchers.
+- Never `vi.mock` a child component or a use case: render the real ones against the
+  in-memory backend and assert on what the user sees or on `backend.state`.
+- Stores are module singletons: call `resetStores()` (from `@/testing/stores.ts`) in
+  `beforeEach` instead of seeding every field by hand. A new store is added there.
+- A hook owning an effect is driven through a probe component (see
+  `hooks/useAutosavedForm.test.tsx`). Anything a hook can hand to a plain function
   belongs in that function, tested without a renderer.

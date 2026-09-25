@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -9,7 +8,6 @@ import {
 	formSchema,
 } from "@/components/modals/Project/common/createSchema.ts";
 import { ProjectNameField } from "@/components/modals/Project/common/ProjectNameField.tsx";
-import { dataService } from "@/contracts/service";
 import { Button } from "@/design-system/components/ui/button.tsx";
 import {
 	Dialog,
@@ -18,15 +16,14 @@ import {
 } from "@/design-system/components/ui/dialog";
 import { DialogContent } from "@/design-system/components/ui/dialog.tsx";
 import { Form } from "@/design-system/components/ui/form.tsx";
+import { createProject } from "@/useCases/project/createProject.ts";
 
 export const CreateProjectModal = ({
 	open,
 	setOpen,
-	onSuccess,
 }: {
 	open: boolean;
-	setOpen: React.Dispatch<SetStateAction<boolean>>;
-	onSuccess: () => Promise<void>;
+	setOpen: (open: boolean) => void;
 }) => {
 	const { t } = useTranslation();
 	const form = useForm<FormSchemaType>({
@@ -45,14 +42,16 @@ export const CreateProjectModal = ({
 	};
 
 	const onSubmit = async (values: FormSchemaType) => {
-		await dataService.createProject({
-			id: crypto.randomUUID(),
-			name: values.name,
-			workingDirectory: values.baseWorkingDirectory,
-		});
+		const created = await createProject(
+			values.name,
+			values.baseWorkingDirectory,
+		);
+		if (!created) {
+			return;
+		}
 
-		onSuccess();
-		handleOpenChange(false);
+		setOpen(false);
+		form.reset();
 	};
 
 	return (

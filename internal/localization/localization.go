@@ -18,8 +18,13 @@ type Localization struct {
 	SidebarCommandsTitle             string `json:"sidebar.commands.title"`
 	SidebarCommandsAdd               string `json:"sidebar.commands.add"`
 	SidebarCommandsRemoveFromGroup   string `json:"sidebar.commands.removeFromGroup"`
+	SidebarCommandsRun               string `json:"sidebar.commands.run"`
+	SidebarCommandsStop              string `json:"sidebar.commands.stop"`
+	SidebarCommandsOpenLink          string `json:"sidebar.commands.openLink"`
 	SidebarCommandGroupsTitle        string `json:"sidebar.commandGroups.title"`
 	SidebarCommandGroupsAdd          string `json:"sidebar.commandGroups.add"`
+	SidebarCommandGroupsRun          string `json:"sidebar.commandGroups.run"`
+	SidebarCommandGroupsStop         string `json:"sidebar.commandGroups.stop"`
 	SidebarCommandGroupsApplyReorder string `json:"sidebar.commandGroups.applyReorder"`
 	SidebarCommandGroupsStartReorder string `json:"sidebar.commandGroups.startReorder"`
 	SidebarCreateTitle               string `json:"sidebar.create.title"`
@@ -42,6 +47,7 @@ type Localization struct {
 	ProjectSelectionCreateButton      string `json:"projectSelection.createButton"`
 	ProjectSelectionImportButton      string `json:"projectSelection.importButton"`
 	ProjectSelectionMoreOptions       string `json:"projectSelection.moreOptions"`
+	ProjectSelectionProjectOptions    string `json:"projectSelection.projectOptions"`
 	ProjectSelectionImportPackageJson string `json:"projectSelection.importPackageJson"`
 	ProjectSelectionExportAction      string `json:"projectSelection.exportAction"`
 
@@ -108,6 +114,8 @@ type Localization struct {
 	CommandGroupFormNameLabel                  string `json:"commandGroupForm.nameLabel"`
 	CommandGroupFormCommandsDescription        string `json:"commandGroupForm.commandsDescription"`
 	CommandGroupFormAvailableCommands          string `json:"commandGroupForm.availableCommands"`
+	CommandGroupFormAddCommand                 string `json:"commandGroupForm.addCommand"`
+	CommandGroupFormRemoveCommand              string `json:"commandGroupForm.removeCommand"`
 	CommandGroupFormGroupCommands              string `json:"commandGroupForm.groupCommands"`
 	CommandGroupFormEmptyAvailable             string `json:"commandGroupForm.emptyAvailable"`
 	CommandGroupFormEmptyGroup                 string `json:"commandGroupForm.emptyGroup"`
@@ -177,6 +185,8 @@ type Localization struct {
 
 	// toast.project
 	ToastProjectSelectFailed     string `json:"toast.project.selectFailed"`
+	ToastProjectCreateSuccess    string `json:"toast.project.createSuccess"`
+	ToastProjectCreateFailed     string `json:"toast.project.createFailed"`
 	ToastProjectImportSuccess    string `json:"toast.project.importSuccess"`
 	ToastProjectImportFailed     string `json:"toast.project.importFailed"`
 	ToastProjectExportSuccess    string `json:"toast.project.exportSuccess"`

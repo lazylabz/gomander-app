@@ -81,8 +81,13 @@ export namespace localization {
 	    "sidebar.commands.title": string;
 	    "sidebar.commands.add": string;
 	    "sidebar.commands.removeFromGroup": string;
+	    "sidebar.commands.run": string;
+	    "sidebar.commands.stop": string;
+	    "sidebar.commands.openLink": string;
 	    "sidebar.commandGroups.title": string;
 	    "sidebar.commandGroups.add": string;
+	    "sidebar.commandGroups.run": string;
+	    "sidebar.commandGroups.stop": string;
 	    "sidebar.commandGroups.applyReorder": string;
 	    "sidebar.commandGroups.startReorder": string;
 	    "sidebar.create.title": string;
@@ -102,6 +107,7 @@ export namespace localization {
 	    "projectSelection.createButton": string;
 	    "projectSelection.importButton": string;
 	    "projectSelection.moreOptions": string;
+	    "projectSelection.projectOptions": string;
 	    "projectSelection.importPackageJson": string;
 	    "projectSelection.exportAction": string;
 	    "logs.matches_one": string;
@@ -155,6 +161,8 @@ export namespace localization {
 	    "commandGroupForm.nameLabel": string;
 	    "commandGroupForm.commandsDescription": string;
 	    "commandGroupForm.availableCommands": string;
+	    "commandGroupForm.addCommand": string;
+	    "commandGroupForm.removeCommand": string;
 	    "commandGroupForm.groupCommands": string;
 	    "commandGroupForm.emptyAvailable": string;
 	    "commandGroupForm.emptyGroup": string;
@@ -212,6 +220,8 @@ export namespace localization {
 	    "toast.commandGroup.notFound": string;
 	    "toast.commandGroup.cannotRemoveLast": string;
 	    "toast.project.selectFailed": string;
+	    "toast.project.createSuccess": string;
+	    "toast.project.createFailed": string;
 	    "toast.project.importSuccess": string;
 	    "toast.project.importFailed": string;
 	    "toast.project.exportSuccess": string;
