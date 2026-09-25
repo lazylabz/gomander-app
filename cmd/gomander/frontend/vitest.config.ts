@@ -5,7 +5,8 @@ export default mergeConfig(
 	viteConfig,
 	defineConfig({
 		test: {
-			environment: "jsdom",
+			environment: "happy-dom",
+			setupFiles: ["src/testing/setup.ts"],
 			include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
 			coverage: {
 				provider: "v8",
