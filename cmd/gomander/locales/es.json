@@ -100,6 +100,8 @@
   "commandGroupForm.nameLabel": "Nombre",
   "commandGroupForm.commandsDescription": "Arrastra comandos de izquierda a derecha para añadirlos y reordénalos según necesites",
   "commandGroupForm.availableCommands": "Comandos disponibles",
+  "commandGroupForm.addCommand": "Añadir {{name}} al grupo",
+  "commandGroupForm.removeCommand": "Quitar {{name}} del grupo",
   "commandGroupForm.groupCommands": "Comandos del grupo",
   "commandGroupForm.emptyAvailable": "No hay comandos disponibles",
   "commandGroupForm.emptyGroup": "Arrastra comandos aquí",

@@ -113,6 +113,8 @@ type Localization struct {
 	CommandGroupFormNameLabel                  string `json:"commandGroupForm.nameLabel"`
 	CommandGroupFormCommandsDescription        string `json:"commandGroupForm.commandsDescription"`
 	CommandGroupFormAvailableCommands          string `json:"commandGroupForm.availableCommands"`
+	CommandGroupFormAddCommand                 string `json:"commandGroupForm.addCommand"`
+	CommandGroupFormRemoveCommand              string `json:"commandGroupForm.removeCommand"`
 	CommandGroupFormGroupCommands              string `json:"commandGroupForm.groupCommands"`
 	CommandGroupFormEmptyAvailable             string `json:"commandGroupForm.emptyAvailable"`
 	CommandGroupFormEmptyGroup                 string `json:"commandGroupForm.emptyGroup"`

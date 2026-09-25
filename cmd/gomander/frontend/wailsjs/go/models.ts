@@ -160,6 +160,8 @@ export namespace localization {
 	    "commandGroupForm.nameLabel": string;
 	    "commandGroupForm.commandsDescription": string;
 	    "commandGroupForm.availableCommands": string;
+	    "commandGroupForm.addCommand": string;
+	    "commandGroupForm.removeCommand": string;
 	    "commandGroupForm.groupCommands": string;
 	    "commandGroupForm.emptyAvailable": string;
 	    "commandGroupForm.emptyGroup": string;

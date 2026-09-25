@@ -123,6 +123,9 @@ export const CommandGroupCommandsField = () => {
 											rightComponent={
 												<button
 													type="button"
+													aria-label={t("commandGroupForm.addCommand", {
+														name: command.name,
+													})}
 													className="cursor-pointer flex items-center justify-center p-2 rounded text-neutral-900 shadow-xs dark:text-neutral-50 bg-accent group-hover:bg-neutral-200 hover:bg-neutral-300/80 dark:group-hover:bg-card/60 dark:hover:bg-card"
 													onClick={() =>
 														setSelected(
@@ -150,6 +153,9 @@ export const CommandGroupCommandsField = () => {
 											rightComponent={
 												<button
 													type="button"
+													aria-label={t("commandGroupForm.removeCommand", {
+														name: command.name,
+													})}
 													className="cursor-pointer flex items-center justify-center p-2 rounded text-neutral-900 shadow-xs dark:text-neutral-50 bg-accent group-hover:bg-neutral-200 hover:bg-neutral-300/80 dark:group-hover:bg-card/60 dark:hover:bg-card"
 													onClick={() =>
 														setSelected(

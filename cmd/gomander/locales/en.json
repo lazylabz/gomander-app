@@ -100,6 +100,8 @@
   "commandGroupForm.nameLabel": "Name",
   "commandGroupForm.commandsDescription": "Drag commands from left to right to add them, and reorder them as needed",
   "commandGroupForm.availableCommands": "Available Commands",
+  "commandGroupForm.addCommand": "Add {{name}} to the group",
+  "commandGroupForm.removeCommand": "Remove {{name}} from the group",
   "commandGroupForm.groupCommands": "Group Commands",
   "commandGroupForm.emptyAvailable": "No commands available",
   "commandGroupForm.emptyGroup": "Drag commands here",
