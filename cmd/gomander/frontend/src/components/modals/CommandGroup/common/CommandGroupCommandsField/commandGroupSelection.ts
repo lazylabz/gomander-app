@@ -53,17 +53,12 @@ export const moveAcrossContainers = (
 	return selectedIds;
 };
 
+// Only two added commands are both in the selection, so the index lookup alone
+// rules out a drag that touches a container or an available command.
 export const reorderAdded = (
 	selectedIds: string[],
-	allCommandIds: string[],
 	{ activeId, overId }: Drag,
 ): string[] => {
-	const from = containerOf(activeId, selectedIds, allCommandIds);
-	const to = containerOf(overId, selectedIds, allCommandIds);
-	if (from !== ADDED_COMMANDS || to !== ADDED_COMMANDS) {
-		return selectedIds;
-	}
-
 	const oldIndex = selectedIds.indexOf(activeId);
 	const newIndex = selectedIds.indexOf(overId);
 	if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) {

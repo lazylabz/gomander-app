@@ -75,20 +75,14 @@ export const CommandGroupCommandsField = () => {
 	};
 
 	const applyDrag =
-		(
-			resolve: (
-				selectedIds: string[],
-				allCommandIds: string[],
-				drag: Drag,
-			) => string[],
-		) =>
+		(resolve: (selectedIds: string[], drag: Drag) => string[]) =>
 		({ active, over }: DragOverEvent | DragEndEvent) => {
 			if (!over) {
 				return;
 			}
 
 			setSelected(
-				resolve(selectedCommandIds, allCommandIds, {
+				resolve(selectedCommandIds, {
 					activeId: active.id.toString(),
 					overId: over.id.toString(),
 				}),
@@ -104,7 +98,9 @@ export const CommandGroupCommandsField = () => {
 					<DndContext
 						sensors={sensors}
 						collisionDetection={closestCorners}
-						onDragOver={applyDrag(moveAcrossContainers)}
+						onDragOver={applyDrag((selectedIds, drag) =>
+							moveAcrossContainers(selectedIds, allCommandIds, drag),
+						)}
 						onDragEnd={applyDrag(reorderAdded)}
 					>
 						<div className="flex gap-6 select-none">
