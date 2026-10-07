@@ -1,3 +1,4 @@
+import { ActionPalette } from "@/components/ActionPalette/ActionPalette.tsx";
 import { AppSidebar } from "@/components/layout/AppSidebarLayout/components/AppSidebar/AppSidebar.tsx";
 import { RunningIndicator } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/RunningIndicator/RunningIndicator.tsx";
 import {
@@ -34,6 +35,8 @@ export const AppSidebarLayout = ({
 			<main className="w-full h-screen bg-white">{children}</main>
 
 			<CollapsedRunningIndicator />
+
+			<ActionPalette />
 		</SidebarProvider>
 	);
 };

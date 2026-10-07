@@ -101,6 +101,15 @@ export namespace localization {
 	    "sidebar.runningIndicator.idle": string;
 	    "sidebar.runningIndicator.running_one": string;
 	    "sidebar.runningIndicator.running_other": string;
+	    "actionPalette.title": string;
+	    "actionPalette.description": string;
+	    "actionPalette.placeholder": string;
+	    "actionPalette.empty": string;
+	    "actionPalette.sections.commands": string;
+	    "actionPalette.kinds.command": string;
+	    "actionPalette.kinds.commandGroup": string;
+	    "actionPalette.run": string;
+	    "actionPalette.stop": string;
 	    "projectSelection.openTitle": string;
 	    "projectSelection.welcome": string;
 	    "projectSelection.emptyState": string;

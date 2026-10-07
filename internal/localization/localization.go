@@ -40,6 +40,17 @@ type Localization struct {
 	SidebarRunningIndicatorRunningOne   string `json:"sidebar.runningIndicator.running_one"`
 	SidebarRunningIndicatorRunningOther string `json:"sidebar.runningIndicator.running_other"`
 
+	// actionPalette
+	ActionPaletteTitle             string `json:"actionPalette.title"`
+	ActionPaletteDescription       string `json:"actionPalette.description"`
+	ActionPalettePlaceholder       string `json:"actionPalette.placeholder"`
+	ActionPaletteEmpty             string `json:"actionPalette.empty"`
+	ActionPaletteSectionsCommands  string `json:"actionPalette.sections.commands"`
+	ActionPaletteKindsCommand      string `json:"actionPalette.kinds.command"`
+	ActionPaletteKindsCommandGroup string `json:"actionPalette.kinds.commandGroup"`
+	ActionPaletteRun               string `json:"actionPalette.run"`
+	ActionPaletteStop              string `json:"actionPalette.stop"`
+
 	// projectSelection
 	ProjectSelectionOpenTitle         string `json:"projectSelection.openTitle"`
 	ProjectSelectionWelcome           string `json:"projectSelection.welcome"`

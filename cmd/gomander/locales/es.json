@@ -35,6 +35,16 @@
   "sidebar.version.latest": "¡Estás usando la última versión!",
   "sidebar.version.checkError": "Error al comprobar nuevas versiones",
 
+  "actionPalette.title": "Acciones",
+  "actionPalette.description": "Busca una acción para ejecutarla",
+  "actionPalette.placeholder": "Escribe una acción o busca...",
+  "actionPalette.empty": "No se han encontrado acciones.",
+  "actionPalette.sections.commands": "Comandos",
+  "actionPalette.kinds.command": "Comando",
+  "actionPalette.kinds.commandGroup": "Grupo de comandos",
+  "actionPalette.run": "Ejecutar {{name}}",
+  "actionPalette.stop": "Detener {{name}}",
+
   "projectSelection.openTitle": "Abrir proyecto",
   "projectSelection.welcome": "¡Bienvenido a Gomander!",
   "projectSelection.emptyState": "Todavía no tienes proyectos. Crea o importa uno.",
