@@ -94,3 +94,10 @@ One transaction spanning several repositories: everything an operation writes
 inside it lands, or none of it does. It is what makes atomicity a property of
 the operation rather than of a single repository.
 _Avoid_: transaction (that is the database's word for the mechanism)
+
+**Action**:
+Something the user can do from the Action Palette, opened with Mod+K: a label to
+search by and what happens when it is picked. Which Actions are offered follows
+from the app's state — a running Command offers to stop it, not to run it.
+_Avoid_: command (that is the domain's shell command line), launcher (that reads as
+the Runner)
