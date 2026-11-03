@@ -41,7 +41,7 @@ ENV GOOS=linux
 RUN mkdir -p /go/src /go/bin /go/pkg
 
 # Install Wails CLI
-RUN CGO_ENABLED=1 go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0
+RUN CGO_ENABLED=1 go install -tags gtk3 github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0
 
 # Install additional npm packages commonly used with Wails
 RUN npm install -g pnpm@latest
