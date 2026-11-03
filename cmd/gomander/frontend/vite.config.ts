@@ -12,7 +12,12 @@ export default defineConfig({
 		port: Number(process.env.WAILS_VITE_PORT) || 9245,
 		strictPort: true,
 	},
-	plugins: [react(), tailwindcss(), wails("./bindings")],
+	// Under Vitest @wailsio/runtime resolves to a stub the typed-events plugin can't extend.
+	plugins: [
+		react(),
+		tailwindcss(),
+		...(process.env.VITEST ? [] : [wails("./bindings")]),
+	],
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "./src"),
