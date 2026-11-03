@@ -39,9 +39,7 @@ import (
 	unitofworkinfrastructure "gomander/internal/unitofwork/infrastructure"
 	"gomander/internal/usecases"
 
-	"github.com/wailsapp/wails/v2"
-	"github.com/wailsapp/wails/v2/pkg/options"
-	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v3/pkg/application"
 
 	internalapp "gomander/internal/app"
 	"gomander/internal/event"
@@ -57,75 +55,60 @@ var localeFs embed.FS
 const ConfigFolderPathName = "gomander"
 
 func main() {
-	// The app can only be built once Wails hands us its context, so OnStartup fills this in
-	var app *internalapp.App
+	// ShouldQuit has to be handed to application.New, before the app it asks exists
+	var app *application.App
+	var gomander *internalapp.App
 
-	// Create instance of helpers
-	uiPathHelper := path.NewUiPathHelper()
-	dialogs := dialog.NewWailsDialogs()
-	uiFsHelper := fs.NewUIFsHelper(dialogs, facade.DefaultRuntimeFacade{})
-	uiOsHelper := os_internal.NewUIOsHelper()
-
-	// Create instance of controllers
-	controllers := NewWailsControllers()
-
-	// Create application with options
-	err := wails.Run(&options.App{
-		Title:  "Gomander",
-		Width:  1024,
-		Height: 768,
-		AssetServer: &assetserver.Options{
-			Assets: assets,
+	app = application.New(application.Options{
+		Name:   "Gomander",
+		Logger: productionLogger(),
+		ShouldQuit: func() bool {
+			return !gomander.OnBeforeClose(app.Context())
 		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-		OnStartup: func(ctx context.Context) {
-			// Initialize the database
-			gormDb := configDB(ctx)
-
-			// Load context into the desktop adapters
-			dialog.SetWailsDialogsContext(dialogs, ctx)
-
-			// Build deps
-			var useCases usecases.Registry
-			app, useCases = buildDeps(gormDb, ctx, dialogs)
-
-			// Register event handlers
-			app.RegisterHandlers()
-
-			// Start app
-			if err := app.Startup(ctx); err != nil {
-				panic(err)
-			}
-
-			// Initialize controllers
-			controllers.loadUseCases(useCases)
-
-			// Start http server for 3rd party integrations
-			server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
-
-			go func() {
-				err := server.RegisterHandlers()
-				if err != nil {
-					panic(err)
-				}
-				server.Start()
-			}()
+		Assets: application.AssetOptions{
+			Handler: application.AssetFileServerFS(assets),
 		},
-		Bind: []interface{}{
-			uiPathHelper,
-			controllers,
-			uiFsHelper,
-			uiOsHelper,
-		},
-		OnBeforeClose: func(ctx context.Context) (prevent bool) {
-			return app.OnBeforeClose(ctx)
-		},
-		EnumBind: []interface{}{
-			event.Events,
+		Mac: application.MacOptions{
+			ApplicationShouldTerminateAfterLastWindowClosed: true,
 		},
 	})
 
-	if err != nil {
+	ctx := app.Context()
+	runtimeFacade := facade.NewRuntimeFacade(app)
+	dialogs := dialog.NewWailsDialogs(app.Dialog)
+
+	gormDb := configDB(ctx)
+	var useCases usecases.Registry
+	gomander, useCases = buildDeps(gormDb, ctx, dialogs, runtimeFacade)
+
+	gomander.RegisterHandlers()
+
+	if err := gomander.Startup(ctx); err != nil {
+		panic(err)
+	}
+
+	app.RegisterService(application.NewService(path.NewUiPathHelper()))
+	app.RegisterService(application.NewService(NewWailsControllers(useCases)))
+	app.RegisterService(application.NewService(fs.NewUIFsHelper(dialogs, runtimeFacade)))
+	app.RegisterService(application.NewService(os_internal.NewUIOsHelper()))
+
+	window := app.Window.NewWithOptions(application.WebviewWindowOptions{
+		Title:            "Gomander",
+		Width:            1024,
+		Height:           768,
+		BackgroundColour: application.NewRGB(27, 38, 54),
+	})
+	closeWindowByQuitting(window, app)
+
+	server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
+	go func() {
+		if err := server.RegisterHandlers(); err != nil {
+			panic(err)
+		}
+		server.Start()
+	}()
+
+	if err := app.Run(); err != nil {
 		println("Error:", err.Error())
 	}
 }
@@ -185,15 +168,14 @@ func getDbFile() string {
 	return dbLocation
 }
 
-func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*internalapp.App, usecases.Registry) {
+func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs, runtimeFacade facade.RuntimeFacade) (*internalapp.App, usecases.Registry) {
 	// Initialize deps
-	l := logger.NewDefaultLogger(ctx, facade.DefaultRuntimeFacade{})
-	ee := event.NewDefaultEventEmitter(ctx, facade.DefaultRuntimeFacade{})
+	l := logger.NewDefaultLogger(runtimeFacade)
+	ee := event.NewDefaultEventEmitter(runtimeFacade)
 	r := runner.NewDefaultRunner(l, ee)
 	releaseFeed := releaseinfrastructure.NewGithubReleaseFeed(ctx, facade.DefaultIOFacade{}, releaseinfrastructure.DefaultLatestReleaseUrl)
 	releaseDownloader := releaseinfrastructure.NewGithubReleaseDownloader(ctx, facade.DefaultOSFacade{}, facade.DefaultIOFacade{}, releaseinfrastructure.DefaultBinaryDownloadBaseUrl)
 	releaseInstaller := releaseinfrastructure.NewOSReleaseInstaller(facade.DefaultOSFacade{}, facade.DefaultOpenFacade{})
-	appControl := releaseinfrastructure.NewShellAppControl(ctx, facade.DefaultRuntimeFacade{})
 
 	// Initialize repos
 	commandRepo := commmandinfrastructure.NewGormCommandRepository(gormDb, ctx)
@@ -263,7 +245,7 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs) (*i
 	getCurrentRelease := releaseusecases.NewGetCurrentRelease()
 	checkForNewRelease := releaseusecases.NewCheckForNewRelease(releaseFeed)
 	downloadRelease := releaseusecases.NewDownloadRelease(releaseDownloader)
-	installReleaseAndQuit := releaseusecases.NewInstallReleaseAndQuit(releaseInstaller, appControl)
+	installReleaseAndQuit := releaseusecases.NewInstallReleaseAndQuit(releaseInstaller, runtimeFacade)
 
 	app := internalapp.NewApp(l, r, configRepo, eventBus, internalapp.EventHandlers{
 		CleanCommandGroupsOnCommandDeleted:   cleanCommandGroupsOnCommandDeleted,

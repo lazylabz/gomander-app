@@ -1,0 +1,42 @@
+version: '3'
+
+# The installer installs and registers under these v2-derived names; changing
+# them leaves a second copy installed next to the one being updated.
+info:
+  companyName: "gomander"
+  productName: "gomander"
+  productIdentifier: "com.wails.gomander"
+  description: "Launch, monitor and organise the shell commands of a project"
+  copyright: "Copyright LazyLabz"
+  comments: "Built using Wails (https://wails.io)"
+  version: "1.0.0"
+
+dev_mode:
+  root_path: ../..
+  log_level: warn
+  debounce: 1000
+  ignore:
+    dir:
+      - .git
+      - node_modules
+      - cmd/gomander/frontend
+      - build
+    file:
+      - .DS_Store
+      - .gitignore
+      - .gitkeep
+      - "*_test.go"
+    watched_extension:
+      - "*.go"
+    git_ignore: true
+  executes:
+    - cmd: wails3 build DEV=true
+      dir: cmd/gomander
+      type: blocking
+    - cmd: wails3 task common:dev:frontend
+      dir: cmd/gomander
+      type: background
+    - cmd: wails3 task run
+      dir: cmd/gomander
+      type: primary
+      exit_policy: shutdown

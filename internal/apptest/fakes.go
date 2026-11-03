@@ -1,7 +1,6 @@
 package apptest
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -145,7 +144,7 @@ type eventSinkFake struct {
 	emittedEvents []EmittedEvent
 }
 
-func (f *eventSinkFake) EventsEmit(_ context.Context, eventName string, payload interface{}) {
+func (f *eventSinkFake) EventsEmit(eventName string, payload interface{}) {
 	f.mutex.Lock()
 	defer f.mutex.Unlock()
 
@@ -163,9 +162,9 @@ func (f *eventSinkFake) emitted() []EmittedEvent {
 // nothing a test asserts on goes through the logger.
 type logSinkFake struct{}
 
-func (f *logSinkFake) LogInfo(_ context.Context, _ string)  {}
-func (f *logSinkFake) LogDebug(_ context.Context, _ string) {}
-func (f *logSinkFake) LogError(_ context.Context, _ string) {}
+func (f *logSinkFake) LogInfo(_ string)  {}
+func (f *logSinkFake) LogDebug(_ string) {}
+func (f *logSinkFake) LogError(_ string) {}
 
 // dialogsFake answers the file dialogs in the user's place: with the path they
 // would have picked, with an empty path when they cancel, or with the failure

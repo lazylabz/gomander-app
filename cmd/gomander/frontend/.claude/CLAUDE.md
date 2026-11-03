@@ -17,7 +17,7 @@ Wails bindings. See [the root CLAUDE.md](../../../../.claude/CLAUDE.md) for the 
 
 ```
 src/
-├── contracts/         # the backend seam - the ONLY place wailsjs is imported
+├── contracts/         # the backend seam - the ONLY place the Wails bindings are imported
 │   ├── ports.ts       # the contract, hand-declared
 │   ├── service.ts     # the services the app calls, plus the test-only swap
 │   └── adapters/      # wails.ts (production), inMemory.ts (tests)
@@ -41,8 +41,8 @@ src/
 
 Adding one is four steps: declare it on the right type in `contracts/ports.ts`, map it
 in `adapters/wails.ts`, implement it in `adapters/inMemory.ts`, then call it from a use
-case. Biome fails any `wailsjs` import outside `contracts/`, and any `@xterm/*` import
-outside `commandOutput/`.
+case. Biome fails any `bindings/` or `@wailsio/runtime` import outside `contracts/`, and
+any `@xterm/*` import outside `commandOutput/`.
 
 ### Mutations own their outcome
 
@@ -104,7 +104,7 @@ is rendered only for its wiring. Logic found in a component moves out before it 
 tested.
 
 - `installInMemoryBackend()` (from `@/testing/backend.ts`) swaps every service;
-  `resetBackendServices()` puts Wails back. Never `vi.mock` the `wailsjs/` modules — the
+  `resetBackendServices()` puts Wails back. Never `vi.mock` the `bindings/` modules — the
   contracts seam exists to avoid exactly that.
 - The fake holds state rather than recording calls: drive it through the seam, then query
   `backend.state`. Emit events with `backend.emit(Event.NEW_LOG_ENTRY, {...})`. Drive a

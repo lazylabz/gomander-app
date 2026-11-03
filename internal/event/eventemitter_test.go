@@ -1,7 +1,6 @@
 package event_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -15,12 +14,11 @@ func TestDefaultEventEmitter_EmitEvent(t *testing.T) {
 		// Arrange
 		eventKey := "test.event"
 		eventPayload := "test payload"
-		ctx := context.Background()
 		mockEventSink := new(test.MockEventSink)
 
-		ee := event.NewDefaultEventEmitter(ctx, mockEventSink)
+		ee := event.NewDefaultEventEmitter(mockEventSink)
 
-		mockEventSink.On("EventsEmit", ctx, eventKey, eventPayload).Return()
+		mockEventSink.On("EventsEmit", eventKey, eventPayload).Return()
 
 		// Act
 		ee.EmitEvent(event.Event(eventKey), eventPayload)

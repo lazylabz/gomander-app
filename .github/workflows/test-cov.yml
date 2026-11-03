@@ -45,7 +45,14 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v6
       with:
-        go-version: '1.23.0'
+        go-version-file: go.mod
+
+    # Wails v3 links GTK on Linux: gtk3 matches the release build and the .deb.
+    - name: Install Linux build dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
 
     - name: Download dependencies
       run: go mod download
@@ -59,7 +66,7 @@ jobs:
         echo "dummy" > cmd/gomander/frontend/dist/.dummy
 
     - name: Run tests
-      run: go test -v -race -coverpkg ./... -coverprofile coverage.txt ./...
+      run: go test -tags gtk3 -v -race -coverpkg ./... -coverprofile coverage.txt ./...
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v6

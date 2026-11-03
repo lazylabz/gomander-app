@@ -17,7 +17,7 @@ monitoring and organising the shell commands of a project.
 
 ## Stack
 
-Go 1.23+, Wails v2, SQLite through GORM, Goose migrations as `.go` files in
+Go 1.26+, Wails v3, SQLite through GORM, Goose migrations as `.go` files in
 `migrations/`. `make help` lists the dev, test and build targets.
 
 ## Layout

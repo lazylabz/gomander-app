@@ -25,6 +25,6 @@
 			"@/*": ["./src/*"]
 		}
 	},
-	"exclude": ["**/wailsjs/**"],
+	"exclude": ["**/bindings/**"],
 	"include": ["src"]
 }

@@ -6,3 +6,7 @@ frontend/dist
 **/build/bin
 **/windows/installer/tmp/**
 .claude/worktrees
+.task/
+**/windows/nsis/MicrosoftEdgeWebview2Setup.exe
+cmd/gomander/build/linux/gomander.desktop
+cmd/gomander/build/linux/appimage/

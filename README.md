@@ -65,7 +65,7 @@ This project is licensed under GPL-3. For more details, check out the [LICENSE](
 
 ### Environment Setup
 
-To get started with development, you'll need to follow the [Wails installation guide](https://wails.io/docs/gettingstarted/installation).
+To get started with development, you'll need Go 1.26+, Node.js with pnpm, and the Wails v3 CLI: follow the [Wails v3 installation guide](https://v3.wails.io/getting-started/installation/).
 
 That's it, no extra setup needed beyond what Wails requires.
 
@@ -74,7 +74,7 @@ That's it, no extra setup needed beyond what Wails requires.
 Once you've got Wails set up, just run:
 
 ```bash
-wails dev
+make dev
 ```
 
 ### Building

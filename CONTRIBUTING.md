@@ -10,9 +10,9 @@ We welcome contributions to Gomander! This guide will help you get started with 
 ## Getting Started
 
 ### Prerequisites
-- Go 1.23+ installed
+- Go 1.26+ installed
 - Node.js and pnpm installed
-- Follow the [Wails installation guide](https://wails.io/docs/gettingstarted/installation)
+- Follow the [Wails v3 installation guide](https://v3.wails.io/getting-started/installation/) (`go install github.com/wailsapp/wails/v3/cmd/wails3@latest`)
 
 ### Setup Steps
 1. Fork the repository
@@ -21,7 +21,7 @@ We welcome contributions to Gomander! This guide will help you get started with 
 4. Create a new branch for your changes
 
 ### Project Structure
-- `cmd/gomander/` - Main application entry point and Wails configuration
+- `cmd/gomander/` - Main application entry point and Wails configuration (`Taskfile.yml`, `build/`)
 - `internal/` - Core business logic organized by domain (command, project, etc.)
 - `cmd/gomander/frontend/` - React/TypeScript frontend
 - `migrations/` - Database migrations (Go files using Goose)
@@ -67,7 +67,7 @@ go test ./...
 make lint
 
 # Run in development mode (from cmd/gomander directory)
-cd cmd/gomander && wails dev
+cd cmd/gomander && wails3 dev -config ./build/config.yml
 
 # Or use the Makefile shortcut from root
 make dev

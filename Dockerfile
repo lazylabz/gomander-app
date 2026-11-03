@@ -25,9 +25,9 @@ RUN ARCH=$(dpkg --print-architecture) && \
         armhf) GOARCH=armv6l ;; \
         *) echo "Unsupported architecture: ${ARCH}" && exit 1 ;; \
     esac && \
-    wget https://go.dev/dl/go1.24.5.linux-${GOARCH}.tar.gz && \
-    tar -C /usr/local -xzf go1.24.5.linux-${GOARCH}.tar.gz && \
-    rm go1.24.5.linux-${GOARCH}.tar.gz
+    wget https://go.dev/dl/go1.26.10.linux-${GOARCH}.tar.gz && \
+    tar -C /usr/local -xzf go1.26.10.linux-${GOARCH}.tar.gz && \
+    rm go1.26.10.linux-${GOARCH}.tar.gz
 
 # Set Go environment variables
 ENV PATH="/usr/local/go/bin:${PATH}"
@@ -41,7 +41,7 @@ ENV GOOS=linux
 RUN mkdir -p /go/src /go/bin /go/pkg
 
 # Install Wails CLI
-RUN CGO_ENABLED=1 go install github.com/wailsapp/wails/v2/cmd/wails@latest
+RUN CGO_ENABLED=1 go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0
 
 # Install additional npm packages commonly used with Wails
 RUN npm install -g pnpm@latest
@@ -53,9 +53,9 @@ RUN echo "=== Verifying Go installation ===" && \
     node --version && \
     npm --version && \
     echo "\n=== Verifying Wails installation ===" && \
-    wails version && \
+    wails3 version && \
     echo "\n=== Running Wails Doctor ===" && \
-    wails doctor || true
+    wails3 doctor || true
 
 # Copy all files
 COPY . .

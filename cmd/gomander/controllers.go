@@ -11,12 +11,8 @@ type WailsControllers struct {
 	useCases usecases.Registry
 }
 
-func NewWailsControllers() *WailsControllers {
-	return &WailsControllers{}
-}
-
-func (wc *WailsControllers) loadUseCases(useCases usecases.Registry) {
-	wc.useCases = useCases
+func NewWailsControllers(useCases usecases.Registry) *WailsControllers {
+	return &WailsControllers{useCases: useCases}
 }
 
 // User config controllers
