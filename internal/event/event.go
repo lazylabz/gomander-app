@@ -1,9 +1,5 @@
 package event
 
-import (
-	"strings"
-)
-
 type Event string
 
 const (
@@ -23,14 +19,3 @@ const (
 	CommandLogEntry LogEntryKind = "command"
 	OutputLogEntry  LogEntryKind = "output"
 )
-
-var Events = []struct {
-	Value  Event
-	TSName string
-}{
-	{Value: ProcessFinished, TSName: strings.ToUpper(string(ProcessFinished))},
-	{Value: ProcessStarted, TSName: strings.ToUpper(string(ProcessStarted))},
-	{Value: NewLogEntry, TSName: strings.ToUpper(string(NewLogEntry))},
-	{Value: CommandGroupDeleted, TSName: strings.ToUpper(string(CommandGroupDeleted))},
-	{Value: CommandErrorDetected, TSName: strings.ToUpper(string(CommandErrorDetected))},
-}

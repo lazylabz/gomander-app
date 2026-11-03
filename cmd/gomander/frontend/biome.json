@@ -6,7 +6,7 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"includes": ["**", "!!**/dist", "!!**/wailsjs"]
+		"includes": ["**", "!!**/dist", "!!**/bindings"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -23,7 +23,7 @@
 					"options": {
 						"patterns": [
 							{
-								"group": ["**/wailsjs/**"]
+								"group": ["**/bindings/**", "@wailsio/runtime"]
 							},
 							{
 								"group": ["@xterm/**"]
@@ -65,7 +65,7 @@
 							"options": {
 								"patterns": [
 									{
-										"group": ["**/wailsjs/**"]
+										"group": ["**/bindings/**", "@wailsio/runtime"]
 									}
 								]
 							}

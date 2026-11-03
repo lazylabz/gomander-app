@@ -92,8 +92,8 @@ func New(t *testing.T) *Harness {
 	releaseInstaller := &releaseInstallerFake{}
 	appControl := &appControlFake{}
 
-	l := logger.NewDefaultLogger(ctx, &logSinkFake{})
-	ee := event.NewDefaultEventEmitter(ctx, events)
+	l := logger.NewDefaultLogger(&logSinkFake{})
+	ee := event.NewDefaultEventEmitter(events)
 
 	failures := &storageFailures{}
 

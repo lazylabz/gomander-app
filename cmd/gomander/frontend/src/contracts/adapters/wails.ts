@@ -1,8 +1,5 @@
+import { Browser, Events } from "@wailsio/runtime";
 import type { BackendServices } from "@/contracts/ports.ts";
-import {
-	AskForDirPath,
-	OpenFileFolder,
-} from "../../../wailsjs/go/fs/UIFsHelper";
 import {
 	AddCommandController,
 	CheckForNewReleaseController,
@@ -39,10 +36,23 @@ import {
 	StopCommandController,
 	StopCommandGroupController,
 	UpdateCommandGroupController,
-} from "../../../wailsjs/go/main/WailsControllers";
-import { GetOs } from "../../../wailsjs/go/os_internal/UIOsHelper";
-import { GetComputedPath } from "../../../wailsjs/go/path/UiPathHelper";
-import { BrowserOpenURL, EventsOff, EventsOn } from "../../../wailsjs/runtime";
+} from "../../../bindings/gomander/cmd/gomander/wailscontrollers.ts";
+import {
+	AskForDirPath,
+	OpenFileFolder,
+} from "../../../bindings/gomander/internal/uihelpers/fs/uifshelper.ts";
+import { GetOs } from "../../../bindings/gomander/internal/uihelpers/os_internal/uioshelper.ts";
+import { GetComputedPath } from "../../../bindings/gomander/internal/uihelpers/path/uipathhelper.ts";
+import type { EventData, WithoutNullSlices } from "../types.ts";
+
+// v3 types a call answering with a Go slice or pointer as `| null`; the contract
+// answers the way v2 typed it, so the call is only recast, never wrapped.
+const asContract = <Args extends unknown[], Result>(
+	call: (...args: Args) => PromiseLike<Result>,
+) =>
+	call as unknown as (
+		...args: Args
+	) => Promise<WithoutNullSlices<NonNullable<Result>>>;
 
 export const wailsBackend = {
 	data: {
@@ -50,7 +60,7 @@ export const wailsBackend = {
 		duplicateCommand: DuplicateCommandController,
 		editCommand: EditCommandController,
 		reorderCommands: ReorderCommandsController,
-		getAvailableProjects: GetAvailableProjectsController,
+		getAvailableProjects: asContract(GetAvailableProjectsController),
 		editCommandGroup: UpdateCommandGroupController,
 		createCommandGroup: CreateCommandGroupController,
 		deleteCommandGroup: DeleteCommandGroupController,
@@ -58,10 +68,10 @@ export const wailsBackend = {
 		removeCommandFromGroup: RemoveCommandFromCommandGroupController,
 		runCommandGroup: RunCommandGroupController,
 		stopCommandGroup: StopCommandGroupController,
-		getCommandGroups: GetCommandGroupsController,
-		getCommands: GetCommandsController,
+		getCommandGroups: asContract(GetCommandGroupsController),
+		getCommands: asContract(GetCommandsController),
 		getCurrentProject: GetCurrentProjectController,
-		getUserConfig: GetUserConfigController,
+		getUserConfig: asContract(GetUserConfigController),
 		removeCommand: RemoveCommandController,
 		runCommand: RunCommandController,
 		saveUserConfig: SaveUserConfigController,
@@ -72,9 +82,10 @@ export const wailsBackend = {
 		deleteProject: DeleteProjectController,
 		exportProject: ExportProjectController,
 		importProject: ImportProjectController,
-		getProjectToImport: GetProjectToImportController,
-		getProjectToImportFromPackageJson:
+		getProjectToImport: asContract(GetProjectToImportController),
+		getProjectToImportFromPackageJson: asContract(
 			GetProjectToImportFromPackageJsonController,
+		),
 		editProject: EditProjectController,
 		getCurrentRelease: GetCurrentReleaseController,
 		checkForNewRelease: CheckForNewReleaseController,
@@ -88,14 +99,18 @@ export const wailsBackend = {
 		openFileFolder: OpenFileFolder,
 	},
 	event: {
-		eventsOn: EventsOn,
-		eventsOff: EventsOff,
+		eventsOn: (event, callback) =>
+			Events.On(event, ({ data }) => callback(data as EventData[typeof event])),
+		eventsOff: (event, ...additionalEvents) =>
+			Events.Off(event, ...additionalEvents),
 	},
 	externalBrowser: {
-		browserOpenURL: BrowserOpenURL,
+		browserOpenURL: (url) => {
+			void Browser.OpenURL(url);
+		},
 	},
 	translations: {
-		getTranslation: GetTranslationController,
-		getSupportedLanguages: GetSupportedLanguagesController,
+		getTranslation: asContract(GetTranslationController),
+		getSupportedLanguages: asContract(GetSupportedLanguagesController),
 	},
 } satisfies BackendServices;

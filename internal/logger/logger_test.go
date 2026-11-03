@@ -1,7 +1,6 @@
 package logger_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -14,12 +13,11 @@ func TestDefaultLogger_Info(t *testing.T) {
 	t.Run("Should call LogInfo with message", func(t *testing.T) {
 		// Arrange
 		message := "test info message"
-		ctx := context.Background()
 		mockLogSink := new(test.MockLogSink)
 
-		l := logger.NewDefaultLogger(ctx, mockLogSink)
+		l := logger.NewDefaultLogger(mockLogSink)
 
-		mockLogSink.On("LogInfo", ctx, message).Return()
+		mockLogSink.On("LogInfo", message).Return()
 
 		// Act
 		l.Info(message)
@@ -33,12 +31,11 @@ func TestDefaultLogger_Debug(t *testing.T) {
 	t.Run("Should call LogDebug with message", func(t *testing.T) {
 		// Arrange
 		message := "test debug message"
-		ctx := context.Background()
 		mockLogSink := new(test.MockLogSink)
 
-		l := logger.NewDefaultLogger(ctx, mockLogSink)
+		l := logger.NewDefaultLogger(mockLogSink)
 
-		mockLogSink.On("LogDebug", ctx, message).Return()
+		mockLogSink.On("LogDebug", message).Return()
 
 		// Act
 		l.Debug(message)
@@ -52,12 +49,11 @@ func TestDefaultLogger_Error(t *testing.T) {
 	t.Run("Should call LogError with message", func(t *testing.T) {
 		// Arrange
 		message := "test error message"
-		ctx := context.Background()
 		mockLogSink := new(test.MockLogSink)
 
-		l := logger.NewDefaultLogger(ctx, mockLogSink)
+		l := logger.NewDefaultLogger(mockLogSink)
 
-		mockLogSink.On("LogError", ctx, message).Return()
+		mockLogSink.On("LogError", message).Return()
 
 		// Act
 		l.Error(message)
