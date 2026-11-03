@@ -168,8 +168,9 @@ jobs:
         run: |
           # Pin the CLI to the version in go.mod: @latest can require a newer
           # Go toolchain than the one setup-go installs (GOTOOLCHAIN=local).
+          # The CLI links GTK on Linux too, and only GTK 3 is installed above.
           wails_version="$(go list -m -f '{{.Version}}' github.com/wailsapp/wails/v3)"
-          go install "github.com/wailsapp/wails/v3/cmd/wails3@${wails_version}"
+          go install -tags gtk3 "github.com/wailsapp/wails/v3/cmd/wails3@${wails_version}"
 
       - name: Build Linux ${{ matrix.arch }} binary
         run: |
