@@ -142,7 +142,10 @@
   "userSettingsForm.themeLight": "Claro",
   "userSettingsForm.themeDark": "Oscuro",
   "userSettingsForm.themeDescription": "(El modo automático sigue la apariencia de tu sistema)",
+  "userSettingsForm.logsFontSizeLabel": "Tamaño de letra de los logs",
+  "userSettingsForm.logsFontSizeDescription": "Para hacer zoom en toda la app, usa Cmd/Ctrl y +, - o 0.",
   "userSettingsForm.validation.pathEmpty": "La ruta no puede estar vacía",
+  "userSettingsForm.validation.logsFontSize": "El tamaño de letra debe estar entre {{min}} y {{max}}",
 
   "projectSettingsForm.sectionTitle": "Información del proyecto",
   "projectSettingsForm.sectionDescription": "Configura los detalles y ajustes básicos de tu proyecto.",
@@ -191,6 +194,7 @@
   "toast.settings.userSaveFailed": "Error al guardar los ajustes de usuario",
   "toast.settings.projectSaveSuccess": "Ajustes del proyecto guardados",
   "toast.settings.projectSaveFailed": "Error al guardar los ajustes del proyecto",
+  "toast.settings.zoomFailed": "Error al hacer zoom",
 
   "toast.version.checkError": "Error al comprobar nuevas versiones",
   "toast.version.downloadFailed": "Error al descargar la actualización",

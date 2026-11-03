@@ -128,6 +128,10 @@ export function ReorderCommandsController(orderedIds: string[] | null): $Cancell
     return $Call.ByID(3124296394, orderedIds);
 }
 
+export function ResetZoomController(): $CancellablePromise<void> {
+    return $Call.ByID(3106917315);
+}
+
 export function RunCommandController(commandId: string): $CancellablePromise<void> {
     return $Call.ByID(4215676835, commandId);
 }
@@ -150,4 +154,12 @@ export function StopCommandGroupController(commandGroupId: string): $Cancellable
 
 export function UpdateCommandGroupController(commandGroup: domain$0.CommandGroup): $CancellablePromise<void> {
     return $Call.ByID(4230705992, commandGroup);
+}
+
+export function ZoomInController(): $CancellablePromise<void> {
+    return $Call.ByID(142987981);
+}
+
+export function ZoomOutController(): $CancellablePromise<void> {
+    return $Call.ByID(1219862946);
 }

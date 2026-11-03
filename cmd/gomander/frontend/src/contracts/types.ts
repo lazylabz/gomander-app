@@ -23,6 +23,8 @@ export type CommandGroupBlueprint =
 	WithoutNullSlices<domain.CommandGroupBlueprint>;
 export type Localization = WithoutNullSlices<localization.Localization>;
 
+export type ZoomDirection = "in" | "out" | "reset";
+
 // Enums
 export enum Event {
 	NEW_LOG_ENTRY = "new_log_entry",

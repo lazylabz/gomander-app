@@ -22,3 +22,8 @@ func (m *MockConfigRepository) Update(config *domain.Config) error {
 	args := m.Called(config)
 	return args.Error(0)
 }
+
+func (m *MockConfigRepository) UpdateZoomLevel(level domain.ZoomLevel) error {
+	args := m.Called(level)
+	return args.Error(0)
+}

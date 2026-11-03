@@ -43,6 +43,8 @@ export interface Config {
     "lastOpenedProjectId": string;
     "environmentPaths": EnvironmentPath[] | null;
     "locale": string;
+    "logsFontSize": number;
+    "zoomLevel": number;
 }
 
 export interface EnvironmentPath {

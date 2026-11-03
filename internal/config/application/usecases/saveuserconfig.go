@@ -13,5 +13,9 @@ func NewSaveUserConfig(repository domain.Repository) *SaveUserConfig {
 }
 
 func (uc *SaveUserConfig) Execute(newUserConfig domain.Config) error {
+	if err := newUserConfig.Validate(); err != nil {
+		return err
+	}
+
 	return uc.repository.Update(&newUserConfig)
 }

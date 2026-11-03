@@ -23,6 +23,7 @@ export type OutputTerminal = {
 	writeln: (line: string) => void;
 	reset: () => void;
 	setTheme: (theme: TerminalTheme) => void;
+	setFontSize: (fontSize: number) => void;
 	attach: (element: HTMLElement) => AttachedTerminal;
 	dispose: () => void;
 };
@@ -30,4 +31,5 @@ export type OutputTerminal = {
 export type TerminalFactory = (
 	commandId: string,
 	theme: TerminalTheme,
+	fontSize: number,
 ) => OutputTerminal;

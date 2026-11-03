@@ -70,6 +70,17 @@ a Command Group among its Project's Groups, a Command among the Commands its
 Command Group holds. Positions are dense: 0, 1, 2 … with no gaps.
 _Avoid_: order, index, sort order
 
+**Zoom Level**:
+How magnified the whole window is, 1 being 100%, stepped by 0.1 between 0.5 and
+2 from the zoom shortcuts. It is stored in the user configuration and put back
+once the window is on screen; the settings screen never writes it.
+_Avoid_: scale, zoom factor (that is WebView2's word for the mechanism)
+
+**Logs Font Size**:
+The size of the text in a Command's logs, set in the user settings. Unlike the
+Zoom Level it touches nothing but the logs.
+_Avoid_: text size (that reads as the whole app's, which is the Zoom Level)
+
 **Release**:
 A published version of Gomander. The app knows the one it is running, asks the
 release feed for the latest published one, and updates by downloading that one's

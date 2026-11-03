@@ -13,6 +13,10 @@ type Registry struct {
 	// Configuration
 	GetUserConfig  *configusecases.GetUserConfig
 	SaveUserConfig *configusecases.SaveUserConfig
+	ZoomIn         *configusecases.ZoomIn
+	ZoomOut        *configusecases.ZoomOut
+	ResetZoom      *configusecases.ResetZoom
+	RestoreZoom    *configusecases.RestoreZoom
 	// Localization
 	GetTranslation        *localizationusecases.GetTranslation
 	GetSupportedLanguages *localizationusecases.GetSupportedLanguages

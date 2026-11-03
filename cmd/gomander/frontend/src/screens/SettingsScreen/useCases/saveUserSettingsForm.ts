@@ -33,6 +33,8 @@ export const saveUserSettingsForm = async (
 			lastOpenedProjectId: userConfig.lastOpenedProjectId,
 			environmentPaths: formData.environmentPaths,
 			locale: formData.locale,
+			logsFontSize: formData.logsFontSize,
+			zoomLevel: userConfig.zoomLevel,
 		});
 		toast.success(i18n.t("toast.settings.userSaveSuccess"));
 	} catch (e) {

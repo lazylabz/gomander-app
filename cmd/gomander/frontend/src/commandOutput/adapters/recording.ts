@@ -16,6 +16,7 @@ export type RecordedTerminal = {
 	written: string[];
 	resets: number;
 	theme: TerminalTheme;
+	fontSize: number;
 	attachedTo: HTMLElement | null;
 	// How many lines had been written when the terminal was first attached.
 	writtenWhenAttached: number | null;
@@ -34,13 +35,14 @@ export type RecordingTerminals = {
 export const createRecordingTerminals = (): RecordingTerminals => {
 	const terminals = new Map<string, RecordedTerminal>();
 
-	const create: TerminalFactory = (commandId, theme) => {
+	const create: TerminalFactory = (commandId, theme, fontSize) => {
 		const resultListeners: ((resultCount: number) => void)[] = [];
 
 		const recorded: RecordedTerminal = {
 			written: [],
 			resets: 0,
 			theme,
+			fontSize,
 			attachedTo: null,
 			writtenWhenAttached: null,
 			fits: 0,
@@ -65,6 +67,9 @@ export const createRecordingTerminals = (): RecordingTerminals => {
 			},
 			setTheme: (nextTheme) => {
 				recorded.theme = nextTheme;
+			},
+			setFontSize: (nextFontSize) => {
+				recorded.fontSize = nextFontSize;
 			},
 			dispose: () => {
 				recorded.disposed = true;

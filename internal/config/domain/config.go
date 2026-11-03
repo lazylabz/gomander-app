@@ -9,4 +9,10 @@ type Config struct {
 	LastOpenedProjectId string
 	EnvironmentPaths    []EnvironmentPath
 	Locale              string
+	LogsFontSize        int
+	ZoomLevel           ZoomLevel
+}
+
+func (c Config) Validate() error {
+	return validateLogsFontSize(c.LogsFontSize)
 }

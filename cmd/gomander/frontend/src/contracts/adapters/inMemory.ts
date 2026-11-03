@@ -1,6 +1,7 @@
 // The values this fake derives (duplicate ids, export paths, computed paths) are
 // its own convention, not the backend's: assert on what a test put in, never on
 // the shape of what the fake made up.
+import { LOGS_FONT_SIZE } from "@/constants/logsFontSize.ts";
 import type { BackendServices } from "@/contracts/ports.ts";
 import type {
 	Command,
@@ -11,6 +12,7 @@ import type {
 	Project,
 	ProjectBlueprint,
 	UserConfig,
+	ZoomDirection,
 } from "@/contracts/types.ts";
 
 export type InMemoryBackendState = {
@@ -36,6 +38,7 @@ export type InMemoryBackendState = {
 	openedUrls: string[];
 	openedFolders: string[];
 	exportedProjectIds: string[];
+	zoomRequests: ZoomDirection[];
 };
 
 export type InMemoryBackend = BackendServices & {
@@ -59,6 +62,8 @@ const createState = (): InMemoryBackendState => ({
 		lastOpenedProjectId: "",
 		environmentPaths: [],
 		locale: "en",
+		logsFontSize: LOGS_FONT_SIZE.default,
+		zoomLevel: 1,
 	},
 	runningCommandIds: [],
 	runningGroupIds: [],
@@ -77,6 +82,7 @@ const createState = (): InMemoryBackendState => ({
 	openedUrls: [],
 	openedFolders: [],
 	exportedProjectIds: [],
+	zoomRequests: [],
 });
 
 export const createInMemoryBackend = (
@@ -255,6 +261,17 @@ export const createInMemoryBackend = (
 			},
 			installReleaseAndQuit: async (binaryPath) => {
 				state.installedBinaryPath = binaryPath;
+			},
+			// The window and its Zoom Level are the backend's, so the fake keeps
+			// only what it was asked for.
+			zoomIn: async () => {
+				state.zoomRequests.push("in");
+			},
+			zoomOut: async () => {
+				state.zoomRequests.push("out");
+			},
+			resetZoom: async () => {
+				state.zoomRequests.push("reset");
 			},
 		},
 
