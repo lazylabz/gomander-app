@@ -50,8 +50,8 @@ jobs:
         run: |
           # Pin the CLI to the version in go.mod: @latest can require a newer
           # Go toolchain than the one setup-go installs (GOTOOLCHAIN=local).
-          wails_version="$(go list -m -f '{{.Version}}' github.com/wailsapp/wails/v2)"
-          go install "github.com/wailsapp/wails/v2/cmd/wails@${wails_version}"
+          wails_version="$(go list -m -f '{{.Version}}' github.com/wailsapp/wails/v3)"
+          go install "github.com/wailsapp/wails/v3/cmd/wails3@${wails_version}"
 
       - name: Install create-dmg
         run: brew install create-dmg
@@ -96,8 +96,8 @@ jobs:
         run: |
           # Pin the CLI to the version in go.mod: @latest can require a newer
           # Go toolchain than the one setup-go installs (GOTOOLCHAIN=local).
-          wails_version="$(go list -m -f '{{.Version}}' github.com/wailsapp/wails/v2)"
-          go install "github.com/wailsapp/wails/v2/cmd/wails@${wails_version}"
+          wails_version="$(go list -m -f '{{.Version}}' github.com/wailsapp/wails/v3)"
+          go install "github.com/wailsapp/wails/v3/cmd/wails3@${wails_version}"
 
       - name: Install NSIS
         run: |
@@ -107,13 +107,15 @@ jobs:
       - name: Build Windows amd64
         working-directory: cmd/gomander
         run: |
-          wails build -nsis --platform=windows/amd64 -o=gomander-windows-amd64-portable.exe
+          wails3 task windows:package ARCH=amd64
+          mv ../../build/bin/gomander.exe ../../build/bin/gomander-windows-amd64-portable.exe
           mv ../../build/bin/gomander-amd64-installer.exe ../../build/bin/gomander-windows-amd64-installer.exe
 
       - name: Build Windows arm64
         working-directory: cmd/gomander
         run: |
-          wails build -nsis --platform=windows/arm64 -o=gomander-windows-arm64-portable.exe
+          wails3 task windows:package ARCH=arm64
+          mv ../../build/bin/gomander.exe ../../build/bin/gomander-windows-arm64-portable.exe
           mv ../../build/bin/gomander-arm64-installer.exe ../../build/bin/gomander-windows-arm64-installer.exe
 
       - name: Upload Windows artifacts
@@ -166,13 +168,13 @@ jobs:
         run: |
           # Pin the CLI to the version in go.mod: @latest can require a newer
           # Go toolchain than the one setup-go installs (GOTOOLCHAIN=local).
-          wails_version="$(go list -m -f '{{.Version}}' github.com/wailsapp/wails/v2)"
-          go install "github.com/wailsapp/wails/v2/cmd/wails@${wails_version}"
+          wails_version="$(go list -m -f '{{.Version}}' github.com/wailsapp/wails/v3)"
+          go install "github.com/wailsapp/wails/v3/cmd/wails3@${wails_version}"
 
       - name: Build Linux ${{ matrix.arch }} binary
         run: |
           cd cmd/gomander
-          wails build -tags webkit2_41
+          wails3 task linux:build
           cd ../..
           mv build/bin/gomander build/bin/gomander-linux-${{ matrix.arch }}
 

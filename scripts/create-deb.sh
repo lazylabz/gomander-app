@@ -55,7 +55,7 @@ cp "${BINARY}" "${DEB_STAGING}/usr/bin/gomander"
 chmod 755 "${DEB_STAGING}/usr/bin/gomander"
 
 # Copy application icon (relative to project root)
-ICON_SRC="build/appicon.png"
+ICON_SRC="cmd/gomander/build/appicon.png"
 if [ -f "${ICON_SRC}" ]; then
     cp "${ICON_SRC}" "${DEB_STAGING}/usr/share/icons/hicolor/256x256/apps/gomander.png"
 fi

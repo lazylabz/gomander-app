@@ -14,7 +14,7 @@ help:
 	@echo "Available targets:"
 	@echo "  all          - Build all platforms (darwin, windows, linux)"
 	@echo "  clean        - Clean build directory"
-	@echo "  dev          - Start development server with Wails"
+	@echo "  dev          - Start development server with Wails v3"
 	@echo "  lint         - Run linting and formatting checks"
 	@echo "  darwin       - Build macOS binaries and create DMG installers"
 	@echo "  darwin-amd64 - Build macOS AMD64 binary only"
@@ -42,7 +42,7 @@ test:
 
 # Development target
 dev:
-	cd $(CMD_DIR) && wails dev
+	cd $(CMD_DIR) && wails3 task dev
 
 # Lint target
 lint:
@@ -62,12 +62,12 @@ darwin: darwin-amd64 darwin-arm64 dmg zip-darwin cleanup-darwin
 
 darwin-amd64:
 	cd $(CMD_DIR) && \
-	wails build --platform="darwin/amd64" && \
+	wails3 task darwin:package ARCH=amd64 && \
 	mv ../../$(BUILD_DIR)/gomander.app ../../$(BUILD_DIR)/gomander-darwin-amd64.app
 
 darwin-arm64:
 	cd $(CMD_DIR) && \
-	wails build --platform="darwin/arm64" && \
+	wails3 task darwin:package ARCH=arm64 && \
 	mv ../../$(BUILD_DIR)/gomander.app ../../$(BUILD_DIR)/gomander-darwin-arm64.app
 
 # DMG creation targets
@@ -116,12 +116,14 @@ windows: windows-amd64 windows-arm64
 
 windows-amd64:
 	cd $(CMD_DIR) && \
-	wails build -nsis --platform="windows/amd64" -o="gomander-windows-amd64-portable.exe" && \
+	wails3 task windows:package ARCH=amd64 && \
+	mv ../../$(BUILD_DIR)/gomander.exe ../../$(BUILD_DIR)/gomander-windows-amd64-portable.exe && \
 	mv ../../$(BUILD_DIR)/gomander-amd64-installer.exe ../../$(BUILD_DIR)/gomander-windows-amd64-installer.exe
 
 windows-arm64:
 	cd $(CMD_DIR) && \
-	wails build -nsis --platform="windows/arm64" -o="gomander-windows-arm64-portable.exe" && \
+	wails3 task windows:package ARCH=arm64 && \
+	mv ../../$(BUILD_DIR)/gomander.exe ../../$(BUILD_DIR)/gomander-windows-arm64-portable.exe && \
 	mv ../../$(BUILD_DIR)/gomander-arm64-installer.exe ../../$(BUILD_DIR)/gomander-windows-arm64-installer.exe
 
 # Linux targets
