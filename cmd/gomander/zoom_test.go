@@ -5,6 +5,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"gomander/internal/apptest"
+	"gomander/internal/usecases"
 )
 
 type zoomSpy struct {
@@ -54,5 +57,40 @@ func TestMacOSZoomKeyBindings(t *testing.T) {
 		for _, goos := range []string{"windows", "linux"} {
 			assert.Empty(t, macOSZoomKeyBindings(goos, (&zoomSpy{}).operations(), func(string) {}))
 		}
+	})
+}
+
+func TestZoomOperationsOf(t *testing.T) {
+	t.Run("Should reach the use cases wired after the shortcuts were bound", func(t *testing.T) {
+		// Arrange
+		var registry usecases.Registry
+		zoom := zoomOperationsOf(&registry)
+		h := apptest.New(t)
+		registry = h.UseCases
+
+		// Act
+		assert.NoError(t, zoom.in())
+		assert.NoError(t, zoom.in())
+		assert.NoError(t, zoom.out())
+		err := zoom.reset()
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Equal(t, 1.0, h.WindowZoomLevel())
+	})
+}
+
+func TestOnClick(t *testing.T) {
+	t.Run("Should run the operation and log it when it fails", func(t *testing.T) {
+		// Arrange
+		spy := &zoomSpy{failure: errors.New("storage refused")}
+		logged := make([]string, 0)
+
+		// Act
+		onClick(spy.operations().out, func(message string) { logged = append(logged, message) })(nil)
+
+		// Assert
+		assert.Equal(t, []string{"out"}, spy.pressed)
+		assert.Equal(t, []string{"storage refused"}, logged)
 	})
 }
