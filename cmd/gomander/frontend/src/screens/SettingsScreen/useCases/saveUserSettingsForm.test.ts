@@ -50,6 +50,7 @@ describe("saveUserSettingsForm", () => {
 			environmentPaths: [environmentPath],
 			locale: "en",
 			logsFontSize: 18,
+			notificationsEnabled: false,
 			zoomLevel: 1.2,
 		};
 
@@ -58,6 +59,7 @@ describe("saveUserSettingsForm", () => {
 			environmentPaths: [environmentPath],
 			locale: "en",
 			logsFontSize: 18,
+			notificationsEnabled: false,
 		});
 
 		// Assert
@@ -75,7 +77,12 @@ describe("saveUserSettingsForm", () => {
 		});
 
 		// Act
-		await sut({ environmentPaths: [], locale: "es", logsFontSize: 15 });
+		await sut({
+			environmentPaths: [],
+			locale: "es",
+			logsFontSize: 15,
+			notificationsEnabled: true,
+		});
 
 		// Assert
 		expect(i18n.language).toBe("es");
@@ -99,6 +106,7 @@ describe("saveUserSettingsForm", () => {
 			environmentPaths: [environmentPath],
 			locale: "en",
 			logsFontSize: 15,
+			notificationsEnabled: true,
 		});
 
 		// Assert

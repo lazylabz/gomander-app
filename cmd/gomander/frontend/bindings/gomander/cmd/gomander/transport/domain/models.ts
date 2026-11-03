@@ -45,6 +45,7 @@ export interface Config {
     "locale": string;
     "logsFontSize": number;
     "zoomLevel": number;
+    "notificationsEnabled": boolean;
 }
 
 export interface EnvironmentPath {

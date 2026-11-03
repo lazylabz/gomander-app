@@ -8,11 +8,12 @@ func ToDomainConfig(model *ConfigModel, paths []EnvironmentPathModel) *domain.Co
 	}
 
 	config := &domain.Config{
-		LastOpenedProjectId: model.LastOpenedProjectId,
-		EnvironmentPaths:    make([]domain.EnvironmentPath, 0),
-		Locale:              model.Locale,
-		LogsFontSize:        model.LogsFontSize,
-		ZoomLevel:           domain.ZoomLevel(model.ZoomLevel),
+		LastOpenedProjectId:  model.LastOpenedProjectId,
+		EnvironmentPaths:     make([]domain.EnvironmentPath, 0),
+		Locale:               model.Locale,
+		LogsFontSize:         model.LogsFontSize,
+		ZoomLevel:            domain.ZoomLevel(model.ZoomLevel),
+		NotificationsEnabled: model.NotificationsEnabled,
 	}
 
 	for _, pathModel := range paths {
@@ -31,11 +32,12 @@ func ToModelConfig(config *domain.Config) (*ConfigModel, []EnvironmentPathModel)
 	}
 
 	model := &ConfigModel{
-		Id:                  1,
-		LastOpenedProjectId: config.LastOpenedProjectId,
-		Locale:              config.Locale,
-		LogsFontSize:        config.LogsFontSize,
-		ZoomLevel:           float64(config.ZoomLevel),
+		Id:                   1,
+		LastOpenedProjectId:  config.LastOpenedProjectId,
+		Locale:               config.Locale,
+		LogsFontSize:         config.LogsFontSize,
+		ZoomLevel:            float64(config.ZoomLevel),
+		NotificationsEnabled: config.NotificationsEnabled,
 	}
 
 	var pathModels []EnvironmentPathModel

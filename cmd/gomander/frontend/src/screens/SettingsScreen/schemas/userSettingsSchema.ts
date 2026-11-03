@@ -26,6 +26,7 @@ export const userSettingsSchema = z.object({
 		.int(logsFontSizeOutOfRange)
 		.min(LOGS_FONT_SIZE.min, logsFontSizeOutOfRange)
 		.max(LOGS_FONT_SIZE.max, logsFontSizeOutOfRange),
+	notificationsEnabled: z.boolean(),
 });
 
 export type UserSettingsSchemaType = z.infer<typeof userSettingsSchema>;

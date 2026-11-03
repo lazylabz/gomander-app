@@ -183,6 +183,8 @@ export interface Localization {
     "userSettingsForm.themeDescription": string;
     "userSettingsForm.logsFontSizeLabel": string;
     "userSettingsForm.logsFontSizeDescription": string;
+    "userSettingsForm.notificationsLabel": string;
+    "userSettingsForm.notificationsDescription": string;
     "userSettingsForm.validation.pathEmpty": string;
     "userSettingsForm.validation.logsFontSize": string;
 
@@ -273,4 +275,9 @@ export interface Localization {
     "modal.missingPath.howToStep2": string;
     "modal.missingPath.commandPlaceholder": string;
     "modal.missingPath.goToSettings": string;
+
+    /**
+     * notifications.errorPattern
+     */
+    "notifications.errorPattern.title": string;
 }

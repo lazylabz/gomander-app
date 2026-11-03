@@ -22,7 +22,7 @@ func userConfigOf(t *testing.T, h *apptest.Harness) configdomain.Config {
 }
 
 func TestAFreshUserConfig(t *testing.T) {
-	t.Run("Should start at 100% zoom with the default logs font size", func(t *testing.T) {
+	t.Run("Should start at 100% zoom with the default logs font size and failure notifications on", func(t *testing.T) {
 		// Arrange
 		h := apptest.New(t)
 
@@ -32,6 +32,7 @@ func TestAFreshUserConfig(t *testing.T) {
 		// Assert
 		assert.Equal(t, configdomain.DefaultZoomLevel, config.ZoomLevel)
 		assert.Equal(t, configdomain.DefaultLogsFontSize, config.LogsFontSize)
+		assert.True(t, config.NotificationsEnabled)
 	})
 }
 

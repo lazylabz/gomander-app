@@ -64,6 +64,7 @@ const createState = (): InMemoryBackendState => ({
 		locale: "en",
 		logsFontSize: LOGS_FONT_SIZE.default,
 		zoomLevel: 1,
+		notificationsEnabled: true,
 	},
 	runningCommandIds: [],
 	runningGroupIds: [],

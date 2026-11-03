@@ -28,6 +28,7 @@ import (
 	localizationusecases "gomander/internal/localization/application/usecases"
 	localizationinfrastructure "gomander/internal/localization/infrastructure"
 	"gomander/internal/logger"
+	"gomander/internal/notifications"
 	"gomander/internal/openedproject"
 	projectusecases "gomander/internal/project/application/usecases"
 	projectinfrastructure "gomander/internal/project/infrastructure"
@@ -94,7 +95,8 @@ func main() {
 	}
 
 	gormDb := configDB(ctx)
-	gomander, useCases = buildDeps(gormDb, ctx, dialogs, runtimeFacade, facade.NewWindowFacade(window))
+	notifier := notifications.NewWailsNotifier(logger.NewDefaultLogger(runtimeFacade))
+	gomander, useCases = buildDeps(gormDb, ctx, dialogs, runtimeFacade, facade.NewWindowFacade(window), notifier)
 
 	window.OnWindowEvent(events.Common.WindowRuntimeReady, func(*application.WindowEvent) {
 		if err := useCases.RestoreZoom.Execute(); err != nil {
@@ -108,6 +110,7 @@ func main() {
 		panic(err)
 	}
 
+	app.RegisterService(application.NewService(notifier.Lifecycle()))
 	app.RegisterService(application.NewService(path.NewUiPathHelper()))
 	app.RegisterService(application.NewService(NewWailsControllers(useCases)))
 	app.RegisterService(application.NewService(fs.NewUIFsHelper(dialogs, runtimeFacade)))
@@ -181,11 +184,19 @@ func getDbFile() string {
 	return dbLocation
 }
 
-func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs, runtimeFacade facade.RuntimeFacade, window configusecases.Window) (*internalapp.App, usecases.Registry) {
+type Window interface {
+	configusecases.Window
+	handlers.Window
+}
+
+func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs, runtimeFacade facade.RuntimeFacade, window Window, notifier handlers.Notifier) (*internalapp.App, usecases.Registry) {
+	// Initialize event bus
+	eventBus := eventbus.NewInMemoryEventBus()
+
 	// Initialize deps
 	l := logger.NewDefaultLogger(runtimeFacade)
 	ee := event.NewDefaultEventEmitter(runtimeFacade)
-	r := runner.NewDefaultRunner(l, ee)
+	r := runner.NewDefaultRunner(l, ee, eventBus)
 	releaseFeed := releaseinfrastructure.NewGithubReleaseFeed(ctx, facade.DefaultIOFacade{}, releaseinfrastructure.DefaultLatestReleaseUrl)
 	releaseDownloader := releaseinfrastructure.NewGithubReleaseDownloader(ctx, facade.DefaultOSFacade{}, facade.DefaultIOFacade{}, releaseinfrastructure.DefaultBinaryDownloadBaseUrl)
 	releaseInstaller := releaseinfrastructure.NewOSReleaseInstaller(facade.DefaultOSFacade{}, facade.DefaultOpenFacade{})
@@ -204,9 +215,8 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs, run
 	cleanCommandGroupsOnProjectDeleted := commandgrouphandlers.NewCleanCommandGroupsOnProjectDeleted(unitOfWork, ee)
 	cleanCommandsOnProjectDeleted := handlers.NewCleanCommandOnProjectDeleted(commandRepo)
 	addCommandToGroupOnCommandDuplicated := commandgrouphandlers.NewAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo)
-
-	// Initialize event bus
-	eventBus := eventbus.NewInMemoryEventBus()
+	localeFiles := localizationinfrastructure.NewLocaleFiles(localeFs)
+	notifyOnErrorPatternMatched := handlers.NewNotifyOnErrorPatternMatched(commandRepo, configRepo, localeFiles, window, notifier)
 
 	// Initialize the opened project
 	openedProject := openedproject.NewOpenedProject(configRepo, projectRepo)
@@ -222,7 +232,6 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs, run
 	resetZoom := configusecases.NewResetZoom(zoom)
 	restoreZoom := configusecases.NewRestoreZoom(configRepo, window)
 	// Localization
-	localeFiles := localizationinfrastructure.NewLocaleFiles(localeFs)
 	getTranslation := localizationusecases.NewGetTranslation(localeFiles)
 	getSupportedLanguages := localizationusecases.NewGetSupportedLanguages(localeFiles)
 	// Projects
@@ -270,6 +279,7 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs, run
 		CleanCommandGroupsOnProjectDeleted:   cleanCommandGroupsOnProjectDeleted,
 		CleanCommandsOnProjectDeleted:        cleanCommandsOnProjectDeleted,
 		AddCommandToGroupOnCommandDuplicated: addCommandToGroupOnCommandDuplicated,
+		NotifyOnErrorPatternMatched:          notifyOnErrorPatternMatched,
 	})
 
 	return app, usecases.Registry{

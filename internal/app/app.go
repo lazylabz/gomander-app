@@ -17,6 +17,7 @@ type EventHandlers struct {
 	CleanCommandGroupsOnProjectDeleted   eventbus.EventHandler
 	CleanCommandsOnProjectDeleted        eventbus.EventHandler
 	AddCommandToGroupOnCommandDuplicated eventbus.EventHandler
+	NotifyOnErrorPatternMatched          eventbus.EventHandler
 }
 
 type App struct {
@@ -48,4 +49,5 @@ func (a *App) RegisterHandlers() {
 	a.eventBus.RegisterHandler(a.eventHandlers.CleanCommandGroupsOnProjectDeleted)
 	a.eventBus.RegisterHandler(a.eventHandlers.CleanCommandsOnProjectDeleted)
 	a.eventBus.RegisterHandler(a.eventHandlers.AddCommandToGroupOnCommandDuplicated)
+	a.eventBus.RegisterHandler(a.eventHandlers.NotifyOnErrorPatternMatched)
 }

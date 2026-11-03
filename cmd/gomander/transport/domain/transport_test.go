@@ -132,11 +132,12 @@ func TestProject(t *testing.T) {
 
 func TestConfig(t *testing.T) {
 	config := configdomain.Config{
-		LastOpenedProjectId: "project-id",
-		EnvironmentPaths:    []configdomain.EnvironmentPath{{Id: "path-id", Path: "/usr/local/bin"}},
-		Locale:              "es",
-		LogsFontSize:        18,
-		ZoomLevel:           1.2,
+		LastOpenedProjectId:  "project-id",
+		EnvironmentPaths:     []configdomain.EnvironmentPath{{Id: "path-id", Path: "/usr/local/bin"}},
+		Locale:               "es",
+		LogsFontSize:         18,
+		ZoomLevel:            1.2,
+		NotificationsEnabled: true,
 	}
 
 	t.Run("Should reach the frontend under the field names it already receives", func(t *testing.T) {
@@ -150,7 +151,8 @@ func TestConfig(t *testing.T) {
 			"environmentPaths": [{"id": "path-id", "path": "/usr/local/bin"}],
 			"locale": "es",
 			"logsFontSize": 18,
-			"zoomLevel": 1.2
+			"zoomLevel": 1.2,
+			"notificationsEnabled": true
 		}`, string(encoded))
 	})
 

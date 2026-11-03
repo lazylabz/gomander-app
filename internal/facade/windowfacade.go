@@ -10,6 +10,10 @@ func NewWindowFacade(window *application.WebviewWindow) WindowFacade {
 	return WindowFacade{window: window}
 }
 
+func (w WindowFacade) IsFocused() bool {
+	return w.window.IsFocused()
+}
+
 func (w WindowFacade) SetZoom(level float64) {
 	w.window.SetZoom(level)
 }

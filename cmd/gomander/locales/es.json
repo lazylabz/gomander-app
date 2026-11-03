@@ -144,6 +144,8 @@
   "userSettingsForm.themeDescription": "(El modo automático sigue la apariencia de tu sistema)",
   "userSettingsForm.logsFontSizeLabel": "Tamaño de letra de los logs",
   "userSettingsForm.logsFontSizeDescription": "Para hacer zoom en toda la app, usa Cmd/Ctrl y +, - o 0.",
+  "userSettingsForm.notificationsLabel": "Avisarme cuando un comando informe de un error",
+  "userSettingsForm.notificationsDescription": "Cuando su salida coincide con uno de sus patrones de error, mientras Gomander está en segundo plano.",
   "userSettingsForm.validation.pathEmpty": "La ruta no puede estar vacía",
   "userSettingsForm.validation.logsFontSize": "El tamaño de letra debe estar entre {{min}} y {{max}}",
 
@@ -209,5 +211,7 @@
   "modal.missingPath.howToStep1": "Averigua dónde está el ejecutable ejecutando <whichcmd/> (macOS/Linux) o <wherecmd/> (Windows) en tu terminal.",
   "modal.missingPath.howToStep2": "Copia el directorio que lo contiene y añádelo a tus rutas de entorno en Ajustes.",
   "modal.missingPath.commandPlaceholder": "<comando>",
-  "modal.missingPath.goToSettings": "Abrir ajustes"
+  "modal.missingPath.goToSettings": "Abrir ajustes",
+
+  "notifications.errorPattern.title": "{{name}} ha informado de un error"
 }

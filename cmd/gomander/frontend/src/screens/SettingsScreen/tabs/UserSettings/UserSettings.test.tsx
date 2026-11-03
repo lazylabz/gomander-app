@@ -68,4 +68,24 @@ describe("UserSettings", () => {
 		await new Promise((resolve) => setTimeout(resolve, 400));
 		expect(backend.state.userConfig.logsFontSize).toBe(15);
 	});
+
+	it("Should save failure notifications turned off when the user unticks them", async () => {
+		// Arrange
+		const userConfig = new UserConfigBuilder()
+			.withNotificationsEnabled(true)
+			.build();
+		const backend = installInMemoryBackend({ userConfig });
+		userConfigurationStore.getState().setUserConfig(userConfig);
+		const { user } = renderSut();
+
+		// Act
+		await user.click(
+			screen.getByLabelText("userSettingsForm.notificationsLabel"),
+		);
+
+		// Assert
+		await waitFor(() =>
+			expect(backend.state.userConfig.notificationsEnabled).toBe(false),
+		);
+	});
 });

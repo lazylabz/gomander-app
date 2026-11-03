@@ -144,24 +144,26 @@ type Localization struct {
 	ProjectFormValidationBaseDirRequired    string `json:"projectForm.validation.baseDirRequired"`
 
 	// userSettingsForm
-	UserSettingsFormEnvPathsTitle           string `json:"userSettingsForm.envPathsTitle"`
-	UserSettingsFormEnvPathsDescription     string `json:"userSettingsForm.envPathsDescription"`
-	UserSettingsFormEnvPathsHelpBody        string `json:"userSettingsForm.envPathsHelpBody"`
-	UserSettingsFormEnvPathsHelpExample     string `json:"userSettingsForm.envPathsHelpExample"`
-	UserSettingsFormPreferencesTitle        string `json:"userSettingsForm.preferencesTitle"`
-	UserSettingsFormPreferencesDescription  string `json:"userSettingsForm.preferencesDescription"`
-	UserSettingsFormLanguageLabel           string `json:"userSettingsForm.languageLabel"`
-	UserSettingsFormLanguagePlaceholder     string `json:"userSettingsForm.languagePlaceholder"`
-	UserSettingsFormThemeLabel              string `json:"userSettingsForm.themeLabel"`
-	UserSettingsFormThemePlaceholder        string `json:"userSettingsForm.themePlaceholder"`
-	UserSettingsFormThemeSystem             string `json:"userSettingsForm.themeSystem"`
-	UserSettingsFormThemeLight              string `json:"userSettingsForm.themeLight"`
-	UserSettingsFormThemeDark               string `json:"userSettingsForm.themeDark"`
-	UserSettingsFormThemeDescription        string `json:"userSettingsForm.themeDescription"`
-	UserSettingsFormLogsFontSizeLabel       string `json:"userSettingsForm.logsFontSizeLabel"`
-	UserSettingsFormLogsFontSizeDescription string `json:"userSettingsForm.logsFontSizeDescription"`
-	UserSettingsFormValidationPathEmpty     string `json:"userSettingsForm.validation.pathEmpty"`
-	UserSettingsFormValidationLogsFontSize  string `json:"userSettingsForm.validation.logsFontSize"`
+	UserSettingsFormEnvPathsTitle            string `json:"userSettingsForm.envPathsTitle"`
+	UserSettingsFormEnvPathsDescription      string `json:"userSettingsForm.envPathsDescription"`
+	UserSettingsFormEnvPathsHelpBody         string `json:"userSettingsForm.envPathsHelpBody"`
+	UserSettingsFormEnvPathsHelpExample      string `json:"userSettingsForm.envPathsHelpExample"`
+	UserSettingsFormPreferencesTitle         string `json:"userSettingsForm.preferencesTitle"`
+	UserSettingsFormPreferencesDescription   string `json:"userSettingsForm.preferencesDescription"`
+	UserSettingsFormLanguageLabel            string `json:"userSettingsForm.languageLabel"`
+	UserSettingsFormLanguagePlaceholder      string `json:"userSettingsForm.languagePlaceholder"`
+	UserSettingsFormThemeLabel               string `json:"userSettingsForm.themeLabel"`
+	UserSettingsFormThemePlaceholder         string `json:"userSettingsForm.themePlaceholder"`
+	UserSettingsFormThemeSystem              string `json:"userSettingsForm.themeSystem"`
+	UserSettingsFormThemeLight               string `json:"userSettingsForm.themeLight"`
+	UserSettingsFormThemeDark                string `json:"userSettingsForm.themeDark"`
+	UserSettingsFormThemeDescription         string `json:"userSettingsForm.themeDescription"`
+	UserSettingsFormLogsFontSizeLabel        string `json:"userSettingsForm.logsFontSizeLabel"`
+	UserSettingsFormLogsFontSizeDescription  string `json:"userSettingsForm.logsFontSizeDescription"`
+	UserSettingsFormNotificationsLabel       string `json:"userSettingsForm.notificationsLabel"`
+	UserSettingsFormNotificationsDescription string `json:"userSettingsForm.notificationsDescription"`
+	UserSettingsFormValidationPathEmpty      string `json:"userSettingsForm.validation.pathEmpty"`
+	UserSettingsFormValidationLogsFontSize   string `json:"userSettingsForm.validation.logsFontSize"`
 
 	// projectSettingsForm
 	ProjectSettingsFormSectionTitle       string `json:"projectSettingsForm.sectionTitle"`
@@ -234,4 +236,7 @@ type Localization struct {
 	ModalMissingPathHowToStep2         string `json:"modal.missingPath.howToStep2"`
 	ModalMissingPathCommandPlaceholder string `json:"modal.missingPath.commandPlaceholder"`
 	ModalMissingPathGoToSettings       string `json:"modal.missingPath.goToSettings"`
+
+	// notifications.errorPattern
+	NotificationsErrorPatternTitle string `json:"notifications.errorPattern.title"`
 }

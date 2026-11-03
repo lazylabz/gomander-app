@@ -8,6 +8,7 @@ export class UserConfigBuilder {
 		locale: "en",
 		logsFontSize: LOGS_FONT_SIZE.default,
 		zoomLevel: 1,
+		notificationsEnabled: true,
 	};
 
 	withLastOpenedProjectId(lastOpenedProjectId: string): this {
@@ -32,6 +33,11 @@ export class UserConfigBuilder {
 
 	withZoomLevel(zoomLevel: number): this {
 		this.data.zoomLevel = zoomLevel;
+		return this;
+	}
+
+	withNotificationsEnabled(notificationsEnabled: boolean): this {
+		this.data.notificationsEnabled = notificationsEnabled;
 		return this;
 	}
 
