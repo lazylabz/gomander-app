@@ -56,7 +56,9 @@ _Avoid_: active commands, live commands, running state
 
 **Error Pattern**:
 A substring that marks a line of a Command's output as failing when the line
-contains it. A Command carries a list of them.
+contains it. A Command carries a list of them. The first matching line of a
+Process is what notifies the user while the window is in the background; later
+matches in the same Process do not.
 _Avoid_: error matcher, error regex — the match is a plain substring, not a regex
 
 **Cascade**:

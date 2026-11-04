@@ -6,10 +6,13 @@ import (
 	"os"
 	"os/exec"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"gomander/internal/command/domain"
+	commandevent "gomander/internal/command/domain/event"
 	"gomander/internal/event"
+	"gomander/internal/eventbus"
 	"gomander/internal/execution"
 )
 
@@ -48,17 +51,25 @@ type EventEmitter interface {
 	EmitEvent(event event.Event, payload interface{})
 }
 
+// DomainEventPublisher is where the runner reports what a Process's output
+// means, for the handlers that react to it.
+type DomainEventPublisher interface {
+	PublishSync(event eventbus.Event) []error
+}
+
 type DefaultRunner struct {
 	runningCommands map[string]runningCommand
 	eventEmitter    EventEmitter
+	domainEvents    DomainEventPublisher
 	logger          Logger
 	mutex           sync.Mutex
 }
 
-func NewDefaultRunner(logger Logger, emitter EventEmitter) *DefaultRunner {
+func NewDefaultRunner(logger Logger, emitter EventEmitter, domainEvents DomainEventPublisher) *DefaultRunner {
 	return &DefaultRunner{
 		runningCommands: make(map[string]runningCommand),
 		eventEmitter:    emitter,
+		domainEvents:    domainEvents,
 		logger:          logger,
 	}
 }
@@ -136,19 +147,22 @@ func (c *DefaultRunner) RunCommand(command *domain.Command, environment executio
 
 	var scanWg sync.WaitGroup
 
+	// Shared by both pipes: a Process reports its first matching line only
+	var errorPatternReported atomic.Bool
+
 	scanWg.Add(2) // For stdout and stderr streaming
 
 	// Stream stdout
 	go func() {
 		defer scanWg.Done()
 		defer wg.Done()
-		c.streamOutput(command, stdout)
+		c.streamOutput(command, stdout, &errorPatternReported)
 	}()
 	// Stream stderr
 	go func() {
 		defer scanWg.Done()
 		defer wg.Done()
-		c.streamOutput(command, stderr)
+		c.streamOutput(command, stderr, &errorPatternReported)
 	}()
 
 	// Wait in background until the command finishes, because it ends naturally or because it is stopped.
@@ -266,7 +280,7 @@ func isExpectedError(err error) bool {
 	return false
 }
 
-func (c *DefaultRunner) streamOutput(command *domain.Command, pipeReader io.ReadCloser) {
+func (c *DefaultRunner) streamOutput(command *domain.Command, pipeReader io.ReadCloser, errorPatternReported *atomic.Bool) {
 	scanner := bufio.NewScanner(pipeReader)
 	scanner.Buffer(make([]byte, 1024), 1024*1024) // Set buffer size to 1MB
 
@@ -274,6 +288,19 @@ func (c *DefaultRunner) streamOutput(command *domain.Command, pipeReader io.Read
 		line := scanner.Text()
 		c.logger.Debug(line)
 		c.sendStreamLine(command, line)
+
+		if command.MatchesErrorPattern(line) && errorPatternReported.CompareAndSwap(false, true) {
+			// Off the scanner: a handler that waits on the OS would stall the pipe
+			// and, once it fills, the Process writing to it.
+			go c.reportErrorPattern(command.Id, line)
+		}
+	}
+}
+
+func (c *DefaultRunner) reportErrorPattern(commandId, line string) {
+	errs := c.domainEvents.PublishSync(commandevent.ErrorPatternMatchedEvent{CommandId: commandId, Line: line})
+	for _, err := range errs {
+		c.logger.Error("[ERROR - Reporting an error pattern]: " + err.Error())
 	}
 }
 

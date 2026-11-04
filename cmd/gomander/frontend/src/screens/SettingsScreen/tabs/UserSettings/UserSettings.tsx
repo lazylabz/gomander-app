@@ -10,6 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/design-system/components/ui/card.tsx";
+import { Checkbox } from "@/design-system/components/ui/checkbox.tsx";
 import {
 	Form,
 	FormControl,
@@ -161,6 +162,33 @@ export const UserSettings = () => {
 											{t("userSettingsForm.logsFontSizeDescription")}
 										</FormDescription>
 										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={userSettingsForm.control}
+								name="notificationsEnabled"
+								render={({ field }) => (
+									<FormItem>
+										<div className="flex items-center gap-2">
+											<FormControl>
+												<Checkbox
+													name={field.name}
+													ref={field.ref}
+													onBlur={field.onBlur}
+													checked={field.value}
+													onCheckedChange={(checked) =>
+														field.onChange(checked === true)
+													}
+												/>
+											</FormControl>
+											<FormLabel>
+												{t("userSettingsForm.notificationsLabel")}
+											</FormLabel>
+										</div>
+										<FormDescription className="text-xs">
+											{t("userSettingsForm.notificationsDescription")}
+										</FormDescription>
 									</FormItem>
 								)}
 							/>

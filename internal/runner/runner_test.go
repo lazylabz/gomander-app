@@ -1,6 +1,7 @@
 package runner_test
 
 import (
+	"errors"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -8,7 +9,9 @@ import (
 	"time"
 
 	commanddomain "gomander/internal/command/domain"
+	commandevent "gomander/internal/command/domain/event"
 	"gomander/internal/event"
+	"gomander/internal/eventbus"
 	"gomander/internal/execution"
 	"gomander/internal/runner"
 	"gomander/internal/runner/test"
@@ -32,7 +35,8 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		domainEvents := new(test.DomainEventsRecorder)
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
 
 		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
 		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
@@ -72,7 +76,8 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		domainEvents := new(test.DomainEventsRecorder)
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
 
 		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
 		emitter.On("EmitEvent", event.ProcessFinished, commandId).Return()
@@ -105,7 +110,8 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		domainEvents := new(test.DomainEventsRecorder)
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
 
 		cmd1Id := "1"
 		cmd2Id := "2"
@@ -159,7 +165,8 @@ func TestDefaultRunner_RunCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		domainEvents := new(test.DomainEventsRecorder)
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
 
 		emitter.On("EmitEvent", event.NewLogEntry, mock.Anything).Return()
 
@@ -186,7 +193,8 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		domainEvents := new(test.DomainEventsRecorder)
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
 
 		commandId := "1"
 
@@ -232,7 +240,8 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		domainEvents := new(test.DomainEventsRecorder)
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
 
 		commandId := "1"
 
@@ -287,7 +296,8 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		domainEvents := new(test.DomainEventsRecorder)
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
 		commandId := "1"
 
 		emitter.On("EmitEvent", event.ProcessStarted, commandId).Return()
@@ -332,7 +342,8 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		domainEvents := new(test.DomainEventsRecorder)
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
 
 		cmd1Id := "1"
 		cmd2Id := "2"
@@ -401,7 +412,8 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		domainEvents := new(test.DomainEventsRecorder)
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
 
 		commandId := "1"
 
@@ -452,7 +464,8 @@ func TestDefaultRunner_StopRunningCommand(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		domainEvents := new(test.DomainEventsRecorder)
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
 
 		// Act
 		err := r.StopRunningCommand("not-running")
@@ -469,7 +482,8 @@ func TestDefaultRunner_StopAllRunningCommands(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		domainEvents := new(test.DomainEventsRecorder)
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
 
 		cmd1Id := "1"
 		cmd2Id := "2"
@@ -535,7 +549,8 @@ func TestDefaultRunner_GetRunningCommandIds(t *testing.T) {
 		emitter := new(test.MockEventEmitter)
 		emitter.On("EmitEvent", mock.Anything, mock.Anything).Return()
 
-		sut := runner.NewDefaultRunner(logger, emitter)
+		domainEvents := new(test.DomainEventsRecorder)
+		sut := runner.NewDefaultRunner(logger, emitter, domainEvents)
 
 		// Act
 		result := sut.GetRunningCommandIds()
@@ -554,7 +569,8 @@ func TestDefaultRunner_GetRunningCommandIds(t *testing.T) {
 		emitter := new(test.MockEventEmitter)
 		emitter.On("EmitEvent", mock.Anything, mock.Anything).Return()
 
-		sut := runner.NewDefaultRunner(logger, emitter)
+		domainEvents := new(test.DomainEventsRecorder)
+		sut := runner.NewDefaultRunner(logger, emitter, domainEvents)
 
 		// Create a few commands that will run for a short time
 		command1 := &commanddomain.Command{
@@ -608,7 +624,8 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 		logger := new(test.MockLogger)
 		emitter := new(test.MockEventEmitter)
 
-		r := runner.NewDefaultRunner(logger, emitter)
+		domainEvents := new(test.DomainEventsRecorder)
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
 
 		commandId := "error-pattern-test"
 
@@ -627,10 +644,11 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 
 		// Act - create a command with error patterns and output that matches them
 		err := r.RunCommand(&commanddomain.Command{
-			Id:               commandId,
-			ProjectId:        commandId,
-			Name:             "Error Pattern Test",
-			Command:          "echo 'Starting...' && echo 'ERROR: Something went wrong' && echo 'Done'",
+			Id:        commandId,
+			ProjectId: commandId,
+			Name:      "Error Pattern Test",
+			// Unquoted and with no space before &&, so cmd prints the same lines as sh
+			Command:          "echo Starting...&& echo ERROR: Something went wrong&& echo FATAL: again&& echo Done",
 			WorkingDirectory: validWorkingDirectory(),
 			Position:         0,
 			ErrorPatterns: []string{
@@ -647,6 +665,109 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 
 		// Verify that CommandErrorDetected was called
 		mock.AssertExpectationsForObjects(t, emitter, logger)
+		assert.Eventually(t, func() bool { return len(domainEvents.Published()) > 0 }, time.Second, 10*time.Millisecond)
+		time.Sleep(100 * time.Millisecond) // room for a second report to land if one was sent
+		assert.Equal(t, []eventbus.Event{commandevent.ErrorPatternMatchedEvent{CommandId: commandId, Line: "ERROR: Something went wrong"}}, domainEvents.Published(), "only the first matching line of a Process is reported")
+	})
+
+	t.Run("Should report the first matching line again when the command runs again", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test.MockEventEmitter)
+
+		domainEvents := new(test.DomainEventsRecorder)
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
+
+		emitter.On("EmitEvent", mock.Anything, mock.Anything).Return()
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Debug", mock.Anything).Return()
+
+		command := &commanddomain.Command{
+			Id:               "rerun",
+			ProjectId:        "rerun",
+			Name:             "Rerun",
+			Command:          "echo 'ERROR: boom'",
+			WorkingDirectory: validWorkingDirectory(),
+			ErrorPatterns:    []string{"ERROR:"},
+		}
+
+		// Act
+		for range 2 {
+			assert.NoError(t, r.RunCommand(command, execution.Environment{}))
+			r.WaitForCommand(command.Id)
+		}
+
+		// Assert
+		assert.Eventually(t, func() bool { return len(domainEvents.Published()) == 2 }, time.Second, 10*time.Millisecond)
+	})
+
+	t.Run("Should log a failing handler and keep streaming the process output", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test.MockEventEmitter)
+
+		domainEvents := &test.DomainEventsRecorder{HandlerFailure: errors.New("notification refused")}
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
+
+		emitter.On("EmitEvent", mock.Anything, mock.Anything).Return()
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Debug", mock.Anything).Return()
+		handlerFailureLogged := make(chan struct{})
+		logger.On("Error", "[ERROR - Reporting an error pattern]: notification refused").Run(func(mock.Arguments) {
+			close(handlerFailureLogged)
+		}).Return()
+
+		// Act
+		err := r.RunCommand(&commanddomain.Command{
+			Id:               "failing-handler",
+			ProjectId:        "failing-handler",
+			Name:             "Failing handler",
+			Command:          "echo ERROR: boom&& echo after the error",
+			WorkingDirectory: validWorkingDirectory(),
+			ErrorPatterns:    []string{"ERROR:"},
+		}, execution.Environment{})
+		r.WaitForCommand("failing-handler")
+
+		// Assert
+		assert.NoError(t, err)
+		select {
+		case <-handlerFailureLogged:
+		case <-time.After(time.Second):
+			t.Fatal("the handler failure was never logged")
+		}
+		assert.Contains(t, streamedLines(emitter), "after the error")
+		assert.Empty(t, r.GetRunningCommandIds())
+		emitter.AssertCalled(t, "EmitEvent", event.ProcessFinished, "failing-handler")
+	})
+
+	t.Run("Should report nothing for a process that fails without matching an error pattern", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test.MockEventEmitter)
+
+		domainEvents := new(test.DomainEventsRecorder)
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
+
+		emitter.On("EmitEvent", mock.Anything, mock.Anything).Return()
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Debug", mock.Anything).Return()
+		logger.On("Error", mock.Anything).Return()
+
+		// Act
+		err := r.RunCommand(&commanddomain.Command{
+			Id:               "quiet-failure",
+			ProjectId:        "quiet-failure",
+			Name:             "Quiet failure",
+			Command:          "echo 'all good' && exit 1",
+			WorkingDirectory: validWorkingDirectory(),
+			ErrorPatterns:    []string{"ERROR:"},
+		}, execution.Environment{})
+		r.WaitForCommand("quiet-failure")
+
+		// Assert
+		assert.NoError(t, err)
+		time.Sleep(100 * time.Millisecond)
+		assert.Empty(t, domainEvents.Published())
 	})
 }
 

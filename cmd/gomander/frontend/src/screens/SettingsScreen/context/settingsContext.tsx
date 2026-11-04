@@ -73,6 +73,7 @@ export const SettingsContextProvider = ({
 			environmentPaths: userConfig.environmentPaths,
 			locale: i18n.language,
 			logsFontSize: userConfig.logsFontSize,
+			notificationsEnabled: userConfig.notificationsEnabled,
 		},
 		save: saveUserSettingsForm,
 	});

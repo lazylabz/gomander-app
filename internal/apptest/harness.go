@@ -10,6 +10,9 @@ package apptest
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/google/uuid"
@@ -28,6 +31,7 @@ import (
 	configinfrastructure "gomander/internal/config/infrastructure"
 	"gomander/internal/event"
 	"gomander/internal/eventbus"
+	localizationinfrastructure "gomander/internal/localization/infrastructure"
 	"gomander/internal/logger"
 	"gomander/internal/openedproject"
 	projectusecases "gomander/internal/project/application/usecases"
@@ -67,6 +71,7 @@ type Harness struct {
 	releaseDownloader *releaseDownloaderFake
 	appControl        *appControlFake
 	window            *windowFake
+	notifier          *notifierFake
 }
 
 // New starts a backend with an empty database and no project open.
@@ -87,12 +92,14 @@ func New(t *testing.T) *Harness {
 	processRunner := &processRunnerFake{
 		startFailures: make(map[string]error),
 		stopFailures:  make(map[string]error),
+		errorReported: make(map[string]bool),
 	}
 	releaseFeed := &releaseFeedFake{}
 	releaseDownloader := &releaseDownloaderFake{}
 	releaseInstaller := &releaseInstallerFake{}
 	appControl := &appControlFake{}
-	window := &windowFake{zoomLevel: 1}
+	window := &windowFake{zoomLevel: 1, focused: true}
+	notifier := &notifierFake{}
 
 	l := logger.NewDefaultLogger(&logSinkFake{})
 	ee := event.NewDefaultEventEmitter(events)
@@ -118,6 +125,7 @@ func New(t *testing.T) *Harness {
 	projectFileV1 := projectinfrastructure.NewProjectFileV1(fsFacade)
 
 	eventBus := eventbus.NewInMemoryEventBus()
+	processRunner.domainEvents = eventBus
 
 	openedProject := openedproject.NewOpenedProject(configRepo, projectRepo)
 
@@ -128,6 +136,7 @@ func New(t *testing.T) *Harness {
 		CleanCommandGroupsOnProjectDeleted:   commandgrouphandlers.NewCleanCommandGroupsOnProjectDeleted(unitOfWork, ee),
 		CleanCommandsOnProjectDeleted:        commandhandlers.NewCleanCommandOnProjectDeleted(commandRepo),
 		AddCommandToGroupOnCommandDuplicated: commandgrouphandlers.NewAddCommandToGroupOnCommandDuplicated(commandRepo, commandGroupRepo),
+		NotifyOnErrorPatternMatched:          commandhandlers.NewNotifyOnErrorPatternMatched(commandRepo, configRepo, shippedTranslations(), window, notifier),
 	})
 	app.RegisterHandlers()
 	if err := app.Startup(ctx); err != nil {
@@ -199,6 +208,7 @@ func New(t *testing.T) *Harness {
 		releaseInstaller:       releaseInstaller,
 		appControl:             appControl,
 		window:                 window,
+		notifier:               notifier,
 	}
 }
 
@@ -265,6 +275,47 @@ func (h *Harness) GivenZoomLevel(level configdomain.ZoomLevel) {
 	if err := h.configRepository.UpdateZoomLevel(level); err != nil {
 		h.t.Fatalf("failed to arrange the zoom level: %v", err)
 	}
+}
+
+func (h *Harness) GivenLocale(locale string) {
+	h.t.Helper()
+
+	config := h.currentConfig()
+	config.Locale = locale
+
+	if err := h.configRepository.Update(config); err != nil {
+		h.t.Fatalf("failed to arrange the locale: %v", err)
+	}
+}
+
+// GivenWindowInBackground puts another app in front of Gomander's window.
+func (h *Harness) GivenWindowInBackground() {
+	h.window.focus(false)
+}
+
+// GivenNotificationsThatFail makes the operating system refuse every
+// notification, the way Linux does with no notification daemon running.
+func (h *Harness) GivenNotificationsThatFail(err error) {
+	h.notifier.fail(err)
+}
+
+// ProcessPrints writes line to the output of the Command's running Process.
+func (h *Harness) ProcessPrints(commandId string, line string) {
+	h.t.Helper()
+
+	h.processRunner.print(commandId, line)
+}
+
+// ProcessExits ends the Command's Process on its own, whatever its exit code:
+// nothing in the app reacts to it.
+func (h *Harness) ProcessExits(commandId string) {
+	h.t.Helper()
+
+	h.processRunner.exit(commandId)
+}
+
+func (h *Harness) SentNotifications() []SentNotification {
+	return h.notifier.delivered()
 }
 
 // GivenProcessThatCannotStart makes spawning the Command fail, the way the
@@ -444,4 +495,12 @@ func (h *Harness) currentConfig() *configdomain.Config {
 	}
 
 	return config
+}
+
+// shippedTranslations reads the locale files the desktop binary embeds, so a
+// notification is asserted on the copy the user reads.
+func shippedTranslations() *localizationinfrastructure.LocaleFiles {
+	_, harnessFile, _, _ := runtime.Caller(0)
+
+	return localizationinfrastructure.NewLocaleFiles(os.DirFS(filepath.Join(filepath.Dir(harnessFile), "..", "..", "cmd", "gomander")))
 }

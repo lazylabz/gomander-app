@@ -19,6 +19,7 @@ export const userConfigurationStore = createStore<UserConfigurationStore>()(
 			locale: "en",
 			logsFontSize: LOGS_FONT_SIZE.default,
 			zoomLevel: 1,
+			notificationsEnabled: true,
 		},
 		setUserConfig: (config: UserConfig) => {
 			set({ userConfig: config, isLoaded: true });

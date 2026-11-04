@@ -7,10 +7,13 @@ import (
 	"slices"
 	"sync"
 
+	commandhandlers "gomander/internal/command/application/handlers"
 	commanddomain "gomander/internal/command/domain"
+	commandevent "gomander/internal/command/domain/event"
 	commandgroupdomain "gomander/internal/commandgroup/domain"
 	"gomander/internal/dialog"
 	"gomander/internal/event"
+	"gomander/internal/eventbus"
 	"gomander/internal/execution"
 	"gomander/internal/unitofwork"
 )
@@ -42,6 +45,10 @@ type processRunnerFake struct {
 	runningIds        []string
 	startFailures     map[string]error
 	stopFailures      map[string]error
+	domainEvents      eventbus.EventBus
+	// errorReported holds the running Commands whose Process already reported
+	// an Error Pattern; a new run starts without one.
+	errorReported map[string]bool
 }
 
 func (r *processRunnerFake) RunCommand(command *commanddomain.Command, environment execution.Environment) error {
@@ -61,6 +68,7 @@ func (r *processRunnerFake) RunCommand(command *commanddomain.Command, environme
 		Environment: environment,
 	})
 	r.runningIds = append(r.runningIds, command.Id)
+	delete(r.errorReported, command.Id)
 
 	return nil
 }
@@ -103,6 +111,46 @@ func (r *processRunnerFake) GetRunningCommandIds() []string {
 	defer r.mutex.Unlock()
 
 	return append([]string(nil), r.runningIds...)
+}
+
+// print reports the first line of a Process that matches its Command's Error
+// Patterns, as the real runner does.
+func (r *processRunnerFake) print(id string, line string) {
+	r.mutex.Lock()
+	command, running := r.runningCommand(id)
+	report := running && !r.errorReported[id] && command.MatchesErrorPattern(line)
+	if report {
+		r.errorReported[id] = true
+	}
+	r.mutex.Unlock()
+
+	if !report {
+		return
+	}
+
+	// The real runner logs what the handlers report and carries on
+	_ = r.domainEvents.PublishSync(commandevent.ErrorPatternMatchedEvent{CommandId: id, Line: line})
+}
+
+func (r *processRunnerFake) exit(id string) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	r.runningIds = slices.DeleteFunc(r.runningIds, func(runningId string) bool { return runningId == id })
+}
+
+func (r *processRunnerFake) runningCommand(id string) (commanddomain.Command, bool) {
+	if !r.isRunning(id) {
+		return commanddomain.Command{}, false
+	}
+
+	for i := len(r.startedProcesses) - 1; i >= 0; i-- {
+		if r.startedProcesses[i].Command.Id == id {
+			return r.startedProcesses[i].Command, true
+		}
+	}
+
+	return commanddomain.Command{}, false
 }
 
 func (r *processRunnerFake) failStart(commandId string, err error) {
@@ -307,6 +355,21 @@ func (f *appControlFake) CloseApp() {
 type windowFake struct {
 	mutex     sync.Mutex
 	zoomLevel float64
+	focused   bool
+}
+
+func (f *windowFake) IsFocused() bool {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+
+	return f.focused
+}
+
+func (f *windowFake) focus(focused bool) {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+
+	f.focused = focused
 }
 
 func (f *windowFake) SetZoom(level float64) {
@@ -380,4 +443,43 @@ func (r commandGroupRepositoryThatCanFail) Delete(commandGroupId string) error {
 	}
 
 	return r.Repository.Delete(commandGroupId)
+}
+
+type SentNotification struct {
+	Title string
+	Body  string
+}
+
+// notifierFake stands in for the operating system's notification centre.
+type notifierFake struct {
+	mutex   sync.Mutex
+	sent    []SentNotification
+	failure error
+}
+
+func (f *notifierFake) Notify(notification commandhandlers.Notification) error {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+
+	if f.failure != nil {
+		return f.failure
+	}
+
+	f.sent = append(f.sent, SentNotification{Title: notification.Title, Body: notification.Body})
+
+	return nil
+}
+
+func (f *notifierFake) fail(err error) {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+
+	f.failure = err
+}
+
+func (f *notifierFake) delivered() []SentNotification {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+
+	return append([]SentNotification(nil), f.sent...)
 }

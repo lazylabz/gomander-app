@@ -10,30 +10,33 @@ type EnvironmentPath struct {
 }
 
 type Config struct {
-	LastOpenedProjectId string            `json:"lastOpenedProjectId"`
-	EnvironmentPaths    []EnvironmentPath `json:"environmentPaths"`
-	Locale              string            `json:"locale"`
-	LogsFontSize        int               `json:"logsFontSize"`
-	ZoomLevel           float64           `json:"zoomLevel"`
+	LastOpenedProjectId  string            `json:"lastOpenedProjectId"`
+	EnvironmentPaths     []EnvironmentPath `json:"environmentPaths"`
+	Locale               string            `json:"locale"`
+	LogsFontSize         int               `json:"logsFontSize"`
+	ZoomLevel            float64           `json:"zoomLevel"`
+	NotificationsEnabled bool              `json:"notificationsEnabled"`
 }
 
 func FromConfig(config configdomain.Config) Config {
 	return Config{
-		LastOpenedProjectId: config.LastOpenedProjectId,
-		EnvironmentPaths:    mapSlice(config.EnvironmentPaths, fromEnvironmentPath),
-		Locale:              config.Locale,
-		LogsFontSize:        config.LogsFontSize,
-		ZoomLevel:           float64(config.ZoomLevel),
+		LastOpenedProjectId:  config.LastOpenedProjectId,
+		EnvironmentPaths:     mapSlice(config.EnvironmentPaths, fromEnvironmentPath),
+		Locale:               config.Locale,
+		LogsFontSize:         config.LogsFontSize,
+		ZoomLevel:            float64(config.ZoomLevel),
+		NotificationsEnabled: config.NotificationsEnabled,
 	}
 }
 
 func (c Config) ToDomain() configdomain.Config {
 	return configdomain.Config{
-		LastOpenedProjectId: c.LastOpenedProjectId,
-		EnvironmentPaths:    mapSlice(c.EnvironmentPaths, EnvironmentPath.ToDomain),
-		Locale:              c.Locale,
-		LogsFontSize:        c.LogsFontSize,
-		ZoomLevel:           configdomain.ZoomLevel(c.ZoomLevel),
+		LastOpenedProjectId:  c.LastOpenedProjectId,
+		EnvironmentPaths:     mapSlice(c.EnvironmentPaths, EnvironmentPath.ToDomain),
+		Locale:               c.Locale,
+		LogsFontSize:         c.LogsFontSize,
+		ZoomLevel:            configdomain.ZoomLevel(c.ZoomLevel),
+		NotificationsEnabled: c.NotificationsEnabled,
 	}
 }
 

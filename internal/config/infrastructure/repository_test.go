@@ -50,10 +50,11 @@ func TestGormConfigRepository_GetOrCreate(t *testing.T) {
 		assert.Empty(t, config.EnvironmentPaths)
 		assert.Equal(t, domain.DefaultLogsFontSize, config.LogsFontSize)
 		assert.Equal(t, domain.DefaultZoomLevel, config.ZoomLevel)
+		assert.True(t, config.NotificationsEnabled)
 	})
 	t.Run("Should return existing config with environment paths", func(t *testing.T) {
 		// Arrange
-		preloadedConfig := &ConfigModel{Id: 1, LastOpenedProjectId: "proj-123", LogsFontSize: 18, ZoomLevel: 1.2}
+		preloadedConfig := &ConfigModel{Id: 1, LastOpenedProjectId: "proj-123", LogsFontSize: 18, ZoomLevel: 1.2, NotificationsEnabled: true}
 		preloadedPaths := []*EnvironmentPathModel{
 			{Id: "path1", Path: "/usr/bin"},
 			{Id: "path2", Path: "/usr/local/bin"},
@@ -66,9 +67,10 @@ func TestGormConfigRepository_GetOrCreate(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 		assert.Equal(t, &domain.Config{
-			LastOpenedProjectId: "proj-123",
-			LogsFontSize:        18,
-			ZoomLevel:           1.2,
+			LastOpenedProjectId:  "proj-123",
+			LogsFontSize:         18,
+			ZoomLevel:            1.2,
+			NotificationsEnabled: true,
 			EnvironmentPaths: []domain.EnvironmentPath{
 				{Id: "path1", Path: "/usr/bin"},
 				{Id: "path2", Path: "/usr/local/bin"},
@@ -122,7 +124,7 @@ func TestGormConfigRepository_Update(t *testing.T) {
 func TestGormConfigRepository_UpdateZoomLevel(t *testing.T) {
 	t.Run("Should store the zoom level and nothing else", func(t *testing.T) {
 		// Arrange
-		preloadedConfig := &ConfigModel{Id: 1, LastOpenedProjectId: "proj-123", LogsFontSize: 18, ZoomLevel: 1}
+		preloadedConfig := &ConfigModel{Id: 1, LastOpenedProjectId: "proj-123", LogsFontSize: 18, ZoomLevel: 1, NotificationsEnabled: true}
 		preloadedPaths := []*EnvironmentPathModel{{Id: "path1", Path: "/usr/bin"}}
 		helper := newTestHelper(t, preloadedConfig, preloadedPaths)
 
@@ -134,10 +136,11 @@ func TestGormConfigRepository_UpdateZoomLevel(t *testing.T) {
 		got, err := helper.repo.GetOrCreate()
 		assert.NoError(t, err)
 		assert.Equal(t, &domain.Config{
-			LastOpenedProjectId: "proj-123",
-			LogsFontSize:        18,
-			ZoomLevel:           1.3,
-			EnvironmentPaths:    []domain.EnvironmentPath{{Id: "path1", Path: "/usr/bin"}},
+			LastOpenedProjectId:  "proj-123",
+			LogsFontSize:         18,
+			ZoomLevel:            1.3,
+			NotificationsEnabled: true,
+			EnvironmentPaths:     []domain.EnvironmentPath{{Id: "path1", Path: "/usr/bin"}},
 		}, got)
 	})
 }

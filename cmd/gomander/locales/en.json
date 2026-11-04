@@ -144,6 +144,8 @@
   "userSettingsForm.themeDescription": "(The system theme will adapt to your operating system's theme settings)",
   "userSettingsForm.logsFontSizeLabel": "Terminal logs font size",
   "userSettingsForm.logsFontSizeDescription": "To zoom the whole app instead, use Cmd/Ctrl and +, - or 0.",
+  "userSettingsForm.notificationsLabel": "Notify me when a command reports an error",
+  "userSettingsForm.notificationsDescription": "When its output matches one of its error patterns, while Gomander is in the background.",
   "userSettingsForm.validation.pathEmpty": "Path cannot be empty",
   "userSettingsForm.validation.logsFontSize": "Font size must be between {{min}} and {{max}}",
 
@@ -209,5 +211,7 @@
   "modal.missingPath.howToStep1": "Find where the executable lives by running <whichcmd/> (macOS/Linux) or <wherecmd/> (Windows) in your terminal.",
   "modal.missingPath.howToStep2": "Copy the directory that contains it and add it to your environment paths in Settings.",
   "modal.missingPath.commandPlaceholder": "<command>",
-  "modal.missingPath.goToSettings": "Open settings"
+  "modal.missingPath.goToSettings": "Open settings",
+
+  "notifications.errorPattern.title": "{{name}} reported an error"
 }

@@ -6,11 +6,12 @@ type EnvironmentPath struct {
 }
 
 type Config struct {
-	LastOpenedProjectId string
-	EnvironmentPaths    []EnvironmentPath
-	Locale              string
-	LogsFontSize        int
-	ZoomLevel           ZoomLevel
+	LastOpenedProjectId  string
+	EnvironmentPaths     []EnvironmentPath
+	Locale               string
+	LogsFontSize         int
+	ZoomLevel            ZoomLevel
+	NotificationsEnabled bool
 }
 
 func (c Config) Validate() error {
