@@ -7,7 +7,7 @@
 package releases
 
 // CurrentRelease is the Release this binary is.
-const CurrentRelease = "v2.0.1"
+const CurrentRelease = "v2.1.0"
 
 // ReleaseFeed is where the app learns which Releases have been published. It
 // answers with the latest one's version, or with an empty string when the feed
