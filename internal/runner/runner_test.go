@@ -1,6 +1,7 @@
 package runner_test
 
 import (
+	"errors"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -698,6 +699,45 @@ func TestDefaultRunner_ErrorPatternDetection(t *testing.T) {
 
 		// Assert
 		assert.Eventually(t, func() bool { return len(domainEvents.Published()) == 2 }, time.Second, 10*time.Millisecond)
+	})
+
+	t.Run("Should log a failing handler and keep streaming the process output", func(t *testing.T) {
+		// Arrange
+		logger := new(test.MockLogger)
+		emitter := new(test.MockEventEmitter)
+
+		domainEvents := &test.DomainEventsRecorder{HandlerFailure: errors.New("notification refused")}
+		r := runner.NewDefaultRunner(logger, emitter, domainEvents)
+
+		emitter.On("EmitEvent", mock.Anything, mock.Anything).Return()
+		logger.On("Info", mock.Anything).Return()
+		logger.On("Debug", mock.Anything).Return()
+		handlerFailureLogged := make(chan struct{})
+		logger.On("Error", "[ERROR - Reporting an error pattern]: notification refused").Run(func(mock.Arguments) {
+			close(handlerFailureLogged)
+		}).Return()
+
+		// Act
+		err := r.RunCommand(&commanddomain.Command{
+			Id:               "failing-handler",
+			ProjectId:        "failing-handler",
+			Name:             "Failing handler",
+			Command:          "echo ERROR: boom&& echo after the error",
+			WorkingDirectory: validWorkingDirectory(),
+			ErrorPatterns:    []string{"ERROR:"},
+		}, execution.Environment{})
+		r.WaitForCommand("failing-handler")
+
+		// Assert
+		assert.NoError(t, err)
+		select {
+		case <-handlerFailureLogged:
+		case <-time.After(time.Second):
+			t.Fatal("the handler failure was never logged")
+		}
+		assert.Contains(t, streamedLines(emitter), "after the error")
+		assert.Empty(t, r.GetRunningCommandIds())
+		emitter.AssertCalled(t, "EmitEvent", event.ProcessFinished, "failing-handler")
 	})
 
 	t.Run("Should report nothing for a process that fails without matching an error pattern", func(t *testing.T) {
