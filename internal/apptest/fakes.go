@@ -328,6 +328,7 @@ func (f *windowFake) zoom() float64 {
 // Group can be written through - directly, or through a Unit of Work.
 type storageFailures struct {
 	commandGroupWrite error
+	zoomLevelWrite    error
 }
 
 // unitOfWorkWithFailingWrites runs the real Unit of Work and lets a test make

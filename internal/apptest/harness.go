@@ -105,7 +105,10 @@ func New(t *testing.T) *Harness {
 		failures:   failures,
 	}
 	projectRepo := projectinfrastructure.NewGormProjectRepository(db, ctx)
-	configRepo := configinfrastructure.NewGormConfigRepository(db, ctx)
+	configRepo := configRepositoryThatCanFail{
+		Repository: configinfrastructure.NewGormConfigRepository(db, ctx),
+		failures:   failures,
+	}
 
 	unitOfWork := &unitOfWorkWithFailingWrites{
 		unitOfWork: unitofworkinfrastructure.NewGormUnitOfWork(db, ctx),
@@ -321,6 +324,14 @@ func (h *Harness) GivenStorageThatRefusesToWriteCommandGroups(err error) {
 	h.t.Helper()
 
 	h.failures.commandGroupWrite = err
+}
+
+// GivenStorageThatRefusesToWriteTheZoomLevel makes storing the Zoom Level fail,
+// the way a full disk refuses the write.
+func (h *Harness) GivenStorageThatRefusesToWriteTheZoomLevel(err error) {
+	h.t.Helper()
+
+	h.failures.zoomLevelWrite = err
 }
 
 // GivenPublishedRelease makes the release feed answer with version, the way it

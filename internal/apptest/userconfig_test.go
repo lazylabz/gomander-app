@@ -1,6 +1,7 @@
 package apptest_test
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 	"testing"
@@ -188,6 +189,21 @@ func TestZooming(t *testing.T) {
 		// Assert
 		assert.Equal(t, 1.5, h.WindowZoomLevel())
 		assert.Equal(t, configdomain.ZoomLevel(1.5), userConfigOf(t, h).ZoomLevel)
+	})
+
+	t.Run("Should leave the window where it was when the zoom level cannot be stored", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+		refused := errors.New("disk full")
+		h.GivenStorageThatRefusesToWriteTheZoomLevel(refused)
+
+		// Act
+		err := h.UseCases.ZoomIn.Execute()
+
+		// Assert
+		assert.ErrorIs(t, err, refused)
+		assert.Equal(t, 1.0, h.WindowZoomLevel())
+		assert.Equal(t, configdomain.DefaultZoomLevel, userConfigOf(t, h).ZoomLevel)
 	})
 
 	t.Run("Should keep the rest of the user config untouched", func(t *testing.T) {
