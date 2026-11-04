@@ -21,6 +21,7 @@ describe("saveUserSettingsForm", () => {
 	const userConfig = new UserConfigBuilder()
 		.withLastOpenedProjectId("project-1")
 		.withLocale("en")
+		.withZoomLevel(1.2)
 		.build();
 	const spanish = {
 		toast: { settings: { userSaveSuccess: "Ajustes guardados" } },
@@ -41,17 +42,23 @@ describe("saveUserSettingsForm", () => {
 		i18n.removeResourceBundle("es", "translation");
 	});
 
-	it("Should save the settings keeping the last opened project and refresh the user configuration", async () => {
+	it("Should save the settings keeping the last opened project and the zoom level, and refresh the user configuration", async () => {
 		// Arrange
 		const backend = installInMemoryBackend({ userConfig });
 		const saved = {
 			lastOpenedProjectId: "project-1",
 			environmentPaths: [environmentPath],
 			locale: "en",
+			logsFontSize: 18,
+			zoomLevel: 1.2,
 		};
 
 		// Act
-		await sut({ environmentPaths: [environmentPath], locale: "en" });
+		await sut({
+			environmentPaths: [environmentPath],
+			locale: "en",
+			logsFontSize: 18,
+		});
 
 		// Assert
 		expect(backend.state.userConfig).toEqual(saved);
@@ -68,7 +75,7 @@ describe("saveUserSettingsForm", () => {
 		});
 
 		// Act
-		await sut({ environmentPaths: [], locale: "es" });
+		await sut({ environmentPaths: [], locale: "es", logsFontSize: 15 });
 
 		// Assert
 		expect(i18n.language).toBe("es");
@@ -88,7 +95,11 @@ describe("saveUserSettingsForm", () => {
 		};
 
 		// Act
-		await sut({ environmentPaths: [environmentPath], locale: "en" });
+		await sut({
+			environmentPaths: [environmentPath],
+			locale: "en",
+			logsFontSize: 15,
+		});
 
 		// Assert
 		expect(toastError).toHaveBeenCalledWith(

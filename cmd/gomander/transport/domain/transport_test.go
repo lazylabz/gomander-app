@@ -135,6 +135,8 @@ func TestConfig(t *testing.T) {
 		LastOpenedProjectId: "project-id",
 		EnvironmentPaths:    []configdomain.EnvironmentPath{{Id: "path-id", Path: "/usr/local/bin"}},
 		Locale:              "es",
+		LogsFontSize:        18,
+		ZoomLevel:           1.2,
 	}
 
 	t.Run("Should reach the frontend under the field names it already receives", func(t *testing.T) {
@@ -146,7 +148,9 @@ func TestConfig(t *testing.T) {
 		assert.JSONEq(t, `{
 			"lastOpenedProjectId": "project-id",
 			"environmentPaths": [{"id": "path-id", "path": "/usr/local/bin"}],
-			"locale": "es"
+			"locale": "es",
+			"logsFontSize": 18,
+			"zoomLevel": 1.2
 		}`, string(encoded))
 	})
 

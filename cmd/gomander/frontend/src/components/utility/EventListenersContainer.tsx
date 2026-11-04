@@ -3,12 +3,14 @@ import { Fragment, useEffect, useRef } from "react";
 import {
 	appendCommandLogEntry,
 	resetCommandOutputForNewRun,
+	setCommandOutputFontSize,
 	setCommandOutputTheme,
 } from "@/commandOutput/commandOutput.ts";
 import { useTheme } from "@/contexts/theme.tsx";
 import { eventService } from "@/contracts/service.ts";
 import { Event, type EventData } from "@/contracts/types.ts";
 import { forgetSidebarSection } from "@/store/sidebarSections.ts";
+import { useUserConfigurationStore } from "@/store/userConfigurationStore.ts";
 import { CommandStatus } from "@/types/CommandStatus.ts";
 import { detectMissingEnvironmentPathFailure } from "@/useCases/command/detectMissingEnvironmentPathFailure.tsx";
 import { recordCommandsErrors } from "@/useCases/command/recordCommandsErrors.ts";
@@ -23,6 +25,14 @@ export const EventListenersContainer = () => {
 	useEffect(() => {
 		setCommandOutputTheme(theme);
 	}, [theme]);
+
+	const logsFontSize = useUserConfigurationStore(
+		(state) => state.userConfig.logsFontSize,
+	);
+
+	useEffect(() => {
+		setCommandOutputFontSize(logsFontSize);
+	}, [logsFontSize]);
 
 	const errorBuffer = useRef<string[]>([]);
 

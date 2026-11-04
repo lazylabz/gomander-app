@@ -181,7 +181,10 @@ export interface Localization {
     "userSettingsForm.themeLight": string;
     "userSettingsForm.themeDark": string;
     "userSettingsForm.themeDescription": string;
+    "userSettingsForm.logsFontSizeLabel": string;
+    "userSettingsForm.logsFontSizeDescription": string;
     "userSettingsForm.validation.pathEmpty": string;
+    "userSettingsForm.validation.logsFontSize": string;
 
     /**
      * projectSettingsForm
@@ -245,6 +248,7 @@ export interface Localization {
     "toast.settings.userSaveFailed": string;
     "toast.settings.projectSaveSuccess": string;
     "toast.settings.projectSaveFailed": string;
+    "toast.settings.zoomFailed": string;
 
     /**
      * toast.version

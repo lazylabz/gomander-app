@@ -142,7 +142,10 @@
   "userSettingsForm.themeLight": "Light theme",
   "userSettingsForm.themeDark": "Dark theme",
   "userSettingsForm.themeDescription": "(The system theme will adapt to your operating system's theme settings)",
+  "userSettingsForm.logsFontSizeLabel": "Terminal logs font size",
+  "userSettingsForm.logsFontSizeDescription": "To zoom the whole app instead, use Cmd/Ctrl and +, - or 0.",
   "userSettingsForm.validation.pathEmpty": "Path cannot be empty",
+  "userSettingsForm.validation.logsFontSize": "Font size must be between {{min}} and {{max}}",
 
   "projectSettingsForm.sectionTitle": "Project information",
   "projectSettingsForm.sectionDescription": "Configure your project details and basic settings.",
@@ -191,6 +194,7 @@
   "toast.settings.userSaveFailed": "Failed to save user settings",
   "toast.settings.projectSaveSuccess": "Project settings saved successfully",
   "toast.settings.projectSaveFailed": "Failed to save project settings",
+  "toast.settings.zoomFailed": "Failed to zoom",
 
   "toast.version.checkError": "Error checking for new releases",
   "toast.version.downloadFailed": "Failed to download the update",

@@ -11,6 +11,8 @@ func ToDomainConfig(model *ConfigModel, paths []EnvironmentPathModel) *domain.Co
 		LastOpenedProjectId: model.LastOpenedProjectId,
 		EnvironmentPaths:    make([]domain.EnvironmentPath, 0),
 		Locale:              model.Locale,
+		LogsFontSize:        model.LogsFontSize,
+		ZoomLevel:           domain.ZoomLevel(model.ZoomLevel),
 	}
 
 	for _, pathModel := range paths {
@@ -32,6 +34,8 @@ func ToModelConfig(config *domain.Config) (*ConfigModel, []EnvironmentPathModel)
 		Id:                  1,
 		LastOpenedProjectId: config.LastOpenedProjectId,
 		Locale:              config.Locale,
+		LogsFontSize:        config.LogsFontSize,
+		ZoomLevel:           float64(config.ZoomLevel),
 	}
 
 	var pathModels []EnvironmentPathModel

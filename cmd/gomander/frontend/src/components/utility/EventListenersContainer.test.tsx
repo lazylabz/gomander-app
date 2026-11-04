@@ -1,7 +1,8 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-
+import type { RecordingTerminals } from "@/commandOutput/adapters/recording.ts";
+import { attachCommandOutput } from "@/commandOutput/commandOutput.ts";
 import { EventListenersContainer } from "@/components/utility/EventListenersContainer.tsx";
 import type { InMemoryBackend } from "@/contracts/adapters/inMemory.ts";
 import { resetBackendServices } from "@/contracts/service.ts";
@@ -11,7 +12,10 @@ import {
 	isSidebarSectionOpen,
 	setSidebarSectionOpen,
 } from "@/store/sidebarSections.ts";
+import { userConfigurationStore } from "@/store/userConfigurationStore.ts";
 import { installInMemoryBackend } from "@/testing/backend.ts";
+import { UserConfigBuilder } from "@/testing/builders/userConfig.ts";
+import { resetStores } from "@/testing/stores.ts";
 import {
 	installRecordingTerminals,
 	resetTerminals,
@@ -19,6 +23,7 @@ import {
 
 describe("EventListenersContainer", () => {
 	let backend: InMemoryBackend;
+	let recording: RecordingTerminals;
 	let roots: Root[] = [];
 	// The store is imported once for the whole file, so what a test opens has to
 	// be forgotten afterwards rather than reloaded away. Recording it here keeps
@@ -41,7 +46,8 @@ describe("EventListenersContainer", () => {
 	beforeEach(() => {
 		// react-dom needs this to accept the act() calls that drive the render.
 		Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-		installRecordingTerminals();
+		resetStores();
+		recording = installRecordingTerminals();
 		backend = installInMemoryBackend();
 	});
 
@@ -88,5 +94,21 @@ describe("EventListenersContainer", () => {
 
 		// Assert
 		expect(isSidebarSectionOpen("group-2")).toBe(true);
+	});
+
+	it("Should size the logs at the font size the user configured", async () => {
+		// Arrange
+		attachCommandOutput("cmd-1", document.createElement("div"));
+		await render();
+
+		// Act
+		act(() => {
+			userConfigurationStore
+				.getState()
+				.setUserConfig(new UserConfigBuilder().withLogsFontSize(21).build());
+		});
+
+		// Assert
+		expect(recording.terminals.get("cmd-1")?.fontSize).toBe(21);
 	});
 });

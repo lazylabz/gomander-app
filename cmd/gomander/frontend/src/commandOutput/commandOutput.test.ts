@@ -11,6 +11,7 @@ import {
 	LOG_TAIL_SIZE,
 	resetCommandOutput,
 	resetCommandOutputForNewRun,
+	setCommandOutputFontSize,
 	setCommandOutputTheme,
 } from "@/commandOutput/commandOutput.ts";
 import { TERMINAL_SCROLLBACK } from "@/commandOutput/ports.ts";
@@ -475,6 +476,30 @@ describe("the command output pipeline", () => {
 
 			// Assert
 			expect(terminalOf("cmd-1").theme).toBe("light");
+		});
+	});
+
+	describe("font size", () => {
+		it("Should resize the terminals that already exist", () => {
+			// Arrange
+			attachCommandOutput("cmd-1", document.createElement("div"));
+
+			// Act
+			setCommandOutputFontSize(20);
+
+			// Assert
+			expect(terminalOf("cmd-1").fontSize).toBe(20);
+		});
+
+		it("Should build later terminals at the current font size", () => {
+			// Arrange
+			setCommandOutputFontSize(11);
+
+			// Act
+			attachCommandOutput("cmd-1", document.createElement("div"));
+
+			// Assert
+			expect(terminalOf("cmd-1").fontSize).toBe(11);
 		});
 	});
 });

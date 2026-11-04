@@ -4,6 +4,7 @@ import { Route, Routes } from "react-router";
 import { AppSidebarLayout } from "@/components/layout/AppSidebarLayout/AppSidebarLayout.tsx";
 import { MissingEnvironmentPathDialog } from "@/components/MissingEnvironmentPath/MissingEnvironmentPathDialog.tsx";
 import { EventListenersContainer } from "@/components/utility/EventListenersContainer.tsx";
+import { ZoomShortcuts } from "@/components/utility/ZoomShortcuts.tsx";
 import { ThemeProvider } from "@/contexts/theme.tsx";
 import { Toaster } from "@/design-system/components/ui/sonner.tsx";
 import { initI18n } from "@/design-system/lib/i18n.ts";
@@ -59,6 +60,7 @@ function App() {
 	return (
 		<ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
 			<EventListenersContainer />
+			<ZoomShortcuts />
 			<MissingEnvironmentPathDialog />
 			<Toaster richColors position="top-right" />
 			<Routes>

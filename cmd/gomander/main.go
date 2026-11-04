@@ -5,6 +5,7 @@ import (
 	"embed"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/glebarez/sqlite"
 	"github.com/pressly/goose/v3"
@@ -40,6 +41,7 @@ import (
 	"gomander/internal/usecases"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/wailsapp/wails/v3/pkg/events"
 
 	internalapp "gomander/internal/app"
 	"gomander/internal/event"
@@ -58,6 +60,8 @@ func main() {
 	// ShouldQuit has to be handed to application.New, before the app it asks exists
 	var app *application.App
 	var gomander *internalapp.App
+	var useCases usecases.Registry
+	zoom := zoomOperationsOf(&useCases)
 
 	app = application.New(application.Options{
 		Name:   "Gomander",
@@ -77,9 +81,26 @@ func main() {
 	runtimeFacade := facade.NewRuntimeFacade(app)
 	dialogs := dialog.NewWailsDialogs(app.Dialog)
 
+	window := app.Window.NewWithOptions(application.WebviewWindowOptions{
+		Title:            "Gomander",
+		Width:            1024,
+		Height:           768,
+		BackgroundColour: application.NewRGB(27, 38, 54),
+		KeyBindings:      macOSZoomKeyBindings(runtime.GOOS, zoom, runtimeFacade.LogError),
+	})
+	closeWindowByQuitting(window, app)
+	if runtime.GOOS == "darwin" {
+		app.Menu.Set(macOSApplicationMenu(zoom, runtimeFacade.LogError))
+	}
+
 	gormDb := configDB(ctx)
-	var useCases usecases.Registry
-	gomander, useCases = buildDeps(gormDb, ctx, dialogs, runtimeFacade)
+	gomander, useCases = buildDeps(gormDb, ctx, dialogs, runtimeFacade, facade.NewWindowFacade(window))
+
+	window.OnWindowEvent(events.Common.WindowRuntimeReady, func(*application.WindowEvent) {
+		if err := useCases.RestoreZoom.Execute(); err != nil {
+			runtimeFacade.LogError(err.Error())
+		}
+	})
 
 	gomander.RegisterHandlers()
 
@@ -91,14 +112,6 @@ func main() {
 	app.RegisterService(application.NewService(NewWailsControllers(useCases)))
 	app.RegisterService(application.NewService(fs.NewUIFsHelper(dialogs, runtimeFacade)))
 	app.RegisterService(application.NewService(os_internal.NewUIOsHelper()))
-
-	window := app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:            "Gomander",
-		Width:            1024,
-		Height:           768,
-		BackgroundColour: application.NewRGB(27, 38, 54),
-	})
-	closeWindowByQuitting(window, app)
 
 	server := thirdpartyserver.NewThirdPartyIntegrationsServer(useCases)
 	go func() {
@@ -168,7 +181,7 @@ func getDbFile() string {
 	return dbLocation
 }
 
-func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs, runtimeFacade facade.RuntimeFacade) (*internalapp.App, usecases.Registry) {
+func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs, runtimeFacade facade.RuntimeFacade, window configusecases.Window) (*internalapp.App, usecases.Registry) {
 	// Initialize deps
 	l := logger.NewDefaultLogger(runtimeFacade)
 	ee := event.NewDefaultEventEmitter(runtimeFacade)
@@ -203,6 +216,11 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs, run
 	// Configuration
 	getUserConfig := configusecases.NewGetUserConfig(configRepo)
 	saveUserConfig := configusecases.NewSaveUserConfig(configRepo)
+	zoom := configusecases.NewZoom(configRepo, window)
+	zoomIn := configusecases.NewZoomIn(zoom)
+	zoomOut := configusecases.NewZoomOut(zoom)
+	resetZoom := configusecases.NewResetZoom(zoom)
+	restoreZoom := configusecases.NewRestoreZoom(configRepo, window)
 	// Localization
 	localeFiles := localizationinfrastructure.NewLocaleFiles(localeFs)
 	getTranslation := localizationusecases.NewGetTranslation(localeFiles)
@@ -258,6 +276,10 @@ func buildDeps(gormDb *gorm.DB, ctx context.Context, dialogs dialog.Dialogs, run
 		// Configuration
 		GetUserConfig:  getUserConfig,
 		SaveUserConfig: saveUserConfig,
+		ZoomIn:         zoomIn,
+		ZoomOut:        zoomOut,
+		ResetZoom:      resetZoom,
+		RestoreZoom:    restoreZoom,
 		// Localization
 		GetTranslation:        getTranslation,
 		GetSupportedLanguages: getSupportedLanguages,

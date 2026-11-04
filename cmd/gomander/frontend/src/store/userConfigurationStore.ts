@@ -1,6 +1,7 @@
 import { useStore } from "zustand/react";
 import { createStore } from "zustand/vanilla";
 
+import { LOGS_FONT_SIZE } from "@/constants/logsFontSize.ts";
 import type { UserConfig } from "@/contracts/types.ts";
 
 type UserConfigurationStore = {
@@ -16,6 +17,8 @@ export const userConfigurationStore = createStore<UserConfigurationStore>()(
 			environmentPaths: [],
 			lastOpenedProjectId: "",
 			locale: "en",
+			logsFontSize: LOGS_FONT_SIZE.default,
+			zoomLevel: 1,
 		},
 		setUserConfig: (config: UserConfig) => {
 			set({ userConfig: config, isLoaded: true });

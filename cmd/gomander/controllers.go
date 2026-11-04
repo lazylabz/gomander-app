@@ -26,6 +26,20 @@ func (wc *WailsControllers) SaveUserConfigController(newConfig transport.Config)
 	return wc.useCases.SaveUserConfig.Execute(newConfig.ToDomain())
 }
 
+// Called by the frontend outside macOS, where Wails cannot name the zoom keys.
+
+func (wc *WailsControllers) ZoomInController() error {
+	return wc.useCases.ZoomIn.Execute()
+}
+
+func (wc *WailsControllers) ZoomOutController() error {
+	return wc.useCases.ZoomOut.Execute()
+}
+
+func (wc *WailsControllers) ResetZoomController() error {
+	return wc.useCases.ResetZoom.Execute()
+}
+
 // Project controllers
 
 func (wc *WailsControllers) GetCurrentProjectController() (*transport.Project, error) {

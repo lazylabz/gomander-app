@@ -144,21 +144,24 @@ type Localization struct {
 	ProjectFormValidationBaseDirRequired    string `json:"projectForm.validation.baseDirRequired"`
 
 	// userSettingsForm
-	UserSettingsFormEnvPathsTitle          string `json:"userSettingsForm.envPathsTitle"`
-	UserSettingsFormEnvPathsDescription    string `json:"userSettingsForm.envPathsDescription"`
-	UserSettingsFormEnvPathsHelpBody       string `json:"userSettingsForm.envPathsHelpBody"`
-	UserSettingsFormEnvPathsHelpExample    string `json:"userSettingsForm.envPathsHelpExample"`
-	UserSettingsFormPreferencesTitle       string `json:"userSettingsForm.preferencesTitle"`
-	UserSettingsFormPreferencesDescription string `json:"userSettingsForm.preferencesDescription"`
-	UserSettingsFormLanguageLabel          string `json:"userSettingsForm.languageLabel"`
-	UserSettingsFormLanguagePlaceholder    string `json:"userSettingsForm.languagePlaceholder"`
-	UserSettingsFormThemeLabel             string `json:"userSettingsForm.themeLabel"`
-	UserSettingsFormThemePlaceholder       string `json:"userSettingsForm.themePlaceholder"`
-	UserSettingsFormThemeSystem            string `json:"userSettingsForm.themeSystem"`
-	UserSettingsFormThemeLight             string `json:"userSettingsForm.themeLight"`
-	UserSettingsFormThemeDark              string `json:"userSettingsForm.themeDark"`
-	UserSettingsFormThemeDescription       string `json:"userSettingsForm.themeDescription"`
-	UserSettingsFormValidationPathEmpty    string `json:"userSettingsForm.validation.pathEmpty"`
+	UserSettingsFormEnvPathsTitle           string `json:"userSettingsForm.envPathsTitle"`
+	UserSettingsFormEnvPathsDescription     string `json:"userSettingsForm.envPathsDescription"`
+	UserSettingsFormEnvPathsHelpBody        string `json:"userSettingsForm.envPathsHelpBody"`
+	UserSettingsFormEnvPathsHelpExample     string `json:"userSettingsForm.envPathsHelpExample"`
+	UserSettingsFormPreferencesTitle        string `json:"userSettingsForm.preferencesTitle"`
+	UserSettingsFormPreferencesDescription  string `json:"userSettingsForm.preferencesDescription"`
+	UserSettingsFormLanguageLabel           string `json:"userSettingsForm.languageLabel"`
+	UserSettingsFormLanguagePlaceholder     string `json:"userSettingsForm.languagePlaceholder"`
+	UserSettingsFormThemeLabel              string `json:"userSettingsForm.themeLabel"`
+	UserSettingsFormThemePlaceholder        string `json:"userSettingsForm.themePlaceholder"`
+	UserSettingsFormThemeSystem             string `json:"userSettingsForm.themeSystem"`
+	UserSettingsFormThemeLight              string `json:"userSettingsForm.themeLight"`
+	UserSettingsFormThemeDark               string `json:"userSettingsForm.themeDark"`
+	UserSettingsFormThemeDescription        string `json:"userSettingsForm.themeDescription"`
+	UserSettingsFormLogsFontSizeLabel       string `json:"userSettingsForm.logsFontSizeLabel"`
+	UserSettingsFormLogsFontSizeDescription string `json:"userSettingsForm.logsFontSizeDescription"`
+	UserSettingsFormValidationPathEmpty     string `json:"userSettingsForm.validation.pathEmpty"`
+	UserSettingsFormValidationLogsFontSize  string `json:"userSettingsForm.validation.logsFontSize"`
 
 	// projectSettingsForm
 	ProjectSettingsFormSectionTitle       string `json:"projectSettingsForm.sectionTitle"`
@@ -212,6 +215,7 @@ type Localization struct {
 	ToastSettingsUserSaveFailed     string `json:"toast.settings.userSaveFailed"`
 	ToastSettingsProjectSaveSuccess string `json:"toast.settings.projectSaveSuccess"`
 	ToastSettingsProjectSaveFailed  string `json:"toast.settings.projectSaveFailed"`
+	ToastSettingsZoomFailed         string `json:"toast.settings.zoomFailed"`
 
 	// toast.version
 	ToastVersionCheckError     string `json:"toast.version.checkError"`

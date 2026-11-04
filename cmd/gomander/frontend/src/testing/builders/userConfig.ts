@@ -1,3 +1,4 @@
+import { LOGS_FONT_SIZE } from "@/constants/logsFontSize.ts";
 import type { EnvironmentPath, UserConfig } from "@/contracts/types.ts";
 
 export class UserConfigBuilder {
@@ -5,6 +6,8 @@ export class UserConfigBuilder {
 		lastOpenedProjectId: "",
 		environmentPaths: [],
 		locale: "en",
+		logsFontSize: LOGS_FONT_SIZE.default,
+		zoomLevel: 1,
 	};
 
 	withLastOpenedProjectId(lastOpenedProjectId: string): this {
@@ -19,6 +22,16 @@ export class UserConfigBuilder {
 
 	withLocale(locale: string): this {
 		this.data.locale = locale;
+		return this;
+	}
+
+	withLogsFontSize(logsFontSize: number): this {
+		this.data.logsFontSize = logsFontSize;
+		return this;
+	}
+
+	withZoomLevel(zoomLevel: number): this {
+		this.data.zoomLevel = zoomLevel;
 		return this;
 	}
 

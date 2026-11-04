@@ -1,6 +1,7 @@
 import { Route, WandSparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { LOGS_FONT_SIZE } from "@/constants/logsFontSize.ts";
 import { type Theme, useTheme } from "@/contexts/theme.tsx";
 import {
 	Card,
@@ -18,6 +19,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/design-system/components/ui/form.tsx";
+import { Input } from "@/design-system/components/ui/input.tsx";
 import {
 	Select,
 	SelectContent,
@@ -131,6 +133,37 @@ export const UserSettings = () => {
 									{t("userSettingsForm.themeDescription")}
 								</FormDescription>
 							</FormItem>
+							<FormField
+								control={userSettingsForm.control}
+								name="logsFontSize"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>
+											{t("userSettingsForm.logsFontSizeLabel")}
+										</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min={LOGS_FONT_SIZE.min}
+												max={LOGS_FONT_SIZE.max}
+												step={1}
+												className="w-24"
+												name={field.name}
+												ref={field.ref}
+												onBlur={field.onBlur}
+												value={Number.isNaN(field.value) ? "" : field.value}
+												onChange={(event) =>
+													field.onChange(event.target.valueAsNumber)
+												}
+											/>
+										</FormControl>
+										<FormDescription className="text-xs">
+											{t("userSettingsForm.logsFontSizeDescription")}
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 						</CardContent>
 					</Card>
 				</div>

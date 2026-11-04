@@ -6,6 +6,7 @@ import {
 	type TerminalFactory,
 	type TerminalTheme,
 } from "@/commandOutput/ports.ts";
+import { LOGS_FONT_SIZE } from "@/constants/logsFontSize.ts";
 import { LogEntryKind } from "@/contracts/types.ts";
 
 export const FLUSH_INTERVAL_MS = 30;
@@ -38,6 +39,7 @@ let createTerminal: TerminalFactory = xtermTerminal;
 const outputs = new Map<string, CommandOutput>();
 
 let currentTheme: TerminalTheme = DEFAULT_THEME;
+let currentFontSize: number = LOGS_FONT_SIZE.default;
 let flushTimer: ReturnType<typeof setInterval> | null = null;
 
 const pad = (n: number) => n.toString().padStart(2, "0");
@@ -158,7 +160,7 @@ export const attachCommandOutput = (
 	element: HTMLElement,
 ): AttachedTerminal => {
 	const output = outputFor(commandId);
-	output.terminal ??= createTerminal(commandId, currentTheme);
+	output.terminal ??= createTerminal(commandId, currentTheme, currentFontSize);
 
 	const attached = output.terminal.attach(element);
 
@@ -217,6 +219,13 @@ export const setCommandOutputTheme = (theme: TerminalTheme): void => {
 	}
 };
 
+export const setCommandOutputFontSize = (fontSize: number): void => {
+	currentFontSize = fontSize;
+	for (const output of outputs.values()) {
+		output.terminal?.setFontSize(fontSize);
+	}
+};
+
 export const setTerminalFactory = (factory: TerminalFactory): void => {
 	createTerminal = factory;
 };
@@ -232,5 +241,6 @@ export const resetCommandOutputPipeline = (): void => {
 	}
 	outputs.clear();
 	currentTheme = DEFAULT_THEME;
+	currentFontSize = LOGS_FONT_SIZE.default;
 	stopFlushing();
 };

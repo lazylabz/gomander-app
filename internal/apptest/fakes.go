@@ -302,11 +302,33 @@ func (f *appControlFake) CloseApp() {
 	f.closed = true
 }
 
+// windowFake stands in for the desktop window, keeping the zoom it was last
+// set to.
+type windowFake struct {
+	mutex     sync.Mutex
+	zoomLevel float64
+}
+
+func (f *windowFake) SetZoom(level float64) {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+
+	f.zoomLevel = level
+}
+
+func (f *windowFake) zoom() float64 {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+
+	return f.zoomLevel
+}
+
 // storageFailures is what a test has made storage refuse. The repositories
 // share it by pointer, so arranging a failure reaches every path a Command
 // Group can be written through - directly, or through a Unit of Work.
 type storageFailures struct {
 	commandGroupWrite error
+	zoomLevelWrite    error
 }
 
 // unitOfWorkWithFailingWrites runs the real Unit of Work and lets a test make

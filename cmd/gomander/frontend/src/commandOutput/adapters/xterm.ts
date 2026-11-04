@@ -44,11 +44,18 @@ const openTerminalLink = (_: unknown, uri: string) => {
 	externalBrowserService.browserOpenURL(uri);
 };
 
-export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
+export const xtermTerminal: TerminalFactory = (
+	_commandId,
+	initialTheme,
+	fontSize,
+) => {
 	let theme = initialTheme;
 	// Set while a terminal is attached: match decorations are painted once, so a
 	// theme change has to re-run the search that painted them.
 	let repaintSearch: (() => void) | null = null;
+	// Set while a terminal is attached: a new font size changes how many rows
+	// and columns fit the view.
+	let refit: (() => void) | null = null;
 
 	const terminal = new Terminal({
 		allowProposedApi: true,
@@ -56,6 +63,7 @@ export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
 		scrollback: TERMINAL_SCROLLBACK,
 		disableStdin: true,
 		fontFamily: "monospace",
+		fontSize,
 		theme: XTERM_THEMES[theme],
 	});
 
@@ -66,6 +74,10 @@ export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
 			theme = nextTheme;
 			terminal.options.theme = XTERM_THEMES[nextTheme];
 			repaintSearch?.();
+		},
+		setFontSize: (nextFontSize) => {
+			terminal.options.fontSize = nextFontSize;
+			refit?.();
 		},
 		dispose: () => terminal.dispose(),
 
@@ -86,6 +98,7 @@ export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
 			terminal.loadAddon(search);
 
 			fit.fit();
+			refit = () => fit.fit();
 
 			let lastQuery = "";
 			repaintSearch = () => {
@@ -129,6 +142,7 @@ export const xtermTerminal: TerminalFactory = (_commandId, initialTheme) => {
 
 				detach: () => {
 					repaintSearch = null;
+					refit = null;
 					search.dispose();
 					// Detach the DOM only — the emulator outlives the view
 					if (terminal.element && element.contains(terminal.element)) {

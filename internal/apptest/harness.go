@@ -66,6 +66,7 @@ type Harness struct {
 	releaseInstaller  *releaseInstallerFake
 	releaseDownloader *releaseDownloaderFake
 	appControl        *appControlFake
+	window            *windowFake
 }
 
 // New starts a backend with an empty database and no project open.
@@ -91,6 +92,7 @@ func New(t *testing.T) *Harness {
 	releaseDownloader := &releaseDownloaderFake{}
 	releaseInstaller := &releaseInstallerFake{}
 	appControl := &appControlFake{}
+	window := &windowFake{zoomLevel: 1}
 
 	l := logger.NewDefaultLogger(&logSinkFake{})
 	ee := event.NewDefaultEventEmitter(events)
@@ -103,7 +105,10 @@ func New(t *testing.T) *Harness {
 		failures:   failures,
 	}
 	projectRepo := projectinfrastructure.NewGormProjectRepository(db, ctx)
-	configRepo := configinfrastructure.NewGormConfigRepository(db, ctx)
+	configRepo := configRepositoryThatCanFail{
+		Repository: configinfrastructure.NewGormConfigRepository(db, ctx),
+		failures:   failures,
+	}
 
 	unitOfWork := &unitOfWorkWithFailingWrites{
 		unitOfWork: unitofworkinfrastructure.NewGormUnitOfWork(db, ctx),
@@ -115,6 +120,8 @@ func New(t *testing.T) *Harness {
 	eventBus := eventbus.NewInMemoryEventBus()
 
 	openedProject := openedproject.NewOpenedProject(configRepo, projectRepo)
+
+	zoom := configusecases.NewZoom(configRepo, window)
 
 	app := internalapp.NewApp(l, processRunner, configRepo, eventBus, internalapp.EventHandlers{
 		CleanCommandGroupsOnCommandDeleted:   commandgrouphandlers.NewCleanCommandGroupsOnCommandDeleted(unitOfWork, commandGroupRepo, ee),
@@ -132,6 +139,10 @@ func New(t *testing.T) *Harness {
 		UseCases: usecases.Registry{
 			GetUserConfig:  configusecases.NewGetUserConfig(configRepo),
 			SaveUserConfig: configusecases.NewSaveUserConfig(configRepo),
+			ZoomIn:         configusecases.NewZoomIn(zoom),
+			ZoomOut:        configusecases.NewZoomOut(zoom),
+			ResetZoom:      configusecases.NewResetZoom(zoom),
+			RestoreZoom:    configusecases.NewRestoreZoom(configRepo, window),
 
 			GetCurrentProject:    projectusecases.NewGetCurrentProject(openedProject),
 			GetAvailableProjects: projectusecases.NewGetAvailableProjects(projectRepo),
@@ -187,6 +198,7 @@ func New(t *testing.T) *Harness {
 		releaseDownloader:      releaseDownloader,
 		releaseInstaller:       releaseInstaller,
 		appControl:             appControl,
+		window:                 window,
 	}
 }
 
@@ -242,6 +254,16 @@ func (h *Harness) GivenEnvironmentPaths(paths ...string) {
 
 	if err := h.configRepository.Update(config); err != nil {
 		h.t.Fatalf("failed to arrange the environment paths: %v", err)
+	}
+}
+
+// GivenZoomLevel stores the Zoom Level the user left the window at, without
+// putting the window there.
+func (h *Harness) GivenZoomLevel(level configdomain.ZoomLevel) {
+	h.t.Helper()
+
+	if err := h.configRepository.UpdateZoomLevel(level); err != nil {
+		h.t.Fatalf("failed to arrange the zoom level: %v", err)
 	}
 }
 
@@ -304,6 +326,14 @@ func (h *Harness) GivenStorageThatRefusesToWriteCommandGroups(err error) {
 	h.failures.commandGroupWrite = err
 }
 
+// GivenStorageThatRefusesToWriteTheZoomLevel makes storing the Zoom Level fail,
+// the way a full disk refuses the write.
+func (h *Harness) GivenStorageThatRefusesToWriteTheZoomLevel(err error) {
+	h.t.Helper()
+
+	h.failures.zoomLevelWrite = err
+}
+
 // GivenPublishedRelease makes the release feed answer with version, the way it
 // does once that release is out.
 func (h *Harness) GivenPublishedRelease(version string) {
@@ -356,6 +386,11 @@ func (h *Harness) StartedProcesses() []StartedProcess {
 
 func (h *Harness) StoppedProcessIds() []string {
 	return h.processRunner.stopped()
+}
+
+// WindowZoomLevel is the magnification the window is showing its content at.
+func (h *Harness) WindowZoomLevel() float64 {
+	return h.window.zoom()
 }
 
 func (h *Harness) EmittedEvents() []EmittedEvent {
