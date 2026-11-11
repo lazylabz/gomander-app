@@ -2,16 +2,18 @@ package localization
 
 type Localization struct {
 	// common
-	CommonCancel    string `json:"common.cancel"`
-	CommonSave      string `json:"common.save"`
-	CommonCreate    string `json:"common.create"`
-	CommonDelete    string `json:"common.delete"`
-	CommonEdit      string `json:"common.edit"`
-	CommonDuplicate string `json:"common.duplicate"`
-	CommonContinue  string `json:"common.continue"`
-	CommonAdd       string `json:"common.add"`
-	CommonAdvanced  string `json:"common.advanced"`
-	CommonClose     string `json:"common.close"`
+	CommonCancel     string `json:"common.cancel"`
+	CommonSave       string `json:"common.save"`
+	CommonCreate     string `json:"common.create"`
+	CommonDelete     string `json:"common.delete"`
+	CommonEdit       string `json:"common.edit"`
+	CommonDuplicate  string `json:"common.duplicate"`
+	CommonContinue   string `json:"common.continue"`
+	CommonAdd        string `json:"common.add"`
+	CommonAdvanced   string `json:"common.advanced"`
+	CommonClose      string `json:"common.close"`
+	CommonLoadFailed string `json:"common.loadFailed"`
+	CommonRetry      string `json:"common.retry"`
 
 	// sidebar
 	SidebarProjectClose              string `json:"sidebar.project.close"`

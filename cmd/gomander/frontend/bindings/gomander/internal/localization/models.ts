@@ -15,6 +15,8 @@ export interface Localization {
     "common.add": string;
     "common.advanced": string;
     "common.close": string;
+    "common.loadFailed": string;
+    "common.retry": string;
 
     /**
      * sidebar

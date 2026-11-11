@@ -269,4 +269,157 @@ describe("ProjectSelectionScreen", () => {
 			await screen.findByRole("dialog", { name: "modal.createProject.title" }),
 		).toBeInTheDocument();
 	});
+
+	describe("when the initial load fails", () => {
+		const failProjectsLoad = () => {
+			const loadProjects = backend.data.getAvailableProjects;
+			backend.data.getAvailableProjects = async () => {
+				throw new Error("boom");
+			};
+			return () => {
+				backend.data.getAvailableProjects = loadProjects;
+			};
+		};
+
+		beforeEach(() => {
+			vi.spyOn(console, "error").mockImplementation(() => {});
+		});
+
+		it("Should tell the user the load failed instead of showing the empty state", async () => {
+			// Arrange
+			failProjectsLoad();
+
+			// Act
+			renderSut();
+
+			// Assert
+			expect(await screen.findByText("common.loadFailed")).toBeInTheDocument();
+			expect(
+				screen.getByRole("button", { name: "common.retry" }),
+			).toBeInTheDocument();
+			expect(
+				screen.queryByText("projectSelection.emptyState"),
+			).not.toBeInTheDocument();
+		});
+
+		it("Should list the projects once retrying succeeds", async () => {
+			// Arrange
+			backend.state.projects = [
+				new ProjectBuilder().withId("p-1").withName("Alpha").build(),
+			];
+			const recoverBackend = failProjectsLoad();
+			const { user } = renderSut();
+			await screen.findByText("common.loadFailed");
+			recoverBackend();
+
+			// Act
+			await user.click(screen.getByRole("button", { name: "common.retry" }));
+
+			// Assert
+			expect(await screen.findByText("Alpha")).toBeInTheDocument();
+			expect(screen.queryByText("common.loadFailed")).not.toBeInTheDocument();
+		});
+
+		it("Should keep the error while retrying keeps failing", async () => {
+			// Arrange
+			failProjectsLoad();
+			const { user } = renderSut();
+			await screen.findByText("common.loadFailed");
+
+			// Act
+			await user.click(screen.getByRole("button", { name: "common.retry" }));
+
+			// Assert
+			expect(await screen.findByText("common.loadFailed")).toBeInTheDocument();
+			expect(
+				screen.queryByText("projectSelection.emptyState"),
+			).not.toBeInTheDocument();
+		});
+
+		it("Should keep the error, and not the empty state, while a retry is still loading", async () => {
+			// Arrange
+			failProjectsLoad();
+			const { user } = renderSut();
+			await screen.findByText("common.loadFailed");
+			let finishLoading: () => void = () => {};
+			backend.data.getAvailableProjects = () =>
+				new Promise((_, reject) => {
+					finishLoading = () => reject(new Error("boom"));
+				});
+
+			// Act
+			await user.click(screen.getByRole("button", { name: "common.retry" }));
+
+			// Assert
+			expect(screen.getByText("common.loadFailed")).toBeInTheDocument();
+			expect(
+				screen.getByRole("button", { name: "common.retry" }),
+			).toBeDisabled();
+			expect(
+				screen.queryByText("projectSelection.emptyState"),
+			).not.toBeInTheDocument();
+			finishLoading();
+			await waitFor(() =>
+				expect(
+					screen.getByRole("button", { name: "common.retry" }),
+				).toBeEnabled(),
+			);
+		});
+
+		it("Should show neither the error nor the empty state while the first load is pending", async () => {
+			// Arrange
+			backend.data.getAvailableProjects = () => new Promise(() => {});
+
+			// Act
+			renderSut();
+
+			// Assert
+			expect(
+				screen.queryByText("projectSelection.emptyState"),
+			).not.toBeInTheDocument();
+			expect(screen.queryByText("common.loadFailed")).not.toBeInTheDocument();
+		});
+
+		it("Should tell the user when the project data of an opened project fails to load", async () => {
+			// Arrange
+			backend.state.projects = [
+				new ProjectBuilder().withId("p-1").withName("Alpha").build(),
+			];
+			const loadCommands = backend.data.getCommands;
+			backend.data.getCommands = async () => {
+				throw new Error("boom");
+			};
+			const { user, location } = renderSut();
+
+			// Act
+			await user.click(await screen.findByRole("button", { name: "Alpha" }));
+
+			// Assert
+			expect(await screen.findByText("common.loadFailed")).toBeInTheDocument();
+			expect(location().pathname).toBe(ScreenRoutes.ProjectSelection);
+			expect(screen.getByText("Alpha")).toBeInTheDocument();
+
+			backend.data.getCommands = loadCommands;
+			await user.click(screen.getByRole("button", { name: "common.retry" }));
+			await waitFor(() => expect(location().pathname).toBe(ScreenRoutes.Logs));
+		});
+
+		it("Should tell the user when opening the project itself fails", async () => {
+			// Arrange
+			backend.state.projects = [
+				new ProjectBuilder().withId("p-1").withName("Alpha").build(),
+			];
+			backend.data.openProject = async () => {
+				throw new Error("boom");
+			};
+			const { user, location } = renderSut();
+
+			// Act
+			await user.click(await screen.findByRole("button", { name: "Alpha" }));
+
+			// Assert
+			expect(await screen.findByText("common.loadFailed")).toBeInTheDocument();
+			expect(location().pathname).toBe(ScreenRoutes.ProjectSelection);
+		});
+	});
 });
