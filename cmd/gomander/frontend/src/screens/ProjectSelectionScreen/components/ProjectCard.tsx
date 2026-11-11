@@ -14,10 +14,12 @@ export const ProjectCard = ({
 	project,
 	handleDeleteProject,
 	handleOpenProject,
+	isOpenDisabled,
 }: {
 	project: Project;
 	handleDeleteProject: () => void;
 	handleOpenProject: () => void;
+	isOpenDisabled: boolean;
 }) => {
 	const { t } = useTranslation();
 
@@ -53,6 +55,7 @@ export const ProjectCard = ({
 				type="button"
 				className="flex flex-col items-start gap-1 p-2 cursor-pointer"
 				onClick={handleOpenProject}
+				disabled={isOpenDisabled}
 			>
 				<p className="font-medium">{project.name}</p>
 			</button>

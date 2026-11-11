@@ -123,6 +123,7 @@ export const ProjectSelectionScreen = () => {
 								project={p}
 								handleDeleteProject={handleDeleteProject(p.id)}
 								handleOpenProject={handleOpenProject(p.id)}
+								isOpenDisabled={isPending}
 							/>
 						))}
 					</div>

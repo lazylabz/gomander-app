@@ -404,6 +404,35 @@ describe("ProjectSelectionScreen", () => {
 			await waitFor(() => expect(location().pathname).toBe(ScreenRoutes.Logs));
 		});
 
+		it("Should not let another project be selected while one is still opening", async () => {
+			// Arrange
+			backend.state.projects = [
+				new ProjectBuilder().withId("p-1").withName("Alpha").build(),
+				new ProjectBuilder().withId("p-2").withName("Beta").build(),
+			];
+			const openedProjectIds: string[] = [];
+			let failOpening: () => void = () => {};
+			backend.data.openProject = (projectId) => {
+				openedProjectIds.push(projectId);
+				return new Promise((_, reject) => {
+					failOpening = () => reject(new Error("boom"));
+				});
+			};
+			const { user } = renderSut();
+			await user.click(await screen.findByRole("button", { name: "Alpha" }));
+
+			// Act
+			await user.click(screen.getByRole("button", { name: "Beta" }));
+
+			// Assert
+			expect(screen.getByRole("button", { name: "Beta" })).toBeDisabled();
+			expect(openedProjectIds).toEqual(["p-1"]);
+			failOpening();
+			await waitFor(() =>
+				expect(screen.getByRole("button", { name: "Beta" })).toBeEnabled(),
+			);
+		});
+
 		it("Should tell the user when opening the project itself fails", async () => {
 			// Arrange
 			backend.state.projects = [
