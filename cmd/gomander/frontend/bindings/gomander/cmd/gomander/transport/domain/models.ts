@@ -17,6 +17,8 @@ export interface CommandBlueprint {
     "name": string;
     "command": string;
     "workingDirectory": string;
+    "link": string;
+    "errorPatterns": string[] | null;
 }
 
 /**

@@ -122,7 +122,7 @@ func New(t *testing.T) *Harness {
 		failures:   failures,
 	}
 
-	projectFileV1 := projectinfrastructure.NewProjectFileV1(fsFacade)
+	projectFile := projectinfrastructure.NewProjectFile(fsFacade)
 
 	eventBus := eventbus.NewInMemoryEventBus()
 	processRunner.domainEvents = eventBus
@@ -160,10 +160,10 @@ func New(t *testing.T) *Harness {
 			EditProject:          projectusecases.NewEditProject(projectRepo),
 			CloseProject:         projectusecases.NewCloseProject(openedProject),
 			DeleteProject:        projectusecases.NewDeleteProject(projectRepo, eventBus),
-			ExportProject:        projectusecases.NewExportProject(projectRepo, commandRepo, commandGroupRepo, dialogs, projectFileV1),
+			ExportProject:        projectusecases.NewExportProject(projectRepo, commandRepo, commandGroupRepo, dialogs, projectFile),
 			ImportProject:        projectusecases.NewImportProject(unitOfWork),
 			GetProjectToImport: projectusecases.NewGetProjectToImport(dialogs, map[projectusecases.FileType]projectusecases.BlueprintReader{
-				projectusecases.FileTypeGomander:    projectFileV1,
+				projectusecases.FileTypeGomander:    projectFile,
 				projectusecases.FileTypePackageJSON: projectinfrastructure.NewPackageJSONFile(fsFacade),
 			}),
 

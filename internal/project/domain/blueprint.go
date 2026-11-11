@@ -19,6 +19,8 @@ type BlueprintCommand struct {
 	Name             string
 	Command          string
 	WorkingDirectory string
+	Link             string
+	ErrorPatterns    []string
 }
 
 type BlueprintCommandGroup struct {

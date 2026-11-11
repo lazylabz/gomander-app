@@ -13,10 +13,12 @@ type ProjectBlueprint struct {
 }
 
 type CommandBlueprint struct {
-	Id               string `json:"id"`
-	Name             string `json:"name"`
-	Command          string `json:"command"`
-	WorkingDirectory string `json:"workingDirectory"`
+	Id               string   `json:"id"`
+	Name             string   `json:"name"`
+	Command          string   `json:"command"`
+	WorkingDirectory string   `json:"workingDirectory"`
+	Link             string   `json:"link"`
+	ErrorPatterns    []string `json:"errorPatterns"`
 }
 
 type CommandGroupBlueprint struct {
@@ -54,6 +56,8 @@ func fromBlueprintCommand(command projectdomain.BlueprintCommand) CommandBluepri
 		Name:             command.Name,
 		Command:          command.Command,
 		WorkingDirectory: command.WorkingDirectory,
+		Link:             command.Link,
+		ErrorPatterns:    array.Map(command.ErrorPatterns, func(pattern string) string { return pattern }),
 	}
 }
 
@@ -63,6 +67,8 @@ func (c CommandBlueprint) ToDomain() projectdomain.BlueprintCommand {
 		Name:             c.Name,
 		Command:          c.Command,
 		WorkingDirectory: c.WorkingDirectory,
+		Link:             c.Link,
+		ErrorPatterns:    c.ErrorPatterns,
 	}
 }
 
