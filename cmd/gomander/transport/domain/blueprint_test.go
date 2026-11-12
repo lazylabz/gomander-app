@@ -15,7 +15,14 @@ var blueprint = projectdomain.Blueprint{
 	Name:             "Gomander",
 	WorkingDirectory: "/home/user/app",
 	Commands: []projectdomain.BlueprintCommand{
-		{Id: "cmd-1", Name: "Dev server", Command: "pnpm dev", WorkingDirectory: "web"},
+		{
+			Id:               "cmd-1",
+			Name:             "Dev server",
+			Command:          "pnpm dev",
+			WorkingDirectory: "web",
+			Link:             "http://localhost:3000",
+			ErrorPatterns:    []string{"ERROR"},
+		},
 	},
 	CommandGroups: []projectdomain.BlueprintCommandGroup{
 		{Id: "group-1", Name: "Everything", CommandIds: []string{"cmd-1"}},
@@ -37,7 +44,9 @@ func TestProjectBlueprint(t *testing.T) {
 					"id": "cmd-1",
 					"name": "Dev server",
 					"command": "pnpm dev",
-					"workingDirectory": "web"
+					"workingDirectory": "web",
+					"link": "http://localhost:3000",
+					"errorPatterns": ["ERROR"]
 				}
 			],
 			"commandGroups": [
@@ -56,6 +65,17 @@ func TestProjectBlueprint(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, blueprint, returned)
+	})
+
+	t.Run("Should give the frontend an empty list of error patterns for a command that has none", func(t *testing.T) {
+		// Act
+		sent, err := json.Marshal(transport.FromBlueprint(projectdomain.Blueprint{
+			Commands: []projectdomain.BlueprintCommand{{Id: "cmd-1", Name: "Dev server"}},
+		}))
+
+		// Assert
+		require.NoError(t, err)
+		assert.Contains(t, string(sent), `"errorPatterns":[]`)
 	})
 
 	t.Run("Should give the frontend empty lists for a Blueprint that carries none", func(t *testing.T) {

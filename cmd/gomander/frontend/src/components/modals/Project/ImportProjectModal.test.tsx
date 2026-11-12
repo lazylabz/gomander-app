@@ -29,12 +29,16 @@ describe("ImportProjectModal", () => {
 		name: "Build",
 		command: "make build",
 		workingDirectory: "",
+		link: "",
+		errorPatterns: [],
 	};
 	const test = {
 		id: "cmd-2",
 		name: "Test",
 		command: "make test",
 		workingDirectory: "",
+		link: "",
+		errorPatterns: [],
 	};
 	const ci = { id: "group-1", name: "CI", commandIds: ["cmd-1"] };
 	const all = { id: "group-2", name: "All", commandIds: ["cmd-1", "cmd-2"] };

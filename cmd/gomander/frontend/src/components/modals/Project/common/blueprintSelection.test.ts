@@ -15,6 +15,8 @@ const aCommand = (id: string): CommandBlueprint => ({
 	name: id,
 	command: `echo ${id}`,
 	workingDirectory: "/app",
+	link: "",
+	errorPatterns: [],
 });
 
 const aGroup = (id: string, commandIds: string[]): CommandGroupBlueprint => ({

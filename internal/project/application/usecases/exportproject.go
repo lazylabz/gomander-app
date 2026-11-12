@@ -73,6 +73,8 @@ func (uc *ExportProject) Execute(projectId string) (string, error) {
 			Name:             cmd.Name,
 			Command:          cmd.Command,
 			WorkingDirectory: cmd.WorkingDirectory,
+			Link:             cmd.Link,
+			ErrorPatterns:    cmd.ErrorPatterns,
 		})
 	}
 

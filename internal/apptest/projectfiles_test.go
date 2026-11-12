@@ -11,6 +11,7 @@ import (
 	"gomander/internal/domainerrors"
 	"gomander/internal/helpers/array"
 	projectusecases "gomander/internal/project/application/usecases"
+	projectdomain "gomander/internal/project/domain"
 	projecttest "gomander/internal/project/domain/test"
 )
 
@@ -27,6 +28,8 @@ func TestExportingAProject(t *testing.T) {
 			WithProjectId(project.Id).
 			WithName("Dev server").
 			WithCommand("pnpm dev").
+			WithLink("http://localhost:3000").
+			WithErrorPatterns([]string{"ERROR", "panic:"}).
 			Build()
 		h.GivenCommands(command)
 
@@ -49,7 +52,7 @@ func TestExportingAProject(t *testing.T) {
 		exported, written := h.ExportedFile("/home/user/gomander.json")
 		assert.True(t, written)
 		assert.JSONEq(t, `{
-			"version": 1,
+			"version": 2,
 			"name": "Gomander",
 			"workingDirectory": "",
 			"commands": [
@@ -57,7 +60,9 @@ func TestExportingAProject(t *testing.T) {
 					"id": "`+command.Id+`",
 					"name": "Dev server",
 					"command": "pnpm dev",
-					"workingDirectory": "`+command.WorkingDirectory+`"
+					"workingDirectory": "`+command.WorkingDirectory+`",
+					"link": "http://localhost:3000",
+					"errorPatterns": ["ERROR", "panic:"]
 				}
 			],
 			"commandGroups": [
@@ -68,6 +73,58 @@ func TestExportingAProject(t *testing.T) {
 				}
 			]
 		}`, string(exported))
+	})
+
+	t.Run("Should give an exported project back with each command's link and error patterns", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		project := projecttest.NewProjectBuilder().WithName("Gomander").Build()
+		h.GivenProjects(project)
+		h.GivenOpenedProject(project.Id)
+
+		withLinkAndPatterns := commandtest.NewCommandBuilder().
+			WithProjectId(project.Id).
+			WithName("Dev server").
+			WithLink("http://localhost:3000").
+			WithErrorPatterns([]string{"ERROR", "panic:"}).
+			WithPosition(0).
+			Build()
+		withNeither := commandtest.NewCommandBuilder().
+			WithProjectId(project.Id).
+			WithName("Tests").
+			WithPosition(1).
+			Build()
+		h.GivenCommands(withLinkAndPatterns, withNeither)
+
+		h.GivenExportDestination("/home/user/gomander.json")
+		_, err := h.UseCases.ExportProject.Execute(project.Id)
+		assert.NoError(t, err)
+
+		exported, _ := h.ExportedFile("/home/user/gomander.json")
+		h.GivenFileToImport("/home/user/gomander.json", exported)
+
+		toImport, err := h.UseCases.GetProjectToImport.Execute(projectusecases.FileTypeGomander)
+		assert.NoError(t, err)
+
+		// Act
+		err = h.UseCases.ImportProject.Execute(*toImport, "Imported", "/work")
+
+		// Assert
+		assert.NoError(t, err)
+
+		projects, err := h.UseCases.GetAvailableProjects.Execute()
+		assert.NoError(t, err)
+		imported := array.Filter(projects, func(p projectdomain.Project) bool { return p.Name == "Imported" })
+		assert.Len(t, imported, 1)
+		h.GivenOpenedProject(imported[0].Id)
+
+		commands := commandsOf(t, h)
+		assert.Equal(t, []string{"Dev server", "Tests"}, array.Map(commands, commandName))
+		assert.Equal(t, "http://localhost:3000", commands[0].Link)
+		assert.Equal(t, []string{"ERROR", "panic:"}, commands[0].ErrorPatterns)
+		assert.Empty(t, commands[1].Link)
+		assert.Empty(t, commands[1].ErrorPatterns)
 	})
 
 	t.Run("Should write nothing when the user cancels the dialog", func(t *testing.T) {
@@ -144,5 +201,65 @@ func TestImportingAProject(t *testing.T) {
 		assert.Len(t, groups, 1)
 		assert.Equal(t, "Everything", groups[0].Name)
 		assert.Equal(t, []string{"Dev server", "Tests"}, commandNamesOf(commands, groups[0].CommandIds))
+	})
+
+	t.Run("Should import a file exported before links and error patterns were carried as commands without them", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		h.GivenFileToImport("/home/user/gomander.json", []byte(`{
+			"version": 1,
+			"name": "Exported",
+			"commands": [
+				{"id": "cmd-1", "name": "Dev server", "command": "pnpm dev", "workingDirectory": "web"}
+			],
+			"commandGroups": []
+		}`))
+
+		toImport, err := h.UseCases.GetProjectToImport.Execute(projectusecases.FileTypeGomander)
+		assert.NoError(t, err)
+
+		// Act
+		err = h.UseCases.ImportProject.Execute(*toImport, "Imported", "/work")
+
+		// Assert
+		assert.NoError(t, err)
+
+		projects, err := h.UseCases.GetAvailableProjects.Execute()
+		assert.NoError(t, err)
+		h.GivenOpenedProject(projects[0].Id)
+
+		commands := commandsOf(t, h)
+		assert.Len(t, commands, 1)
+		assert.Empty(t, commands[0].Link)
+		assert.Empty(t, commands[0].ErrorPatterns)
+	})
+
+	t.Run("Should refuse a file written by a Gomander newer than this one", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		h.GivenFileToImport("/home/user/gomander.json", []byte(`{"version": 99, "name": "From the future"}`))
+
+		// Act
+		toImport, err := h.UseCases.GetProjectToImport.Execute(projectusecases.FileTypeGomander)
+
+		// Assert
+		assert.ErrorContains(t, err, "version 99")
+		assert.Nil(t, toImport)
+	})
+
+	t.Run("Should refuse a file that names no version", func(t *testing.T) {
+		// Arrange
+		h := apptest.New(t)
+
+		h.GivenFileToImport("/home/user/gomander.json", []byte(`{"name": "Unversioned", "commands": []}`))
+
+		// Act
+		toImport, err := h.UseCases.GetProjectToImport.Execute(projectusecases.FileTypeGomander)
+
+		// Assert
+		assert.ErrorContains(t, err, "version 0")
+		assert.Nil(t, toImport)
 	})
 }

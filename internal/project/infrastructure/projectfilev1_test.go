@@ -1,20 +1,16 @@
 package infrastructure
 
 import (
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 
-	facadetest "gomander/internal/facade/test"
 	"gomander/internal/project/domain"
 )
 
-// exportedByAnEarlierGomander is a file the app wrote before the format moved
-// out of the domain, kept verbatim. Both directions are pinned against it: a
-// file a user already has must still import, and a file the app writes today
-// must still open in a Gomander that has not been updated.
+// exportedByAnEarlierGomander is a file the app wrote before commands carried a
+// link and error patterns, kept verbatim: a file a user already has must still
+// import.
 const exportedByAnEarlierGomander = `{
   "version": 1,
   "name": "Gomander",
@@ -56,36 +52,13 @@ var exportedBlueprint = domain.Blueprint{
 	},
 }
 
-func TestProjectFileV1_Read(t *testing.T) {
+func TestDecodeProjectV1(t *testing.T) {
 	t.Run("Should read a file exported by an earlier Gomander", func(t *testing.T) {
-		// Arrange
-		fs := new(facadetest.MockFsFacade)
-		fs.On("ReadFile", "/home/user/gomander.json").Return([]byte(exportedByAnEarlierGomander), nil)
-
 		// Act
-		blueprint, err := NewProjectFileV1(fs).Read("/home/user/gomander.json")
+		blueprint, err := decodeProjectV1([]byte(exportedByAnEarlierGomander))
 
 		// Assert
 		assert.NoError(t, err)
 		assert.Equal(t, exportedBlueprint, *blueprint)
-	})
-}
-
-func TestProjectFileV1_Write(t *testing.T) {
-	t.Run("Should write the same bytes an earlier Gomander wrote", func(t *testing.T) {
-		// Arrange
-		fs := new(facadetest.MockFsFacade)
-
-		var written []byte
-		fs.On("WriteFile", "/home/user/gomander.json", mock.Anything, os.FileMode(0644)).
-			Run(func(args mock.Arguments) { written = args.Get(1).([]byte) }).
-			Return(nil)
-
-		// Act
-		err := NewProjectFileV1(fs).Write("/home/user/gomander.json", exportedBlueprint)
-
-		// Assert
-		assert.NoError(t, err)
-		assert.Equal(t, exportedByAnEarlierGomander, string(written))
 	})
 }

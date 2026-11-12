@@ -39,6 +39,8 @@ func (uc *ImportProject) Execute(blueprint projectdomain.Blueprint, name, workin
 			Name:             cmd.Name,
 			Command:          cmd.Command,
 			WorkingDirectory: cmd.WorkingDirectory,
+			Link:             cmd.Link,
+			ErrorPatterns:    cmd.ErrorPatterns,
 			ProjectId:        project.Id,
 			Position:         domain.Order.End(commands),
 		}
