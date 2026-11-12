@@ -9,6 +9,8 @@
   "common.add": "Add",
   "common.advanced": "Advanced",
   "common.close": "Close",
+  "common.loadFailed": "Something went wrong while loading. Try again.",
+  "common.retry": "Retry",
 
   "sidebar.project.close": "Close",
   "sidebar.commands.title": "Commands",

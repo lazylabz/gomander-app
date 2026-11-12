@@ -13,6 +13,23 @@ declare module "i18next" {
 	}
 }
 
+// The translations come from the backend, so when it is the backend that is
+// failing there is no copy to tell the user so with.
+const FALLBACK_COPY: Pick<Localization, "common.loadFailed" | "common.retry"> =
+	{
+		"common.loadFailed": "Something went wrong while loading. Try again.",
+		"common.retry": "Retry",
+	};
+
+export const initFallbackI18n = async () => {
+	await i18n.use(initReactI18next).init({
+		lng: "en",
+		resources: { en: { translation: FALLBACK_COPY } },
+		interpolation: { escapeValue: false },
+		react: { useSuspense: false },
+	});
+};
+
 export const initI18n = async () => {
 	// Get supported languages and user's current locale from backend
 	const [supportedLanguages, userConfig] = await Promise.all([

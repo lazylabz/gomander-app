@@ -9,6 +9,8 @@
   "common.add": "Añadir",
   "common.advanced": "Avanzado",
   "common.close": "Cerrar",
+  "common.loadFailed": "Algo salió mal al cargar. Inténtalo de nuevo.",
+  "common.retry": "Reintentar",
 
   "sidebar.project.close": "Cerrar",
   "sidebar.commands.title": "Comandos",

@@ -3,9 +3,11 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
+import { LoadFailure } from "@/components/LoadFailure/LoadFailure.tsx";
 import { CreateProjectModal } from "@/components/modals/Project/CreateProjectModal.tsx";
 import { DeleteProjectModal } from "@/components/modals/Project/DeleteProjectModal.tsx";
 import { ImportProjectModal } from "@/components/modals/Project/ImportProjectModal.tsx";
+import { dataService } from "@/contracts/service.ts";
 import type { ProjectBlueprint } from "@/contracts/types.ts";
 import { Button } from "@/design-system/components/ui/button.tsx";
 import { ButtonGroup } from "@/design-system/components/ui/button-group.tsx";
@@ -15,7 +17,9 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/design-system/components/ui/dropdown-menu.tsx";
+import { useLoadFailure } from "@/hooks/useLoadFailure.ts";
 import { fetchAvailableProjects } from "@/queries/fetchAvailableProjects.ts";
+import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
 import { ScreenRoutes } from "@/routes.ts";
 import { ProjectCard } from "@/screens/ProjectSelectionScreen/components/ProjectCard.tsx";
 import { useProjectStore } from "@/store/projectStore.ts";
@@ -33,6 +37,7 @@ export const ProjectSelectionScreen = () => {
 	const project = useProjectStore((state) => state.projectInfo);
 
 	const navigate = useNavigate();
+	const { hasFailed, isPending, attempt, retry } = useLoadFailure();
 
 	const [projectBeingImported, setProjectBeingImported] =
 		useState<ProjectBlueprint | null>(null);
@@ -70,9 +75,15 @@ export const ProjectSelectionScreen = () => {
 		}
 	};
 
+	const handleOpenProject = (projectId: string) => () =>
+		attempt(async () => {
+			await dataService.openProject(projectId);
+			await loadAllProjectData();
+		});
+
 	useEffect(() => {
-		fetchAvailableProjects();
-	}, []);
+		attempt(fetchAvailableProjects);
+	}, [attempt]);
 
 	useEffect(() => {
 		if (project) {
@@ -111,11 +122,16 @@ export const ProjectSelectionScreen = () => {
 								key={p.id}
 								project={p}
 								handleDeleteProject={handleDeleteProject(p.id)}
+								handleOpenProject={handleOpenProject(p.id)}
+								isOpenDisabled={isPending}
 							/>
 						))}
 					</div>
 				)}
-				{!hasProjects && <p>{t("projectSelection.emptyState")}</p>}
+				{hasFailed && <LoadFailure onRetry={retry} isRetrying={isPending} />}
+				{!hasProjects && !hasFailed && !isPending && (
+					<p>{t("projectSelection.emptyState")}</p>
+				)}
 				<div className="flex flex-row items-center gap-2 justify-center">
 					<Button onClick={openCreateProjectModal} variant="ghost">
 						<Plus /> {t("projectSelection.createButton")}

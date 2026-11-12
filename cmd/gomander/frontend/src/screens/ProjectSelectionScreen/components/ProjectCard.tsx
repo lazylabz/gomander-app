@@ -1,7 +1,6 @@
 import { EllipsisVertical } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { dataService } from "@/contracts/service.ts";
 import type { Project } from "@/contracts/types.ts";
 import {
 	DropdownMenu,
@@ -9,22 +8,20 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/design-system/components/ui/dropdown-menu.tsx";
-import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
 import { exportProject } from "@/useCases/project/exportProject.tsx";
 
 export const ProjectCard = ({
 	project,
 	handleDeleteProject,
+	handleOpenProject,
+	isOpenDisabled,
 }: {
 	project: Project;
 	handleDeleteProject: () => void;
+	handleOpenProject: () => void;
+	isOpenDisabled: boolean;
 }) => {
 	const { t } = useTranslation();
-
-	const handleOpenProject = (projectId: string) => async () => {
-		await dataService.openProject(projectId);
-		await loadAllProjectData();
-	};
 
 	const handleExportProject = async () => {
 		await exportProject(project.id);
@@ -57,7 +54,8 @@ export const ProjectCard = ({
 			<button
 				type="button"
 				className="flex flex-col items-start gap-1 p-2 cursor-pointer"
-				onClick={handleOpenProject(project.id)}
+				onClick={handleOpenProject}
+				disabled={isOpenDisabled}
 			>
 				<p className="font-medium">{project.name}</p>
 			</button>

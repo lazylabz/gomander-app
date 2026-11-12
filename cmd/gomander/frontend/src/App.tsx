@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Route, Routes } from "react-router";
 
+import { LoadFailure } from "@/components/LoadFailure/LoadFailure.tsx";
 import { AppSidebarLayout } from "@/components/layout/AppSidebarLayout/AppSidebarLayout.tsx";
 import { MissingEnvironmentPathDialog } from "@/components/MissingEnvironmentPath/MissingEnvironmentPathDialog.tsx";
 import { EventListenersContainer } from "@/components/utility/EventListenersContainer.tsx";
 import { ZoomShortcuts } from "@/components/utility/ZoomShortcuts.tsx";
 import { ThemeProvider } from "@/contexts/theme.tsx";
 import { Toaster } from "@/design-system/components/ui/sonner.tsx";
-import { initI18n } from "@/design-system/lib/i18n.ts";
+import { initFallbackI18n, initI18n } from "@/design-system/lib/i18n.ts";
+import { useLoadFailure } from "@/hooks/useLoadFailure.ts";
 import { fetchCurrentRelease } from "@/queries/fetchCurrentRelease.ts";
 import { fetchUserConfig } from "@/queries/fetchUserConfig.ts";
 import { loadAllProjectData } from "@/queries/loadAllProjectData.ts";
@@ -27,19 +29,29 @@ function App() {
 	);
 
 	const [i18nReady, setI18nReady] = useState(false);
+	const { hasFailed, isPending, attempt, retry } = useLoadFailure();
 
 	const initialFetchesAreDone = projectIsLoaded && userConfigIsLoaded;
 
-	useEffect(() => {
-		const initializeApp = async () => {
-			await initI18n();
-			setI18nReady(true);
-			loadAllProjectData();
-			fetchUserConfig();
-		};
+	const initializeApp = useCallback(
+		() =>
+			attempt(async () => {
+				try {
+					await initI18n();
+				} catch (error) {
+					await initFallbackI18n();
+					throw error;
+				}
 
+				setI18nReady(true);
+				await Promise.all([loadAllProjectData(), fetchUserConfig()]);
+			}),
+		[attempt],
+	);
+
+	useEffect(() => {
 		initializeApp();
-	}, []);
+	}, [initializeApp]);
 
 	const appIsReady = i18nReady && initialFetchesAreDone;
 
@@ -52,6 +64,16 @@ function App() {
 		fetchCurrentRelease();
 		checkForNewRelease();
 	}, [appIsReady]);
+
+	if (hasFailed) {
+		return (
+			<ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+				<div className="w-full h-full flex items-center justify-center">
+					<LoadFailure onRetry={retry} isRetrying={isPending} />
+				</div>
+			</ThemeProvider>
+		);
+	}
 
 	if (!appIsReady) {
 		return null;
