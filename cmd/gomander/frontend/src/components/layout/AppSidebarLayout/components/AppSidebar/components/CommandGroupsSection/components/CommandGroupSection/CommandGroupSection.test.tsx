@@ -17,6 +17,7 @@ import { installInMemoryBackend } from "@/testing/backend.ts";
 import { CommandBuilder } from "@/testing/builders/command.ts";
 import { CommandGroupBuilder } from "@/testing/builders/commandGroup.ts";
 import { installTranslations } from "@/testing/i18n.ts";
+import { tabToAndPressEnter } from "@/testing/keyboard.ts";
 import { renderWithProviders } from "@/testing/render.tsx";
 import { resetStores } from "@/testing/stores.ts";
 import {
@@ -169,6 +170,57 @@ describe("CommandGroupSection", () => {
 
 		// Assert
 		expect(backend.state.runningGroupIds).toEqual([]);
+	});
+
+	it("Should run the group from the keyboard without expanding it", async () => {
+		// Arrange
+		seed(allIdle);
+		const { user } = render();
+
+		// Act
+		await tabToAndPressEnter(
+			user,
+			screen.getByRole("button", { name: "sidebar.commandGroups.run" }),
+		);
+
+		// Assert
+		expect(backend.state.runningGroupIds).toEqual(["group-1"]);
+		expect(screen.queryByText("api")).not.toBeInTheDocument();
+	});
+
+	it("Should stop the group from the keyboard without expanding it", async () => {
+		// Arrange
+		seed(allRunning);
+		backend.state.runningGroupIds = ["group-1"];
+		const { user } = render();
+
+		// Act
+		await tabToAndPressEnter(
+			user,
+			screen.getByRole("button", { name: "sidebar.commandGroups.stop" }),
+		);
+
+		// Assert
+		await waitFor(() => expect(backend.state.runningGroupIds).toEqual([]));
+		expect(screen.queryByText("api")).not.toBeInTheDocument();
+	});
+
+	it("Should not nest its run or stop controls inside the header's button", () => {
+		// Arrange
+		seed(oneRunning);
+
+		// Act
+		render();
+
+		// Assert
+		for (const name of [
+			"sidebar.commandGroups.run",
+			"sidebar.commandGroups.stop",
+		]) {
+			expect(
+				screen.getByRole("button", { name }).parentElement?.closest("button"),
+			).toBeNull();
+		}
 	});
 
 	it("Should show the group's commands once its header is clicked", async () => {

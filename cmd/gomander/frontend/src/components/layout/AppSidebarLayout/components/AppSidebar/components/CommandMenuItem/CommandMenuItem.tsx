@@ -3,6 +3,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, LinkIcon, Play, Square } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import {
+	sidebarControlClassName,
+	stretchedButtonClassName,
+} from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/sidebarControls.ts";
 import { useSidebarContext } from "@/components/layout/AppSidebarLayout/components/AppSidebar/contexts/sidebarContext.tsx";
 import { useTheme } from "@/contexts/theme.tsx";
 import { externalBrowserService } from "@/contracts/service.ts";
@@ -55,16 +59,22 @@ export const CommandMenuItem = ({
 		transition,
 	};
 
-	const handleRunCommand = async () => {
+	const selectCommand = () => {
 		setActiveCommandId(command.id);
+		cleanCommandError(command.id);
+	};
+
+	const handleRunCommand = async () => {
+		selectCommand();
 		await startCommand(command.id);
 	};
 
-	const handleOpenLink = async () => {
+	const handleOpenLink = () => {
 		if (!command.link) {
 			return;
 		}
 
+		selectCommand();
 		externalBrowserService.browserOpenURL(command.link);
 	};
 
@@ -88,14 +98,9 @@ export const CommandMenuItem = ({
 		await duplicateCommand(command.id, insideGroupId);
 	};
 
-	const onCommandSectionClick = () => {
-		setActiveCommandId(command.id);
-		cleanCommandError(command.id);
-	};
-
 	const handleStopCommand = async () => {
+		selectCommand();
 		await stopCommand(command.id);
-		setActiveCommandId(command.id);
 	};
 
 	const isIdle = commandsStatus[command.id] === CommandStatus.IDLE;
@@ -129,10 +134,8 @@ export const CommandMenuItem = ({
 		<ContextMenu>
 			<ContextMenuTrigger>
 				<SidebarMenuButton asChild className={className}>
-					<button
-						type="button"
-						onClick={onCommandSectionClick}
-						className="flex flex-row justify-between items-center w-full select-none"
+					<div
+						className="relative flex flex-row justify-between items-center w-full select-none"
 						ref={setNodeRef}
 						style={style}
 					>
@@ -146,48 +149,62 @@ export const CommandMenuItem = ({
 								<div
 									{...attributes}
 									{...listeners}
-									className="cursor-grab active:cursor-grabbing pr-0.5 rounded hover:bg-sidebar-accent/50 shrink-0"
+									className={cn(
+										sidebarControlClassName,
+										"cursor-grab active:cursor-grabbing pr-0.5 hover:bg-sidebar-accent/50 shrink-0",
+									)}
 								>
 									<GripVertical size={14} className="text-muted-foreground" />
 								</div>
 							)}
-							<p
-								className="cursor-default text-left truncate"
+							<button
+								type="button"
+								onClick={selectCommand}
 								title={command.name}
+								className={cn(
+									stretchedButtonClassName,
+									"cursor-default text-left truncate",
+								)}
 							>
 								{command.name}
-							</p>
+							</button>
 							{command.link && (
-								<LinkIcon
-									role="button"
+								<button
+									type="button"
 									aria-label={t("sidebar.commands.openLink")}
-									size={12}
 									onClick={handleOpenLink}
-									className="text-muted-foreground cursor-pointer hover:text-primary min-w-4"
-								/>
+									className={cn(sidebarControlClassName, "min-w-4")}
+								>
+									<LinkIcon size={12} />
+								</button>
 							)}
 						</div>
-						<div className="shrink-0">
+						<div className="shrink-0 flex">
 							{isIdle && (
-								<Play
-									role="button"
+								<button
+									type="button"
 									aria-label={t("sidebar.commands.run")}
-									size={16}
-									className="text-muted-foreground cursor-pointer hover:text-primary"
 									onClick={handleRunCommand}
-								/>
+									className={sidebarControlClassName}
+								>
+									<Play size={16} />
+								</button>
 							)}
 							{isRunning && (
-								<Square
-									role="button"
+								<button
+									type="button"
 									aria-label={t("sidebar.commands.stop")}
-									size={16}
-									className="text-muted-foreground dark:text-primary/70 cursor-pointer hover:text-primary dark:hover:text-primary"
 									onClick={handleStopCommand}
-								/>
+									className={cn(
+										sidebarControlClassName,
+										"dark:text-primary/70 dark:hover:text-primary",
+									)}
+								>
+									<Square size={16} />
+								</button>
 							)}
 						</div>
-					</button>
+					</div>
 				</SidebarMenuButton>
 			</ContextMenuTrigger>
 			<ContextMenuContent>

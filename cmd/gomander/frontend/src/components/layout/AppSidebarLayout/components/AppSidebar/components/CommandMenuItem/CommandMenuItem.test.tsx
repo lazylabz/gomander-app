@@ -14,6 +14,7 @@ import { installInMemoryBackend } from "@/testing/backend.ts";
 import { CommandBuilder } from "@/testing/builders/command.ts";
 import { CommandGroupBuilder } from "@/testing/builders/commandGroup.ts";
 import { installTranslations } from "@/testing/i18n.ts";
+import { tabToAndPressEnter } from "@/testing/keyboard.ts";
 import { renderWithProviders } from "@/testing/render.tsx";
 import { resetStores } from "@/testing/stores.ts";
 import {
@@ -27,12 +28,22 @@ describe("CommandMenuItem", () => {
 
 	let backend: InMemoryBackend;
 
-	const render = (command: Command, insideGroupId?: string) =>
+	const render = (
+		command: Command,
+		{
+			insideGroupId,
+			draggable = false,
+		}: { insideGroupId?: string; draggable?: boolean } = {},
+	) =>
 		renderWithProviders(
 			<sidebarContext.Provider value={{ startEditingCommand }}>
 				<DndContext>
 					<SortableContext items={[command.id]}>
-						<CommandMenuItem command={command} insideGroupId={insideGroupId} />
+						<CommandMenuItem
+							command={command}
+							insideGroupId={insideGroupId}
+							draggable={draggable}
+						/>
 					</SortableContext>
 				</DndContext>
 			</sidebarContext.Provider>,
@@ -178,6 +189,118 @@ describe("CommandMenuItem", () => {
 		expect(backend.state.openedUrls).toEqual(["http://localhost:3000"]);
 	});
 
+	it("Should make the command active and clear its error when its link is opened", async () => {
+		// Arrange
+		const command = new CommandBuilder()
+			.withId("cmd-1")
+			.withLink("http://localhost:3000")
+			.build();
+		seed(command, CommandStatus.IDLE);
+		commandStore.setState({ commandIdsWithErrors: ["cmd-1"] });
+		const { user } = render(command);
+
+		// Act
+		await user.click(
+			screen.getByRole("button", { name: "sidebar.commands.openLink" }),
+		);
+
+		// Assert
+		expect(commandStore.getState().activeCommandId).toBe("cmd-1");
+		expect(commandStore.getState().commandIdsWithErrors).toEqual([]);
+	});
+
+	it("Should make the command active and clear its error as soon as stop is clicked", async () => {
+		// Arrange
+		const command = new CommandBuilder().withId("cmd-1").build();
+		seed(command, CommandStatus.RUNNING);
+		backend.data.stopCommand = () => new Promise(() => {});
+		commandStore.setState({ commandIdsWithErrors: ["cmd-1"] });
+		const { user } = render(command);
+
+		// Act
+		await user.click(
+			screen.getByRole("button", { name: "sidebar.commands.stop" }),
+		);
+
+		// Assert
+		expect(commandStore.getState().activeCommandId).toBe("cmd-1");
+		expect(commandStore.getState().commandIdsWithErrors).toEqual([]);
+	});
+
+	it("Should run the command from the keyboard", async () => {
+		// Arrange
+		const command = new CommandBuilder().withId("cmd-1").build();
+		seed(command, CommandStatus.IDLE);
+		const { user } = render(command);
+
+		// Act
+		await tabToAndPressEnter(
+			user,
+			screen.getByRole("button", { name: "sidebar.commands.run" }),
+		);
+
+		// Assert
+		expect(backend.state.runningCommandIds).toEqual(["cmd-1"]);
+	});
+
+	it("Should stop the command from the keyboard", async () => {
+		// Arrange
+		const command = new CommandBuilder().withId("cmd-1").build();
+		seed(command, CommandStatus.RUNNING);
+		backend.state.runningCommandIds = ["cmd-1"];
+		const { user } = render(command);
+
+		// Act
+		await tabToAndPressEnter(
+			user,
+			screen.getByRole("button", { name: "sidebar.commands.stop" }),
+		);
+
+		// Assert
+		await waitFor(() => expect(backend.state.runningCommandIds).toEqual([]));
+	});
+
+	it("Should open the command's link from the keyboard", async () => {
+		// Arrange
+		const command = new CommandBuilder()
+			.withLink("http://localhost:3000")
+			.build();
+		seed(command, CommandStatus.IDLE);
+		const { user } = render(command);
+
+		// Act
+		await tabToAndPressEnter(
+			user,
+			screen.getByRole("button", { name: "sidebar.commands.openLink" }),
+		);
+
+		// Assert
+		expect(backend.state.openedUrls).toEqual(["http://localhost:3000"]);
+	});
+
+	// Assistive technology flattens a button's children, so a control nested in
+	// the row's button may never reach a screen reader.
+	it.each([
+		{ situation: "idle", status: CommandStatus.IDLE },
+		{ situation: "running", status: CommandStatus.RUNNING },
+	])("Should not nest any of its controls inside another button while $situation", ({
+		status,
+	}) => {
+		// Arrange
+		const command = new CommandBuilder()
+			.withLink("http://localhost:3000")
+			.build();
+		seed(command, status);
+
+		// Act
+		render(command, { draggable: true });
+
+		// Assert
+		for (const control of screen.getAllByRole("button")) {
+			expect(control.parentElement?.closest("button")).toBeNull();
+		}
+	});
+
 	it("Should disable editing, duplicating and deleting while the command runs", async () => {
 		// Arrange
 		const command = new CommandBuilder().withName("api").build();
@@ -224,7 +347,7 @@ describe("CommandMenuItem", () => {
 			.withCommands(command)
 			.build();
 		seed(command, CommandStatus.IDLE, [group]);
-		const { user } = render(command, insideGroupId);
+		const { user } = render(command, { insideGroupId });
 
 		// Act
 		await user.pointer({
@@ -267,7 +390,7 @@ describe("CommandMenuItem", () => {
 			.withCommands(command)
 			.build();
 		seed(command, CommandStatus.IDLE, [group]);
-		const { user } = render(command, "group-1");
+		const { user } = render(command, { insideGroupId: "group-1" });
 		await user.pointer({
 			keys: "[MouseRight]",
 			target: screen.getByText("api"),
@@ -318,7 +441,7 @@ describe("CommandMenuItem", () => {
 			.withCommands(command, new CommandBuilder().withId("cmd-2").build())
 			.build();
 		seed(command, CommandStatus.IDLE, [group]);
-		const { user } = render(command, "group-1");
+		const { user } = render(command, { insideGroupId: "group-1" });
 		await user.pointer({
 			keys: "[MouseRight]",
 			target: screen.getByText("api"),
