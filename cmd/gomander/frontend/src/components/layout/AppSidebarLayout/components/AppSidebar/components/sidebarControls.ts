@@ -1,6 +1,5 @@
-// A row's own button stretches over the whole row through ::after, and its
-// controls sit above it as sibling buttons: a control nested inside the row's
-// button would take no focus of its own and could be hidden from screen readers.
+// Controls sit above the row's stretched button as siblings: nested inside it,
+// they take no focus and screen readers may drop them.
 export const stretchedButtonClassName =
 	"outline-hidden after:absolute after:inset-0 after:rounded-md after:ring-sidebar-ring focus-visible:after:ring-2";
 

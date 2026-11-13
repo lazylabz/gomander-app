@@ -69,7 +69,6 @@ export const CommandGroupSection = ({
 	);
 
 	const run = async (e: SyntheticEvent) => {
-		// Prevent the folder from collapsing when clicking the play button
 		e.stopPropagation();
 
 		if (isReorderingGroups) {
@@ -80,7 +79,6 @@ export const CommandGroupSection = ({
 	};
 
 	const stop = async (e: SyntheticEvent) => {
-		// Prevent the folder from collapsing when clicking the stop button
 		e.stopPropagation();
 		if (isReorderingGroups) {
 			return;
