@@ -17,7 +17,7 @@ import { installInMemoryBackend } from "@/testing/backend.ts";
 import { CommandBuilder } from "@/testing/builders/command.ts";
 import { CommandGroupBuilder } from "@/testing/builders/commandGroup.ts";
 import { installTranslations } from "@/testing/i18n.ts";
-import { pressEnterOn } from "@/testing/keyboard.ts";
+import { tabToAndPressEnter } from "@/testing/keyboard.ts";
 import { renderWithProviders } from "@/testing/render.tsx";
 import { resetStores } from "@/testing/stores.ts";
 import {
@@ -178,7 +178,7 @@ describe("CommandGroupSection", () => {
 		const { user } = render();
 
 		// Act
-		await pressEnterOn(
+		await tabToAndPressEnter(
 			user,
 			screen.getByRole("button", { name: "sidebar.commandGroups.run" }),
 		);
@@ -195,7 +195,7 @@ describe("CommandGroupSection", () => {
 		const { user } = render();
 
 		// Act
-		await pressEnterOn(
+		await tabToAndPressEnter(
 			user,
 			screen.getByRole("button", { name: "sidebar.commandGroups.stop" }),
 		);

@@ -14,7 +14,7 @@ import { installInMemoryBackend } from "@/testing/backend.ts";
 import { CommandBuilder } from "@/testing/builders/command.ts";
 import { CommandGroupBuilder } from "@/testing/builders/commandGroup.ts";
 import { installTranslations } from "@/testing/i18n.ts";
-import { pressEnterOn } from "@/testing/keyboard.ts";
+import { tabToAndPressEnter } from "@/testing/keyboard.ts";
 import { renderWithProviders } from "@/testing/render.tsx";
 import { resetStores } from "@/testing/stores.ts";
 import {
@@ -209,11 +209,11 @@ describe("CommandMenuItem", () => {
 		expect(commandStore.getState().commandIdsWithErrors).toEqual([]);
 	});
 
-	it("Should make the command active and clear its error when it is stopped", async () => {
+	it("Should make the command active and clear its error as soon as stop is clicked", async () => {
 		// Arrange
 		const command = new CommandBuilder().withId("cmd-1").build();
 		seed(command, CommandStatus.RUNNING);
-		backend.state.runningCommandIds = ["cmd-1"];
+		backend.data.stopCommand = () => new Promise(() => {});
 		commandStore.setState({ commandIdsWithErrors: ["cmd-1"] });
 		const { user } = render(command);
 
@@ -223,9 +223,7 @@ describe("CommandMenuItem", () => {
 		);
 
 		// Assert
-		await waitFor(() =>
-			expect(commandStore.getState().activeCommandId).toBe("cmd-1"),
-		);
+		expect(commandStore.getState().activeCommandId).toBe("cmd-1");
 		expect(commandStore.getState().commandIdsWithErrors).toEqual([]);
 	});
 
@@ -236,7 +234,7 @@ describe("CommandMenuItem", () => {
 		const { user } = render(command);
 
 		// Act
-		await pressEnterOn(
+		await tabToAndPressEnter(
 			user,
 			screen.getByRole("button", { name: "sidebar.commands.run" }),
 		);
@@ -253,7 +251,7 @@ describe("CommandMenuItem", () => {
 		const { user } = render(command);
 
 		// Act
-		await pressEnterOn(
+		await tabToAndPressEnter(
 			user,
 			screen.getByRole("button", { name: "sidebar.commands.stop" }),
 		);
@@ -271,7 +269,7 @@ describe("CommandMenuItem", () => {
 		const { user } = render(command);
 
 		// Act
-		await pressEnterOn(
+		await tabToAndPressEnter(
 			user,
 			screen.getByRole("button", { name: "sidebar.commands.openLink" }),
 		);

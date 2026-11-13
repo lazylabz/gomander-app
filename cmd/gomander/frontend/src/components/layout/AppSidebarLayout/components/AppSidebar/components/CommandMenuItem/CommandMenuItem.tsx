@@ -99,8 +99,8 @@ export const CommandMenuItem = ({
 	};
 
 	const handleStopCommand = async () => {
-		await stopCommand(command.id);
 		selectCommand();
+		await stopCommand(command.id);
 	};
 
 	const isIdle = commandsStatus[command.id] === CommandStatus.IDLE;
