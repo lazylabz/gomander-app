@@ -1,7 +1,6 @@
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { screen, waitFor } from "@testing-library/react";
-import type { UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
@@ -15,6 +14,7 @@ import { installInMemoryBackend } from "@/testing/backend.ts";
 import { CommandBuilder } from "@/testing/builders/command.ts";
 import { CommandGroupBuilder } from "@/testing/builders/commandGroup.ts";
 import { installTranslations } from "@/testing/i18n.ts";
+import { pressEnterOn } from "@/testing/keyboard.ts";
 import { renderWithProviders } from "@/testing/render.tsx";
 import { resetStores } from "@/testing/stores.ts";
 import {
@@ -30,8 +30,10 @@ describe("CommandMenuItem", () => {
 
 	const render = (
 		command: Command,
-		insideGroupId?: string,
-		draggable = false,
+		{
+			insideGroupId,
+			draggable = false,
+		}: { insideGroupId?: string; draggable?: boolean } = {},
 	) =>
 		renderWithProviders(
 			<sidebarContext.Provider value={{ startEditingCommand }}>
@@ -58,12 +60,6 @@ describe("CommandMenuItem", () => {
 			commandsStatus: { [command.id]: status },
 		});
 		commandGroupStore.setState({ commandGroups });
-	};
-
-	const pressEnterOn = async (user: UserEvent, control: HTMLElement) => {
-		control.focus();
-		expect(control).toHaveFocus();
-		await user.keyboard("{Enter}");
 	};
 
 	beforeEach(async () => {
@@ -299,7 +295,7 @@ describe("CommandMenuItem", () => {
 		seed(command, status);
 
 		// Act
-		render(command, undefined, true);
+		render(command, { draggable: true });
 
 		// Assert
 		for (const control of screen.getAllByRole("button")) {
@@ -353,7 +349,7 @@ describe("CommandMenuItem", () => {
 			.withCommands(command)
 			.build();
 		seed(command, CommandStatus.IDLE, [group]);
-		const { user } = render(command, insideGroupId);
+		const { user } = render(command, { insideGroupId });
 
 		// Act
 		await user.pointer({
@@ -396,7 +392,7 @@ describe("CommandMenuItem", () => {
 			.withCommands(command)
 			.build();
 		seed(command, CommandStatus.IDLE, [group]);
-		const { user } = render(command, "group-1");
+		const { user } = render(command, { insideGroupId: "group-1" });
 		await user.pointer({
 			keys: "[MouseRight]",
 			target: screen.getByText("api"),
@@ -447,7 +443,7 @@ describe("CommandMenuItem", () => {
 			.withCommands(command, new CommandBuilder().withId("cmd-2").build())
 			.build();
 		seed(command, CommandStatus.IDLE, [group]);
-		const { user } = render(command, "group-1");
+		const { user } = render(command, { insideGroupId: "group-1" });
 		await user.pointer({
 			keys: "[MouseRight]",
 			target: screen.getByText("api"),

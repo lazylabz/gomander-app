@@ -1,7 +1,6 @@
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { screen, waitFor } from "@testing-library/react";
-import type { UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CommandGroupSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandGroupsSection/components/CommandGroupSection/CommandGroupSection.tsx";
@@ -18,6 +17,7 @@ import { installInMemoryBackend } from "@/testing/backend.ts";
 import { CommandBuilder } from "@/testing/builders/command.ts";
 import { CommandGroupBuilder } from "@/testing/builders/commandGroup.ts";
 import { installTranslations } from "@/testing/i18n.ts";
+import { pressEnterOn } from "@/testing/keyboard.ts";
 import { renderWithProviders } from "@/testing/render.tsx";
 import { resetStores } from "@/testing/stores.ts";
 import {
@@ -71,12 +71,6 @@ describe("CommandGroupSection", () => {
 	const allRunning = {
 		"cmd-1": CommandStatus.RUNNING,
 		"cmd-2": CommandStatus.RUNNING,
-	};
-
-	const pressEnterOn = async (user: UserEvent, control: HTMLElement) => {
-		control.focus();
-		expect(control).toHaveFocus();
-		await user.keyboard("{Enter}");
 	};
 
 	beforeEach(async () => {

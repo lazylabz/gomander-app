@@ -3,8 +3,11 @@ import { CSS } from "@dnd-kit/utilities";
 import { Folder, FolderOpen, Play, Square } from "lucide-react";
 import type { SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
-
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
+import {
+	sidebarControlClassName,
+	stretchedButtonClassName,
+} from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/sidebarControls.ts";
 import type { CommandGroup } from "@/contracts/types.ts";
 import {
 	ContextMenu,
@@ -27,9 +30,6 @@ import { CommandStatus } from "@/types/CommandStatus.ts";
 import { deleteCommandGroup } from "@/useCases/commandGroup/deleteCommandGroup.ts";
 import { runCommandGroup } from "@/useCases/commandGroup/runCommandGroup.ts";
 import { stopCommandGroup } from "@/useCases/commandGroup/stopCommandGroup.ts";
-
-const controlClassName =
-	"relative z-10 flex items-center justify-center rounded-sm text-muted-foreground cursor-pointer hover:text-primary outline-hidden ring-sidebar-ring focus-visible:ring-2";
 
 export const CommandGroupSection = ({
 	commandGroup,
@@ -122,7 +122,10 @@ export const CommandGroupSection = ({
 						<div className="relative flex items-center gap-2 p-2 w-full justify-between">
 							<button
 								type="button"
-								className="flex items-center gap-2 min-w-0 overflow-hidden outline-hidden after:absolute after:inset-0 after:rounded-md after:ring-sidebar-ring focus-visible:after:ring-2"
+								className={cn(
+									stretchedButtonClassName,
+									"flex items-center gap-2 min-w-0 overflow-hidden",
+								)}
 								style={{ cursor: isReorderingGroups ? "grab" : "pointer" }}
 								onClick={() => setSectionOpen(!sectionOpen)}
 								disabled={isReorderingGroups}
@@ -147,7 +150,7 @@ export const CommandGroupSection = ({
 											type="button"
 											aria-label={t("sidebar.commandGroups.run")}
 											onClick={run}
-											className={controlClassName}
+											className={sidebarControlClassName}
 										>
 											<Play size={16} />
 										</button>
@@ -157,7 +160,7 @@ export const CommandGroupSection = ({
 											type="button"
 											aria-label={t("sidebar.commandGroups.stop")}
 											onClick={stop}
-											className={controlClassName}
+											className={sidebarControlClassName}
 										>
 											<Square size={16} />
 										</button>
