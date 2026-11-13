@@ -24,6 +24,11 @@ import { removeCommandFromGroup } from "@/useCases/command/removeCommandFromGrou
 import { startCommand } from "@/useCases/command/startCommand.ts";
 import { stopCommand } from "@/useCases/command/stopCommand.ts";
 
+// Each control sits above the row's button, which stretches across the row, so
+// a control is its own focusable button rather than a child the row swallows.
+const controlClassName =
+	"relative z-10 flex items-center justify-center rounded-sm outline-hidden ring-sidebar-ring focus-visible:ring-2";
+
 export const CommandMenuItem = ({
 	command,
 	insideGroupId,
@@ -55,16 +60,22 @@ export const CommandMenuItem = ({
 		transition,
 	};
 
-	const handleRunCommand = async () => {
+	const selectCommand = () => {
 		setActiveCommandId(command.id);
+		cleanCommandError(command.id);
+	};
+
+	const handleRunCommand = async () => {
+		selectCommand();
 		await startCommand(command.id);
 	};
 
-	const handleOpenLink = async () => {
+	const handleOpenLink = () => {
 		if (!command.link) {
 			return;
 		}
 
+		selectCommand();
 		externalBrowserService.browserOpenURL(command.link);
 	};
 
@@ -88,14 +99,9 @@ export const CommandMenuItem = ({
 		await duplicateCommand(command.id, insideGroupId);
 	};
 
-	const onCommandSectionClick = () => {
-		setActiveCommandId(command.id);
-		cleanCommandError(command.id);
-	};
-
 	const handleStopCommand = async () => {
 		await stopCommand(command.id);
-		setActiveCommandId(command.id);
+		selectCommand();
 	};
 
 	const isIdle = commandsStatus[command.id] === CommandStatus.IDLE;
@@ -129,10 +135,8 @@ export const CommandMenuItem = ({
 		<ContextMenu>
 			<ContextMenuTrigger>
 				<SidebarMenuButton asChild className={className}>
-					<button
-						type="button"
-						onClick={onCommandSectionClick}
-						className="flex flex-row justify-between items-center w-full select-none"
+					<div
+						className="relative flex flex-row justify-between items-center w-full select-none"
 						ref={setNodeRef}
 						style={style}
 					>
@@ -146,48 +150,65 @@ export const CommandMenuItem = ({
 								<div
 									{...attributes}
 									{...listeners}
-									className="cursor-grab active:cursor-grabbing pr-0.5 rounded hover:bg-sidebar-accent/50 shrink-0"
+									className={cn(
+										controlClassName,
+										"cursor-grab active:cursor-grabbing pr-0.5 rounded hover:bg-sidebar-accent/50 shrink-0",
+									)}
 								>
 									<GripVertical size={14} className="text-muted-foreground" />
 								</div>
 							)}
-							<p
-								className="cursor-default text-left truncate"
+							<button
+								type="button"
+								onClick={selectCommand}
 								title={command.name}
+								className="cursor-default text-left truncate outline-hidden after:absolute after:inset-0 after:rounded-md after:ring-sidebar-ring focus-visible:after:ring-2"
 							>
 								{command.name}
-							</p>
+							</button>
 							{command.link && (
-								<LinkIcon
-									role="button"
+								<button
+									type="button"
 									aria-label={t("sidebar.commands.openLink")}
-									size={12}
 									onClick={handleOpenLink}
-									className="text-muted-foreground cursor-pointer hover:text-primary min-w-4"
-								/>
+									className={cn(
+										controlClassName,
+										"text-muted-foreground cursor-pointer hover:text-primary min-w-4",
+									)}
+								>
+									<LinkIcon size={12} />
+								</button>
 							)}
 						</div>
-						<div className="shrink-0">
+						<div className="shrink-0 flex">
 							{isIdle && (
-								<Play
-									role="button"
+								<button
+									type="button"
 									aria-label={t("sidebar.commands.run")}
-									size={16}
-									className="text-muted-foreground cursor-pointer hover:text-primary"
 									onClick={handleRunCommand}
-								/>
+									className={cn(
+										controlClassName,
+										"text-muted-foreground cursor-pointer hover:text-primary",
+									)}
+								>
+									<Play size={16} />
+								</button>
 							)}
 							{isRunning && (
-								<Square
-									role="button"
+								<button
+									type="button"
 									aria-label={t("sidebar.commands.stop")}
-									size={16}
-									className="text-muted-foreground dark:text-primary/70 cursor-pointer hover:text-primary dark:hover:text-primary"
 									onClick={handleStopCommand}
-								/>
+									className={cn(
+										controlClassName,
+										"text-muted-foreground dark:text-primary/70 cursor-pointer hover:text-primary dark:hover:text-primary",
+									)}
+								>
+									<Square size={16} />
+								</button>
 							)}
 						</div>
-					</button>
+					</div>
 				</SidebarMenuButton>
 			</ContextMenuTrigger>
 			<ContextMenuContent>

@@ -1,6 +1,7 @@
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { screen, waitFor } from "@testing-library/react";
+import type { UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CommandGroupSection } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandGroupsSection/components/CommandGroupSection/CommandGroupSection.tsx";
@@ -70,6 +71,12 @@ describe("CommandGroupSection", () => {
 	const allRunning = {
 		"cmd-1": CommandStatus.RUNNING,
 		"cmd-2": CommandStatus.RUNNING,
+	};
+
+	const pressEnterOn = async (user: UserEvent, control: HTMLElement) => {
+		control.focus();
+		expect(control).toHaveFocus();
+		await user.keyboard("{Enter}");
 	};
 
 	beforeEach(async () => {
@@ -169,6 +176,57 @@ describe("CommandGroupSection", () => {
 
 		// Assert
 		expect(backend.state.runningGroupIds).toEqual([]);
+	});
+
+	it("Should run the group from the keyboard without expanding it", async () => {
+		// Arrange
+		seed(allIdle);
+		const { user } = render();
+
+		// Act
+		await pressEnterOn(
+			user,
+			screen.getByRole("button", { name: "sidebar.commandGroups.run" }),
+		);
+
+		// Assert
+		expect(backend.state.runningGroupIds).toEqual(["group-1"]);
+		expect(screen.queryByText("api")).not.toBeInTheDocument();
+	});
+
+	it("Should stop the group from the keyboard without expanding it", async () => {
+		// Arrange
+		seed(allRunning);
+		backend.state.runningGroupIds = ["group-1"];
+		const { user } = render();
+
+		// Act
+		await pressEnterOn(
+			user,
+			screen.getByRole("button", { name: "sidebar.commandGroups.stop" }),
+		);
+
+		// Assert
+		await waitFor(() => expect(backend.state.runningGroupIds).toEqual([]));
+		expect(screen.queryByText("api")).not.toBeInTheDocument();
+	});
+
+	it("Should not nest its run or stop controls inside the header's button", () => {
+		// Arrange
+		seed(oneRunning);
+
+		// Act
+		render();
+
+		// Assert
+		for (const name of [
+			"sidebar.commandGroups.run",
+			"sidebar.commandGroups.stop",
+		]) {
+			expect(
+				screen.getByRole("button", { name }).parentElement?.closest("button"),
+			).toBeNull();
+		}
 	});
 
 	it("Should show the group's commands once its header is clicked", async () => {

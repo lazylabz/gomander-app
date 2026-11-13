@@ -1,6 +1,7 @@
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { screen, waitFor } from "@testing-library/react";
+import type { UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CommandMenuItem } from "@/components/layout/AppSidebarLayout/components/AppSidebar/components/CommandMenuItem/CommandMenuItem.tsx";
@@ -27,12 +28,20 @@ describe("CommandMenuItem", () => {
 
 	let backend: InMemoryBackend;
 
-	const render = (command: Command, insideGroupId?: string) =>
+	const render = (
+		command: Command,
+		insideGroupId?: string,
+		draggable = false,
+	) =>
 		renderWithProviders(
 			<sidebarContext.Provider value={{ startEditingCommand }}>
 				<DndContext>
 					<SortableContext items={[command.id]}>
-						<CommandMenuItem command={command} insideGroupId={insideGroupId} />
+						<CommandMenuItem
+							command={command}
+							insideGroupId={insideGroupId}
+							draggable={draggable}
+						/>
 					</SortableContext>
 				</DndContext>
 			</sidebarContext.Provider>,
@@ -49,6 +58,12 @@ describe("CommandMenuItem", () => {
 			commandsStatus: { [command.id]: status },
 		});
 		commandGroupStore.setState({ commandGroups });
+	};
+
+	const pressEnterOn = async (user: UserEvent, control: HTMLElement) => {
+		control.focus();
+		expect(control).toHaveFocus();
+		await user.keyboard("{Enter}");
 	};
 
 	beforeEach(async () => {
@@ -176,6 +191,120 @@ describe("CommandMenuItem", () => {
 
 		// Assert
 		expect(backend.state.openedUrls).toEqual(["http://localhost:3000"]);
+	});
+
+	it("Should make the command active and clear its error when its link is opened", async () => {
+		// Arrange
+		const command = new CommandBuilder()
+			.withId("cmd-1")
+			.withLink("http://localhost:3000")
+			.build();
+		seed(command, CommandStatus.IDLE);
+		commandStore.setState({ commandIdsWithErrors: ["cmd-1"] });
+		const { user } = render(command);
+
+		// Act
+		await user.click(
+			screen.getByRole("button", { name: "sidebar.commands.openLink" }),
+		);
+
+		// Assert
+		expect(commandStore.getState().activeCommandId).toBe("cmd-1");
+		expect(commandStore.getState().commandIdsWithErrors).toEqual([]);
+	});
+
+	it("Should make the command active and clear its error when it is stopped", async () => {
+		// Arrange
+		const command = new CommandBuilder().withId("cmd-1").build();
+		seed(command, CommandStatus.RUNNING);
+		backend.state.runningCommandIds = ["cmd-1"];
+		commandStore.setState({ commandIdsWithErrors: ["cmd-1"] });
+		const { user } = render(command);
+
+		// Act
+		await user.click(
+			screen.getByRole("button", { name: "sidebar.commands.stop" }),
+		);
+
+		// Assert
+		await waitFor(() =>
+			expect(commandStore.getState().activeCommandId).toBe("cmd-1"),
+		);
+		expect(commandStore.getState().commandIdsWithErrors).toEqual([]);
+	});
+
+	it("Should run the command from the keyboard", async () => {
+		// Arrange
+		const command = new CommandBuilder().withId("cmd-1").build();
+		seed(command, CommandStatus.IDLE);
+		const { user } = render(command);
+
+		// Act
+		await pressEnterOn(
+			user,
+			screen.getByRole("button", { name: "sidebar.commands.run" }),
+		);
+
+		// Assert
+		expect(backend.state.runningCommandIds).toEqual(["cmd-1"]);
+	});
+
+	it("Should stop the command from the keyboard", async () => {
+		// Arrange
+		const command = new CommandBuilder().withId("cmd-1").build();
+		seed(command, CommandStatus.RUNNING);
+		backend.state.runningCommandIds = ["cmd-1"];
+		const { user } = render(command);
+
+		// Act
+		await pressEnterOn(
+			user,
+			screen.getByRole("button", { name: "sidebar.commands.stop" }),
+		);
+
+		// Assert
+		await waitFor(() => expect(backend.state.runningCommandIds).toEqual([]));
+	});
+
+	it("Should open the command's link from the keyboard", async () => {
+		// Arrange
+		const command = new CommandBuilder()
+			.withLink("http://localhost:3000")
+			.build();
+		seed(command, CommandStatus.IDLE);
+		const { user } = render(command);
+
+		// Act
+		await pressEnterOn(
+			user,
+			screen.getByRole("button", { name: "sidebar.commands.openLink" }),
+		);
+
+		// Assert
+		expect(backend.state.openedUrls).toEqual(["http://localhost:3000"]);
+	});
+
+	// Assistive technology flattens a button's children, so a control nested in
+	// the row's button may never reach a screen reader.
+	it.each([
+		{ situation: "idle", status: CommandStatus.IDLE },
+		{ situation: "running", status: CommandStatus.RUNNING },
+	])("Should not nest any of its controls inside another button while $situation", ({
+		status,
+	}) => {
+		// Arrange
+		const command = new CommandBuilder()
+			.withLink("http://localhost:3000")
+			.build();
+		seed(command, status);
+
+		// Act
+		render(command, undefined, true);
+
+		// Assert
+		for (const control of screen.getAllByRole("button")) {
+			expect(control.parentElement?.closest("button")).toBeNull();
+		}
 	});
 
 	it("Should disable editing, duplicating and deleting while the command runs", async () => {

@@ -28,6 +28,9 @@ import { deleteCommandGroup } from "@/useCases/commandGroup/deleteCommandGroup.t
 import { runCommandGroup } from "@/useCases/commandGroup/runCommandGroup.ts";
 import { stopCommandGroup } from "@/useCases/commandGroup/stopCommandGroup.ts";
 
+const controlClassName =
+	"relative z-10 flex items-center justify-center rounded-sm text-muted-foreground cursor-pointer hover:text-primary outline-hidden ring-sidebar-ring focus-visible:ring-2";
+
 export const CommandGroupSection = ({
 	commandGroup,
 	startEditingCommandGroup,
@@ -116,21 +119,22 @@ export const CommandGroupSection = ({
 							isReorderingGroups && "border-dashed border-muted-foreground/30",
 						)}
 					>
-						<button
-							className="group flex items-center gap-2 p-2 w-full justify-between"
-							style={{ cursor: isReorderingGroups ? "grab" : "pointer" }}
-							onClick={() => setSectionOpen(!sectionOpen)}
-							disabled={isReorderingGroups}
-							{...(isReorderingGroups ? { ...attributes, ...listeners } : {})}
-						>
-							<div className="flex items-center gap-2 min-w-0 overflow-hidden">
+						<div className="relative flex items-center gap-2 p-2 w-full justify-between">
+							<button
+								type="button"
+								className="flex items-center gap-2 min-w-0 overflow-hidden outline-hidden after:absolute after:inset-0 after:rounded-md after:ring-sidebar-ring focus-visible:after:ring-2"
+								style={{ cursor: isReorderingGroups ? "grab" : "pointer" }}
+								onClick={() => setSectionOpen(!sectionOpen)}
+								disabled={isReorderingGroups}
+								{...(isReorderingGroups ? { ...attributes, ...listeners } : {})}
+							>
 								<div className="size-4 shrink-0 flex items-center justify-center">
 									{isOpen ? <FolderOpen size={16} /> : <Folder size={16} />}
 								</div>
-								<p className="text-left truncate" title={commandGroup.name}>
+								<span className="text-left truncate" title={commandGroup.name}>
 									{commandGroup.name}
-								</p>
-							</div>
+								</span>
+							</button>
 							{!isReorderingGroups && (
 								<div className="flex gap-2 items-center shrink-0">
 									{someCommandIsRunning && (
@@ -139,28 +143,28 @@ export const CommandGroupSection = ({
 										</span>
 									)}
 									{someCommandIsIdle && (
-										<Play
-											role="button"
+										<button
+											type="button"
 											aria-label={t("sidebar.commandGroups.run")}
-											size={16}
-											className="text-muted-foreground cursor-pointer hover:text-primary"
 											onClick={run}
-										/>
+											className={controlClassName}
+										>
+											<Play size={16} />
+										</button>
 									)}
 									{someCommandIsRunning && (
-										<div className="group/command p-0 m-0">
-											<Square
-												role="button"
-												aria-label={t("sidebar.commandGroups.stop")}
-												size={16}
-												className="text-muted-foreground cursor-pointer hover:text-primary"
-												onClick={stop}
-											/>
-										</div>
+										<button
+											type="button"
+											aria-label={t("sidebar.commandGroups.stop")}
+											onClick={stop}
+											className={controlClassName}
+										>
+											<Square size={16} />
+										</button>
 									)}
 								</div>
 							)}
-						</button>
+						</div>
 					</SidebarGroupLabel>
 				</ContextMenuTrigger>
 				<ContextMenuContent>
