@@ -128,3 +128,43 @@ tested.
 - A hook owning an effect is driven through a probe component (see
   `hooks/useAutosavedForm.test.tsx`). Anything a hook can hand to a plain function
   belongs in that function, tested without a renderer.
+- A test rendering `App` (see `App.test.tsx`) calls `cleanup()` before
+  `resetBackendServices()` in its `afterEach`. The global cleanup in
+  `testing/setup.ts` runs after the file's own hooks, and `EventListenersContainer`
+  unsubscribes through the backend on unmount, which by then is the Wails stub that
+  throws. `App` also runs the real `initI18n`, so the in-memory backend needs
+  `translations: { en: ... }` or the App stays on its load-failed screen.
+- Never click a dnd-kit drag handle. The sidebar's `DndContext` sets no activation
+  constraint, so a pointerdown starts a drag that puts a capture-phase click blocker
+  on the document, and dnd-kit removes it 50 ms after release. The test passes and
+  the next tests in the file lose their clicks. Test drag rules in the module that
+  owns them (ADR-0008).
+
+## Verify in a browser
+
+`pnpm dev` serves the frontend alone on 127.0.0.1:9245. That port is not the Wails
+runtime: every backend call is a `POST /wails/runtime`, which 404s there, so the
+page opens on "Something went wrong while loading". Only the native window
+(`make dev`) reaches the Go backend.
+
+To see the UI in a browser, install the in-memory backend from the page and press
+Retry; the app's modules are the ones the page imports:
+
+```js
+const { installInMemoryBackend } = await import("/src/testing/backend.ts");
+const { ProjectBuilder } = await import("/src/testing/builders/project.ts");
+const { CommandBuilder } = await import("/src/testing/builders/command.ts");
+const project = new ProjectBuilder().withId("p1").withName("Demo").build();
+window.backend = installInMemoryBackend({
+	projects: [project],
+	currentProject: project,
+	commands: [new CommandBuilder().withProjectId("p1").withName("api").build()],
+	translations: { en: {} },
+});
+```
+
+A key missing from `translations` renders as the key itself. For the English copy,
+inline the contents of `cmd/gomander/locales/en.json`: it sits outside what Vite
+serves, so the page cannot import it. Show a backend failure the same way a test
+does, by replacing one method (`backend.data.getUserConfig = async () => { throw
+new Error() }`) before Retry.
