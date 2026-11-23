@@ -68,6 +68,7 @@ migrations/              # goose create <name>, Go files with Up and Down
 ## Conventions
 
 - Conventional commits: `feat(scope):`, `fix`, `docs`, `refactor`, `test`, `chore`.
+- Write issues, PR titles and descriptions, commits and code comments in English, whatever language the conversation is in.
 - Test new backend behaviour through `internal/apptest` (see ADR-0004): arrange with
   the domain builders, act through `h.UseCases`, assert on what the user or the OS
   sees — `StartedProcesses`, `EmittedEvents`, a read use case.
